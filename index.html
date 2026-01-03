@@ -2,163 +2,102 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EPS PRO v5 - Barèmes Complets</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EPS PRO v6 - Modulaire</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root {
-            --bg: #0b0f1a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --danger: #ff4bb4;
-            --warning: #ffcc00;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% 0%, #1a2a4a 0%, #0b0f1a 100%);
-            color: white;
-            margin: 0;
-            padding: env(safe-area-inset-top) 15px 30px 15px;
-            min-height: 100vh;
-        }
-
+        :root { --bg: #0b0f1a; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; min-height: 100vh; }
         .container { max-width: 1400px; margin: auto; }
+        .card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; border: 1px solid var(--glass-border); margin-bottom: 20px; }
         .screen { display: none; } .active { display: block; }
-
-        /* Style spécifique iPad */
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid var(--glass-border);
-            margin-bottom: 10px;
-        }
-
-        select {
-            background: white !important;
-            color: black !important;
-            padding: 15px;
-            border-radius: 14px;
-            width: 100%;
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 10px 0;
-            border: none;
-        }
-
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: var(--glass);
-            border-radius: 20px;
-            margin-bottom: 20px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .timer-display {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--success);
-            font-family: monospace;
-        }
-
-        .grid-6 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 20px;
-        }
-
-        button {
-            border: none;
-            border-radius: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .btn-lap { background: var(--accent); color: white; height: 70px; width: 100%; font-size: 1.2rem; margin-bottom: 10px; }
-        .btn-start { background: var(--success); color: black; padding: 0 35px; height: 60px; font-size: 1.1rem; }
-        .btn-add { background: rgba(255,255,255,0.1); color: white; height: 50px; width: 100%; font-size: 0.9rem; }
-
-        .perf-chip {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(0, 210, 255, 0.1);
-            color: var(--accent);
-            padding: 6px 12px;
-            border-radius: 10px;
-            margin: 4px;
-            border: 1px solid var(--accent);
-        }
-        .note-badge {
-            background: var(--warning);
-            color: black;
-            padding: 2px 6px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            margin-left: 8px;
-            font-weight: 900;
-        }
+        
+        /* Formulaire */
+        label { display: block; margin: 15px 0 5px; font-weight: bold; opacity: 0.8; }
+        select, input[type="text"], input[type="number"] { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 600; }
+        .checkbox-group { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-top: 10px; }
+        
+        /* Terrain */
+        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--glass-border); position: sticky; top: 10px; z-index: 100; }
+        .timer-display { font-size: 3.5rem; font-weight: 900; color: var(--success); font-family: monospace; }
+        
+        button { border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--success); color: black; padding: 15px 30px; font-size: 1.1rem; }
+        .btn-lap { background: var(--accent); color: white; height: 60px; width: 100%; font-size: 1.2rem; }
+        .btn-add { background: rgba(255,255,255,0.1); color: white; padding: 8px; width: 100%; font-size: 0.8rem; }
+        
+        .perf-chip { display: inline-flex; align-items: center; background: rgba(0, 210, 255, 0.1); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 8px; margin: 3px; font-size: 0.85rem; }
+        .note-badge { background: var(--warning); color: black; padding: 1px 5px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; font-weight: 900; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="screen1" class="screen active">
-        <h1 style="text-align:center; font-size:3rem; margin-top:50px;">EPS<span style="color:var(--accent)">PRO</span></h1>
-        <div class="card" style="max-width: 600px; margin: 40px auto;">
-            <label>1. Cycle & Niveau</label>
-            <select id="cycleLevel" onchange="updateEpreuves()">
+        <h1 style="text-align:center; font-size:2.5rem;">EPS<span style="color:var(--accent)">PRO</span></h1>
+        <div class="card" style="max-width: 600px; margin: auto;">
+            <label>1. Niveau de la classe</label>
+            <select id="cycleLevel" onchange="toggleSpecificOptions()">
                 <option value="C3_6">Cycle 3 (6ème)</option>
                 <option value="C4">Cycle 4 (5/4/3ème)</option>
             </select>
 
-            <label>2. Épreuve de Lancer</label>
-            <select id="enginLancer">
-                <option value="vortex">Vortex</option>
-                <option value="poids1">Poids 1kg</option>
-                <option value="poids2">Poids 2kg</option>
-            </select>
+            <label>2. Ateliers à évaluer aujourd'hui :</label>
+            <div class="checkbox-group">
+                <label style="margin:0"><input type="checkbox" id="checkCourse" checked> Course</label>
+                <label style="margin:0"><input type="checkbox" id="checkSaut" checked> Saut</label>
+                <label style="margin:0"><input type="checkbox" id="checkLancer" checked> Lancer</label>
+            </div>
 
-            <label>3. Épreuve de Course</label>
-            <select id="epreuveCourse">
-                <option value="vitesse">Vitesse 30m</option>
-                <option value="demifond">Demi-Fond 3x400m</option>
-            </select>
+            <div id="opts-course">
+                <label>3. Type d'épreuve de Course</label>
+                <select id="typeCourse" onchange="toggleSpecificOptions()">
+                    <option class="c3-opt" value="vitesse">Vitesse 30m</option>
+                    <option class="c3-opt" value="demifond">Demi-Fond 3x400m</option>
+                    <option class="c4-opt hidden" value="relais">Relais</option>
+                    <option class="c4-opt hidden" value="biathlon">Biathlon</option>
+                </select>
 
-            <label>4. Liste des élèves (Excel)</label>
-            <input type="file" id="importExcel" accept=".xlsx, .xls, .csv" style="margin:15px 0; color:white;">
+                <div id="opt-relais" class="hidden">
+                    <label>Distance Relais</label>
+                    <select id="distRelais"><option value="4x200">4 x 200m</option><option value="4x400">4 x 400m</option></select>
+                </div>
 
-            <button class="btn-start" style="width:100%; margin-top:20px; height:70px;" onclick="startSession()">DÉMARRER LE TERRAIN</button>
+                <div id="opt-biathlon" class="hidden">
+                    <label>Type de Biathlon</label>
+                    <select id="typeBiathlon"><option value="laserrun">Laser Run</option><option value="arcathlon">Arcathlon</option></select>
+                </div>
+            </div>
+
+            <div id="opts-lancer">
+                <label>4. Engin de Lancer</label>
+                <select id="enginLancer">
+                    <option value="vortex">Vortex</option>
+                    <option value="poids1">Poids 1kg</option>
+                    <option value="poids2">Poids 2kg</option>
+                </select>
+            </div>
+
+            <label>5. Liste Excel</label>
+            <input type="file" id="importExcel" accept=".xlsx, .xls, .csv" style="color:white">
+
+            <button class="btn-start" style="width:100%; margin-top:30px; height:70px" onclick="startSession()">DÉMARRER LA SESSION</button>
         </div>
     </div>
 
     <div id="screen2" class="screen">
         <div class="header-bar">
-            <button onclick="location.reload()" style="background:none; color:var(--danger); border:1px solid var(--danger); padding:10px 20px;">QUITTER</button>
+            <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 15px;">QUITTER</button>
             <div id="main-chrono" class="timer-display">00:00.0</div>
             <div style="display:flex; gap:10px;">
                 <button id="master-btn" class="btn-start" onclick="toggleMasterTimer()">START</button>
-                <button onclick="resetMasterTimer()" style="background:white; color:black; padding:0 20px;">RESET</button>
+                <button onclick="resetMasterTimer()" style="background:white; color:black; padding:0 15px;">RESET</button>
             </div>
         </div>
-
         <div id="students-container" class="grid-6"></div>
-
-        <div style="margin-top:50px; text-align:center; padding-bottom:80px;">
-            <button class="btn-start" style="background:var(--accent); width:100%; max-width:500px;" onclick="exportResults()">💾 EXPORTER LES RÉSULTATS</button>
-        </div>
+        <div style="text-align:center; padding:40px 0;"><button class="btn-start" style="background:var(--accent); width:100%; max-width:400px;" onclick="exportResults()">💾 EXPORTER</button></div>
     </div>
 </div>
 
@@ -166,36 +105,22 @@
     let allStudents = [];
     let masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
     let studentData = Array.from({ length: 6 }, () => ({ laps: [], sauts: [], lancers: [] }));
-    let currentConfig = {};
+    let sessionConfig = {};
 
-    // BARÈMES SAUTS (6ème)
-    const baremeSaut = {
-        'F': [3.00, 2.80, 2.60, 2.40, 2.20, 2.00, 1.30, 0],
-        'M': [3.40, 3.20, 3.00, 2.80, 2.60, 2.40, 1.50, 0]
-    };
-
-    // BARÈMES LANCERS (6ème) - Vortex / Poids 1kg / Poids 2kg
-    const baremeLancer = {
-        'vortex': {
-            'F': [20, 18, 16, 14, 12, 10, 6, 0],
-            'M': [30, 27, 24, 21, 18, 15, 8, 0]
-        },
-        'poids1': {
-            'F': [8.50, 7.50, 6.50, 5.50, 4.50, 3.50, 2.50, 0],
-            'M': [9.50, 8.50, 7.50, 6.50, 5.50, 4.50, 3.00, 0]
-        },
-        'poids2': {
-            'F': [7.00, 6.20, 5.40, 4.60, 3.80, 3.00, 2.00, 0],
-            'M': [8.00, 7.20, 6.40, 5.60, 4.80, 4.00, 2.50, 0]
-        }
-    };
-
-    function updateEpreuves() {
+    function toggleSpecificOptions() {
         const cycle = document.getElementById('cycleLevel').value;
-        const ep = document.getElementById('epreuveCourse');
-        ep.innerHTML = cycle === "C3_6" 
-            ? `<option value="vitesse">Vitesse 30m</option><option value="demifond">Demi-Fond 3x400m</option>`
-            : `<option value="relais">Relais 12s</option><option value="biathlon">Biathlon</option>`;
+        const typeC = document.getElementById('typeCourse').value;
+        
+        // Gérer visibilité C3 vs C4
+        document.querySelectorAll('.c3-opt').forEach(el => el.classList.toggle('hidden', cycle !== 'C3_6'));
+        document.querySelectorAll('.c4-opt').forEach(el => el.classList.toggle('hidden', cycle !== 'C4'));
+        
+        // Reset type course si changement de cycle
+        if(cycle === 'C4' && (typeC === 'vitesse' || typeC === 'demifond')) document.getElementById('typeCourse').value = 'relais';
+        if(cycle === 'C3_6' && (typeC === 'relais' || typeC === 'biathlon')) document.getElementById('typeCourse').value = 'vitesse';
+
+        document.getElementById('opt-relais').classList.toggle('hidden', document.getElementById('typeCourse').value !== 'relais');
+        document.getElementById('opt-biathlon').classList.toggle('hidden', document.getElementById('typeCourse').value !== 'biathlon');
     }
 
     document.getElementById('importExcel').addEventListener('change', (e) => {
@@ -203,44 +128,49 @@
         reader.onload = (evt) => {
             const wb = XLSX.read(evt.target.result, {type:'binary'});
             allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert("✅ " + allStudents.length + " élèves chargés.");
+            alert("✅ Classe chargée !");
         };
         reader.readAsBinaryString(e.target.files[0]);
     });
 
     function startSession() {
-        if(allStudents.length === 0) return alert("Veuillez importer le fichier Excel.");
-        currentConfig = {
-            cycle: document.getElementById('cycleLevel').value,
+        if(allStudents.length === 0) return alert("Importez un fichier !");
+        sessionConfig = {
+            useCourse: document.getElementById('checkCourse').checked,
+            useSaut: document.getElementById('checkSaut').checked,
+            useLancer: document.getElementById('checkLancer').checked,
+            typeCourse: document.getElementById('typeCourse').value,
             engin: document.getElementById('enginLancer').value,
-            epreuve: document.getElementById('epreuveCourse').value
+            cycle: document.getElementById('cycleLevel').value
         };
 
         const container = document.getElementById('students-container');
         container.innerHTML = "";
         for(let i=0; i<6; i++) {
             container.innerHTML += `
-                <div class="card" style="border-top: 8px solid var(--accent)">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span style="opacity:0.5; font-weight:800; font-size:0.8rem;">POSTE ${i+1}</span>
-                        <span id="info-${i}" style="color:var(--warning); font-weight:800; font-size:0.8rem;"></span>
+                <div class="card" style="border-top: 6px solid var(--accent)">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem; font-weight:800;">
+                        <span>POSTE ${i+1}</span>
+                        <span id="info-${i}" style="color:var(--warning)"></span>
                     </div>
                     <select id="sel-${i}" onchange="updateInfo(${i})">
-                        <option value="">-- Sélectionner Élève --</option>
+                        <option value="">-- Élève --</option>
                         ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
                     </select>
-                    
-                    <button class="btn-lap" onclick="recordLap(${i})">⏱️ TOP PASSAGE</button>
-                    <div id="laps-${i}" style="text-align:center; color:var(--accent); font-size:0.9rem; min-height:20px; margin-bottom:10px;"></div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                        <div>
-                            <button class="btn-add" onclick="addPerf(${i}, 'sauts')">+ SAUT LONG.</button>
-                            <div id="cont-sauts-${i}" style="margin-top:5px;"></div>
+                    <div class="${sessionConfig.useCourse ? '' : 'hidden'}" style="margin:15px 0;">
+                        <button class="btn-lap" onclick="recordLap(${i})">⏱️ TOP ${sessionConfig.typeCourse.toUpperCase()}</button>
+                        <div id="laps-${i}" style="text-align:center; color:var(--accent); font-size:0.8rem; margin-top:5px;"></div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="${sessionConfig.useSaut ? '' : 'hidden'}">
+                            <button class="btn-add" onclick="addPerf(${i}, 'sauts')">+ SAUT</button>
+                            <div id="cont-sauts-${i}"></div>
                         </div>
-                        <div>
-                            <button class="btn-add" onclick="addPerf(${i}, 'lancers')">+ ${currentConfig.engin.toUpperCase()}</button>
-                            <div id="cont-lancers-${i}" style="margin-top:5px;"></div>
+                        <div class="${sessionConfig.useLancer ? '' : 'hidden'}">
+                            <button class="btn-add" onclick="addPerf(${i}, 'lancers')">+ ${sessionConfig.engin.toUpperCase()}</button>
+                            <div id="cont-lancers-${i}"></div>
                         </div>
                     </div>
                 </div>`;
@@ -256,26 +186,13 @@
     }
 
     function addPerf(i, type) {
-        let val = prompt("Performance en mètres (ex: 3.45) :");
+        let val = prompt("Performance (m) :");
         if(!val) return;
         val = parseFloat(val.replace(',', '.'));
         if(isNaN(val)) return;
-
         studentData[i][type].push(val);
-        const prefix = type === 'sauts' ? 'S' : 'L';
         const cont = document.getElementById(`cont-${type}-${i}`);
-        
-        // CALCUL NOTE
-        let note = "";
-        const eleve = allStudents.find(x => x['Nom Prénom'] === document.getElementById(`sel-${i}`).value);
-        if(eleve && currentConfig.cycle === "C3_6") {
-            const table = type === 'sauts' ? baremeSaut[eleve.Sexe] : baremeLancer[currentConfig.engin][eleve.Sexe];
-            const idx = table.findIndex(b => val >= b);
-            const score = idx === -1 ? 0 : 8 - idx;
-            note = `<span class="note-badge">${score}/8</span>`;
-        }
-
-        cont.innerHTML += `<div class="perf-chip"><b>${prefix}${studentData[i][type].length}:</b> ${val}m ${note}</div>`;
+        cont.innerHTML += `<div class="perf-chip"><b>${type[0].toUpperCase()}${studentData[i][type].length}:</b> ${val}m</div>`;
     }
 
     function toggleMasterTimer() {
@@ -295,7 +212,7 @@
     }
 
     function resetMasterTimer() {
-        if(confirm("Réinitialiser le chrono général ?")) {
+        if(confirm("Reset ?")) {
             clearInterval(masterTimer.interval);
             masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
             document.getElementById('main-chrono').innerText = "00:00.0";
@@ -313,13 +230,11 @@
         let res = [];
         for(let i=0; i<6; i++) {
             const nom = document.getElementById(`sel-${i}`).value;
-            if(nom) res.push({ nom: nom, laps: studentData[i].laps, sauts: studentData[i].sauts, lancers: studentData[i].lancers });
+            if(nom) res.push({ nom, laps: studentData[i].laps, sauts: studentData[i].sauts, lancers: studentData[i].lancers });
         }
         const blob = new Blob([JSON.stringify(res, null, 2)], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `EPS_Session_${Date.now()}.json`;
-        a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `EPS_Export.json`; a.click();
     }
 </script>
 </body>

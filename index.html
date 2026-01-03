@@ -3,235 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPS - Épreuves Combinées v2</title>
+    <title>EPS - Multi-Évaluation (6 Élèves)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --p: #2c3e50; --a: #3498db; --s: #27ae60; --d: #e74c3c; --bg: #f4f7f6; --w: #f39c12; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .container { max-width: 950px; margin: auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        :root { --p: #2c3e50; --a: #3498db; --s: #27ae60; --d: #e74c3c; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 5px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .screen { display: none; } .active { display: block; }
-        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .card { border: 2px solid #eee; padding: 15px; border-radius: 10px; border-top: 8px solid var(--p); }
-        .card.left { border-top-color: var(--a); } .card.right { border-top-color: var(--s); }
-        button { padding: 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin: 5px 0; font-size: 16px; }
-        .btn-blue { background: var(--a); color: white; }
-        .btn-timer { background: var(--p); color: white; font-size: 1.5em; height: 70px; }
-        .btn-green { background: var(--s); color: white; }
-        .btn-red { background: var(--d); color: white; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-        .timer-display { font-size: 2.5em; text-align: center; font-family: monospace; background: #333; color: #7fdbff; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .gain-badge { background: var(--w); color: white; padding: 5px; border-radius: 4px; font-weight: bold; text-align: center; }
-        .tir-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 5px 0; }
-        .tir-dot { height: 30px; border: 2px solid var(--p); border-radius: 4px; background: white; cursor: pointer; }
-        .tir-dot.hit { background: var(--success); background-color: #27ae60; }
-        h2, h3 { text-align: center; color: var(--p); margin-top: 0; }
+        
+        /* Grille pour 6 élèves */
+        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+        .card { border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fff; border-top: 5px solid var(--p); }
+        
+        /* Couleurs pour différencier les élèves */
+        .card:nth-child(1) { border-top-color: #e74c3c; } .card:nth-child(2) { border-top-color: #3498db; }
+        .card:nth-child(3) { border-top-color: #2cc; } .card:nth-child(4) { border-top-color: #f39c12; }
+        .card:nth-child(5) { border-top-color: #9b59b6; } .card:nth-child(6) { border-top-color: #27ae60; }
+
+        button { padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin: 3px 0; }
+        .btn-lap { background: var(--a); color: white; height: 50px; font-size: 1.1em; }
+        .btn-start { background: var(--s); color: white; font-size: 1.2em; height: 60px; }
+        .btn-stop { background: var(--d); color: white; }
+        
+        input, select { width: 100%; padding: 8px; margin: 4px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .timer-main { font-size: 2.5em; text-align: center; background: #222; color: #0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-family: monospace; }
+        .lap-list { font-size: 0.8em; height: 60px; overflow-y: auto; background: #eee; padding: 5px; margin-top: 5px; }
+        .header-info { display: flex; justify-content: space-between; align-items: center; background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="screen1" class="screen active">
-        <h2>🚀 Configuration EPS</h2>
+        <h2>🚀 Config Groupe (Max 6 élèves)</h2>
         <div class="card">
-            <label>Niveau de classe :</label>
+            <label>Niveau :</label>
             <select id="nivSelect">
                 <option value="6">6ème (Cycle 3)</option>
                 <option value="5">5ème (Cycle 4)</option>
                 <option value="4">4ème (Cycle 4)</option>
                 <option value="3">3ème (Cycle 4)</option>
             </select>
-            <label>Importer la liste Excel :</label>
+            <label>Liste élèves (Fichier Excel avec Nom, Prenom, Sexe, DateNaissance) :</label>
             <input type="file" id="importExcel" accept=".xlsx, .xls">
-            <button class="btn-blue" onclick="initStudents()">Démarrer la séance ➔</button>
-            <hr>
-            <button class="btn-red" onclick="accessProf()">🔐 Mode Professeur (Barèmes)</button>
+            <button class="btn-start" onclick="setupGroup()">Préparer la Tablette ➔</button>
         </div>
     </div>
 
     <div id="screen2" class="screen">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <button class="btn-red" style="width:100px" onclick="showScreen(1)">Retour</button>
-            <h3 id="labelEpreuve">Évaluation en cours</h3>
-            <select id="typeEpreuve" onchange="adaptUI()" style="width:200px">
-                <option value="course">Course / 3x400 / 30m</option>
-                <option value="relais12">Relais 12 secondes</option>
-                <option value="biathlon">Biathlon (Course + Tir)</option>
-            </select>
+        <div class="header-info">
+            <button style="width:100px" onclick="location.reload()">Quitter</button>
+            <div id="main-chrono" class="timer-main" style="flex-grow:1; margin:0 20px;">00:00.0</div>
+            <button id="master-btn" class="btn-start" style="width:150px" onclick="toggleMasterTimer()">START</button>
         </div>
 
-        <div class="split">
-            <div class="card left" id="card-a">
-                <select id="sel-a" class="student-list"></select>
-                
-                <div id="ui-chrono-a">
-                    <div class="timer-display" id="disp-a">00:00.0</div>
-                    <button class="btn-timer" id="btn-a" onclick="toggleTimer('a')">START</button>
-                    <button class="btn-blue" onclick="recordLap('a')">LAP / TOUR</button>
-                </div>
-
-                <div id="ui-relais-a" style="display:none">
-                    <label>6" Arrêté (m) :</label><input type="number" id="dist6a-a">
-                    <label>6" Lancé (m) :</label><input type="number" id="dist6l-a">
-                    <label>Relais 12" (m) :</label><input type="number" id="dist12-a" oninput="calcGain('a')">
-                    <div class="gain-badge" id="gain-a">Gain : -- m</div>
-                </div>
-
-                <div id="ui-biathlon-a" style="display:none">
-                    <label>Tirs (Cliquer si touché) :</label>
-                    <div class="tir-grid" id="grid-a"></div>
-                    <p>Total : <span id="hit-count-a">0</span>/15</p>
-                </div>
-
-                <hr>
-                <label>Saut (m) :</label><input type="number" id="saut-a">
-                <label>Lancer (m) :</label><input type="number" id="lancer-a">
-            </div>
-
-            <div class="card right" id="card-b">
-                <select id="sel-b" class="student-list"></select>
-                
-                <div id="ui-chrono-b">
-                    <div class="timer-display" id="disp-b">00:00.0</div>
-                    <button class="btn-timer" id="btn-b" onclick="toggleTimer('b')">START</button>
-                    <button class="btn-blue" onclick="recordLap('b')">LAP / TOUR</button>
-                </div>
-
-                <div id="ui-relais-b" style="display:none">
-                    <label>6" Arrêté (m) :</label><input type="number" id="dist6a-b">
-                    <label>6" Lancé (m) :</label><input type="number" id="dist6l-b">
-                    <label>Relais 12" (m) :</label><input type="number" id="dist12-b" oninput="calcGain('b')">
-                    <div class="gain-badge" id="gain-b">Gain : -- m</div>
-                </div>
-
-                <div id="ui-biathlon-b" style="display:none">
-                    <label>Tirs (Cliquer si touché) :</label>
-                    <div class="tir-grid" id="grid-b"></div>
-                    <p>Total : <span id="hit-count-b">0</span>/15</p>
-                </div>
-
-                <hr>
-                <label>Saut (m) :</label><input type="number" id="saut-b">
-                <label>Lancer (m) :</label><input type="number" id="lancer-b">
-            </div>
+        <div class="grid-6">
+            <div id="students-container" class="grid-6"></div>
         </div>
-        <button class="btn-green" onclick="exportResults()">💾 Enregistrer et Exporter les résultats</button>
-    </div>
 
-    <div id="screen3" class="screen">
-        <button class="btn-red" onclick="showScreen(1)">Quitter</button>
-        <h2>👨‍🏫 Résultats Calculés (Admin)</h2>
-        <div id="tableContainer"></div>
+        <button class="btn-start" style="margin-top:20px; background: var(--p);" onclick="exportGroupData()">💾 Sauvegarder les données du groupe</button>
     </div>
 </div>
 
 <script>
-    let students = [];
-    let sessionData = [];
-    let timers = { a: { running: false, time: 0, start: 0, interval: null, laps: [] }, b: { running: false, time: 0, start: 0, interval: null, laps: [] }};
+    let allStudents = [];
+    let groupSize = 6;
+    let masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
+    let studentPerfs = Array.from({ length: 6 }, () => ({ laps: [], saut: 0, lancer: 0 }));
+
+    // IMPORT EXCEL
+    document.getElementById('importExcel').addEventListener('change', (e) => {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const wb = XLSX.read(evt.target.result, {type:'binary'});
+            allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            alert(allStudents.length + " élèves chargés.");
+        };
+        reader.readAsBinaryString(e.target.files[0]);
+    });
+
+    function setupGroup() {
+        if(allStudents.length === 0) return alert("Importez une liste !");
+        const container = document.getElementById('students-container');
+        container.innerHTML = "";
+        
+        for(let i=0; i < groupSize; i++) {
+            container.innerHTML += `
+                <div class="card">
+                    <select id="sel-${i}" onchange="updateInfo(${i})">
+                        <option>Choisir élève...</option>
+                        ${allStudents.map(s => `<option value="${s.Nom}">${s.Nom} ${s.Prenom}</option>`).join('')}
+                    </select>
+                    <div id="info-${i}" style="font-size:0.8em; margin-bottom:5px;">Sexe: - | Age: -</div>
+                    
+                    <button class="btn-lap" onclick="recordLap(${i})">LAP (Passage Ligne)</button>
+                    <div class="lap-list" id="laps-${i}">Passages:</div>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
+                        <input type="number" step="0.01" id="saut-${i}" placeholder="Saut (m)">
+                        <input type="number" step="0.01" id="lancer-${i}" placeholder="Lancer (m)">
+                    </div>
+                </div>
+            `;
+        }
+        showScreen(2);
+    }
+
+    function updateInfo(i) {
+        const nom = document.getElementById(`sel-${i}`).value;
+        const s = allStudents.find(x => x.Nom === nom);
+        if(s) {
+            const age = calculateAge(s.DateNaissance);
+            document.getElementById(`info-${i}`).innerText = `Sexe: ${s.Sexe} | Age: ${age} ans`;
+        }
+    }
+
+    function calculateAge(dob) {
+        // Gère différents formats de date Excel
+        const birth = new Date(dob);
+        const diff = Date.now() - birth.getTime();
+        return Math.abs(new Date(diff).getUTCFullYear() - 1970);
+    }
+
+    // CHRONO GÉNÉRAL
+    function toggleMasterTimer() {
+        const btn = document.getElementById('master-btn');
+        if(!masterTimer.running) {
+            masterTimer.start = Date.now() - masterTimer.elapsed;
+            masterTimer.interval = setInterval(updateMasterDisplay, 100);
+            masterTimer.running = true;
+            btn.innerText = "STOP"; btn.className = "btn-stop";
+        } else {
+            clearInterval(masterTimer.interval);
+            masterTimer.running = false;
+            btn.innerText = "REPRENDRE"; btn.className = "btn-start";
+        }
+    }
+
+    function updateMasterDisplay() {
+        masterTimer.elapsed = Date.now() - masterTimer.start;
+        let ms = masterTimer.elapsed;
+        let s = Math.floor(ms/1000);
+        document.getElementById('main-chrono').innerText = 
+            `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
+    }
+
+    function recordLap(i) {
+        if(!masterTimer.running && masterTimer.elapsed === 0) return alert("Lancez le chrono général !");
+        const lapTime = masterTimer.elapsed;
+        studentPerfs[i].laps.push(lapTime);
+        const s = Math.floor(lapTime/1000);
+        const display = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}.${Math.floor((lapTime%1000)/100)}`;
+        const list = document.getElementById(`laps-${i}`);
+        list.innerHTML += `<div>Tour ${studentPerfs[i].laps.length} : ${display}</div>`;
+        list.scrollTop = list.scrollHeight;
+    }
 
     function showScreen(n) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen'+n).classList.add('active');
     }
 
-    function initStudents() {
-        if(students.length === 0) alert("Veuillez d'abord importer un fichier Excel.");
-        else {
-            const selects = document.querySelectorAll('.student-list');
-            selects.forEach(s => s.innerHTML = students.map(st => `<option value="${st.Nom}">${st.Nom} ${st.Prenom}</option>`).join(''));
-            showScreen(2);
-            adaptUI();
+    function exportGroupData() {
+        let results = [];
+        for(let i=0; i<groupSize; i++) {
+            const nom = document.getElementById(`sel-${i}`).value;
+            if(nom !== "Choisir élève...") {
+                results.push({
+                    nom: nom,
+                    laps: studentPerfs[i].laps,
+                    saut: document.getElementById(`saut-${i}`).value,
+                    lancer: document.getElementById(`lancer-${i}`).value,
+                    date: new Date().toISOString()
+                });
+            }
         }
-    }
-
-    // Gestion du fichier Excel
-    document.getElementById('importExcel').addEventListener('change', (e) => {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const wb = XLSX.read(evt.target.result, {type:'binary'});
-            students = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert(students.length + " élèves importés avec succès !");
-        };
-        reader.readAsBinaryString(e.target.files[0]);
-    });
-
-    // Adaptation de l'interface selon l'épreuve
-    function adaptUI() {
-        const type = document.getElementById('typeEpreuve').value;
-        const ids = ['ui-chrono', 'ui-relais', 'ui-biathlon'];
-        ids.forEach(id => {
-            document.getElementById(id+'-a').style.display = (id === 'ui-'+type) ? 'block' : 'none';
-            document.getElementById(id+'-b').style.display = (id === 'ui-'+type) ? 'block' : 'none';
-        });
-        if(type === 'biathlon') { createTirGrid('a'); createTirGrid('b'); }
-    }
-
-    // Timers
-    function toggleTimer(p) {
-        let t = timers[p];
-        if(!t.running) {
-            t.start = Date.now() - t.time;
-            t.interval = setInterval(() => {
-                t.time = Date.now() - t.start;
-                let ms = t.time;
-                let s = Math.floor(ms/1000);
-                document.getElementById('disp-'+p).innerText = `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
-            }, 100);
-            t.running = true; document.getElementById('btn-'+p).innerText = "STOP";
-        } else {
-            clearInterval(t.interval);
-            t.running = false; document.getElementById('btn-'+p).innerText = "START";
-        }
-    }
-
-    function recordLap(p) { if(timers[p].running) timers[p].laps.push(timers[p].time); }
-
-    // Calcul Relais 12s
-    function calcGain(p) {
-        let d6a = parseFloat(document.getElementById('dist6a-'+p).value) || 0;
-        let d6l = parseFloat(document.getElementById('dist6l-'+p).value) || 0;
-        let d12 = parseFloat(document.getElementById('dist12-'+p).value) || 0;
-        let gain = d12 - (d6a + d6l);
-        document.getElementById('gain-'+p).innerText = `Gain : ${gain.toFixed(1)} m`;
-    }
-
-    // Grille Biathlon
-    function createTirGrid(p) {
-        const grid = document.getElementById('grid-'+p);
-        grid.innerHTML = "";
-        for(let i=0; i<15; i++) {
-            let dot = document.createElement('div');
-            dot.className = "tir-dot";
-            dot.onclick = function() { 
-                this.classList.toggle('hit');
-                document.getElementById('hit-count-'+p).innerText = document.querySelectorAll(`#grid-${p} .hit`).length;
-            };
-            grid.appendChild(dot);
-        }
-    }
-
-    function exportResults() {
-        const result = {
-            eleveA: document.getElementById('sel-a').value,
-            tempsA: document.getElementById('disp-a').innerText,
-            relaisA: document.getElementById('gain-a').innerText,
-            tirA: document.getElementById('hit-count-a').innerText,
-            sautA: document.getElementById('saut-a').value,
-            lancerA: document.getElementById('lancer-a').value,
-        };
-        sessionData.push(result);
-        const blob = new Blob([JSON.stringify(sessionData, null, 2)], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = `resultats_eps_${result.eleveA}.json`;
+        const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Groupe_EPS_${new Date().getTime()}.json`;
         a.click();
-        alert("Résultats exportés ! Envoie ce fichier à ton professeur.");
-    }
-
-    function accessProf() {
-        if(prompt("Code Secret Professeur :") === "EPS2026") showScreen(3);
     }
 </script>
-
 </body>
 </html>

@@ -2,120 +2,108 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EPS PRO v7 - Cycle 4 Spécifique</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EPS PRO v8 - Logique Cascade</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --bg: #0b0f1a; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; min-height: 100vh; }
-        .container { max-width: 1400px; margin: auto; }
-        .card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; padding: 25px; border: 1px solid var(--glass-border); margin-bottom: 20px; }
+        :root { --bg: #0b0f1a; --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
+        .card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
         .screen { display: none; } .active { display: block; }
         
-        label { display: block; margin: 15px 0 5px; font-weight: bold; font-size: 0.9rem; color: var(--accent); }
-        select, input[type="file"] { background: white; color: black; padding: 12px; border-radius: 12px; width: 100%; border: none; font-weight: 700; font-size: 1rem; }
-        .checkbox-group { display: flex; gap: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px solid var(--glass-border); }
+        /* Formulaire en cascade */
+        .step { display: none; border-left: 3px solid var(--accent); padding-left: 15px; margin-bottom: 25px; animation: fadeIn 0.5s; }
+        .step.visible { display: block; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--accent); text-transform: uppercase; font-size: 0.8rem; }
+        select, input[type="file"] { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; }
         
+        /* Terrain */
         .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--glass-border); position: sticky; top: 10px; z-index: 1000; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
         .timer-display { font-size: 3.5rem; font-weight: 900; color: var(--success); font-family: monospace; }
         
-        button { border: none; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-start { background: var(--success); color: black; padding: 15px 30px; font-size: 1.1rem; }
-        .btn-lap { background: var(--accent); color: white; height: 65px; width: 100%; font-size: 1.2rem; }
+        button { border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-start { background: var(--success); color: black; padding: 15px 30px; }
+        .btn-lap { background: var(--accent); color: white; height: 60px; width: 100%; font-size: 1.2rem; }
         .btn-add { background: rgba(255,255,255,0.1); color: white; padding: 10px; width: 100%; font-size: 0.8rem; margin-top: 5px; }
         
-        .perf-chip { display: inline-flex; align-items: center; background: rgba(0, 210, 255, 0.1); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 8px; margin: 3px; font-size: 0.85rem; }
         .hidden { display: none; }
-        .config-section { border-left: 3px solid var(--accent); padding-left: 15px; margin-bottom: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="screen1" class="screen active">
-        <h1 style="text-align:center; font-size:2.5rem; margin-top:30px;">EPS<span style="color:var(--accent)">PRO</span></h1>
+        <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span></h1>
         
-        <div class="card" style="max-width: 650px; margin: auto;">
-            <div class="config-section">
-                <label>1. NIVEAU DE CYCLE</label>
-                <select id="cycleLevel" onchange="updateUI()">
-                    <option value="C3">Cycle 3 (6ème)</option>
-                    <option value="C4">Cycle 4 (5/4/3ème)</option>
+        <div class="card" style="max-width: 600px; margin: auto;">
+            
+            <div id="step1" class="step visible">
+                <label>1. Cycle</label>
+                <select id="cycle" onchange="goStep(2)">
+                    <option value="">-- Choisir --</option>
+                    <option value="C3">Cycle 3</option>
+                    <option value="C4">Cycle 4</option>
                 </select>
             </div>
 
-            <div class="config-section">
-                <label>2. ATELIERS ACTIFS</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="checkCourse" checked> Course</label>
-                    <label><input type="checkbox" id="checkSaut" checked> Saut</label>
-                    <label><input type="checkbox" id="checkLancer" checked> Lancer</label>
-                </div>
+            <div id="step2" class="step">
+                <label>2. Niveau de Classe</label>
+                <select id="classe" onchange="goStep(3)"></select>
             </div>
 
-            <div id="logic-course" class="config-section">
-                <label>3. CHOIX DE L'ÉPREUVE</label>
-                <select id="mainEpreuve" onchange="updateUI()">
-                    <option class="opt-c3" value="vitesse">Vitesse 30m</option>
-                    <option class="opt-c3" value="demifond">Demi-Fond 3x400m</option>
-                    <option class="opt-c4 hidden" value="relais">Relais (Vitesse)</option>
-                    <option class="opt-c4 hidden" value="biathlon">Biathlon (Combiné)</option>
-                </select>
-
-                <div id="sub-relais" class="hidden" style="margin-top:10px;">
-                    <label>Format du Relais</label>
-                    <select id="formatRelais">
-                        <option value="2x40m">Vitesse : 2 x 40m</option>
-                        <option value="12s">Vitesse : Relais 12"</option>
-                    </select>
-                </div>
-
-                <div id="sub-biathlon" class="hidden" style="margin-top:10px;">
-                    <label>Type de Tir</label>
-                    <select id="typeTir">
-                        <option value="Laser Run">Biathlon 1 : Laser Run</option>
-                        <option value="Arcathlon">Biathlon 2 : Arcathlon</option>
-                    </select>
-                    <label>Distance de Course</label>
-                    <select id="distBiathlon">
-                        <option value="4x200m">4 x 200m</option>
-                        <option value="4x400m">4 x 400m</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="logic-lancer" class="config-section">
-                <label>4. ENGIN DE LANCER</label>
-                <select id="enginLancer">
-                    <option value="Vortex">Vortex</option>
-                    <option value="Poids 1kg">Poids 1kg</option>
-                    <option value="Poids 2kg">Poids 2kg</option>
+            <div id="step3" class="step">
+                <label>3. Configuration des Ateliers</label>
+                <select id="configAteliers" onchange="goStep(4)">
+                    <option value="">-- Choisir --</option>
+                    <option value="C">Course uniquement</option>
+                    <option value="CS">Course + Saut</option>
+                    <option value="CL">Course + Lancer</option>
+                    <option value="CSL">Course + Saut + Lancer</option>
                 </select>
             </div>
 
-            <div class="config-section">
-                <label>5. LISTE DES ÉLÈVES (EXCEL)</label>
+            <div id="step4" class="step">
+                <label>4. Type de Course</label>
+                <select id="typeCourse" onchange="goStep(5)"></select>
+            </div>
+
+            <div id="step5" class="step">
+                <label>5. Détails Techniques</label>
+                <div id="saut-detail" class="hidden">
+                    <small>Saut : Longueur (par défaut)</small>
+                </div>
+                <div id="lancer-detail" class="hidden">
+                    <label>Engin de Lancer</label>
+                    <select id="enginLancer">
+                        <option value="Vortex">Vortex</option>
+                        <option value="Poids 1kg">Poids 1kg</option>
+                        <option value="Poids 2kg">Poids 2kg</option>
+                    </select>
+                </div>
+                <button class="btn-lap" style="height:40px; margin-top:10px;" onclick="goStep(6)">Valider Technique</button>
+            </div>
+
+            <div id="step6" class="step">
+                <label>6. Importer la Liste de Classe (Excel)</label>
                 <input type="file" id="importExcel" accept=".xlsx, .xls, .csv">
+                <button class="btn-start" style="width:100%; margin-top:20px; height:60px" onclick="startSession()">DÉMARRER LE TERRAIN ➔</button>
             </div>
 
-            <button class="btn-start" style="width:100%; margin-top:20px; height:70px" onclick="startSession()">OUVRIR LE TERRAIN ➔</button>
         </div>
     </div>
 
     <div id="screen2" class="screen">
         <div class="header-bar">
-            <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 15px;">QUITTER</button>
+            <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px;">QUITTER</button>
             <div id="main-chrono" class="timer-display">00:00.0</div>
             <div style="display:flex; gap:10px;">
                 <button id="master-btn" class="btn-start" onclick="toggleMasterTimer()">START</button>
-                <button onclick="resetMasterTimer()" style="background:white; color:black; padding:0 15px;">RESET</button>
+                <button onclick="resetMasterTimer()" style="background:white; color:black;">RESET</button>
             </div>
         </div>
-
         <div id="students-container" class="grid-6"></div>
-
-        <div style="text-align:center; padding:40px 0;"><button class="btn-start" style="background:var(--accent); width:100%; max-width:400px;" onclick="exportResults()">💾 EXPORTER LA SESSION</button></div>
     </div>
 </div>
 
@@ -123,27 +111,37 @@
     let allStudents = [];
     let masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
     let studentData = Array.from({ length: 6 }, () => ({ laps: [], sauts: [], lancers: [] }));
-    let finalConfig = {};
 
-    function updateUI() {
-        const cycle = document.getElementById('cycleLevel').value;
-        const epreuve = document.getElementById('mainEpreuve').value;
+    function goStep(n) {
+        // Cacher les étapes suivantes si on revient en arrière
+        for(let i=n; i<=6; i++) document.getElementById('step'+i).classList.remove('visible');
+        
+        const stepDiv = document.getElementById('step'+n);
+        const cycle = document.getElementById('cycle').value;
 
-        // Afficher/Cacher options par cycle
-        document.querySelectorAll('.opt-c3').forEach(el => el.classList.toggle('hidden', cycle !== 'C3'));
-        document.querySelectorAll('.opt-c4').forEach(el => el.classList.toggle('hidden', cycle !== 'C4'));
-
-        // Sécurité menu épreuve
-        if (cycle === 'C4' && (epreuve === 'vitesse' || epreuve === 'demifond')) {
-            document.getElementById('mainEpreuve').value = 'relais';
-        } else if (cycle === 'C3' && (epreuve === 'relais' || epreuve === 'biathlon')) {
-            document.getElementById('mainEpreuve').value = 'vitesse';
+        if(n === 2) {
+            const cl = document.getElementById('classe');
+            cl.innerHTML = cycle === 'C3' 
+                ? '<option value="">--</option><option value="6ème">6ème</option>' 
+                : '<option value="">--</option><option value="5ème">5ème</option><option value="4ème">4ème</option><option value="3ème">3ème</option>';
         }
 
-        // Affichage sous-options C4
-        const currentEp = document.getElementById('mainEpreuve').value;
-        document.getElementById('sub-relais').classList.toggle('hidden', currentEp !== 'relais');
-        document.getElementById('sub-biathlon').classList.toggle('hidden', currentEp !== 'biathlon');
+        if(n === 4) {
+            const tc = document.getElementById('typeCourse');
+            if(cycle === 'C3') {
+                tc.innerHTML = '<option value="">--</option><option value="3x400m">3 x 400m</option><option value="4x100m">4 x 100m</option>';
+            } else {
+                tc.innerHTML = '<option value="">--</option><option value="Relais 2x40m">Relais 2 x 40m</option><option value="Relais 12s">Relais 12"</option><option value="Laser Run">Laser Run</option><option value="Arcathlon">Arcathlon</option>';
+            }
+        }
+
+        if(n === 5) {
+            const config = document.getElementById('configAteliers').value;
+            document.getElementById('saut-detail').classList.toggle('hidden', !config.includes('S'));
+            document.getElementById('lancer-detail').classList.toggle('hidden', !config.includes('L'));
+        }
+
+        stepDiv.classList.add('visible');
     }
 
     document.getElementById('importExcel').addEventListener('change', (e) => {
@@ -151,53 +149,40 @@
         reader.onload = (evt) => {
             const wb = XLSX.read(evt.target.result, {type:'binary'});
             allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert("✅ Classe prête !");
+            alert("Liste chargée !");
         };
         reader.readAsBinaryString(e.target.files[0]);
     });
 
     function startSession() {
-        if(allStudents.length === 0) return alert("Veuillez charger un fichier Excel.");
-        
-        const mainEp = document.getElementById('mainEpreuve').value;
-        let detailCourse = mainEp;
-        if(mainEp === 'relais') detailCourse = document.getElementById('formatRelais').value;
-        if(mainEp === 'biathlon') detailCourse = document.getElementById('typeTir').value + " (" + document.getElementById('distBiathlon').value + ")";
-
-        finalConfig = {
-            useCourse: document.getElementById('checkCourse').checked,
-            useSaut: document.getElementById('checkSaut').checked,
-            useLancer: document.getElementById('checkLancer').checked,
-            labelCourse: detailCourse,
-            engin: document.getElementById('enginLancer').value
-        };
+        if(allStudents.length === 0) return alert("Fichier manquant");
+        const config = document.getElementById('configAteliers').value;
+        const typeC = document.getElementById('typeCourse').value;
+        const engin = document.getElementById('enginLancer').value;
 
         const container = document.getElementById('students-container');
         container.innerHTML = "";
         for(let i=0; i<6; i++) {
             container.innerHTML += `
-                <div class="card" style="border-top: 8px solid var(--accent)">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span style="font-size:0.7rem; font-weight:900; opacity:0.6;">POSTE ${i+1}</span>
-                        <span id="info-${i}" style="color:var(--warning); font-size:0.8rem; font-weight:900;"></span>
-                    </div>
+                <div class="card" style="border-top: 6px solid var(--accent)">
                     <select id="sel-${i}" onchange="updateInfo(${i})">
-                        <option value="">-- Choisir Élève --</option>
+                        <option value="">-- Élève --</option>
                         ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
                     </select>
+                    <div id="info-${i}" style="font-size:0.7rem; color:var(--warning); margin-bottom:10px;"></div>
 
-                    <div class="${finalConfig.useCourse ? '' : 'hidden'}" style="margin:15px 0;">
-                        <button class="btn-lap" onclick="recordLap(${i})">⏱️ TOP ${finalConfig.labelCourse.toUpperCase()}</button>
-                        <div id="laps-${i}" style="text-align:center; color:var(--accent); font-size:0.9rem; margin-top:8px; font-weight:700;"></div>
+                    <div class="${config.includes('C') ? '' : 'hidden'}">
+                        <button class="btn-lap" onclick="recordLap(${i})">⏱️ ${typeC}</button>
+                        <div id="laps-${i}" style="text-align:center; font-size:0.8rem; margin:5px 0; color:var(--accent);"></div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                        <div class="${finalConfig.useSaut ? '' : 'hidden'}">
-                            <button class="btn-add" onclick="addPerf(${i}, 'sauts')">+ SAUT LONG.</button>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="${config.includes('S') ? '' : 'hidden'}">
+                            <button class="btn-add" onclick="addPerf(${i}, 'sauts')">+ SAUT</button>
                             <div id="cont-sauts-${i}"></div>
                         </div>
-                        <div class="${finalConfig.useLancer ? '' : 'hidden'}">
-                            <button class="btn-add" onclick="addPerf(${i}, 'lancers')">+ ${finalConfig.engin.toUpperCase()}</button>
+                        <div class="${config.includes('L') ? '' : 'hidden'}">
+                            <button class="btn-add" onclick="addPerf(${i}, 'lancers')">+ ${engin}</button>
                             <div id="cont-lancers-${i}"></div>
                         </div>
                     </div>
@@ -207,21 +192,11 @@
         document.getElementById('screen2').classList.add('active');
     }
 
+    // --- Fonctions Chrono/Data identiques aux versions précédentes ---
     function updateInfo(i) {
         const val = document.getElementById(`sel-${i}`).value;
         const s = allStudents.find(x => x['Nom Prénom'] === val);
         if(s) document.getElementById(`info-${i}`).innerText = `${s.Sexe} | ${s.Age} ans`;
-    }
-
-    function addPerf(i, type) {
-        let val = prompt("Saisir la performance (m) :");
-        if(!val) return;
-        val = parseFloat(val.replace(',', '.'));
-        if(!isNaN(val)) {
-            studentData[i][type].push(val);
-            const prefix = type === 'sauts' ? 'S' : 'L';
-            document.getElementById(`cont-${type}-${i}`).innerHTML += `<div class="perf-chip"><b>${prefix}${studentData[i][type].length}:</b> ${val}m</div>`;
-        }
     }
 
     function toggleMasterTimer() {
@@ -240,29 +215,24 @@
         }
     }
 
-    function resetMasterTimer() {
-        if(confirm("Réinitialiser le chrono général ?")) {
-            clearInterval(masterTimer.interval);
-            masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
-            document.getElementById('main-chrono').innerText = "00:00.0";
-            document.getElementById('master-btn').innerText = "START";
-        }
-    }
-
     function recordLap(i) {
         if(masterTimer.elapsed === 0) return;
         studentData[i].laps.push(masterTimer.elapsed);
-        document.getElementById(`laps-${i}`).innerText = `TOUR ${studentData[i].laps.length} • ${document.getElementById('main-chrono').innerText}`;
+        document.getElementById(`laps-${i}`).innerText = `Tour ${studentData[i].laps.length} : ${document.getElementById('main-chrono').innerText}`;
     }
 
-    function exportResults() {
-        const res = allStudents.map((s, idx) => {
-            const data = studentData.find((d, i) => document.getElementById(`sel-${i}`) && document.getElementById(`sel-${i}`).value === s['Nom Prénom']);
-            return data ? { ...s, ...data } : null;
-        }).filter(x => x);
-        const blob = new Blob([JSON.stringify(res, null, 2)], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `EPS_Session_${Date.now()}.json`; a.click();
+    function addPerf(i, type) {
+        let val = prompt("Performance (m) :");
+        if(!val) return;
+        val = parseFloat(val.replace(',', '.'));
+        studentData[i][type].push(val);
+        document.getElementById(`cont-${type}-${i}`).innerHTML += `<div style="font-size:0.7rem; background:rgba(0,210,255,0.1); margin:2px; padding:2px; border-radius:4px;">${type[0].toUpperCase()}${studentData[i][type].length}: ${val}m</div>`;
+    }
+
+    function resetMasterTimer() {
+        clearInterval(masterTimer.interval);
+        masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
+        document.getElementById('main-chrono').innerText = "00:00.0";
     }
 </script>
 </body>

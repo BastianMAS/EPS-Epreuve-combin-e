@@ -3,105 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPS - Multi-Évaluation (6 Élèves)</title>
+    <title>EPS - Multi-Évaluation 6 Élevés</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --p: #2c3e50; --a: #3498db; --s: #27ae60; --d: #e74c3c; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 5px; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        :root { --p: #2c3e50; --a: #3498db; --s: #27ae60; --d: #e74c3c; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 5px; }
+        .container { max-width: 100%; margin: auto; background: white; padding: 10px; border-radius: 8px; }
         .screen { display: none; } .active { display: block; }
         
-        /* Grille pour 6 élèves */
-        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
-        .card { border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fff; border-top: 5px solid var(--p); }
+        /* Grille adaptative pour 6 élèves */
+        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 8px; }
+        .card { border: 1px solid #ccc; padding: 8px; border-radius: 6px; background: #fff; position: relative; border-top: 6px solid var(--p); }
         
-        /* Couleurs pour différencier les élèves */
+        /* Couleurs badges élèves */
         .card:nth-child(1) { border-top-color: #e74c3c; } .card:nth-child(2) { border-top-color: #3498db; }
-        .card:nth-child(3) { border-top-color: #2cc; } .card:nth-child(4) { border-top-color: #f39c12; }
-        .card:nth-child(5) { border-top-color: #9b59b6; } .card:nth-child(6) { border-top-color: #27ae60; }
+        .card:nth-child(3) { border-top-color: #f1c40f; } .card:nth-child(4) { border-top-color: #9b59b6; }
+        .card:nth-child(5) { border-top-color: #e67e22; } .card:nth-child(6) { border-top-color: #2ecc71; }
 
-        button { padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin: 3px 0; }
-        .btn-lap { background: var(--a); color: white; height: 50px; font-size: 1.1em; }
-        .btn-start { background: var(--s); color: white; font-size: 1.2em; height: 60px; }
+        button { padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin: 2px 0; transition: 0.2s; }
+        .btn-lap { background: var(--a); color: white; height: 55px; font-size: 1.1em; border-bottom: 3px solid #2980b9; }
+        .btn-lap:active { transform: translateY(2px); border-bottom: none; }
+        .btn-start { background: var(--s); color: white; height: 60px; font-size: 1.2em; }
         .btn-stop { background: var(--d); color: white; }
         
-        input, select { width: 100%; padding: 8px; margin: 4px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .timer-main { font-size: 2.5em; text-align: center; background: #222; color: #0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-family: monospace; }
-        .lap-list { font-size: 0.8em; height: 60px; overflow-y: auto; background: #eee; padding: 5px; margin-top: 5px; }
-        .header-info { display: flex; justify-content: space-between; align-items: center; background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        input, select { width: 100%; padding: 8px; margin: 3px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .timer-main { font-size: 2.8em; text-align: center; background: #1a1a1a; color: #33ff33; padding: 8px; border-radius: 6px; font-family: 'Courier New', monospace; border: 3px solid #444; }
+        .lap-list { font-size: 0.8em; height: 70px; overflow-y: auto; background: #f8f8f8; padding: 4px; border: 1px inset #ddd; margin-top: 4px; }
+        .header-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; background: #fff; padding: 10px; border-bottom: 2px solid #ddd; margin-bottom: 10px; position: sticky; top: 0; z-index: 100; }
+        .activity-toggle { font-size: 0.8em; display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="screen1" class="screen active">
-        <h2>🚀 Config Groupe (Max 6 élèves)</h2>
-        <div class="card">
-            <label>Niveau :</label>
+        <h2 style="text-align:center">⚙️ Configuration Tablette</h2>
+        <div class="card" style="max-width: 500px; margin: auto;">
+            <label>1. Choisir le niveau :</label>
             <select id="nivSelect">
                 <option value="6">6ème (Cycle 3)</option>
                 <option value="5">5ème (Cycle 4)</option>
                 <option value="4">4ème (Cycle 4)</option>
                 <option value="3">3ème (Cycle 4)</option>
             </select>
-            <label>Liste élèves (Fichier Excel avec Nom, Prenom, Sexe, DateNaissance) :</label>
+            <label>2. Charger Excel (Colonnes: "nom prenom", "sexe", "age") :</label>
             <input type="file" id="importExcel" accept=".xlsx, .xls">
-            <button class="btn-start" onclick="setupGroup()">Préparer la Tablette ➔</button>
+            <label>3. Activités à afficher :</label>
+            <div class="activity-toggle">
+                <input type="checkbox" id="showCourse" checked> Course
+                <input type="checkbox" id="showSaut" checked> Saut
+                <input type="checkbox" id="showLancer" checked> Lancer
+            </div>
+            <button class="btn-start" style="margin-top:15px" onclick="setupGroup()">Démarrer l'Évaluation ➔</button>
         </div>
     </div>
 
     <div id="screen2" class="screen">
-        <div class="header-info">
-            <button style="width:100px" onclick="location.reload()">Quitter</button>
-            <div id="main-chrono" class="timer-main" style="flex-grow:1; margin:0 20px;">00:00.0</div>
-            <button id="master-btn" class="btn-start" style="width:150px" onclick="toggleMasterTimer()">START</button>
+        <div class="header-bar">
+            <button style="width:80px; background:#666; color:white;" onclick="location.reload()">Quitter</button>
+            <div id="main-chrono" class="timer-main">00:00.0</div>
+            <div style="width:160px">
+                <button id="master-btn" class="btn-start" onclick="toggleMasterTimer()">START</button>
+                <button class="btn-stop" style="font-size:0.8em; padding:5px;" onclick="resetMasterTimer()">Reset</button>
+            </div>
         </div>
 
-        <div class="grid-6">
-            <div id="students-container" class="grid-6"></div>
-        </div>
+        <div id="students-container" class="grid-6">
+            </div>
 
-        <button class="btn-start" style="margin-top:20px; background: var(--p);" onclick="exportGroupData()">💾 Sauvegarder les données du groupe</button>
+        <div style="padding: 20px;">
+            <button class="btn-start" style="background: var(--p);" onclick="exportGroupData()">💾 Sauvegarder et Exporter le groupe (.json)</button>
+        </div>
     </div>
 </div>
 
 <script>
     let allStudents = [];
-    let groupSize = 6;
+    const groupCount = 6;
     let masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
-    let studentPerfs = Array.from({ length: 6 }, () => ({ laps: [], saut: 0, lancer: 0 }));
+    let studentData = Array.from({ length: 6 }, () => ({ laps: [], saut: "", lancer: "" }));
 
-    // IMPORT EXCEL
+    // GESTION IMPORT EXCEL
     document.getElementById('importExcel').addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onload = (evt) => {
-            const wb = XLSX.read(evt.target.result, {type:'binary'});
-            allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert(allStudents.length + " élèves chargés.");
+            try {
+                const wb = XLSX.read(evt.target.result, {type:'binary'});
+                allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                alert(allStudents.length + " élèves chargés !");
+            } catch(err) {
+                alert("Erreur de lecture du fichier. Vérifiez le format.");
+            }
         };
         reader.readAsBinaryString(e.target.files[0]);
     });
 
     function setupGroup() {
-        if(allStudents.length === 0) return alert("Importez une liste !");
+        if(allStudents.length === 0) return alert("Veuillez importer un fichier Excel.");
+        
         const container = document.getElementById('students-container');
         container.innerHTML = "";
         
-        for(let i=0; i < groupSize; i++) {
+        const sCourse = document.getElementById('showCourse').checked;
+        const sSaut = document.getElementById('showSaut').checked;
+        const sLancer = document.getElementById('showLancer').checked;
+
+        for(let i=0; i < groupCount; i++) {
             container.innerHTML += `
                 <div class="card">
                     <select id="sel-${i}" onchange="updateInfo(${i})">
-                        <option>Choisir élève...</option>
-                        ${allStudents.map(s => `<option value="${s.Nom}">${s.Nom} ${s.Prenom}</option>`).join('')}
+                        <option value="">-- Choisir Élève --</option>
+                        ${allStudents.map(s => `<option value="${s['nom prenom']}">${s['nom prenom']}</option>`).join('')}
                     </select>
-                    <div id="info-${i}" style="font-size:0.8em; margin-bottom:5px;">Sexe: - | Age: -</div>
+                    <div id="info-${i}" style="font-size:0.85em; color:#666; margin: 2px 0;">Sexe: ? | Âge: ?</div>
                     
-                    <button class="btn-lap" onclick="recordLap(${i})">LAP (Passage Ligne)</button>
-                    <div class="lap-list" id="laps-${i}">Passages:</div>
+                    ${sCourse ? `
+                        <button class="btn-lap" onclick="recordLap(${i})">PASSAGE LIGNE (LAP)</button>
+                        <div class="lap-list" id="laps-${i}">Passages :</div>
+                    ` : ''}
                     
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px;">
-                        <input type="number" step="0.01" id="saut-${i}" placeholder="Saut (m)">
-                        <input type="number" step="0.01" id="lancer-${i}" placeholder="Lancer (m)">
+                        ${sSaut ? `<input type="number" step="0.01" id="saut-${i}" placeholder="Saut (m)">` : ''}
+                        ${sLancer ? `<input type="number" step="0.01" id="lancer-${i}" placeholder="Lancer (m)">` : ''}
                     </div>
                 </div>
             `;
@@ -110,27 +133,19 @@
     }
 
     function updateInfo(i) {
-        const nom = document.getElementById(`sel-${i}`).value;
-        const s = allStudents.find(x => x.Nom === nom);
+        const val = document.getElementById(`sel-${i}`).value;
+        const s = allStudents.find(x => x['nom prenom'] === val);
         if(s) {
-            const age = calculateAge(s.DateNaissance);
-            document.getElementById(`info-${i}`).innerText = `Sexe: ${s.Sexe} | Age: ${age} ans`;
+            document.getElementById(`info-${i}`).innerText = `Sexe: ${s.sexe || s.Sexe} | Âge: ${s.age || s.Age} ans`;
         }
     }
 
-    function calculateAge(dob) {
-        // Gère différents formats de date Excel
-        const birth = new Date(dob);
-        const diff = Date.now() - birth.getTime();
-        return Math.abs(new Date(diff).getUTCFullYear() - 1970);
-    }
-
-    // CHRONO GÉNÉRAL
+    // CHRONO GÉNÉRAL (MASTER)
     function toggleMasterTimer() {
         const btn = document.getElementById('master-btn');
         if(!masterTimer.running) {
             masterTimer.start = Date.now() - masterTimer.elapsed;
-            masterTimer.interval = setInterval(updateMasterDisplay, 100);
+            masterTimer.interval = setInterval(updateDisplay, 100);
             masterTimer.running = true;
             btn.innerText = "STOP"; btn.className = "btn-stop";
         } else {
@@ -140,22 +155,37 @@
         }
     }
 
-    function updateMasterDisplay() {
+    function resetMasterTimer() {
+        if(confirm("Réinitialiser le chrono ? (Les laps enregistrés resteront)")) {
+            clearInterval(masterTimer.interval);
+            masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
+            document.getElementById('main-chrono').innerText = "00:00.0";
+            document.getElementById('master-btn').innerText = "START";
+            document.getElementById('master-btn').className = "btn-start";
+        }
+    }
+
+    function updateDisplay() {
         masterTimer.elapsed = Date.now() - masterTimer.start;
         let ms = masterTimer.elapsed;
         let s = Math.floor(ms/1000);
+        let m = Math.floor(s/60);
         document.getElementById('main-chrono').innerText = 
-            `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
+            `${m.toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
     }
 
     function recordLap(i) {
-        if(!masterTimer.running && masterTimer.elapsed === 0) return alert("Lancez le chrono général !");
-        const lapTime = masterTimer.elapsed;
-        studentPerfs[i].laps.push(lapTime);
-        const s = Math.floor(lapTime/1000);
-        const display = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}.${Math.floor((lapTime%1000)/100)}`;
+        if(masterTimer.elapsed === 0) return alert("Lancez le chrono avant de marquer un passage !");
+        const time = masterTimer.elapsed;
+        studentData[i].laps.push(time);
+        
+        let s = Math.floor(time/1000);
+        let display = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}.${Math.floor((time%1000)/100)}`;
+        
         const list = document.getElementById(`laps-${i}`);
-        list.innerHTML += `<div>Tour ${studentPerfs[i].laps.length} : ${display}</div>`;
+        const div = document.createElement('div');
+        div.innerText = `T${studentData[i].laps.length}: ${display}`;
+        list.appendChild(div);
         list.scrollTop = list.scrollHeight;
     }
 
@@ -166,23 +196,24 @@
 
     function exportGroupData() {
         let results = [];
-        for(let i=0; i<groupSize; i++) {
+        for(let i=0; i<groupCount; i++) {
             const nom = document.getElementById(`sel-${i}`).value;
-            if(nom !== "Choisir élève...") {
+            if(nom) {
                 results.push({
-                    nom: nom,
-                    laps: studentPerfs[i].laps,
-                    saut: document.getElementById(`saut-${i}`).value,
-                    lancer: document.getElementById(`lancer-${i}`).value,
-                    date: new Date().toISOString()
+                    id_eleve: nom,
+                    laps: studentData[i].laps,
+                    saut: document.getElementById(`saut-${i}`) ? document.getElementById(`saut-${i}`).value : null,
+                    lancer: document.getElementById(`lancer-${i}`) ? document.getElementById(`lancer-${i}`).value : null,
+                    timestamp: new Date().toLocaleString()
                 });
             }
         }
         const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `Groupe_EPS_${new Date().getTime()}.json`;
+        a.download = `EPS_Resultats_${new Date().getTime()}.json`;
         a.click();
+        alert("Fichier exporté. Envoyez ce document au professeur.");
     }
 </script>
 </body>

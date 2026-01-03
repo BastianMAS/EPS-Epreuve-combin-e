@@ -2,247 +2,209 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EPS PRO v4</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EPS PRO - Barèmes Automatiques</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root {
-            --bg: #0b0f1a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --danger: #ff4bb4;
-            --warning: #ffcc00;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% 0%, #1a2a4a 0%, #0b0f1a 100%);
-            color: white;
-            margin: 0;
-            padding: env(safe-area-inset-top) 15px 30px 15px;
-            min-height: 100vh;
-        }
-
-        /* En-tête */
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
-            position: sticky;
-            top: 10px;
-            z-index: 1000;
-        }
-
-        .timer-display {
-            font-size: 3.8rem;
-            font-weight: 900;
-            font-variant-numeric: tabular-nums;
-            color: var(--success);
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-
-        /* Grille Élèves */
-        .grid-6 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid var(--glass-border);
-        }
-
-        /* Liste élèves : TEXTE NOIR */
-        select {
-            background: white !important;
-            color: black !important;
-            padding: 15px;
-            border-radius: 14px;
-            width: 100%;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 10px 0;
-            border: none;
-        }
-
-        /* Chrono Zone */
-        .lap-zone {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 18px;
-            padding: 15px;
-            margin: 15px 0;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* Boutons */
-        button {
-            border: none;
-            border-radius: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        button:active { transform: scale(0.96); }
-
-        .btn-lap { background: var(--accent); color: white; height: 75px; width: 100%; font-size: 1.3rem; }
-        .btn-start { background: var(--success); color: black; padding: 0 40px; height: 60px; font-size: 1.2rem; }
-        .btn-stop { background: var(--danger); color: white; padding: 0 25px; height: 60px; }
-        .btn-add { background: rgba(255,255,255,0.15); color: white; height: 45px; width: 100%; font-size: 0.9rem; }
-
-        /* Badge tentatives */
-        .perf-chip {
-            display: inline-flex;
-            background: rgba(0, 210, 255, 0.15);
-            color: var(--accent);
-            padding: 6px 12px;
-            border-radius: 8px;
-            margin: 4px;
-            font-size: 0.9rem;
-            border: 1px solid var(--accent);
-        }
-        .perf-chip b { color: white; margin-right: 4px; }
-
-        .screen { display: none; }
-        .active { display: block; }
-
-        /* Couleurs par poste */
-        .card-0 { border-top: 8px solid #ff4bb4; }
-        .card-1 { border-top: 8px solid #00d2ff; }
-        .card-2 { border-top: 8px solid #00ff88; }
-        .card-3 { border-top: 8px solid #ffcc00; }
-        .card-4 { border-top: 8px solid #9d50bb; }
-        .card-5 { border-top: 8px solid #ff9a9e; }
+        :root { --bg: #0b0f1a; --glass: rgba(255, 255, 255, 0.07); --glass-border: rgba(255, 255, 255, 0.12); --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; min-height: 100vh; }
+        .container { max-width: 1400px; margin: auto; }
+        .screen { display: none; } .active { display: block; }
+        
+        /* Glass Cards */
+        .card { background: var(--glass); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; border: 1px solid var(--glass-border); }
+        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
+        
+        /* Typography & Inputs */
+        h1 { font-size: 2.5rem; font-weight: 900; text-align: center; }
+        label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: 0.9rem; opacity: 0.8; }
+        select, input { background: white; color: black; padding: 12px; border-radius: 12px; width: 100%; border: none; font-weight: 700; box-sizing: border-box; }
+        
+        /* Terrain Interface */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
+        .timer-display { font-size: 3.5rem; font-weight: 900; color: var(--success); font-family: monospace; }
+        
+        /* Buttons */
+        button { border: none; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--success); color: black; padding: 15px 30px; font-size: 1.1rem; }
+        .btn-lap { background: var(--accent); color: white; height: 65px; width: 100%; font-size: 1.2rem; margin: 10px 0; }
+        .btn-add { background: rgba(255,255,255,0.1); color: white; font-size: 0.8rem; padding: 8px; margin-top: 5px; width: 100%; }
+        
+        /* Perfs display */
+        .perf-chip { display: inline-flex; background: rgba(0, 210, 255, 0.1); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 8px; margin: 3px; font-size: 0.85rem; }
+        .note-badge { background: var(--warning); color: black; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 900; margin-left: 5px; }
     </style>
 </head>
 <body>
 
-<div id="screen1" class="screen active">
-    <div style="text-align: center; padding: 100px 20px;">
-        <h1 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0;">EPS<span style="color:var(--accent)">PRO</span></h1>
-        <p style="opacity: 0.5; font-size: 1.2rem;">Interface Épreuves Combinées</p>
-        <div class="card" style="max-width: 500px; margin: 40px auto; text-align: left;">
-            <label style="display:block; margin-bottom:10px;">📂 Charger la classe (Fichier Excel)</label>
-            <input type="file" id="importExcel" accept=".xlsx, .xls, .csv" style="width:100%; color:white;">
-            <button onclick="setupGroup()" style="background:white; color:black; width:100%; height:60px; margin-top:30px; font-size:1.1rem;">LANCER L'ÉVALUATION</button>
+<div class="container">
+    <div id="screen1" class="screen active">
+        <h1>EPS<span style="color:var(--accent)">PRO</span></h1>
+        <div class="card" style="max-width: 550px; margin: auto;">
+            <label>Cycle & Niveau</label>
+            <select id="cycleSelect" onchange="updateEpreuves()">
+                <option value="C3">Cycle 3 (6ème)</option>
+                <option value="C4">Cycle 4 (5/4/3ème)</option>
+            </select>
+
+            <label>Engin de Lancer</label>
+            <select id="enginLancer">
+                <option value="vortex">Vortex</option>
+                <option value="poids1">Poids 1kg</option>
+                <option value="poids2">Poids 2kg</option>
+            </select>
+
+            <label>Épreuve de Course</label>
+            <select id="epreuveSelect">
+                </select>
+
+            <label>Liste des élèves (Excel)</label>
+            <input type="file" id="importExcel" accept=".xlsx, .xls, .csv">
+
+            <button class="btn-start" style="width:100%; margin-top:30px;" onclick="startSession()">DÉMARRER LA SESSION ➔</button>
         </div>
     </div>
-</div>
 
-<div id="screen2" class="screen">
-    <div class="header-bar">
-        <button onclick="location.reload()" style="background:none; color:var(--danger); border:1px solid var(--danger); padding:10px 20px;">QUITTER</button>
-        <div id="main-chrono" class="timer-display">00:00.0</div>
-        <div style="display:flex; gap:12px;">
-            <button id="master-btn" class="btn-start" onclick="toggleMasterTimer()">START</button>
-            <button class="btn-stop" onclick="resetMasterTimer()">RESET</button>
+    <div id="screen2" class="screen">
+        <div class="header-bar">
+            <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 15px;">QUITTER</button>
+            <div id="main-chrono" class="timer-display">00:00.0</div>
+            <div style="display:flex; gap:10px;">
+                <button id="master-btn" class="btn-start" onclick="toggleMasterTimer()">START</button>
+                <button onclick="resetMasterTimer()" style="background:white; color:black; padding:0 15px;">RESET</button>
+            </div>
         </div>
-    </div>
 
-    <div id="students-container" class="grid-6"></div>
-
-    <div style="margin-top: 50px; text-align: center; padding-bottom: 100px;">
-        <button onclick="exportGroupData()" style="max-width: 400px; background: var(--success); color:black; width:100%; height:70px; font-size:1.2rem;">💾 EXPORTER LE GROUPE</button>
+        <div id="students-container" class="grid-6"></div>
+        
+        <div style="text-align:center; padding: 40px 0;">
+            <button class="btn-start" style="background:var(--accent); width:100%; max-width:400px;" onclick="exportGroupData()">💾 EXPORTER LES RÉSULTATS</button>
+        </div>
     </div>
 </div>
 
 <script>
     let allStudents = [];
     let masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
-    let studentData = Array.from({ length: 6 }, () => ({ laps: [], sauts: [], lancers: [] }));
+    let studentPerfs = Array.from({ length: 6 }, () => ({ laps: [], sauts: [], lancers: [] }));
+    let configActuelle = {};
+
+    // BARÈMES SAUT LONGUEUR (6ème)
+    const baremeSaut = {
+        'F': [3.00, 2.80, 2.60, 2.40, 2.20, 2.00, 1.30, 0],
+        'M': [3.40, 3.20, 3.00, 2.80, 2.60, 2.40, 1.50, 0]
+    };
+
+    function updateEpreuves() {
+        const cycle = document.getElementById('cycleSelect').value;
+        const ep = document.getElementById('epreuveSelect');
+        if(cycle === "C3") {
+            ep.innerHTML = `<option value="vitesse">Vitesse 30m</option><option value="demifond">Demi-Fond 3x400m</option>`;
+        } else {
+            ep.innerHTML = `<option value="relais">Relais 12s</option><option value="biathlon">Biathlon</option>`;
+        }
+    }
+    updateEpreuves();
 
     document.getElementById('importExcel').addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onload = (evt) => {
             const wb = XLSX.read(evt.target.result, {type:'binary'});
             allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert("✅ Classe chargée !");
+            alert(allStudents.length + " élèves importés avec succès !");
         };
         reader.readAsBinaryString(e.target.files[0]);
     });
 
-    function setupGroup() {
-        if(allStudents.length === 0) return alert("Chargez un fichier d'abord !");
+    function startSession() {
+        if(allStudents.length === 0) return alert("Veuillez charger votre fichier Excel.");
+        configActuelle = {
+            cycle: document.getElementById('cycleSelect').value,
+            engin: document.getElementById('enginLancer').value,
+            epreuve: document.getElementById('epreuveSelect').value
+        };
+        
         const container = document.getElementById('students-container');
         container.innerHTML = "";
         for(let i=0; i < 6; i++) {
             container.innerHTML += `
-                <div class="card card-${i}">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="opacity:0.5; font-weight:800; font-size:0.8rem;">POSTE ${i+1}</span>
-                        <span id="info-${i}" style="color:var(--warning); font-size:0.8rem; font-weight:700;"></span>
+                <div class="card" style="border-top: 8px solid var(--accent)">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-size:0.7rem; font-weight:800; opacity:0.6;">POSTE ${i+1}</span>
+                        <span id="info-${i}" style="color:var(--warning); font-size:0.8rem; font-weight:800;"></span>
                     </div>
-                    <select id="sel-${i}" onchange="updateInfo(${i})">
+                    <select id="sel-${i}" onchange="updateEleve(${i})">
                         <option value="">-- Sélectionner Élève --</option>
                         ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
                     </select>
 
-                    <div class="lap-zone">
-                        <button class="btn-lap" onclick="recordLap(${i})">⏱️ TOP PASSAGE</button>
-                        <div id="laps-${i}" style="margin-top:10px; font-size:0.9rem; font-weight:700; color:var(--accent); text-align:center;"></div>
-                    </div>
+                    <button class="btn-lap" onclick="recordLap(${i})">⏱️ TOP COURSE</button>
+                    <div id="laps-${i}" style="font-size:0.85rem; text-align:center; color:var(--accent); min-height:20px; margin-bottom:10px;"></div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div>
-                            <button class="btn-add" onclick="addTrial(${i}, 'saut')">+ ESSAI SAUT</button>
-                            <div id="saut-cont-${i}" style="margin-top:8px;"></div>
+                            <button class="btn-add" onclick="addPerf(${i}, 'sauts')">+ SAUT (m)</button>
+                            <div id="cont-sauts-${i}"></div>
                         </div>
                         <div>
-                            <button class="btn-add" onclick="addTrial(${i}, 'lanc')">+ ESSAI LANCER</button>
-                            <div id="lanc-cont-${i}" style="margin-top:8px;"></div>
+                            <button class="btn-add" onclick="addPerf(${i}, 'lancers')">+ ${configActuelle.engin.toUpperCase()}</button>
+                            <div id="cont-lancers-${i}"></div>
                         </div>
                     </div>
                 </div>`;
         }
-        showScreen(2);
+        document.getElementById('screen1').classList.remove('active');
+        document.getElementById('screen2').classList.add('active');
     }
 
-    function updateInfo(i) {
+    function updateEleve(i) {
         const val = document.getElementById(`sel-${i}`).value;
         const s = allStudents.find(x => x['Nom Prénom'] === val);
-        if(s) document.getElementById(`info-${i}`).innerText = `${s.Sexe} • ${s.Age} ans`;
+        if(s) document.getElementById(`info-${i}`).innerText = `${s.Sexe} | ${s.Age} ans`;
+    }
+
+    function addPerf(i, type) {
+        let val = prompt("Entrez la performance (m) :");
+        if(val) {
+            val = parseFloat(val.replace(',', '.'));
+            if(!isNaN(val)) {
+                studentPerfs[i][type].push(val);
+                const cont = document.getElementById(`cont-${type}-${i}`);
+                const prefix = type === 'sauts' ? 'S' : 'L';
+                
+                // Calcul de la note auto si c'est un saut en 6ème
+                let noteHtml = "";
+                if(type === 'sauts' && configActuelle.cycle === "C3") {
+                    const sexe = allStudents.find(x => x['Nom Prénom'] === document.getElementById(`sel-${i}`).value)?.Sexe;
+                    if(sexe) {
+                        const score = 8 - baremeSaut[sexe].findIndex(b => val >= b);
+                        noteHtml = `<span class="note-badge">${score}/8</span>`;
+                    }
+                }
+
+                cont.innerHTML += `<div class="perf-chip"><b>${prefix}${studentPerfs[i][type].length}:</b> ${val}m ${noteHtml}</div>`;
+            }
+        }
     }
 
     function toggleMasterTimer() {
         const btn = document.getElementById('master-btn');
         if(!masterTimer.running) {
             masterTimer.start = Date.now() - masterTimer.elapsed;
-            masterTimer.interval = setInterval(updateDisplay, 100);
-            masterTimer.running = true;
-            btn.innerText = "STOP"; btn.style.background = "var(--danger)"; btn.style.color = "white";
+            masterTimer.interval = setInterval(() => {
+                masterTimer.elapsed = Date.now() - masterTimer.start;
+                let ms = masterTimer.elapsed, s = Math.floor(ms/1000);
+                document.getElementById('main-chrono').innerText = `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
+            }, 100);
+            masterTimer.running = true; btn.innerText = "STOP"; btn.style.background = "var(--danger)";
         } else {
-            clearInterval(masterTimer.interval);
-            masterTimer.running = false;
-            btn.innerText = "START"; btn.style.background = "var(--success)"; btn.style.color = "black";
+            clearInterval(masterTimer.interval); masterTimer.running = false;
+            btn.innerText = "START"; btn.style.background = "var(--success)";
         }
     }
 
-    function updateDisplay() {
-        masterTimer.elapsed = Date.now() - masterTimer.start;
-        let ms = masterTimer.elapsed, s = Math.floor(ms/1000);
-        document.getElementById('main-chrono').innerText = 
-            `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
-    }
-
     function resetMasterTimer() {
-        if(confirm("Réinitialiser le chrono général ?")) {
+        if(confirm("Reset le chrono ?")) {
             clearInterval(masterTimer.interval);
             masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
             document.getElementById('main-chrono').innerText = "00:00.0";
@@ -252,41 +214,20 @@
 
     function recordLap(i) {
         if(masterTimer.elapsed === 0) return;
-        studentData[i].laps.push(masterTimer.elapsed);
-        document.getElementById(`laps-${i}`).innerText = `TOUR ${studentData[i].laps.length} • ${document.getElementById('main-chrono').innerText}`;
-    }
-
-    function addTrial(i, type) {
-        const val = prompt(`Performance en mètres (ex: 3.45) :`);
-        if(val) {
-            const formattedVal = val.replace(',', '.');
-            if(!isNaN(formattedVal)) {
-                const cont = document.getElementById(type === 'saut' ? `saut-cont-${i}` : `lanc-cont-${i}`);
-                studentData[i][type === 'saut' ? 'sauts' : 'lancers'].push(formattedVal);
-                const label = type === 'saut' ? 'S' : 'L';
-                const chip = document.createElement('div');
-                chip.className = 'perf-chip';
-                chip.innerHTML = `<b>${label}${studentData[i][type === 'saut' ? 'sauts' : 'lancers'].length}:</b> ${formattedVal}m`;
-                cont.appendChild(chip);
-            }
-        }
-    }
-
-    function showScreen(n) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen'+n).classList.add('active');
+        studentPerfs[i].laps.push(masterTimer.elapsed);
+        document.getElementById(`laps-${i}`).innerText = `Tour ${studentPerfs[i].laps.length} : ${document.getElementById('main-chrono').innerText}`;
     }
 
     function exportGroupData() {
-        let results = [];
+        let res = [];
         for(let i=0; i<6; i++) {
             const nom = document.getElementById(`sel-${i}`).value;
-            if(nom) results.push({ nom_prenom: nom, laps: studentData[i].laps, sauts: studentData[i].sauts, lancers: studentData[i].lancers });
+            if(nom) res.push({ nom: nom, engin: configActuelle.engin, epreuve: configActuelle.epreuve, laps: studentPerfs[i].laps, sauts: studentPerfs[i].sauts, lancers: studentPerfs[i].lancers });
         }
-        const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+        const blob = new Blob([JSON.stringify(res, null, 2)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `Groupe_EPS_${new Date().getTime()}.json`;
+        a.download = `EPS_Export_${Date.now()}.json`;
         a.click();
     }
 </script>

@@ -3,263 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v12.1 - Correction Cycles</title>
+    <title>EPS PRO v13 - Autonomie Totale</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --bg: #0b0f1a; --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; --card-bg: #161b2a; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; min-height: 100vh; }
-        .card { background: var(--card-bg); border-radius: 15px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; position: relative; overflow: hidden; }
-        .screen { display: none; } .active { display: block; }
-        .step { display: none; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 20px; animation: fadeIn 0.4s; }
-        .step.visible { display: block; }
-        label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; }
-        select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; box-sizing: border-box; }
-        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; }
-        .timer-display { font-size: 3rem; font-weight: 900; color: var(--success); font-family: monospace; text-align: center; }
-        .recup-badge { background: var(--danger); color: white; padding: 5px 10px; border-radius: 5px; font-weight: 900; font-size: 1.2rem; display: none; margin-top: 5px; text-align: center; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .course-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin: 10px 0; }
-        .course-box { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .course-box span { display: block; font-size: 0.6rem; color: var(--accent); }
-        .course-box b { font-size: 1rem; color: white; }
-        .physio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .physio-input { background: #222; color: var(--success); border: 1px solid #444; padding: 8px; border-radius: 8px; text-align: center; font-weight: bold; }
-        button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-main { height: 50px; width: 100%; font-size: 1rem; text-transform: uppercase; }
-        .btn-depart { background: var(--warning); color: black; }
-        .btn-arrivee { background: var(--success); color: black; }
-        .btn-add { background: rgba(255,255,255,0.1); color: white; padding: 8px; width: 100%; font-size: 0.7rem; }
+        :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; }
+        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 15px; }
+        .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; }
+        
+        /* Chrono Individuel */
+        .local-chrono { font-family: monospace; font-size: 2.5rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 5px 0; }
+        .state-run { color: var(--success); }
+        .state-recup { color: var(--danger); }
+        .state-idle { color: var(--accent); }
+
+        /* Grille des résultats */
+        .results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .res-box { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .res-box small { font-size: 0.6rem; color: var(--accent); display: block; }
+        .res-box b { font-size: 0.85rem; }
+
+        /* Boutons */
+        button { border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-action { height: 60px; font-size: 1.2rem; text-transform: uppercase; width: 100%; }
+        .start { background: var(--success); color: #000; }
+        .stop { background: var(--danger); color: #fff; }
+        .wait { background: #333; color: #777; cursor: not-allowed; }
+        
+        .physio-input { background: #000; color: var(--warning); border: 1px solid #444; padding: 10px; border-radius: 8px; width: 100%; text-align: center; font-size: 1rem; }
         .hidden { display: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
-<div id="screen1" class="screen active">
-    <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span></h1>
-    <div class="card" style="max-width: 500px; margin: auto;">
-        <div id="step1" class="step visible">
-            <label>1. Cycle</label>
-            <select id="cycle" onchange="goStep(2)"><option value="">--</option><option value="C3">Cycle 3</option><option value="C4">Cycle 4</option></select>
-        </div>
-        <div id="step2" class="step"><label>2. Classe</label><select id="classe" onchange="goStep(3)"></select></div>
-        <div id="step3" class="step"><label>3. Ateliers</label>
-            <select id="configAteliers" onchange="goStep(4)">
-                <option value="">--</option>
-                <option value="C">Course Uniquement</option>
-                <option value="CS">Course + Saut</option>
-                <option value="CL">Course + Lancer</option>
-                <option value="CSL">Course + Saut + Lancer</option>
-            </select>
-        </div>
-        <div id="step4" class="step"><label>4. Course</label><select id="typeCourse" onchange="checkBiathlon()"></select></div>
-        <div id="step4bis" class="step"><label>Distance Biathlon</label><select id="distBiathlon" onchange="goStep(5)"><option value="4x200m">4x200m</option><option value="4x400m">4x400m</option></select></div>
-        <div id="step5" class="step">
-            <label>5. Récupération & Technique</label>
-            <div style="margin-bottom:15px;">
-                <label style="color:white; font-size:0.7rem;">Temps de récup (sec)</label>
-                <input type="number" id="tempsRecup" value="180">
-            </div>
-            <div id="lancer-box" class="hidden">
-                <select id="enginLancer"><option value="Vortex">Vortex</option><option value="Poids 1kg">Poids 1kg</option><option value="Poids 2kg">Poids 2kg</option></select>
-            </div>
-            <button class="btn-main" style="background:var(--accent); color:black;" onclick="goStep(6)">Valider</button>
-        </div>
-        <div id="step6" class="step"><label>6. Liste Elèves</label><input type="file" id="importExcel" accept=".xlsx, .csv"><button class="btn-main" style="background:var(--success); margin-top:10px" onclick="startTerrain()">LANCER LE TERRAIN</button></div>
+<div id="screen1" class="active">
+    <div class="card" style="max-width:500px; margin: 20px auto;">
+        <h2 style="text-align:center">CONFIG SESSION</h2>
+        <label>Cycle / Classe</label>
+        <select id="cycle" onchange="updateClasse()"><option value="C3">Cycle 3</option><option value="C4">Cycle 4</option></select>
+        <select id="classe" style="margin-top:10px"></select>
+        
+        <label>Atelier & Course</label>
+        <select id="configAteliers" onchange="updateCourses()"><option value="C">Course Seule</option><option value="CS">Course + Saut</option><option value="CL">Course + Lancer</option></select>
+        <select id="typeCourse" style="margin-top:10px" onchange="updateLaps()"></select>
+        
+        <label>Récupération (secondes)</label>
+        <input type="number" id="tempsRecup" value="120">
+        
+        <input type="file" id="importExcel" style="margin-top:20px">
+        <button onclick="launchSession()" style="background:var(--success); padding:15px; width:100%; margin-top:10px">OUVRIR LE TERRAIN</button>
     </div>
 </div>
 
-<div id="screen2" class="screen">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px;">Quitter</button>
-        <div id="main-chrono" class="timer-display">00:00.0</div>
-        <button id="master-btn" class="btn-start" style="padding:15px; background:var(--success)" onclick="toggleMasterTimer()">START</button>
-    </div>
-    <div id="students-grid" class="grid-6"></div>
+<div id="screen2" class="hidden">
+    <div style="text-align:center; margin-bottom:15px;"><button onclick="location.reload()" style="background:var(--danger); color:white; padding:8px 15px;">RETOUR</button></div>
+    <div id="grid" class="grid-6"></div>
 </div>
 
 <script>
-    let allStudents = [];
-    let masterTimer = { running: false, start: 0, elapsed: 0, interval: null };
-    let studentData = {}; 
-    let maxLaps = 3;
+let studentData = {};
+let maxLaps = 3;
+let allStudents = [];
 
-    function goStep(n) {
-        for(let i=n; i<=6; i++) {
-            let el = document.getElementById('step'+i);
-            if(el) el.classList.remove('visible');
-        }
-        const cycle = document.getElementById('cycle').value;
-        const config = document.getElementById('configAteliers').value;
-
-        if(n===2){
-            const cl = document.getElementById('classe');
-            cl.innerHTML = cycle === 'C3' ? '<option value="">--</option><option value="6e">6ème</option>' : '<option value="">--</option><option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
-            document.getElementById('step2').classList.add('visible');
-        }
-        if(n===3) document.getElementById('step3').classList.add('visible');
-        if(n===4) {
-            const tc = document.getElementById('typeCourse');
-            let opts = '<option value="">--</option>';
-            
-            if(cycle === 'C3') {
-                opts += '<option value="3x400m">3x400m</option><option value="30m Vitesse">30m Vitesse</option>';
-            } else {
-                opts += '<option value="3x400m">3x400m</option><option value="4x400m">4x400m</option><option value="Relais 2x40m">Relais 2x40m</option><option value="Relais 12s">Relais 12"</option>';
-                if(config === 'C') {
-                    opts += '<option value="Laser Run">Laser Run</option><option value="Arcathlon">Arcathlon</option>';
-                }
-            }
-            tc.innerHTML = opts;
-            document.getElementById('step4').classList.add('visible');
-        }
-        if(n===5) {
-            document.getElementById('lancer-box').classList.toggle('hidden', !config.includes('L'));
-            document.getElementById('step5').classList.add('visible');
-        }
-        if(n===6) document.getElementById('step6').classList.add('visible');
+// -- LOGIQUE CONFIGURATION (Identique à ton souhait) --
+function updateClasse() {
+    const c = document.getElementById('cycle').value;
+    const cl = document.getElementById('classe');
+    cl.innerHTML = c === 'C3' ? '<option value="6e">6ème</option>' : '<option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
+    updateCourses();
+}
+function updateCourses() {
+    const c = document.getElementById('cycle').value;
+    const config = document.getElementById('configAteliers').value;
+    const tc = document.getElementById('typeCourse');
+    let opts = '<option value="3x400m">3x400m</option>';
+    if(c === 'C4') {
+        opts += '<option value="4x400m">4x400m</option><option value="Relais 2x40">Relais 2x40</option>';
+        if(config === 'C') opts += '<option value="Laser Run">Laser Run</option><option value="Arcathlon">Arcathlon</option>';
     }
+    tc.innerHTML = opts;
+}
+function updateLaps() {
+    const tc = document.getElementById('typeCourse').value;
+    maxLaps = (tc.includes('4x400') || tc.includes('Run') || tc.includes('Arca')) ? 4 : 3;
+}
 
-    function checkBiathlon() {
-        const val = document.getElementById('typeCourse').value;
-        if(val.includes('Run') || val.includes('Arca')) {
-            document.getElementById('step4bis').classList.add('visible');
-            maxLaps = 4;
-        } else {
-            // Définition auto du nombre de tours
-            if(val === '3x400m') maxLaps = 3;
-            else if(val === '4x400m') maxLaps = 4;
-            else if(val.includes('Relais')) maxLaps = 2; // Par défaut pour relais
-            else maxLaps = 1; // Vitesse
-            goStep(5);
-        }
-    }
+document.getElementById('importExcel').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        const wb = XLSX.read(evt.target.result, {type:'binary'});
+        allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    };
+    reader.readAsBinaryString(e.target.files[0]);
+};
 
-    document.getElementById('importExcel').addEventListener('change', (e) => {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const wb = XLSX.read(evt.target.result, {type:'binary'});
-            allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert("Liste chargée avec succès !");
+// -- LOGIQUE TERRAIN --
+function launchSession() {
+    document.getElementById('screen1').classList.add('hidden');
+    document.getElementById('screen2').classList.remove('hidden');
+    const container = document.getElementById('grid');
+    const recupBase = parseInt(document.getElementById('tempsRecup').value);
+
+    for(let i=0; i<6; i++) {
+        studentData[i] = {
+            state: 'IDLE', // IDLE, RUNNING, RECUP, FINISHED
+            timer: 0,
+            interval: null,
+            laps: [],
+            recupLeft: 0
         };
-        reader.readAsBinaryString(e.target.files[0]);
-    });
 
-    function startTerrain() {
-        if(allStudents.length === 0) return alert("Importez d'abord la liste !");
-        document.getElementById('screen1').classList.remove('active');
-        document.getElementById('screen2').classList.add('active');
-        const grid = document.getElementById('students-grid');
-        const config = document.getElementById('configAteliers').value;
-        const engin = document.getElementById('enginLancer').value;
+        container.innerHTML += `
+            <div class="card" id="card-${i}">
+                <select style="font-size:1.1rem">${allStudents.map(s => `<option>${s['Nom Prénom']}</option>`).join('')}</select>
+                
+                <div id="chrono-${i}" class="local-chrono state-idle">00:00.0</div>
+                
+                <div class="results-row">
+                    ${Array.from({length: maxLaps}).map((_,l) => `<div class="res-box"><small>C${l+1}</small><b id="lap-${i}-${l}">--</b></div>`).join('')}
+                </div>
 
-        for(let i=0; i<6; i++) {
-            studentData[i] = { laps: [], currentStart: null, sauts: [], lancers: [], recupTimer: null };
-            grid.innerHTML += `
-                <div class="card" id="card-${i}">
-                    <select id="sel-${i}" onchange="updateInfo(${i})">
-                        <option value="">-- Poste ${i+1} --</option>
-                        ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
-                    </select>
-                    
-                    <div id="recup-${i}" class="recup-badge">RECUP : <span id="recup-val-${i}">00</span>s</div>
+                <button id="btn-${i}" class="btn-action start" onclick="toggleStudent(${i})">DÉPART</button>
 
-                    <div class="course-grid">
-                        ${Array.from({length: maxLaps}).map((_,j) => `
-                            <div class="course-box"><span>C${j+1}</span><b id="c-${i}-${j}">--:--</b></div>
-                        `).join('')}
-                    </div>
-
-                    <button id="btn-run-${i}" class="btn-main btn-depart" onclick="handleCourse(${i})">DÉPART</button>
-
-                    <div class="physio-grid">
-                        <div><label>BPM</label><input type="number" class="physio-input" placeholder="Cardio"></div>
-                        <div><label>RPE (1-10)</label><input type="number" class="physio-input" placeholder="Effort"></div>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                        <div class="${config.includes('S') ? '' : 'hidden'}"><button class="btn-add" onclick="addPerf(${i},'S')">+ SAUT</button><div id="s-${i}" style="font-size:0.7rem"></div></div>
-                        <div class="${config.includes('L') ? '' : 'hidden'}"><button class="btn-add" onclick="addPerf(${i},'L')">+ ${engin}</button><div id="l-${i}" style="font-size:0.7rem"></div></div>
-                    </div>
-                </div>`;
-        }
+                <div class="physio-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <input type="number" id="bpm-${i}" class="physio-input" placeholder="BPM">
+                    <input type="number" id="rpe-${i}" class="physio-input" placeholder="RPE (1-10)">
+                </div>
+            </div>
+        `;
     }
+}
 
-    function handleCourse(i) {
-        if(!masterTimer.running) return alert("Lancez le chrono général d'abord !");
-        let s = studentData[i];
-        let btn = document.getElementById(`btn-run-${i}`);
+function toggleStudent(i) {
+    let s = studentData[i];
+    let btn = document.getElementById(`btn-${i}`);
+    let display = document.getElementById(`chrono-${i}`);
 
-        if(s.currentStart === null) {
-            if(s.laps.length >= maxLaps) return;
-            s.currentStart = masterTimer.elapsed;
-            btn.innerText = "ARRIVÉE";
-            btn.className = "btn-main btn-arrivee";
+    if(s.state === 'IDLE') {
+        // Lancement Course
+        s.state = 'RUNNING';
+        s.timer = 0;
+        display.className = "local-chrono state-run";
+        btn.innerText = "ARRIVÉE";
+        btn.className = "btn-action stop";
+        
+        s.interval = setInterval(() => {
+            s.timer += 100;
+            display.innerText = formatTime(s.timer);
+        }, 100);
+
+    } else if(s.state === 'RUNNING') {
+        // Arrêt Course
+        clearInterval(s.interval);
+        s.laps.push(s.timer);
+        document.getElementById(`lap-${i}-${s.laps.length-1}`).innerText = formatTime(s.timer);
+        
+        if(s.laps.length >= maxLaps) {
+            s.state = 'FINISHED';
+            btn.innerText = "TERMINÉ";
+            btn.className = "btn-action wait";
+            display.className = "local-chrono state-idle";
         } else {
-            let net = masterTimer.elapsed - s.currentStart;
-            s.laps.push(net);
-            document.getElementById(`c-${i}-${s.laps.length-1}`).innerText = formatTime(net);
-            s.currentStart = null;
+            // Lancement Récup
+            s.state = 'RECUP';
+            s.recupLeft = parseInt(document.getElementById('tempsRecup').value);
+            btn.className = "btn-action wait";
+            display.className = "local-chrono state-recup";
             
-            if(s.laps.length < maxLaps) {
-                btn.innerText = "DÉPART";
-                btn.className = "btn-main btn-depart";
-                startRecup(i);
-            } else {
-                btn.innerText = "TERMINÉ";
-                btn.disabled = true;
-                btn.style.opacity = 0.5;
-            }
+            s.interval = setInterval(() => {
+                s.recupLeft--;
+                display.innerText = "RECUP: " + s.recupLeft + "s";
+                btn.innerText = "ATTENDRE...";
+                
+                if(s.recupLeft <= 0) {
+                    clearInterval(s.interval);
+                    s.state = 'IDLE';
+                    btn.innerText = "DÉPART C" + (s.laps.length + 1);
+                    btn.className = "btn-action start";
+                    display.className = "local-chrono state-idle";
+                    display.innerText = "PRÊT !";
+                }
+            }, 1000);
         }
     }
+}
 
-    function startRecup(i) {
-        let seconds = parseInt(document.getElementById('tempsRecup').value);
-        let badge = document.getElementById(`recup-${i}`);
-        let val = document.getElementById(`recup-val-${i}`);
-        badge.style.display = "block";
-        if(studentData[i].recupTimer) clearInterval(studentData[i].recupTimer);
-        studentData[i].recupTimer = setInterval(() => {
-            seconds--;
-            val.innerText = seconds;
-            if(seconds <= 0) {
-                clearInterval(studentData[i].recupTimer);
-                badge.style.display = "none";
-            }
-        }, 1000);
-    }
+function formatTime(ms) {
+    let s = Math.floor(ms/1000);
+    let m = Math.floor(s/60);
+    let milli = Math.floor((ms%1000)/100);
+    return `${m.toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${milli}`;
+}
 
-    function formatTime(ms) {
-        let s = Math.floor(ms/1000);
-        let m = Math.floor(s/60);
-        return `${m}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
-    }
-
-    function toggleMasterTimer() {
-        const btn = document.getElementById('master-btn');
-        if(!masterTimer.running) {
-            masterTimer.start = Date.now() - masterTimer.elapsed;
-            masterTimer.interval = setInterval(() => {
-                masterTimer.elapsed = Date.now() - masterTimer.start;
-                document.getElementById('main-chrono').innerText = formatTime(masterTimer.elapsed);
-            }, 100);
-            masterTimer.running = true; btn.innerText = "STOP"; btn.style.background = "var(--danger)";
-        } else {
-            clearInterval(masterTimer.interval); masterTimer.running = false;
-            btn.innerText = "START"; btn.style.background = "var(--success)";
-        }
-    }
-
-    function updateInfo(i) {
-        const val = document.getElementById(`sel-${i}`).value;
-        const s = allStudents.find(x => x['Nom Prénom'] === val);
-        if(s) document.getElementById(`info-${i}`) ? document.getElementById(`info-${i}`).innerText = `${s.Sexe} | ${s.Age} ans` : null;
-    }
-
-    function addPerf(i, type) {
-        let p = prompt("Valeur :");
-        if(p) document.getElementById(`${type.toLowerCase()}-${i}`).innerText += p + " | ";
-    }
+updateClasse();
 </script>
 </body>
 </html>

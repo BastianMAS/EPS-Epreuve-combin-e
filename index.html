@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v15 - Correctif Performance</title>
+    <title>EPS PRO v16 - Tunnel & Chronos Fixes</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
         body { font-family: system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; }
-        .step { display: none; border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 25px; }
+        .step { display: none; border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 25px; animation: fadeIn 0.3s; }
         .step.visible { display: block; }
-        label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; }
-        select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
+        select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; box-sizing: border-box; }
         .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 15px; }
         .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); }
         .local-chrono { font-family: monospace; font-size: 2.5rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 10px; }
@@ -19,14 +19,15 @@
         .state-recup { color: var(--danger); border: 2px solid var(--danger); }
         .state-idle { color: var(--accent); }
         .results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
-        .res-box { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; text-align: center; font-size: 0.8rem; }
+        .res-box { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; text-align: center; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
         button { border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
         .btn-action { height: 55px; font-size: 1.1rem; width: 100%; text-transform: uppercase; }
-        .start { background: var(--success); }
+        .start { background: var(--success); color: black; }
         .stop { background: var(--danger); color: white; }
-        .wait { background: #333; color: #777; }
-        .perf-input { background: #222; color: white; border: 1px solid #444; padding: 8px; border-radius: 8px; width: 100%; text-align: center; margin-top: 5px; }
+        .wait { background: #333; color: #777; cursor: not-allowed; }
+        .perf-input { background: #000; color: white; border: 1px solid #444; padding: 8px; border-radius: 8px; width: 100%; text-align: center; }
         .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
@@ -34,13 +35,50 @@
 <div id="screen1" class="active">
     <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span></h1>
     <div class="card" style="max-width: 500px; margin: auto;">
-        <div id="step1" class="step visible"><label>1. Cycle</label><select id="cycle" onchange="goStep(2)"><option value="">--</option><option value="C3">C3</option><option value="C4">C4</option></select></div>
-        <div id="step2" class="step"><label>2. Classe</label><select id="classe" onchange="goStep(3)"></select></div>
-        <div id="step3" class="step"><label>3. Ateliers</label><select id="configAteliers" onchange="goStep(4)"><option value="C">Course Seule</option><option value="CS">Course + Saut</option><option value="CL">Course + Lancer</option><option value="CSL">Course + Saut + Lancer</option></select></div>
-        <div id="step4" class="step"><label>4. Course</label><select id="typeCourse" onchange="checkBiathlon()"></select></div>
-        <div id="step4bis" class="step"><label>Distance Biathlon</label><select id="distBiathlon" onchange="goStep(5)"><option value="4x200m">4x200m</option><option value="4x400m">4x400m</option></select></div>
-        <div id="step5" class="step"><label>5. Récupération (sec)</label><input type="number" id="tempsRecup" value="120"><button class="btn-action start" onclick="goStep(6)">Valider</button></div>
-        <div id="step6" class="step"><label>6. Liste Excel</label><input type="file" id="importExcel" accept=".xlsx"><button class="btn-action start" style="background:var(--success); margin-top:10px" onclick="launch()">OUVRIR LE TERRAIN</button></div>
+        <div id="step1" class="step visible">
+            <label>1. Cycle</label>
+            <select id="cycle" onchange="updateTunnel(2)">
+                <option value="">-- Sélectionner --</option>
+                <option value="C3">Cycle 3</option>
+                <option value="C4">Cycle 4</option>
+            </select>
+        </div>
+        <div id="step2" class="step">
+            <label>2. Classe</label>
+            <select id="classe" onchange="updateTunnel(3)"></select>
+        </div>
+        <div id="step3" class="step">
+            <label>3. Ateliers</label>
+            <select id="configAteliers" onchange="updateTunnel(4)">
+                <option value="">-- Sélectionner --</option>
+                <option value="C">Course Seule</option>
+                <option value="CS">Course + Saut</option>
+                <option value="CL">Course + Lancer</option>
+                <option value="CSL">Course + Saut + Lancer</option>
+            </select>
+        </div>
+        <div id="step4" class="step">
+            <label>4. Épreuve</label>
+            <select id="typeCourse" onchange="handleCourseSelection()"></select>
+        </div>
+        <div id="step4bis" class="step">
+            <label>Distance Biathlon</label>
+            <select id="distBiathlon" onchange="updateTunnel(5)">
+                <option value="">-- Choisir --</option>
+                <option value="4x200m">4x200m</option>
+                <option value="4x400m">4x400m</option>
+            </select>
+        </div>
+        <div id="step5" class="step">
+            <label>5. Récupération (sec)</label>
+            <input type="number" id="tempsRecup" value="120">
+            <button class="btn-action start" style="height:40px; font-size:0.8rem;" onclick="updateTunnel(6)">Valider Récupération</button>
+        </div>
+        <div id="step6" class="step">
+            <label>6. Liste Excel</label>
+            <input type="file" id="importExcel" accept=".xlsx, .csv">
+            <button class="btn-action start" style="background:var(--success); margin-top:10px" onclick="launch()">LANCER LE TERRAIN ➔</button>
+        </div>
     </div>
 </div>
 
@@ -54,67 +92,89 @@ let studentData = {};
 let maxLaps = 3;
 let allStudents = [];
 
-function goStep(n) {
-    for(let i=n; i<=6; i++) document.getElementById('step'+i)?.classList.remove('visible');
-    const c = document.getElementById('cycle').value;
-    if(n===2) { 
-        document.getElementById('classe').innerHTML = c==='C3'?'<option value="6e">6e</option>':'<option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
-        document.getElementById('step2').classList.add('visible'); 
+function updateTunnel(n) {
+    // Cacher les étapes suivantes
+    for(let i=n; i<=6; i++) document.getElementById('step'+i).classList.remove('visible');
+    if(n <= 4) document.getElementById('step4bis').classList.remove('visible');
+
+    const cycle = document.getElementById('cycle').value;
+    const config = document.getElementById('configAteliers').value;
+
+    if(n === 2) {
+        const cl = document.getElementById('classe');
+        cl.innerHTML = cycle === 'C3' ? '<option value="">--</option><option value="6e">6ème</option>' : '<option value="">--</option><option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
+        document.getElementById('step2').classList.add('visible');
     }
-    if(n===3) document.getElementById('step3').classList.add('visible');
-    if(n===4) {
-        let opts = '<option value="3x400m">3x400m</option>';
-        if(c==='C4') opts += '<option value="4x400m">4x400m</option><option value="Laser Run">Laser Run</option>';
-        document.getElementById('typeCourse').innerHTML = opts;
+    if(n === 3) document.getElementById('step3').classList.add('visible');
+    if(n === 4) {
+        const tc = document.getElementById('typeCourse');
+        let opts = '<option value="">-- Sélectionner --</option>';
+        if(cycle === 'C3') {
+            opts += '<option value="3x400m">3x400m</option><option value="30m Vitesse">30m Vitesse</option>';
+        } else {
+            opts += '<option value="3x400m">3x400m</option><option value="4x400m">4x400m</option><option value="Relais 2x40m">Relais 2x40m</option><option value="Relais 12s">Relais 12"</option>';
+            if(config === 'C') opts += '<option value="Laser Run">Laser Run</option><option value="Arcathlon">Arcathlon</option>';
+        }
+        tc.innerHTML = opts;
         document.getElementById('step4').classList.add('visible');
     }
-    if(n===5) document.getElementById('step5').classList.add('visible');
-    if(n===6) document.getElementById('step6').classList.add('visible');
+    if(n === 5) document.getElementById('step5').classList.add('visible');
+    if(n === 6) document.getElementById('step6').classList.add('visible');
 }
 
-function checkBiathlon() {
-    if(document.getElementById('typeCourse').value.includes('Run')) document.getElementById('step4bis').classList.add('visible');
-    else goStep(5);
+function handleCourseSelection() {
+    const val = document.getElementById('typeCourse').value;
+    if(val.includes('Run') || val.includes('Arca')) {
+        document.getElementById('step5').classList.remove('visible');
+        document.getElementById('step4bis').classList.add('visible');
+    } else if(val !== "") {
+        updateTunnel(5);
+    }
 }
 
 document.getElementById('importExcel').onchange = (e) => {
     const reader = new FileReader();
     reader.onload = (evt) => {
-        allStudents = XLSX.utils.sheet_to_json(XLSX.read(evt.target.result, {type:'binary'}).Sheets[XLSX.read(evt.target.result, {type:'binary'}).SheetNames[0]]);
-        alert("Liste chargée");
+        const wb = XLSX.read(evt.target.result, {type:'binary'});
+        allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        alert("Liste chargée ! " + allStudents.length + " élèves.");
     };
     reader.readAsBinaryString(e.target.files[0]);
 };
 
 function launch() {
+    if(allStudents.length === 0) return alert("Importez une liste Excel d'abord.");
     document.getElementById('screen1').classList.add('hidden');
     document.getElementById('screen2').classList.remove('hidden');
+    
     const grid = document.getElementById('grid');
     const config = document.getElementById('configAteliers').value;
-    maxLaps = document.getElementById('typeCourse').value === '3x400m' ? 3 : 4;
+    const typeC = document.getElementById('typeCourse').value;
+    maxLaps = (typeC === '3x400m') ? 3 : (typeC.includes('400') || typeC.includes('Run') ? 4 : 2);
 
+    grid.innerHTML = "";
     for(let i=0; i<6; i++) {
-        studentData[i] = { state:'IDLE', startTime:0, laps:[], elapsed:0 };
+        studentData[i] = { state:'IDLE', startTime:0, laps:[], elapsed:0, interval:null };
         grid.innerHTML += `
             <div class="card">
                 <select id="sel-${i}" onchange="updateProfile(${i})">
                     <option value="">-- Choisir Elève --</option>
                     ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
                 </select>
-                <div id="prof-${i}" style="font-size:0.7rem; color:var(--warning); margin-bottom:5px; height:15px;"></div>
+                <div id="prof-${i}" style="font-size:0.75rem; color:var(--warning); margin:5px 0; height:15px;"></div>
                 
                 <div id="chrono-${i}" class="local-chrono state-idle">00:00.0</div>
                 
                 <div class="results-row">${Array.from({length:maxLaps}).map((_,l)=>`<div class="res-box"><small>C${l+1}</small><b id="lap-${i}-${l}">--</b></div>`).join('')}</div>
                 
-                <button id="btn-${i}" class="btn-action start" onclick="handle(${i})">DÉPART</button>
+                <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">DÉPART</button>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
-                    <input type="number" class="perf-input" placeholder="BPM">
-                    <input type="number" class="perf-input" placeholder="RPE">
+                    <div><label>BPM</label><input type="number" class="perf-input"></div>
+                    <div><label>RPE</label><input type="number" class="perf-input"></div>
                 </div>
 
-                <div class="ateliers-box" style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div class="${config.includes('S')?'':'hidden'}"><label>SAUT (m)</label><input type="number" step="0.01" class="perf-input" placeholder="0.00"></div>
                     <div class="${config.includes('L')?'':'hidden'}"><label>LANCER (m)</label><input type="number" step="0.01" class="perf-input" placeholder="0.00"></div>
                 </div>
@@ -127,7 +187,7 @@ function updateProfile(i) {
     document.getElementById(`prof-${i}`).innerText = s ? `${s.Sexe} | ${s.Age} ans` : "";
 }
 
-function handle(i) {
+function handleChrono(i) {
     let s = studentData[i];
     let btn = document.getElementById(`btn-${i}`);
     let display = document.getElementById(`chrono-${i}`);
@@ -147,14 +207,15 @@ function handle(i) {
         document.getElementById(`lap-${i}-${s.laps.length-1}`).innerText = formatTime(s.elapsed);
         
         if(s.laps.length >= maxLaps) {
-            s.state = 'FINISHED'; btn.innerText = "FINI"; btn.className = "btn-action wait";
+            s.state = 'FINISHED'; btn.innerText = "TERMINÉ"; btn.className = "btn-action wait";
+            display.className = "local-chrono state-idle"; display.innerText = "FINI";
         } else {
             s.state = 'RECUP';
-            let targetRecup = Date.now() + (parseInt(document.getElementById('tempsRecup').value) * 1000);
+            let target = Date.now() + (parseInt(document.getElementById('tempsRecup').value) * 1000);
             display.className = "local-chrono state-recup";
             btn.className = "btn-action wait";
             s.interval = setInterval(() => {
-                let diff = Math.ceil((targetRecup - Date.now()) / 1000);
+                let diff = Math.ceil((target - Date.now()) / 1000);
                 display.innerText = diff + "s";
                 btn.innerText = "REPOS...";
                 if(diff <= 0) {

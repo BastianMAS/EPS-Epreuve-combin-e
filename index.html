@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v17.2 - Correctif Page 2</title>
+    <title>EPS PRO v17.3 - Retour Config</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
@@ -55,6 +55,9 @@
 </div>
 
 <div id="screen2" class="hidden">
+    <div style="margin-bottom:15px; display: flex; justify-content: flex-start;">
+        <button onclick="backToConfig()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px; font-weight: bold;">← RETOUR CONFIG</button>
+    </div>
     <div id="grid" class="grid-6"></div>
 </div>
 
@@ -62,6 +65,15 @@
 let studentData = {};
 let allStudents = [];
 let maxLaps = 3;
+
+function backToConfig() {
+    if(confirm("Retourner à la configuration ? Les chronos en cours seront perdus.")) {
+        document.getElementById('screen2').classList.add('hidden');
+        document.getElementById('screen1').classList.remove('active'); // Correction affichage
+        document.getElementById('screen1').style.display = 'block';
+        location.reload(); // Recharge pour éviter les doublons de grille
+    }
+}
 
 function updateTunnel(n) {
     for(let i=n; i<=6; i++) document.getElementById('step'+i)?.classList.remove('visible');
@@ -95,13 +107,14 @@ document.getElementById('importExcel').onchange = (e) => {
 };
 
 function launch() {
-    document.getElementById('screen1').classList.add('hidden');
+    document.getElementById('screen1').style.display = 'none';
     document.getElementById('screen2').classList.remove('hidden');
     const grid = document.getElementById('grid');
     const config = document.getElementById('configAteliers').value;
     const engin = document.getElementById('enginLancer').value;
     maxLaps = document.getElementById('typeCourse').value === '3x400m' ? 3 : 1;
 
+    grid.innerHTML = "";
     for(let i=0; i<6; i++) {
         studentData[i] = { state:'IDLE', startTime:0, sessionStart:null, laps:[], interval:null, totalInterval:null };
         grid.innerHTML += `
@@ -181,7 +194,7 @@ function handleChrono(i) {
         if(s.laps.length >= maxLaps) {
             s.state = 'FINISHED'; btn.innerText = "TERMINÉ"; btn.className = "btn-action wait";
             display.className = "local-chrono state-idle"; display.innerText = "FINI";
-            clearInterval(s.totalInterval); // On stoppe le chrono épreuve à la toute fin
+            clearInterval(s.totalInterval);
         } else {
             s.state = 'RECUP';
             let target = Date.now() + (parseInt(document.getElementById('tempsRecup').value) * 1000);

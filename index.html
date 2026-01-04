@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v22 - Niveaux de Compétence</title>
+    <title>EPS PRO v23 - Intégral</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
         body { font-family: system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; }
+        .step { display: none; border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 25px; }
+        .step.visible { display: block; }
         label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
         select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; box-sizing: border-box; }
         .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .local-chrono { font-family: monospace; font-size: 2.2rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 10px 0; color: var(--accent); }
+        .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .local-chrono { font-family: monospace; font-size: 2.2rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 10px; color: var(--accent); }
         button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; }
         .btn-action { height: 50px; font-size: 1rem; width: 100%; text-transform: uppercase; }
         .start { background: var(--success); color: black; }
@@ -23,31 +25,42 @@
 <body>
 
 <div id="screen1">
-    <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span> <small>V22</small></h1>
+    <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span></h1>
     <div class="card" style="max-width: 500px; margin: auto;">
-        <label>Configuration Atelier</label>
-        <select id="configAteliers">
-            <option value="CS">Course + Saut (3+3 pts)</option>
-            <option value="CL">Course + Lancer (3+3 pts)</option>
-            <option value="CSL">Course + Saut + Lancer (2+2+2 pts)</option>
-        </select>
-        <label>Liste Elèves (Nom Prénom, Sexe, VMA)</label>
-        <input type="file" id="importExcel" accept=".xlsx">
-        <button class="btn-action start" onclick="launch()">LANCER LE TERRAIN</button>
+        <div id="step1" class="step visible"><label>1. Cycle</label><select id="cycle" onchange="updateTunnel(2)"><option value="">--</option><option value="C3">Cycle 3</option><option value="C4">Cycle 4</option></select></div>
+        <div id="step2" class="step"><label>2. Classe</label><select id="classe" onchange="updateTunnel(3)"></select></div>
+        <div id="step3" class="step"><label>3. Ateliers</label><select id="configAteliers" onchange="updateTunnel(4)"><option value="">--</option><option value="CS">Course + Saut (3+3 pts)</option><option value="CL">Course + Lancer (3+3 pts)</option><option value="CSL">Course + Saut + Lancer (2+2+2 pts)</option></select></div>
+        <div id="step4" class="step"><label>4. Épreuve</label><select id="typeCourse" onchange="updateTunnel(5)"></select></div>
+        <div id="step5" class="step"><label>5. Récupération (sec)</label><input type="number" id="tempsRecup" value="120"><button class="btn-action start" style="height:40px" onclick="updateTunnel(6)">Valider</button></div>
+        <div id="step6" class="step"><label>6. Liste (Nom Prénom, Sexe, VMA)</label><input type="file" id="importExcel" accept=".xlsx"><button class="btn-action start" style="margin-top:10px" onclick="launch()">LANCER LE TERRAIN</button></div>
     </div>
 </div>
 
 <div id="screen2" class="hidden">
-    <div style="display:flex; justify-content: space-between; margin-bottom:15px;">
-        <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px;">RETOUR</button>
-        <button onclick="exportBilan()" style="background:var(--warning); color:black; padding:10px; font-weight:900;">💾 BILAN EXCEL /6 PTS</button>
-    </div>
+    <div style="margin-bottom:15px;"><button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px;">← RETOUR</button></div>
     <div id="grid" class="grid-6"></div>
+    <div style="text-align:center; padding:30px;"><button onclick="exportBilan()" style="background:var(--warning); color:black; padding:20px; border-radius:15px; font-size:1.2rem; font-weight:900;">💾 BILAN & NOTES /6</button></div>
 </div>
 
 <script>
 let studentData = {};
 let allStudents = [];
+
+function updateTunnel(n) {
+    for(let i=n; i<=6; i++) document.getElementById('step'+i)?.classList.remove('visible');
+    const cycle = document.getElementById('cycle').value;
+    if(n===2) {
+        document.getElementById('classe').innerHTML = cycle==='C3'?'<option value="">--</option><option value="6e">6ème</option>':'<option value="">--</option><option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
+        document.getElementById('step2').classList.add('visible');
+    }
+    if(n===3) document.getElementById('step3').classList.add('visible');
+    if(n===4) {
+        document.getElementById('typeCourse').innerHTML = '<option value="3x400m">3x400m</option>';
+        document.getElementById('step4').classList.add('visible');
+    }
+    if(n===5) document.getElementById('step5').classList.add('visible');
+    if(n===6) document.getElementById('step6').classList.add('visible');
+}
 
 document.getElementById('importExcel').onchange = (e) => {
     const reader = new FileReader();
@@ -58,23 +71,19 @@ document.getElementById('importExcel').onchange = (e) => {
 };
 
 function launch() {
-    if(!allStudents.length) return alert("Importez le fichier Excel d'abord !");
     document.getElementById('screen1').style.display = 'none';
     document.getElementById('screen2').classList.remove('hidden');
-    const grid = document.getElementById('grid');
     const config = document.getElementById('configAteliers').value;
+    const grid = document.getElementById('grid');
 
     for(let i=0; i<6; i++) {
-        studentData[i] = { laps:[], sauts:[], lancers:[], vma:0, sexe:"", state:'IDLE' };
+        studentData[i] = { laps:[], sauts:[], lancers:[], vma:0, state:'IDLE' };
         grid.innerHTML += `
             <div class="card">
-                <select id="sel-${i}" onchange="setStudent(${i}, this.value)">
-                    <option value="">-- Elève --</option>
-                    ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
-                </select>
-                <div id="prof-${i}" style="font-size:0.7rem; color:var(--warning); margin:5px 0;">VMA: -- | Sexe: --</div>
+                <select id="sel-${i}" onchange="setStudent(${i}, this.value)"><option value="">-- Elève --</option>${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}</select>
+                <div id="prof-${i}" style="font-size:0.7rem; color:var(--warning); margin:5px 0;">VMA: --</div>
                 <div id="chrono-${i}" class="local-chrono">00:00.0</div>
-                <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">DÉPART TOUR 1</button>
+                <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">DÉPART</button>
                 <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div class="${config.includes('S')?'':'hidden'}">Saut: <input type="number" id="in-s-${i}" class="perf-input"> <button onclick="addP(${i},'s')">+</button></div>
                     <div class="${config.includes('L')?'':'hidden'}">Lancer: <input type="number" id="in-l-${i}" class="perf-input"> <button onclick="addP(${i},'l')">+</button></div>
@@ -85,11 +94,7 @@ function launch() {
 
 function setStudent(i, name) {
     const s = allStudents.find(x => x['Nom Prénom'] === name);
-    if(s) {
-        studentData[i].vma = parseFloat(s.VMA) || 0;
-        studentData[i].sexe = s.Sexe || "M";
-        document.getElementById(`prof-${i}`).innerText = `VMA: ${studentData[i].vma} km/h | Sexe: ${studentData[i].sexe}`;
-    }
+    if(s) { studentData[i].vma = parseFloat(s.VMA) || 0; document.getElementById(`prof-${i}`).innerText = `VMA: ${studentData[i].vma} km/h`; }
 }
 
 function handleChrono(i) {
@@ -103,8 +108,8 @@ function handleChrono(i) {
     } else {
         clearInterval(s.interval);
         s.laps.push(Date.now()-s.start);
-        s.state='IDLE'; btn.innerText = "DÉPART TOUR " + (s.laps.length+1); btn.style.background = "var(--success)";
-        if(s.laps.length >= 3) { btn.innerText = "TERMINÉ"; btn.disabled = true; }
+        s.state='IDLE'; btn.innerText = "TOUR " + (s.laps.length+1); btn.style.background = "var(--success)";
+        if(s.laps.length >= 3) btn.disabled = true;
     }
 }
 
@@ -113,50 +118,22 @@ function addP(i,t) {
     if(val) { (t==='s'?studentData[i].sauts:studentData[i].lancers).push(val); document.getElementById(`in-${t}-${i}`).value=""; }
 }
 
-function calculateNote(pct, max) {
-    if (pct < 90) return 0.25;
-    if (max === 2) {
-        if (pct >= 110) return 2.00;
-        if (pct >= 100) return 1.50;
-        return 0.75;
-    } else { // max === 3
-        if (pct >= 110) return 3.00;
-        if (pct >= 100) return 2.25;
-        return 1.25;
-    }
-}
-
 function exportBilan() {
     const config = document.getElementById('configAteliers').value;
     const ptsMax = config === 'CSL' ? 2 : 3;
     let report = [];
-
-    for(let i=0; i<6; i++) {
-        let name = document.getElementById(`sel-${i}`).value;
-        if(!name) continue;
+    for(let i in studentData) {
+        let name = document.getElementById(`sel-${i}`).value; if(!name) continue;
         let s = studentData[i];
-        
-        let totalMs = s.laps.reduce((a,b)=>a+b, 0);
-        let vitesseKmh = totalMs > 0 ? (1.2 / (totalMs/3600000)) : 0;
-        let pct = s.vma > 0 ? (vitesseKmh / s.vma) * 100 : 0;
-        
-        let noteC = calculateNote(pct, ptsMax);
-
-        report.push({
-            "Nom Prénom": name,
-            "VMA Ref": s.vma,
-            "Vitesse Moyenne": vitesseKmh.toFixed(2) + " km/h",
-            "% VMA Atteint": pct.toFixed(1) + "%",
-            "Niveau Compétence": pct < 90 ? "1" : pct < 100 ? "2" : pct < 110 ? "3" : "4",
-            "Note Course /"+ptsMax: noteC.toFixed(2),
-            "Meilleur Saut/Lancer (m)": Math.max(...s.sauts, ...s.lancers, 0),
-            "Note Finale /6": "À sommer avec Ateliers"
-        });
+        let vit = s.laps.length ? (1.2 / ((s.laps.reduce((a,b)=>a+b)/3600000))) : 0;
+        let pct = s.vma > 0 ? (vit / s.vma) * 100 : 0;
+        let noteC = pct < 90 ? 0.25 : (pct < 100 ? (ptsMax*0.4) : (pct < 110 ? (ptsMax*0.75) : ptsMax));
+        report.push({ "Nom": name, "VMA": s.vma, "% VMA": pct.toFixed(1)+"%", "Note Course /"+ptsMax: noteC.toFixed(2) });
     }
     const ws = XLSX.utils.json_to_sheet(report);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Bilan");
-    XLSX.writeFile(wb, "Bilan_Niveaux_EPS.xlsx");
+    XLSX.writeFile(wb, "Bilan_EPS_V23.xlsx");
 }
 
 function formatTime(ms) {

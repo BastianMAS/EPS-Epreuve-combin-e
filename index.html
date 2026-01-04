@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v17.3 - Retour Config</title>
+    <title>EPS PRO v18 - Final avec Export Excel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
@@ -21,7 +21,7 @@
         .state-idle { color: var(--accent); }
         .results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
         .res-box { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; text-align: center; font-size: 0.75rem; }
-        button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-action { height: 50px; font-size: 1rem; width: 100%; text-transform: uppercase; }
         .start { background: var(--success); color: black; }
         .stop { background: var(--danger); color: white; }
@@ -29,6 +29,7 @@
         .perf-input { background: #000 !important; color: white !important; border: 1px solid #444; padding: 8px; border-radius: 8px; width: 80px; text-align: center; }
         .perf-list { font-size: 0.75rem; color: var(--success); margin-top: 4px; font-weight: bold; }
         .hidden { display: none; }
+        .export-area { margin-top: 30px; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 20px; }
     </style>
 </head>
 <body>
@@ -56,24 +57,21 @@
 
 <div id="screen2" class="hidden">
     <div style="margin-bottom:15px; display: flex; justify-content: flex-start;">
-        <button onclick="backToConfig()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px; font-weight: bold;">← RETOUR CONFIG</button>
+        <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px;">← RETOUR CONFIG</button>
     </div>
+    
     <div id="grid" class="grid-6"></div>
+
+    <div class="export-area">
+        <h3 style="color:var(--accent)">Fin de Séance</h3>
+        <button onclick="exportBilan()" style="background:var(--warning); color:black; padding:20px; border-radius:15px; font-size:1.2rem; width:300px;">💾 GÉNÉRER LE BILAN EXCEL</button>
+    </div>
 </div>
 
 <script>
 let studentData = {};
 let allStudents = [];
 let maxLaps = 3;
-
-function backToConfig() {
-    if(confirm("Retourner à la configuration ? Les chronos en cours seront perdus.")) {
-        document.getElementById('screen2').classList.add('hidden');
-        document.getElementById('screen1').classList.remove('active'); // Correction affichage
-        document.getElementById('screen1').style.display = 'block';
-        location.reload(); // Recharge pour éviter les doublons de grille
-    }
-}
 
 function updateTunnel(n) {
     for(let i=n; i<=6; i++) document.getElementById('step'+i)?.classList.remove('visible');
@@ -116,7 +114,7 @@ function launch() {
 
     grid.innerHTML = "";
     for(let i=0; i<6; i++) {
-        studentData[i] = { state:'IDLE', startTime:0, sessionStart:null, laps:[], interval:null, totalInterval:null };
+        studentData[i] = { state:'IDLE', startTime:0, sessionStart:null, laps:[], sauts:[], lancers:[], bpm:"", rpe:"" };
         grid.innerHTML += `
             <div class="card">
                 <div class="total-session-time" id="total-${i}">Chrono épreuve: 00:00</div>
@@ -147,6 +145,10 @@ function launch() {
                         <div id="list-l-${i}" class="perf-list"></div>
                     </div>
                 </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
+                    <div><label>BPM</label><input type="number" onchange="studentData[${i}].bpm=this.value" class="perf-input" style="width:100%"></div>
+                    <div><label>RPE</label><input type="number" onchange="studentData[${i}].rpe=this.value" class="perf-input" style="width:100%"></div>
+                </div>
             </div>`;
     }
 }
@@ -158,10 +160,11 @@ function updateProfile(i) {
 
 function addPerf(i, type) {
     const input = document.getElementById(`in-${type}-${i}`);
-    const val = input.value;
+    const val = parseFloat(input.value);
     if(val && val > 0) {
-        const list = document.getElementById(`list-${type}-${i}`);
-        list.innerText += val + "m | ";
+        if(type==='s') studentData[i].sauts.push(val);
+        else studentData[i].lancers.push(val);
+        document.getElementById(`list-${type}-${i}`).innerText = (type==='s' ? studentData[i].sauts : studentData[i].lancers).join('m | ') + "m";
         input.value = "";
     }
 }
@@ -175,16 +178,13 @@ function handleChrono(i) {
         if(s.sessionStart === null) {
             s.sessionStart = Date.now();
             s.totalInterval = setInterval(() => {
-                let total = Date.now() - s.sessionStart;
-                document.getElementById(`total-${i}`).innerText = "Chrono épreuve: " + formatTotal(total);
+                document.getElementById(`total-${i}`).innerText = "Chrono épreuve: " + formatTotal(Date.now() - s.sessionStart);
             }, 1000);
         }
         s.state = 'RUNNING'; s.startTime = Date.now();
         btn.innerText = "ARRIVÉE"; btn.className = "btn-action stop";
         display.className = "local-chrono state-run";
-        s.interval = setInterval(() => {
-            display.innerText = formatTime(Date.now() - s.startTime);
-        }, 100);
+        s.interval = setInterval(() => { display.innerText = formatTime(Date.now() - s.startTime); }, 100);
     } else if(s.state === 'RUNNING') {
         clearInterval(s.interval);
         let elapsed = Date.now() - s.startTime;
@@ -213,11 +213,34 @@ function handleChrono(i) {
     }
 }
 
+function exportBilan() {
+    let report = [];
+    for(let i=0; i<6; i++) {
+        let name = document.getElementById(`sel-${i}`).value;
+        if(!name) continue;
+        let s = studentData[i];
+        let row = {
+            "Nom Prénom": name,
+            "BPM": s.bpm,
+            "RPE": s.rpe,
+            "C1": s.laps[0] ? formatTime(s.laps[0]) : "--",
+            "C2": s.laps[1] ? formatTime(s.laps[1]) : "--",
+            "C3": s.laps[2] ? formatTime(s.laps[2]) : "--",
+            "Meilleur Saut (m)": s.sauts.length ? Math.max(...s.sauts) : "--",
+            "Meilleur Lancer (m)": s.lancers.length ? Math.max(...s.lancers) : "--"
+        };
+        report.push(row);
+    }
+    const ws = XLSX.utils.json_to_sheet(report);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Bilan EPS");
+    XLSX.writeFile(wb, "Bilan_Session_EPS.xlsx");
+}
+
 function formatTime(ms) {
     let s = Math.floor(ms/1000);
     return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
 }
-
 function formatTotal(ms) {
     let s = Math.floor(ms/1000);
     return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;

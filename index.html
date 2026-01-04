@@ -3,44 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v12 - Performance & Cardio</title>
+    <title>EPS PRO v12.1 - Correction Cycles</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --bg: #0b0f1a; --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; --card-bg: #161b2a; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; min-height: 100vh; }
         .card { background: var(--card-bg); border-radius: 15px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; position: relative; overflow: hidden; }
         .screen { display: none; } .active { display: block; }
-        
-        /* Formulaire */
         .step { display: none; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 20px; animation: fadeIn 0.4s; }
         .step.visible { display: block; }
         label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; }
         select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; box-sizing: border-box; }
-        
-        /* Terrain Grid */
         .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; }
-        
-        /* Chrono & Recup */
         .timer-display { font-size: 3rem; font-weight: 900; color: var(--success); font-family: monospace; text-align: center; }
         .recup-badge { background: var(--danger); color: white; padding: 5px 10px; border-radius: 5px; font-weight: 900; font-size: 1.2rem; display: none; margin-top: 5px; text-align: center; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* Zones de saisie Card */
         .course-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin: 10px 0; }
         .course-box { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .course-box span { display: block; font-size: 0.6rem; color: var(--accent); }
         .course-box b { font-size: 1rem; color: white; }
-
         .physio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .physio-input { background: #222; color: var(--success); border: 1px solid #444; padding: 8px; border-radius: 8px; text-align: center; font-weight: bold; }
-
         button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; }
         .btn-main { height: 50px; width: 100%; font-size: 1rem; text-transform: uppercase; }
         .btn-depart { background: var(--warning); color: black; }
         .btn-arrivee { background: var(--success); color: black; }
         .btn-add { background: rgba(255,255,255,0.1); color: white; padding: 8px; width: 100%; font-size: 0.7rem; }
-
         .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
@@ -110,8 +100,16 @@
         if(n===3) document.getElementById('step3').classList.add('visible');
         if(n===4) {
             const tc = document.getElementById('typeCourse');
-            let opts = '<option value="">--</option><option value="3x400m">3x400m</option><option value="4x400m">4x400m</option>';
-            if(cycle === 'C4' && config === 'C') opts += '<option value="Laser Run">Laser Run</option><option value="Arcathlon">Arcathlon</option>';
+            let opts = '<option value="">--</option>';
+            
+            if(cycle === 'C3') {
+                opts += '<option value="3x400m">3x400m</option><option value="30m Vitesse">30m Vitesse</option>';
+            } else {
+                opts += '<option value="3x400m">3x400m</option><option value="4x400m">4x400m</option><option value="Relais 2x40m">Relais 2x40m</option><option value="Relais 12s">Relais 12"</option>';
+                if(config === 'C') {
+                    opts += '<option value="Laser Run">Laser Run</option><option value="Arcathlon">Arcathlon</option>';
+                }
+            }
             tc.innerHTML = opts;
             document.getElementById('step4').classList.add('visible');
         }
@@ -128,7 +126,11 @@
             document.getElementById('step4bis').classList.add('visible');
             maxLaps = 4;
         } else {
-            maxLaps = val === '3x400m' ? 3 : 4;
+            // Définition auto du nombre de tours
+            if(val === '3x400m') maxLaps = 3;
+            else if(val === '4x400m') maxLaps = 4;
+            else if(val.includes('Relais')) maxLaps = 2; // Par défaut pour relais
+            else maxLaps = 1; // Vitesse
             goStep(5);
         }
     }
@@ -138,12 +140,13 @@
         reader.onload = (evt) => {
             const wb = XLSX.read(evt.target.result, {type:'binary'});
             allStudents = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            alert("Liste OK");
+            alert("Liste chargée avec succès !");
         };
         reader.readAsBinaryString(e.target.files[0]);
     });
 
     function startTerrain() {
+        if(allStudents.length === 0) return alert("Importez d'abord la liste !");
         document.getElementById('screen1').classList.remove('active');
         document.getElementById('screen2').classList.add('active');
         const grid = document.getElementById('students-grid');
@@ -188,13 +191,11 @@
         let btn = document.getElementById(`btn-run-${i}`);
 
         if(s.currentStart === null) {
-            // Top Départ
             if(s.laps.length >= maxLaps) return;
             s.currentStart = masterTimer.elapsed;
             btn.innerText = "ARRIVÉE";
             btn.className = "btn-main btn-arrivee";
         } else {
-            // Arrivée
             let net = masterTimer.elapsed - s.currentStart;
             s.laps.push(net);
             document.getElementById(`c-${i}-${s.laps.length-1}`).innerText = formatTime(net);
@@ -217,16 +218,13 @@
         let badge = document.getElementById(`recup-${i}`);
         let val = document.getElementById(`recup-val-${i}`);
         badge.style.display = "block";
-        
         if(studentData[i].recupTimer) clearInterval(studentData[i].recupTimer);
-        
         studentData[i].recupTimer = setInterval(() => {
             seconds--;
             val.innerText = seconds;
             if(seconds <= 0) {
                 clearInterval(studentData[i].recupTimer);
                 badge.style.display = "none";
-                alert(`Poste ${i+1} : Fin de récupération !`);
             }
         }, 1000);
     }
@@ -252,9 +250,15 @@
         }
     }
 
+    function updateInfo(i) {
+        const val = document.getElementById(`sel-${i}`).value;
+        const s = allStudents.find(x => x['Nom Prénom'] === val);
+        if(s) document.getElementById(`info-${i}`) ? document.getElementById(`info-${i}`).innerText = `${s.Sexe} | ${s.Age} ans` : null;
+    }
+
     function addPerf(i, type) {
-        let p = prompt("Valeur (m/tir) :");
-        if(p) document.getElementById(`${type.toLowerCase()}-${i}`).innerText += p + "m | ";
+        let p = prompt("Valeur :");
+        if(p) document.getElementById(`${type.toLowerCase()}-${i}`).innerText += p + " | ";
     }
 </script>
 </body>

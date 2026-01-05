@@ -3,248 +3,1086 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v18 - Final avec Export Excel</title>
+    <title>EPS PRO - Évaluation Athlétisme Cycle 3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; }
-        .step { display: none; border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 25px; }
+        :root {
+            --bg: #0b101d;
+            --card: #1c2333;
+            --accent: #00d2ff;
+            --success: #00ff88;
+            --danger: #ff4bb4;
+            --warning: #ffcc00;
+            --orange: #ff8800;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: white;
+            margin: 0;
+            padding: 10px;
+            line-height: 1.4;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 20px 0;
+            font-weight: 900;
+        }
+        
+        .accent-text { color: var(--accent); }
+        
+        /* TUNNEL DE CONFIGURATION */
+        .config-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .step {
+            display: none;
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 25px;
+            animation: slideIn 0.3s ease;
+        }
+        
         .step.visible { display: block; }
-        label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
-        select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; box-sizing: border-box; }
-        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .total-session-time { font-size: 0.8rem; color: #ffcc00; text-align: right; margin-bottom: 5px; font-family: monospace; font-weight: bold; }
-        .local-chrono { font-family: monospace; font-size: 2.2rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 10px; }
-        .state-run { color: var(--success); }
-        .state-recup { color: var(--danger); border: 1px solid var(--danger); }
-        .state-idle { color: var(--accent); }
-        .results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
-        .res-box { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; text-align: center; font-size: 0.75rem; }
-        button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-action { height: 50px; font-size: 1rem; width: 100%; text-transform: uppercase; }
-        .start { background: var(--success); color: black; }
-        .stop { background: var(--danger); color: white; }
-        .wait { background: #333; color: #777; cursor: not-allowed; }
-        .perf-input { background: #000 !important; color: white !important; border: 1px solid #444; padding: 8px; border-radius: 8px; width: 80px; text-align: center; }
-        .perf-list { font-size: 0.75rem; color: var(--success); margin-top: 4px; font-weight: bold; }
-        .hidden { display: none; }
-        .export-area { margin-top: 30px; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 20px; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select, input[type="number"], input[type="file"] {
+            background: white;
+            color: black;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: 3px solid var(--accent);
+            transform: scale(1.02);
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        /* BOUTONS */
+        button {
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:active { transform: scale(0.95); }
+        
+        .btn-action {
+            height: 60px;
+            font-size: 1.1rem;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        
+        .btn-primary {
+            background: var(--success);
+            color: black;
+        }
+        
+        .btn-primary:hover { background: #00ffaa; }
+        
+        .start {
+            background: var(--success);
+            color: black;
+        }
+        
+        .stop {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .wait {
+            background: #333;
+            color: #777;
+            cursor: not-allowed;
+        }
+        
+        .finished {
+            background: var(--accent);
+            color: black;
+        }
+        
+        /* GRILLE DES ÉLÈVES */
+        .grid-6 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .student-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 18px;
+            border: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .student-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(0,210,255,0.3);
+        }
+        
+        .card-number {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: var(--accent);
+            color: black;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        
+        .total-session-time {
+            font-size: 0.85rem;
+            color: var(--warning);
+            text-align: right;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .student-select {
+            margin-bottom: 5px;
+        }
+        
+        .student-info {
+            font-size: 0.75rem;
+            color: var(--warning);
+            height: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* CHRONOMÈTRE */
+        .local-chrono {
+            font-family: 'Courier New', monospace;
+            font-size: 2.8rem;
+            text-align: center;
+            font-weight: 900;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            margin-bottom: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .state-idle {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .state-run {
+            color: var(--success);
+            border-color: var(--success);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .state-recup {
+            color: var(--danger);
+            border-color: var(--danger);
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.5); }
+            50% { box-shadow: 0 0 40px rgba(0,255,136,0.8); }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            25%, 75% { opacity: 0.6; }
+        }
+        
+        /* RÉSULTATS DES TOURS */
+        .results-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .res-box {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .res-box small {
+            display: block;
+            color: var(--accent);
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .res-box b {
+            font-size: 1rem;
+            color: white;
+        }
+        
+        /* PERFORMANCES ATELIERS */
+        .ateliers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .atelier-box label {
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+        }
+        
+        .perf-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .perf-input {
+            background: #000 !important;
+            color: white !important;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 10px;
+            flex: 1;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        
+        .btn-add {
+            background: var(--accent);
+            color: black;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: 900;
+            min-width: 50px;
+        }
+        
+        .perf-list {
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-top: 5px;
+            font-weight: bold;
+            min-height: 18px;
+        }
+        
+        /* PHYSIOLOGIE */
+        .physio-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .physio-box label {
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+        }
+        
+        .physio-input {
+            background: #000 !important;
+            color: white !important;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        
+        /* ZONE D'EXPORT */
+        .export-area {
+            margin-top: 40px;
+            text-align: center;
+            padding: 30px;
+            background: rgba(0,210,255,0.1);
+            border-radius: 20px;
+            border: 2px solid var(--accent);
+        }
+        
+        .export-area h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .btn-export {
+            background: var(--warning);
+            color: black;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            min-width: 350px;
+            box-shadow: 0 8px 25px rgba(255,204,0,0.4);
+        }
+        
+        .btn-export:hover {
+            background: #ffdd33;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255,204,0,0.6);
+        }
+        
+        /* UTILITAIRES */
+        .hidden { display: none !important; }
+        
+        .text-center { text-align: center; }
+        
+        .mt-2 { margin-top: 15px; }
+        
+        .mb-2 { margin-bottom: 15px; }
+        
+        /* HEADER TERRAIN */
+        .terrain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--card);
+            border-radius: 15px;
+        }
+        
+        .btn-back {
+            background: var(--danger);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+        
+        .session-info {
+            text-align: right;
+            font-size: 0.9rem;
+        }
+        
+        .session-info div {
+            margin-bottom: 5px;
+        }
+        
+        .session-info strong {
+            color: var(--accent);
+        }
     </style>
 </head>
 <body>
 
-<div id="screen1" class="active">
-    <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span></h1>
-    <div class="card" style="max-width: 500px; margin: auto;">
-        <div id="step1" class="step visible"><label>1. Cycle</label><select id="cycle" onchange="updateTunnel(2)"><option value="">--</option><option value="C3">Cycle 3</option><option value="C4">Cycle 4</option></select></div>
-        <div id="step2" class="step"><label>2. Classe</label><select id="classe" onchange="updateTunnel(3)"></select></div>
-        <div id="step3" class="step"><label>3. Ateliers</label><select id="configAteliers" onchange="updateTunnel(4)"><option value="">--</option><option value="C">Course Seule</option><option value="CS">Course + Saut</option><option value="CL">Course + Lancer</option><option value="CSL">Course + Saut + Lancer</option></select></div>
-        <div id="step4" class="step"><label>4. Épreuve</label><select id="typeCourse" onchange="updateTunnel(5)"></select></div>
-        <div id="step5" class="step">
-            <label>5. Technique & Récupération</label>
-            <div id="lancer-options" class="hidden">
-                <label style="color:white; font-size:0.7rem">Engin pour Lancer :</label>
-                <select id="enginLancer"><option value="Vortex">Vortex</option><option value="Poids 1kg">Poids 1kg</option></select>
+<!-- PAGE 1 : CONFIGURATION -->
+<div id="screen1">
+    <h1>EPS<span class="accent-text">PRO</span></h1>
+    <p class="text-center" style="color: var(--accent); margin-bottom: 30px; font-size: 1.1rem;">
+        Évaluation Athlétisme - Cycle 3
+    </p>
+    
+    <div class="config-container">
+        <div class="card">
+            <!-- ÉTAPE 1 : CYCLE -->
+            <div id="step1" class="step visible">
+                <label>1️⃣ Cycle</label>
+                <select id="cycle" onchange="updateTunnel(2)">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="C3">Cycle 3</option>
+                </select>
             </div>
-            <label style="color:white; font-size:0.7rem">Temps de Récup (sec) :</label>
-            <input type="number" id="tempsRecup" value="120">
-            <button class="btn-action start" style="height:40px; font-size:0.8rem" onclick="updateTunnel(6)">Valider</button>
+            
+            <!-- ÉTAPE 2 : CLASSE -->
+            <div id="step2" class="step">
+                <label>2️⃣ Classe</label>
+                <select id="classe" onchange="updateTunnel(3)">
+                    <option value="">-- Sélectionner --</option>
+                </select>
+            </div>
+            
+            <!-- ÉTAPE 3 : ATELIERS -->
+            <div id="step3" class="step">
+                <label>3️⃣ Configuration des Ateliers</label>
+                <select id="configAteliers" onchange="updateTunnel(4)">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="CS">Course + Saut (CS)</option>
+                    <option value="CL">Course + Lancer (CL)</option>
+                    <option value="CSL">Course + Saut + Lancer (CSL)</option>
+                </select>
+            </div>
+            
+            <!-- ÉTAPE 4 : ÉPREUVE -->
+            <div id="step4" class="step">
+                <label>4️⃣ Épreuve de Course</label>
+                <select id="typeCourse" onchange="updateTunnel(5)">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="3x400m">3x400m</option>
+                </select>
+            </div>
+            
+            <!-- ÉTAPE 5 : RÉCUPÉRATION -->
+            <div id="step5" class="step">
+                <label>5️⃣ Temps de Récupération (secondes)</label>
+                <input type="number" id="tempsRecup" value="120" min="30" max="300">
+                <button class="btn-action btn-primary mt-2" onclick="updateTunnel(6)">
+                    ✓ Valider
+                </button>
+            </div>
+            
+            <!-- ÉTAPE 6 : IMPORT EXCEL -->
+            <div id="step6" class="step">
+                <label>6️⃣ Importer la Liste des Élèves</label>
+                <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 10px;">
+                    Le fichier Excel doit contenir : <strong>Nom Prénom</strong>, <strong>Sexe</strong>, <strong>VMA</strong>
+                </p>
+                <input type="file" id="importExcel" accept=".xlsx, .xls">
+                <button class="btn-action btn-primary mt-2" onclick="launchTerrain()">
+                    🚀 LANCER LE TERRAIN
+                </button>
+            </div>
         </div>
-        <div id="step6" class="step"><label>6. Liste Elèves</label><input type="file" id="importExcel" accept=".xlsx, .csv"><button class="btn-action start" style="background:var(--success); margin-top:10px" onclick="launch()">LANCER LE TERRAIN</button></div>
     </div>
 </div>
 
+<!-- PAGE 2 : TERRAIN -->
 <div id="screen2" class="hidden">
-    <div style="margin-bottom:15px; display: flex; justify-content: flex-start;">
-        <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px;">← RETOUR CONFIG</button>
+    <div class="terrain-header">
+        <button class="btn-back" onclick="location.reload()">
+            ← Retour Configuration
+        </button>
+        <div class="session-info">
+            <div><strong>Classe :</strong> <span id="info-classe"></span></div>
+            <div><strong>Épreuve :</strong> <span id="info-epreuve"></span></div>
+            <div><strong>Ateliers :</strong> <span id="info-ateliers"></span></div>
+        </div>
     </div>
     
     <div id="grid" class="grid-6"></div>
-
+    
     <div class="export-area">
-        <h3 style="color:var(--accent)">Fin de Séance</h3>
-        <button onclick="exportBilan()" style="background:var(--warning); color:black; padding:20px; border-radius:15px; font-size:1.2rem; width:300px;">💾 GÉNÉRER LE BILAN EXCEL</button>
+        <h3>📊 Fin de Séance</h3>
+        <p style="margin-bottom: 20px; color: #ccc;">
+            Génère un bilan Excel complet avec les notes calculées automatiquement
+        </p>
+        <button class="btn-export" onclick="exportBilan()">
+            💾 GÉNÉRER LE BILAN EXCEL
+        </button>
     </div>
 </div>
 
 <script>
+// ============================================================================
+// VARIABLES GLOBALES
+// ============================================================================
 let studentData = {};
 let allStudents = [];
 let maxLaps = 3;
-
-function updateTunnel(n) {
-    for(let i=n; i<=6; i++) document.getElementById('step'+i)?.classList.remove('visible');
-    const cycle = document.getElementById('cycle').value;
-    const config = document.getElementById('configAteliers').value;
-    if(n===2) {
-        document.getElementById('classe').innerHTML = cycle==='C3'?'<option value="">--</option><option value="6e">6ème</option>':'<option value="">--</option><option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
-        document.getElementById('step2').classList.add('visible');
-    }
-    if(n===3) document.getElementById('step3').classList.add('visible');
-    if(n===4) {
-        let opts = '<option value="">--</option>';
-        if(cycle==='C3') opts += '<option value="3x400m">3x400m</option><option value="30m Vitesse">30m Vitesse</option>';
-        else opts += '<option value="3x400m">3x400m</option><option value="4x400m">4x400m</option>';
-        document.getElementById('typeCourse').innerHTML = opts;
-        document.getElementById('step4').classList.add('visible');
-    }
-    if(n===5) {
-        document.getElementById('lancer-options').classList.toggle('hidden', !config.includes('L'));
-        document.getElementById('step5').classList.add('visible');
-    }
-    if(n===6) document.getElementById('step6').classList.add('visible');
-}
-
-document.getElementById('importExcel').onchange = (e) => {
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-        allStudents = XLSX.utils.sheet_to_json(XLSX.read(evt.target.result, {type:'binary'}).Sheets[XLSX.read(evt.target.result, {type:'binary'}).SheetNames[0]]);
-    };
-    reader.readAsBinaryString(e.target.files[0]);
+let sessionConfig = {
+    cycle: '',
+    classe: '',
+    ateliers: '',
+    epreuve: '',
+    recup: 120
 };
 
-function launch() {
-    document.getElementById('screen1').style.display = 'none';
-    document.getElementById('screen2').classList.remove('hidden');
-    const grid = document.getElementById('grid');
+// ============================================================================
+// TUNNEL DE CONFIGURATION
+// ============================================================================
+function updateTunnel(stepNumber) {
+    // Masquer toutes les étapes suivantes
+    for (let i = stepNumber; i <= 6; i++) {
+        const step = document.getElementById('step' + i);
+        if (step) step.classList.remove('visible');
+    }
+    
+    const cycle = document.getElementById('cycle').value;
     const config = document.getElementById('configAteliers').value;
-    const engin = document.getElementById('enginLancer').value;
-    maxLaps = document.getElementById('typeCourse').value === '3x400m' ? 3 : 1;
-
-    grid.innerHTML = "";
-    for(let i=0; i<6; i++) {
-        studentData[i] = { state:'IDLE', startTime:0, sessionStart:null, laps:[], sauts:[], lancers:[], bpm:"", rpe:"" };
-        grid.innerHTML += `
-            <div class="card">
-                <div class="total-session-time" id="total-${i}">Chrono épreuve: 00:00</div>
-                <select id="sel-${i}" onchange="updateProfile(${i})">
-                    <option value="">-- Choisir Elève --</option>
-                    ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
-                </select>
-                <div id="prof-${i}" style="font-size:0.7rem; color:var(--warning); height:12px; margin-bottom:5px;"></div>
-                <div id="chrono-${i}" class="local-chrono state-idle">00:00.0</div>
-                <div class="results-row">${Array.from({length:maxLaps}).map((_,l)=>`<div class="res-box"><small>C${l+1}</small><b id="lap-${i}-${l}">--</b></div>`).join('')}</div>
-                <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">DÉPART</button>
-                
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
-                    <div class="${config.includes('S')?'':'hidden'}">
-                        <label>Sauts (m)</label>
-                        <div style="display:flex; gap:5px">
-                            <input type="number" id="in-s-${i}" step="0.01" class="perf-input">
-                            <button onclick="addPerf(${i},'s')" style="background:var(--accent); padding:10px">+</button>
-                        </div>
-                        <div id="list-s-${i}" class="perf-list"></div>
-                    </div>
-                    <div class="${config.includes('L')?'':'hidden'}">
-                        <label>${engin} (m)</label>
-                        <div style="display:flex; gap:5px">
-                            <input type="number" id="in-l-${i}" step="0.01" class="perf-input">
-                            <button onclick="addPerf(${i},'l')" style="background:var(--accent); padding:10px">+</button>
-                        </div>
-                        <div id="list-l-${i}" class="perf-list"></div>
-                    </div>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
-                    <div><label>BPM</label><input type="number" onchange="studentData[${i}].bpm=this.value" class="perf-input" style="width:100%"></div>
-                    <div><label>RPE</label><input type="number" onchange="studentData[${i}].rpe=this.value" class="perf-input" style="width:100%"></div>
-                </div>
-            </div>`;
+    
+    // ÉTAPE 2 : CLASSE
+    if (stepNumber === 2 && cycle) {
+        const classeSelect = document.getElementById('classe');
+        classeSelect.innerHTML = '<option value="">-- Sélectionner --</option>';
+        if (cycle === 'C3') {
+            classeSelect.innerHTML += '<option value="6ème">6ème</option>';
+        }
+        document.getElementById('step2').classList.add('visible');
+    }
+    
+    // ÉTAPE 3 : ATELIERS
+    if (stepNumber === 3 && document.getElementById('classe').value) {
+        document.getElementById('step3').classList.add('visible');
+    }
+    
+    // ÉTAPE 4 : ÉPREUVE
+    if (stepNumber === 4 && config) {
+        document.getElementById('step4').classList.add('visible');
+    }
+    
+    // ÉTAPE 5 : RÉCUPÉRATION
+    if (stepNumber === 5 && document.getElementById('typeCourse').value) {
+        document.getElementById('step5').classList.add('visible');
+    }
+    
+    // ÉTAPE 6 : IMPORT
+    if (stepNumber === 6) {
+        document.getElementById('step6').classList.add('visible');
     }
 }
 
-function updateProfile(i) {
-    const s = allStudents.find(x => x['Nom Prénom'] === document.getElementById(`sel-${i}`).value);
-    document.getElementById(`prof-${i}`).innerText = s ? `${s.Sexe} | ${s.Age} ans` : "";
+// ============================================================================
+// IMPORT EXCEL
+// ============================================================================
+document.getElementById('importExcel').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        try {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            allStudents = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (allStudents.length === 0) {
+                alert('❌ Le fichier Excel est vide ou mal formaté.');
+                return;
+            }
+            
+            // Vérifier les colonnes requises
+            const firstStudent = allStudents[0];
+            if (!firstStudent['Nom Prénom'] || !firstStudent['VMA']) {
+                alert('❌ Le fichier doit contenir les colonnes : "Nom Prénom", "Sexe", "VMA"');
+                allStudents = [];
+                return;
+            }
+            
+            alert(`✅ ${allStudents.length} élève(s) importé(s) avec succès !`);
+        } catch (error) {
+            alert('❌ Erreur lors de la lecture du fichier : ' + error.message);
+            allStudents = [];
+        }
+    };
+    reader.readAsBinaryString(file);
+};
+
+// ============================================================================
+// LANCEMENT DU TERRAIN
+// ============================================================================
+function launchTerrain() {
+    if (allStudents.length === 0) {
+        alert('⚠️ Veuillez d\'abord importer un fichier Excel avec la liste des élèves.');
+        return;
+    }
+    
+    // Sauvegarder la configuration
+    sessionConfig.cycle = document.getElementById('cycle').value;
+    sessionConfig.classe = document.getElementById('classe').value;
+    sessionConfig.ateliers = document.getElementById('configAteliers').value;
+    sessionConfig.epreuve = document.getElementById('typeCourse').value;
+    sessionConfig.recup = parseInt(document.getElementById('tempsRecup').value);
+    
+    maxLaps = sessionConfig.epreuve === '3x400m' ? 3 : 1;
+    
+    // Afficher les infos de session
+    document.getElementById('info-classe').textContent = sessionConfig.classe;
+    document.getElementById('info-epreuve').textContent = sessionConfig.epreuve;
+    document.getElementById('info-ateliers').textContent = sessionConfig.ateliers;
+    
+    // Basculer vers le terrain
+    document.getElementById('screen1').classList.add('hidden');
+    document.getElementById('screen2').classList.remove('hidden');
+    
+    // Générer les 6 cartes élèves
+    generateStudentCards();
 }
 
+// ============================================================================
+// GÉNÉRATION DES CARTES ÉLÈVES
+// ============================================================================
+function generateStudentCards() {
+    const grid = document.getElementById('grid');
+    const config = sessionConfig.ateliers;
+    grid.innerHTML = '';
+    
+    for (let i = 0; i < 6; i++) {
+        // Initialiser les données de l'élève
+        studentData[i] = {
+            state: 'IDLE',
+            startTime: 0,
+            sessionStart: null,
+            totalInterval: null,
+            interval: null,
+            laps: [],
+            sauts: [],
+            lancers: [],
+            bpm: '',
+            rpe: '',
+            selectedStudent: null
+        };
+        
+        // Créer la carte
+        const card = document.createElement('div');
+        card.className = 'student-card';
+        card.innerHTML = `
+            <div class="card-number">${i + 1}</div>
+            
+            <div class="total-session-time" id="total-${i}">
+                ⏱️ Chrono épreuve: 00:00
+            </div>
+            
+            <select class="student-select" id="sel-${i}" onchange="updateProfile(${i})">
+                <option value="">-- Choisir Élève --</option>
+                ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
+            </select>
+            
+            <div class="student-info" id="prof-${i}"></div>
+            
+            <div id="chrono-${i}" class="local-chrono state-idle">00:00.0</div>
+            
+            <div class="results-row">
+                ${Array.from({length: maxLaps}, (_, l) => `
+                    <div class="res-box">
+                        <small>TOUR ${l + 1}</small>
+                        <b id="lap-${i}-${l}">--:--</b>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">
+                🏁 DÉPART
+            </button>
+            
+            <!-- ATELIERS -->
+            <div class="ateliers-grid">
+                <div class="atelier-box ${config.includes('S') ? '' : 'hidden'}">
+                    <label>🦘 Saut en Longueur (m)</label>
+                    <div class="perf-input-group">
+                        <input type="number" id="in-s-${i}" step="0.01" class="perf-input" placeholder="ex: 3.45">
+                        <button class="btn-add" onclick="addPerf(${i}, 's')">+</button>
+                    </div>
+                    <div id="list-s-${i}" class="perf-list"></div>
+                </div>
+                
+                <div class="atelier-box ${config.includes('L') ? '' : 'hidden'}">
+                    <label>🎯 Lancer de Vortex (m)</label>
+                    <div class="perf-input-group">
+                        <input type="number" id="in-l-${i}" step="0.01" class="perf-input" placeholder="ex: 22.5">
+                        <button class="btn-add" onclick="addPerf(${i}, 'l')">+</button>
+                    </div>
+                    <div id="list-l-${i}" class="perf-list"></div>
+                </div>
+            </div>
+            
+            <!-- PHYSIOLOGIE -->
+            <div class="physio-grid">
+                <div class="physio-box">
+                    <label>💓 BPM</label>
+                    <input type="number" class="physio-input" placeholder="ex: 165" 
+                           onchange="studentData[${i}].bpm = this.value">
+                </div>
+                <div class="physio-box">
+                    <label>😓 RPE (/10)</label>
+                    <input type="number" class="physio-input" placeholder="ex: 7" min="0" max="10"
+                           onchange="studentData[${i}].rpe = this.value">
+                </div>
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    }
+}
+
+// ============================================================================
+// MISE À JOUR PROFIL ÉLÈVE
+// ============================================================================
+function updateProfile(i) {
+    const selectedName = document.getElementById(`sel-${i}`).value;
+    if (!selectedName) {
+        document.getElementById(`prof-${i}`).innerHTML = '';
+        studentData[i].selectedStudent = null;
+        return;
+    }
+    
+    const student = allStudents.find(s => s['Nom Prénom'] === selectedName);
+    if (student) {
+        studentData[i].selectedStudent = student;
+        const sexe = student.Sexe || '?';
+        const vma = student.VMA || '?';
+        document.getElementById(`prof-${i}`).innerHTML = 
+            `<strong>${sexe}</strong> | VMA: <strong>${vma} km/h</strong>`;
+    }
+}
+
+// ============================================================================
+// AJOUT DE PERFORMANCE (SAUT/LANCER)
+// ============================================================================
 function addPerf(i, type) {
     const input = document.getElementById(`in-${type}-${i}`);
     const val = parseFloat(input.value);
-    if(val && val > 0) {
-        if(type==='s') studentData[i].sauts.push(val);
-        else studentData[i].lancers.push(val);
-        document.getElementById(`list-${type}-${i}`).innerText = (type==='s' ? studentData[i].sauts : studentData[i].lancers).join('m | ') + "m";
-        input.value = "";
+    
+    if (!val || val <= 0) {
+        alert('⚠️ Veuillez entrer une valeur valide.');
+        return;
     }
+    
+    if (type === 's') {
+        studentData[i].sauts.push(val);
+        document.getElementById(`list-s-${i}`).textContent = 
+            studentData[i].sauts.map(v => v.toFixed(2) + 'm').join(' | ');
+    } else {
+        studentData[i].lancers.push(val);
+        document.getElementById(`list-l-${i}`).textContent = 
+            studentData[i].lancers.map(v => v.toFixed(2) + 'm').join(' | ');
+    }
+    
+    input.value = '';
 }
 
+// ============================================================================
+// GESTION DU CHRONOMÈTRE
+// ============================================================================
 function handleChrono(i) {
-    let s = studentData[i];
-    let btn = document.getElementById(`btn-${i}`);
-    let display = document.getElementById(`chrono-${i}`);
-
-    if(s.state === 'IDLE') {
-        if(s.sessionStart === null) {
+    const s = studentData[i];
+    const btn = document.getElementById(`btn-${i}`);
+    const display = document.getElementById(`chrono-${i}`);
+    
+    // DÉPART
+    if (s.state === 'IDLE') {
+        // Démarrer le chrono global de la session (si pas déjà démarré)
+        if (s.sessionStart === null) {
             s.sessionStart = Date.now();
             s.totalInterval = setInterval(() => {
-                document.getElementById(`total-${i}`).innerText = "Chrono épreuve: " + formatTotal(Date.now() - s.sessionStart);
+                const elapsed = Date.now() - s.sessionStart;
+                document.getElementById(`total-${i}`).textContent = 
+                    `⏱️ Chrono épreuve: ${formatTotal(elapsed)}`;
             }, 1000);
         }
-        s.state = 'RUNNING'; s.startTime = Date.now();
-        btn.innerText = "ARRIVÉE"; btn.className = "btn-action stop";
-        display.className = "local-chrono state-run";
-        s.interval = setInterval(() => { display.innerText = formatTime(Date.now() - s.startTime); }, 100);
-    } else if(s.state === 'RUNNING') {
-        clearInterval(s.interval);
-        let elapsed = Date.now() - s.startTime;
-        s.laps.push(elapsed);
-        document.getElementById(`lap-${i}-${s.laps.length-1}`).innerText = formatTime(elapsed);
         
-        if(s.laps.length >= maxLaps) {
-            s.state = 'FINISHED'; btn.innerText = "TERMINÉ"; btn.className = "btn-action wait";
-            display.className = "local-chrono state-idle"; display.innerText = "FINI";
+        s.state = 'RUNNING';
+        s.startTime = Date.now();
+        btn.innerHTML = '🏁 ARRIVÉE';
+        btn.className = 'btn-action stop';
+        display.className = 'local-chrono state-run';
+        
+        // Mise à jour du chrono
+        s.interval = setInterval(() => {
+            const elapsed = Date.now() - s.startTime;
+            display.textContent = formatTime(elapsed);
+        }, 100);
+    }
+    // ARRIVÉE
+    else if (s.state === 'RUNNING') {
+        clearInterval(s.interval);
+        const elapsed = Date.now() - s.startTime;
+        s.laps.push(elapsed);
+        
+        // Afficher le temps du tour
+        const lapIndex = s.laps.length - 1;
+        document.getElementById(`lap-${i}-${lapIndex}`).textContent = formatTime(elapsed);
+        
+        // Vérifier si c'est le dernier tour
+        if (s.laps.length >= maxLaps) {
+            s.state = 'FINISHED';
+            btn.innerHTML = '✅ TERMINÉ';
+            btn.className = 'btn-action finished';
+            display.className = 'local-chrono state-idle';
+            display.textContent = 'FINI';
             clearInterval(s.totalInterval);
         } else {
+            // Passer en mode récupération
             s.state = 'RECUP';
-            let target = Date.now() + (parseInt(document.getElementById('tempsRecup').value) * 1000);
-            display.className = "local-chrono state-recup";
+            const targetTime = Date.now() + (sessionConfig.recup * 1000);
+            display.className = 'local-chrono state-recup';
+            btn.className = 'btn-action wait';
+            
             s.interval = setInterval(() => {
-                let diff = Math.ceil((target - Date.now()) / 1000);
-                display.innerText = diff + "s";
-                btn.innerText = "REPOS..."; btn.className = "btn-action wait";
-                if(diff <= 0) {
-                    clearInterval(s.interval); s.state = 'IDLE';
-                    btn.innerText = "DÉPART C" + (s.laps.length + 1); btn.className = "btn-action start";
-                    display.className = "local-chrono state-idle"; display.innerText = "PRÊT";
+                const remaining = Math.ceil((targetTime - Date.now()) / 1000);
+                display.textContent = remaining + 's';
+                btn.innerHTML = '⏸️ REPOS...';
+                
+                if (remaining <= 0) {
+                    clearInterval(s.interval);
+                    s.state = 'IDLE';
+                    btn.innerHTML = `🏁 DÉPART TOUR ${s.laps.length + 1}`;
+                    btn.className = 'btn-action start';
+                    display.className = 'local-chrono state-idle';
+                    display.textContent = 'PRÊT';
                 }
             }, 500);
         }
     }
 }
 
-function exportBilan() {
-    let report = [];
-    for(let i=0; i<6; i++) {
-        let name = document.getElementById(`sel-${i}`).value;
-        if(!name) continue;
-        let s = studentData[i];
-        let row = {
-            "Nom Prénom": name,
-            "BPM": s.bpm,
-            "RPE": s.rpe,
-            "C1": s.laps[0] ? formatTime(s.laps[0]) : "--",
-            "C2": s.laps[1] ? formatTime(s.laps[1]) : "--",
-            "C3": s.laps[2] ? formatTime(s.laps[2]) : "--",
-            "Meilleur Saut (m)": s.sauts.length ? Math.max(...s.sauts) : "--",
-            "Meilleur Lancer (m)": s.lancers.length ? Math.max(...s.lancers) : "--"
+// ============================================================================
+// CALCUL DES NOTES
+// ============================================================================
+function calculateNote(i) {
+    const s = studentData[i];
+    const config = sessionConfig.ateliers;
+    
+    if (!s.selectedStudent) {
+        return {
+            nomPrenom: '',
+            vma: 0,
+            moyenneCourse: '--',
+            pourcentVMA: 0,
+            niveauCourse: '--',
+            noteCourse: 0,
+            meilleureAtelier: '--',
+            noteAtelier: 0,
+            noteFinale: 0
         };
-        report.push(row);
     }
-    const ws = XLSX.utils.json_to_sheet(report);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Bilan EPS");
-    XLSX.writeFile(wb, "Bilan_Session_EPS.xlsx");
+    
+    const vma = parseFloat(s.selectedStudent.VMA) || 0;
+    const nomPrenom = s.selectedStudent['Nom Prénom'];
+    
+    // ===== CALCUL COURSE =====
+    let moyenneCourse = '--';
+    let pourcentVMA = 0;
+    let niveauCourse = '--';
+    let noteCourse = 0;
+    
+    if (s.laps.length > 0) {
+        // Calculer la moyenne des temps (en secondes)
+        const totalMs = s.laps.reduce((acc, lap) => acc + lap, 0);
+        const moyenneMs = totalMs / s.laps.length;
+        const moyenneSec = moyenneMs / 1000;
+        moyenneCourse = formatTime(moyenneMs);
+        
+        // Calculer la vitesse moyenne (km/h)
+        // Distance d'un tour = 400m = 0.4 km
+        const vitesseMoyenne = (0.4 / (moyenneSec / 3600)); // km/h
+        
+        // Calculer le % de VMA
+        if (vma > 0) {
+            pourcentVMA = (vitesseMoyenne / vma) * 100;
+            
+            // Déterminer le niveau et la note
+            const baremes = getBaremeCourse(config);
+            
+            if (pourcentVMA < 90) {
+                niveauCourse = 'Niveau 1';
+                noteCourse = baremes.niveau1;
+            } else if (pourcentVMA >= 90 && pourcentVMA < 100) {
+                niveauCourse = 'Niveau 2';
+                noteCourse = baremes.niveau2;
+            } else if (pourcentVMA >= 100 && pourcentVMA <= 110) {
+                niveauCourse = 'Niveau 3';
+                noteCourse = baremes.niveau3;
+            } else {
+                niveauCourse = 'Niveau 4';
+                noteCourse = baremes.niveau4;
+            }
+        }
+    }
+    
+    // ===== CALCUL ATELIERS =====
+    let meilleureAtelier = '--';
+    let noteAtelier = 0;
+    
+    if (config.includes('S') && s.sauts.length > 0) {
+        const meilleurSaut = Math.max(...s.sauts);
+        meilleureAtelier = `Saut: ${meilleurSaut.toFixed(2)}m`;
+        noteAtelier = getNoteSaut(meilleurSaut, config);
+    }
+    
+    if (config.includes('L') && s.lancers.length > 0) {
+        const meilleurLancer = Math.max(...s.lancers);
+        if (meilleureAtelier !== '--') {
+            meilleureAtelier += ` | Lancer: ${meilleurLancer.toFixed(2)}m`;
+            noteAtelier = (noteAtelier + getNoteLancer(meilleurLancer, config)) / 2;
+        } else {
+            meilleureAtelier = `Lancer: ${meilleurLancer.toFixed(2)}m`;
+            noteAtelier = getNoteLancer(meilleurLancer, config);
+        }
+    }
+    
+    // Note finale
+    const noteFinale = noteCourse + noteAtelier;
+    
+    return {
+        nomPrenom,
+        vma: vma.toFixed(2),
+        moyenneCourse,
+        pourcentVMA: pourcentVMA.toFixed(1),
+        niveauCourse,
+        noteCourse: noteCourse.toFixed(2),
+        meilleureAtelier,
+        noteAtelier: noteAtelier.toFixed(2),
+        noteFinale: noteFinale.toFixed(2)
+    };
 }
 
-function formatTime(ms) {
-    let s = Math.floor(ms/1000);
-    return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
+// ============================================================================
+// BARÈMES
+// ============================================================================
+function getBaremeCourse(config) {
+    // CSL = 3 ateliers : Course sur /2
+    // CS ou CL = 2 ateliers : Course sur /3
+    if (config === 'CSL') {
+        return {
+            niveau1: 0.25,
+            niveau2: 0.75,
+            niveau3: 1.50,
+            niveau4: 2.00
+        };
+    } else {
+        return {
+            niveau1: 0.25,
+            niveau2: 1.25,
+            niveau3: 2.25,
+            niveau4: 3.00
+        };
+    }
 }
+
+function getNoteSaut(distance, config) {
+    const maxPoints = config === 'CSL' ? 2 : 3;
+    
+    if (distance >= 4) return maxPoints; // Max
+    if (distance >= 3 && distance < 4) return maxPoints * 0.67; // Satisfaisant
+    if (distance >= 2 && distance < 3) return maxPoints * 0.33; // Fragile
+    return 0.25; // Minimum
+}
+
+function getNoteLancer(distance, config) {
+    const maxPoints = config === 'CSL' ? 2 : 3;
+    
+    if (distance >= 25) return maxPoints; // Max
+    if (distance >= 18 && distance < 25) return maxPoints * 0.67; // Satisfaisant
+    if (distance >= 12 && distance < 18) return maxPoints * 0.33; // Fragile
+    return 0.25; // Minimum
+}
+
+// ============================================================================
+// EXPORT EXCEL
+// ============================================================================
+function exportBilan() {
+    const report = [];
+    
+    for (let i = 0; i < 6; i++) {
+        const selectedName = document.getElementById(`sel-${i}`).value;
+        if (!selectedName) continue;
+        
+        const note = calculateNote(i);
+        const s = studentData[i];
+        
+        report.push({
+            'Nom Prénom': note.nomPrenom,
+            'VMA (km/h)': note.vma,
+            'Moyenne Course': note.moyenneCourse,
+            '% VMA': note.pourcentVMA + '%',
+            'Niveau Compétence': note.niveauCourse,
+            'Note Course': note.noteCourse,
+            'Meilleure Perf Atelier': note.meilleureAtelier,
+            'Note Atelier': note.noteAtelier,
+            'NOTE FINALE /6': note.noteFinale,
+            'BPM': s.bpm || '--',
+            'RPE': s.rpe || '--'
+        });
+    }
+    
+    if (report.length === 0) {
+        alert('⚠️ Aucun élève n\'a été évalué. Impossible de générer le bilan.');
+        return;
+    }
+    
+    // Créer le fichier Excel
+    const ws = XLSX.utils.json_to_sheet(report);
+    
+    // Largeur des colonnes
+    ws['!cols'] = [
+        { wch: 20 }, // Nom Prénom
+        { wch: 10 }, // VMA
+        { wch: 15 }, // Moyenne Course
+        { wch: 10 }, // % VMA
+        { wch: 18 }, // Niveau
+        { wch: 12 }, // Note Course
+        { wch: 25 }, // Meilleure Perf
+        { wch: 12 }, // Note Atelier
+        { wch: 15 }, // Note Finale
+        { wch: 8 },  // BPM
+        { wch: 8 }   // RPE
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Bilan EPS');
+    
+    const filename = `Bilan_EPS_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR')}.xlsx`;
+    XLSX.writeFile(wb, filename);
+    
+    alert(`✅ Bilan généré avec succès !\n📄 Fichier : ${filename}`);
+}
+
+// ============================================================================
+// FORMATAGE DU TEMPS
+// ============================================================================
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const deciseconds = Math.floor((ms % 1000) / 100);
+    
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${deciseconds}`;
+}
+
 function formatTotal(ms) {
-    let s = Math.floor(ms/1000);
-    return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 </script>
+
 </body>
 </html>

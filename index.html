@@ -167,7 +167,7 @@
         .card-number {
             position: absolute;
             top: 10px;
-            right: 15px;
+            left: 15px;
             background: var(--accent);
             color: black;
             width: 35px;
@@ -178,6 +178,7 @@
             justify-content: center;
             font-weight: 900;
             font-size: 1.2rem;
+            z-index: 10;
         }
         
         .total-session-time {
@@ -479,7 +480,7 @@
             <div id="step6" class="step">
                 <label>6️⃣ Importer la Liste des Élèves</label>
                 <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 10px;">
-                    Le fichier Excel doit contenir : <strong>Nom Prénom</strong>, <strong>Sexe</strong>, <strong>VMA</strong>
+                    Le fichier Excel doit contenir : <strong>Nom Prénom</strong>, <strong>Sexe</strong> (F ou M), <strong>VMA</strong> (km/h)
                 </p>
                 <input type="file" id="importExcel" accept=".xlsx, .xls">
                 <button class="btn-action btn-primary mt-2" onclick="launchTerrain()">
@@ -508,7 +509,8 @@
     <div class="export-area">
         <h3>📊 Fin de Séance</h3>
         <p style="margin-bottom: 20px; color: #ccc;">
-            Génère un bilan Excel complet avec les notes calculées automatiquement
+            Génère un bilan Excel complet avec <strong>notation HYBRIDE</strong><br>
+            📌 Note Course = <strong>50% Barème officiel + 50% % VMA exploitée</strong>
         </p>
         <button class="btn-export" onclick="exportBilan()">
             💾 GÉNÉRER LE BILAN EXCEL
@@ -598,8 +600,8 @@ document.getElementById('importExcel').onchange = (e) => {
             
             // Vérifier les colonnes requises
             const firstStudent = allStudents[0];
-            if (!firstStudent['Nom Prénom'] || !firstStudent['VMA']) {
-                alert('❌ Le fichier doit contenir les colonnes : "Nom Prénom", "Sexe", "VMA"');
+            if (!firstStudent['Nom Prénom'] || !firstStudent['Sexe'] || !firstStudent['VMA']) {
+                alert('❌ Le fichier doit contenir les colonnes : "Nom Prénom", "Sexe" (F/M) et "VMA" (km/h)');
                 allStudents = [];
                 return;
             }
@@ -712,9 +714,9 @@ function generateStudentCards() {
                 </div>
                 
                 <div class="atelier-box ${config.includes('L') ? '' : 'hidden'}">
-                    <label>🎯 Lancer de Vortex (m)</label>
+                    <label>🎯 Lancer de Poids 1kg (m)</label>
                     <div class="perf-input-group">
-                        <input type="number" id="in-l-${i}" step="0.01" class="perf-input" placeholder="ex: 22.5">
+                        <input type="number" id="in-l-${i}" step="0.01" class="perf-input" placeholder="ex: 8.5">
                         <button class="btn-add" onclick="addPerf(${i}, 'l')">+</button>
                     </div>
                     <div id="list-l-${i}" class="perf-list"></div>
@@ -756,8 +758,9 @@ function updateProfile(i) {
         studentData[i].selectedStudent = student;
         const sexe = student.Sexe || '?';
         const vma = student.VMA || '?';
+        const sexeLabel = (sexe === 'F' || sexe === 'f') ? '👧 F' : '🧑 M';
         document.getElementById(`prof-${i}`).innerHTML = 
-            `<strong>${sexe}</strong> | VMA: <strong>${vma} km/h</strong>`;
+            `<strong>${sexeLabel}</strong> | VMA: <strong>${vma} km/h</strong>`;
     }
 }
 
@@ -862,7 +865,7 @@ function handleChrono(i) {
 }
 
 // ============================================================================
-// CALCUL DES NOTES
+// CALCUL DES NOTES - VERSION HYBRIDE 50% BARÈME + 50% VMA
 // ============================================================================
 function calculateNote(i) {
     const s = studentData[i];
@@ -871,78 +874,101 @@ function calculateNote(i) {
     if (!s.selectedStudent) {
         return {
             nomPrenom: '',
-            vma: 0,
+            sexe: '',
+            vma: '--',
             moyenneCourse: '--',
-            pourcentVMA: 0,
-            niveauCourse: '--',
+            tempsTotal: '--',
+            pourcentVMA: '--',
+            niveauBareme: '--',
+            noteBareme: 0,
+            niveauVMA: '--',
+            noteVMA: 0,
             noteCourse: 0,
             meilleureAtelier: '--',
+            niveauAtelier: '--',
             noteAtelier: 0,
             noteFinale: 0
         };
     }
     
-    const vma = parseFloat(s.selectedStudent.VMA) || 0;
     const nomPrenom = s.selectedStudent['Nom Prénom'];
+    const sexe = s.selectedStudent.Sexe || 'M';
+    const vma = parseFloat(s.selectedStudent.VMA) || 0;
     
-    // ===== CALCUL COURSE =====
+    // ===== CALCUL COURSE (3x400m) - VERSION HYBRIDE =====
     let moyenneCourse = '--';
-    let pourcentVMA = 0;
-    let niveauCourse = '--';
+    let tempsTotal = '--';
+    let pourcentVMA = '--';
+    let niveauBareme = '--';
+    let noteBareme = 0;
+    let niveauVMA = '--';
+    let noteVMA = 0;
     let noteCourse = 0;
     
-    if (s.laps.length > 0) {
-        // Calculer la moyenne des temps (en secondes)
+    if (s.laps.length === 3) {
+        // Calculer le temps TOTAL des 3 tours (en secondes)
         const totalMs = s.laps.reduce((acc, lap) => acc + lap, 0);
-        const moyenneMs = totalMs / s.laps.length;
-        const moyenneSec = moyenneMs / 1000;
+        const totalSec = totalMs / 1000;
+        tempsTotal = formatTotal(totalMs);
+        
+        // Moyenne par tour
+        const moyenneMs = totalMs / 3;
         moyenneCourse = formatTime(moyenneMs);
         
-        // Calculer la vitesse moyenne (km/h)
-        // Distance d'un tour = 400m = 0.4 km
-        const vitesseMoyenne = (0.4 / (moyenneSec / 3600)); // km/h
+        // 1️⃣ NOTE BARÈME (50%)
+        const resultatBareme = getNoteCourse(totalSec, sexe, config);
+        niveauBareme = resultatBareme.niveau;
+        noteBareme = resultatBareme.note;
         
-        // Calculer le % de VMA
+        // 2️⃣ NOTE VMA (50%)
         if (vma > 0) {
-            pourcentVMA = (vitesseMoyenne / vma) * 100;
+            // Calculer la vitesse moyenne sur un tour de 400m
+            const moyenneSec = moyenneMs / 1000;
+            const vitesseMoyenne = (0.4 / (moyenneSec / 3600)); // km/h
+            const pourcentVMAValue = (vitesseMoyenne / vma) * 100;
+            pourcentVMA = pourcentVMAValue.toFixed(1) + '%';
             
-            // Déterminer le niveau et la note
-            const baremes = getBaremeCourse(config);
+            // Appliquer le barème % VMA
+            const resultatVMA = getNoteVMA(pourcentVMAValue, config);
+            niveauVMA = resultatVMA.niveau;
+            noteVMA = resultatVMA.note;
             
-            if (pourcentVMA < 90) {
-                niveauCourse = 'Niveau 1';
-                noteCourse = baremes.niveau1;
-            } else if (pourcentVMA >= 90 && pourcentVMA < 100) {
-                niveauCourse = 'Niveau 2';
-                noteCourse = baremes.niveau2;
-            } else if (pourcentVMA >= 100 && pourcentVMA <= 110) {
-                niveauCourse = 'Niveau 3';
-                noteCourse = baremes.niveau3;
-            } else {
-                niveauCourse = 'Niveau 4';
-                noteCourse = baremes.niveau4;
-            }
+            // 🎯 NOTE FINALE COURSE = MOYENNE 50/50
+            noteCourse = (noteBareme + noteVMA) / 2;
+        } else {
+            // Pas de VMA renseignée → on garde 100% barème
+            noteCourse = noteBareme;
+            niveauVMA = 'VMA non renseignée';
+            pourcentVMA = '--';
         }
     }
     
-    // ===== CALCUL ATELIERS =====
+    // ===== CALCUL ATELIERS (inchangé) =====
     let meilleureAtelier = '--';
+    let niveauAtelier = '--';
     let noteAtelier = 0;
     
     if (config.includes('S') && s.sauts.length > 0) {
         const meilleurSaut = Math.max(...s.sauts);
+        const resultatSaut = getNoteSaut(meilleurSaut, sexe, config);
         meilleureAtelier = `Saut: ${meilleurSaut.toFixed(2)}m`;
-        noteAtelier = getNoteSaut(meilleurSaut, config);
+        niveauAtelier = resultatSaut.niveau;
+        noteAtelier = resultatSaut.note;
     }
     
     if (config.includes('L') && s.lancers.length > 0) {
         const meilleurLancer = Math.max(...s.lancers);
+        const resultatLancer = getNoteLancer(meilleurLancer, sexe, config);
+        
         if (meilleureAtelier !== '--') {
+            // CSL : moyenne des deux ateliers
             meilleureAtelier += ` | Lancer: ${meilleurLancer.toFixed(2)}m`;
-            noteAtelier = (noteAtelier + getNoteLancer(meilleurLancer, config)) / 2;
+            niveauAtelier += ` | ${resultatLancer.niveau}`;
+            noteAtelier = (noteAtelier + resultatLancer.note) / 2;
         } else {
             meilleureAtelier = `Lancer: ${meilleurLancer.toFixed(2)}m`;
-            noteAtelier = getNoteLancer(meilleurLancer, config);
+            niveauAtelier = resultatLancer.niveau;
+            noteAtelier = resultatLancer.note;
         }
     }
     
@@ -951,60 +977,225 @@ function calculateNote(i) {
     
     return {
         nomPrenom,
-        vma: vma.toFixed(2),
+        sexe,
+        vma: vma > 0 ? vma.toFixed(1) : '--',
         moyenneCourse,
-        pourcentVMA: pourcentVMA.toFixed(1),
-        niveauCourse,
+        tempsTotal,
+        pourcentVMA,
+        niveauBareme,
+        noteBareme: noteBareme.toFixed(2),
+        niveauVMA,
+        noteVMA: noteVMA.toFixed(2),
         noteCourse: noteCourse.toFixed(2),
         meilleureAtelier,
+        niveauAtelier,
         noteAtelier: noteAtelier.toFixed(2),
         noteFinale: noteFinale.toFixed(2)
     };
 }
 
 // ============================================================================
-// BARÈMES
+// BARÈMES OFFICIELS CYCLE 3 (6ème)
 // ============================================================================
-function getBaremeCourse(config) {
-    // CSL = 3 ateliers : Course sur /2
-    // CS ou CL = 2 ateliers : Course sur /3
-    if (config === 'CSL') {
-        return {
-            niveau1: 0.25,
-            niveau2: 0.75,
-            niveau3: 1.50,
-            niveau4: 2.00
-        };
+
+/**
+ * Barème Course 3x400m
+ * @param {number} totalSec - Temps total en secondes
+ * @param {string} sexe - 'F' ou 'M'
+ * @param {string} config - 'CS', 'CL', ou 'CSL'
+ * @returns {object} {niveau: string, note: number}
+ */
+function getNoteCourse(totalSec, sexe, config) {
+    const isFemale = (sexe === 'F' || sexe === 'f');
+    const maxNote = (config === 'CSL') ? 2 : 3;
+    
+    // Conversion de la note /5 vers /2 ou /3
+    const convertNote = (noteBase5) => {
+        return (noteBase5 / 5) * maxNote;
+    };
+    
+    // Barèmes en secondes
+    let baremes;
+    if (isFemale) {
+        baremes = [
+            { max: 330, niveau: 'Niveau 8 (Très bon +)', note: 5 },      // ≤ 5'30
+            { max: 345, niveau: 'Niveau 7 (Très bon -)', note: 4 },      // 5'31-5'45
+            { max: 365, niveau: 'Niveau 6 (Satisfaisant +)', note: 3.5 }, // 5'46-6'05
+            { max: 385, niveau: 'Niveau 5 (Satisfaisant -)', note: 3 },   // 6'06-6'25
+            { max: 405, niveau: 'Niveau 4 (Fragile +)', note: 2.5 },      // 6'26-6'45
+            { max: 425, niveau: 'Niveau 3 (Fragile -)', note: 2 },        // 6'46-7'05
+            { max: 445, niveau: 'Niveau 2 (Insuffisant +)', note: 1.5 },  // 7'06-7'25
+            { max: Infinity, niveau: 'Niveau 1 (Insuffisant -)', note: 1 } // ≥ 7'26
+        ];
     } else {
-        return {
-            niveau1: 0.25,
-            niveau2: 1.25,
-            niveau3: 2.25,
-            niveau4: 3.00
-        };
+        baremes = [
+            { max: 300, niveau: 'Niveau 8 (Très bon +)', note: 5 },      // ≤ 5'00
+            { max: 315, niveau: 'Niveau 7 (Très bon -)', note: 4 },      // 5'01-5'15
+            { max: 335, niveau: 'Niveau 6 (Satisfaisant +)', note: 3.5 }, // 5'16-5'35
+            { max: 355, niveau: 'Niveau 5 (Satisfaisant -)', note: 3 },   // 5'36-5'55
+            { max: 375, niveau: 'Niveau 4 (Fragile +)', note: 2.5 },      // 5'56-6'15
+            { max: 395, niveau: 'Niveau 3 (Fragile -)', note: 2 },        // 6'16-6'35
+            { max: 415, niveau: 'Niveau 2 (Insuffisant +)', note: 1.5 },  // 6'36-6'55
+            { max: Infinity, niveau: 'Niveau 1 (Insuffisant -)', note: 1 } // ≥ 6'56
+        ];
     }
+    
+    for (let i = 0; i < baremes.length; i++) {
+        if (totalSec <= baremes[i].max) {
+            return {
+                niveau: baremes[i].niveau,
+                note: convertNote(baremes[i].note)
+            };
+        }
+    }
+    
+    return { niveau: 'Niveau 1', note: convertNote(1) };
 }
 
-function getNoteSaut(distance, config) {
-    const maxPoints = config === 'CSL' ? 2 : 3;
+/**
+ * Barème % VMA pour la course
+ * @param {number} pourcentVMA - Pourcentage de VMA exploitée
+ * @param {string} config - 'CS', 'CL', ou 'CSL'
+ * @returns {object} {niveau: string, note: number}
+ */
+function getNoteVMA(pourcentVMA, config) {
+    const maxNote = (config === 'CSL') ? 2 : 3;
     
-    if (distance >= 4) return maxPoints; // Max
-    if (distance >= 3 && distance < 4) return maxPoints * 0.67; // Satisfaisant
-    if (distance >= 2 && distance < 3) return maxPoints * 0.33; // Fragile
-    return 0.25; // Minimum
+    // Conversion de la note /5 vers /2 ou /3
+    const convertNote = (noteBase5) => {
+        return (noteBase5 / 5) * maxNote;
+    };
+    
+    // Barème basé sur l'intensité de l'effort (% VMA)
+    const baremes = [
+        { min: 120, niveau: 'Niveau 8 (Très bon + / >120% VMA)', note: 5 },
+        { min: 115, niveau: 'Niveau 7 (Très bon - / 115-120% VMA)', note: 4 },
+        { min: 110, niveau: 'Niveau 6 (Satisfaisant + / 110-115% VMA)', note: 3.5 },
+        { min: 105, niveau: 'Niveau 5 (Satisfaisant - / 105-110% VMA)', note: 3 },
+        { min: 100, niveau: 'Niveau 4 (Fragile + / 100-105% VMA)', note: 2.5 },
+        { min: 95, niveau: 'Niveau 3 (Fragile - / 95-100% VMA)', note: 2 },
+        { min: 90, niveau: 'Niveau 2 (Insuffisant + / 90-95% VMA)', note: 1.5 },
+        { min: 0, niveau: 'Niveau 1 (Insuffisant - / <90% VMA)', note: 1 }
+    ];
+    
+    for (let i = 0; i < baremes.length; i++) {
+        if (pourcentVMA >= baremes[i].min) {
+            return {
+                niveau: baremes[i].niveau,
+                note: convertNote(baremes[i].note)
+            };
+        }
+    }
+    
+    return { niveau: 'Niveau 1', note: convertNote(1) };
 }
 
-function getNoteLancer(distance, config) {
-    const maxPoints = config === 'CSL' ? 2 : 3;
+/**
+ * Barème Saut en Longueur
+ * @param {number} distance - Distance en mètres
+ * @param {string} sexe - 'F' ou 'M'
+ * @param {string} config - 'CS', 'CL', ou 'CSL'
+ * @returns {object} {niveau: string, note: number}
+ */
+function getNoteSaut(distance, sexe, config) {
+    const isFemale = (sexe === 'F' || sexe === 'f');
+    const maxNote = (config === 'CSL') ? 2 : 3;
     
-    if (distance >= 25) return maxPoints; // Max
-    if (distance >= 18 && distance < 25) return maxPoints * 0.67; // Satisfaisant
-    if (distance >= 12 && distance < 18) return maxPoints * 0.33; // Fragile
-    return 0.25; // Minimum
+    const convertNote = (noteBase5) => {
+        return (noteBase5 / 5) * maxNote;
+    };
+    
+    let baremes;
+    if (isFemale) {
+        baremes = [
+            { min: 3.00, niveau: 'Niveau 8 (Très bon +)', note: 5 },
+            { min: 2.80, niveau: 'Niveau 7 (Très bon -)', note: 4 },
+            { min: 2.60, niveau: 'Niveau 6 (Satisfaisant +)', note: 3.5 },
+            { min: 2.40, niveau: 'Niveau 5 (Satisfaisant -)', note: 3 },
+            { min: 2.20, niveau: 'Niveau 4 (Fragile +)', note: 2.5 },
+            { min: 2.00, niveau: 'Niveau 3 (Fragile -)', note: 2 },
+            { min: 1.30, niveau: 'Niveau 2 (Insuffisant +)', note: 1.5 },
+            { min: 0, niveau: 'Niveau 1 (Insuffisant -)', note: 1 }
+        ];
+    } else {
+        baremes = [
+            { min: 3.40, niveau: 'Niveau 8 (Très bon +)', note: 5 },
+            { min: 3.20, niveau: 'Niveau 7 (Très bon -)', note: 4 },
+            { min: 3.00, niveau: 'Niveau 6 (Satisfaisant +)', note: 3.5 },
+            { min: 2.80, niveau: 'Niveau 5 (Satisfaisant -)', note: 3 },
+            { min: 2.60, niveau: 'Niveau 4 (Fragile +)', note: 2.5 },
+            { min: 2.40, niveau: 'Niveau 3 (Fragile -)', note: 2 },
+            { min: 1.50, niveau: 'Niveau 2 (Insuffisant +)', note: 1.5 },
+            { min: 0, niveau: 'Niveau 1 (Insuffisant -)', note: 1 }
+        ];
+    }
+    
+    for (let i = 0; i < baremes.length; i++) {
+        if (distance >= baremes[i].min) {
+            return {
+                niveau: baremes[i].niveau,
+                note: convertNote(baremes[i].note)
+            };
+        }
+    }
+    
+    return { niveau: 'Niveau 1', note: convertNote(1) };
+}
+
+/**
+ * Barème Lancer de Poids 1kg
+ * @param {number} distance - Distance en mètres
+ * @param {string} sexe - 'F' ou 'M'
+ * @param {string} config - 'CS', 'CL', ou 'CSL'
+ * @returns {object} {niveau: string, note: number}
+ */
+function getNoteLancer(distance, sexe, config) {
+    const isFemale = (sexe === 'F' || sexe === 'f');
+    const maxNote = (config === 'CSL') ? 2 : 3;
+    
+    const convertNote = (noteBase5) => {
+        return (noteBase5 / 5) * maxNote;
+    };
+    
+    let baremes;
+    if (isFemale) {
+        baremes = [
+            { min: 8.50, niveau: 'Niveau 8 (Très bon +)', note: 5 },
+            { min: 7.50, niveau: 'Niveau 7 (Très bon -)', note: 4 },
+            { min: 6.50, niveau: 'Niveau 6 (Satisfaisant +)', note: 3.5 },
+            { min: 5.50, niveau: 'Niveau 5 (Satisfaisant -)', note: 3 },
+            { min: 4.80, niveau: 'Niveau 4 (Fragile +)', note: 2.5 },
+            { min: 4.30, niveau: 'Niveau 3 (Fragile -)', note: 2 },
+            { min: 3.90, niveau: 'Niveau 2 (Insuffisant +)', note: 1.5 },
+            { min: 0, niveau: 'Niveau 1 (Insuffisant -)', note: 1 }
+        ];
+    } else {
+        baremes = [
+            { min: 10.00, niveau: 'Niveau 8 (Très bon +)', note: 5 },
+            { min: 9.00, niveau: 'Niveau 7 (Très bon -)', note: 4 },
+            { min: 8.00, niveau: 'Niveau 6 (Satisfaisant +)', note: 3.5 },
+            { min: 7.00, niveau: 'Niveau 5 (Satisfaisant -)', note: 3 },
+            { min: 6.00, niveau: 'Niveau 4 (Fragile +)', note: 2.5 },
+            { min: 5.00, niveau: 'Niveau 3 (Fragile -)', note: 2 },
+            { min: 4.50, niveau: 'Niveau 2 (Insuffisant +)', note: 1.5 },
+            { min: 0, niveau: 'Niveau 1 (Insuffisant -)', note: 1 }
+        ];
+    }
+    
+    for (let i = 0; i < baremes.length; i++) {
+        if (distance >= baremes[i].min) {
+            return {
+                niveau: baremes[i].niveau,
+                note: convertNote(baremes[i].note)
+            };
+        }
+    }
+    
+    return { niveau: 'Niveau 1', note: convertNote(1) };
 }
 
 // ============================================================================
-// EXPORT EXCEL
+// EXPORT EXCEL - VERSION HYBRIDE
 // ============================================================================
 function exportBilan() {
     const report = [];
@@ -1018,12 +1209,18 @@ function exportBilan() {
         
         report.push({
             'Nom Prénom': note.nomPrenom,
+            'Sexe': note.sexe,
             'VMA (km/h)': note.vma,
-            'Moyenne Course': note.moyenneCourse,
-            '% VMA': note.pourcentVMA + '%',
-            'Niveau Compétence': note.niveauCourse,
-            'Note Course': note.noteCourse,
+            'Temps Total 3x400m': note.tempsTotal,
+            'Moyenne par 400m': note.moyenneCourse,
+            '% VMA Exploitée': note.pourcentVMA,
+            'Niveau Barème': note.niveauBareme,
+            'Note Barème': note.noteBareme,
+            'Niveau VMA': note.niveauVMA,
+            'Note VMA': note.noteVMA,
+            'NOTE COURSE (50/50)': note.noteCourse,
             'Meilleure Perf Atelier': note.meilleureAtelier,
+            'Niveau Atelier': note.niveauAtelier,
             'Note Atelier': note.noteAtelier,
             'NOTE FINALE /6': note.noteFinale,
             'BPM': s.bpm || '--',
@@ -1042,12 +1239,18 @@ function exportBilan() {
     // Largeur des colonnes
     ws['!cols'] = [
         { wch: 20 }, // Nom Prénom
-        { wch: 10 }, // VMA
-        { wch: 15 }, // Moyenne Course
-        { wch: 10 }, // % VMA
-        { wch: 18 }, // Niveau
-        { wch: 12 }, // Note Course
-        { wch: 25 }, // Meilleure Perf
+        { wch: 6 },  // Sexe
+        { wch: 12 }, // VMA
+        { wch: 18 }, // Temps Total
+        { wch: 18 }, // Moyenne
+        { wch: 15 }, // % VMA
+        { wch: 28 }, // Niveau Barème
+        { wch: 12 }, // Note Barème
+        { wch: 35 }, // Niveau VMA
+        { wch: 10 }, // Note VMA
+        { wch: 18 }, // Note Course
+        { wch: 30 }, // Meilleure Perf
+        { wch: 28 }, // Niveau Atelier
         { wch: 12 }, // Note Atelier
         { wch: 15 }, // Note Finale
         { wch: 8 },  // BPM
@@ -1057,10 +1260,10 @@ function exportBilan() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Bilan EPS');
     
-    const filename = `Bilan_EPS_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR')}.xlsx`;
+    const filename = `Bilan_EPS_Hybride_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`;
     XLSX.writeFile(wb, filename);
     
-    alert(`✅ Bilan généré avec succès !\n📄 Fichier : ${filename}`);
+    alert(`✅ Bilan généré avec succès !\n📄 Fichier : ${filename}\n\n💡 Note Course = Moyenne (50% Barème + 50% VMA)`);
 }
 
 // ============================================================================

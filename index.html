@@ -386,6 +386,52 @@
         
         .mb-2 { margin-bottom: 15px; }
         
+        /* VMA EN TEMPS RÉEL */
+        .vma-live {
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(0,210,255,0.2), rgba(0,255,136,0.2));
+            border-radius: 15px;
+            border: 2px solid var(--accent);
+            text-align: center;
+        }
+        
+        .vma-percent {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'Courier New', monospace;
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(0,255,136,0.5);
+        }
+        
+        .vma-label {
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 800;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+        
+        /* STATUT ABSENT */
+        .student-card.absent {
+            opacity: 0.5;
+            background: rgba(102,102,102,0.3);
+            border-color: #666;
+        }
+        
+        .student-card.absent::after {
+            content: 'ABSENT';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 3rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.3);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
         /* HEADER TERRAIN */
         .terrain-header {
             display: flex;
@@ -667,7 +713,8 @@ function generateStudentCards() {
             lancers: [],
             bpm: '',
             rpe: '',
-            selectedStudent: null
+            selectedStudent: null,
+            isAbsent: false
         };
         
         // Créer la carte
@@ -701,6 +748,22 @@ function generateStudentCards() {
             <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">
                 🏁 DÉPART
             </button>
+            
+            <!-- BOUTONS GESTION -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <button onclick="markAbsent(${i})" style="background: #666; color: white; padding: 10px; border-radius: 10px; font-size: 0.85rem;">
+                    ❌ ABSENT
+                </button>
+                <button onclick="resetStudent(${i})" style="background: var(--orange); color: white; padding: 10px; border-radius: 10px; font-size: 0.85rem;">
+                    🔄 RESET
+                </button>
+            </div>
+            
+            <!-- INDICATEUR % VMA EN TEMPS RÉEL -->
+            <div id="vma-live-${i}" class="vma-live hidden">
+                <div class="vma-percent">-- %</div>
+                <div class="vma-label">VMA EN TEMPS RÉEL</div>
+            </div>
             
             <!-- ATELIERS -->
             <div class="ateliers-grid">
@@ -796,6 +859,13 @@ function handleChrono(i) {
     const s = studentData[i];
     const btn = document.getElementById(`btn-${i}`);
     const display = document.getElementById(`chrono-${i}`);
+    const vmaLive = document.getElementById(`vma-live-${i}`);
+    
+    // Vérifier si l'élève est absent
+    if (s.isAbsent) {
+        alert('⚠️ Cet élève est marqué comme absent. Cliquez sur RESET pour le réactiver.');
+        return;
+    }
     
     // DÉPART
     if (s.state === 'IDLE') {
@@ -815,10 +885,38 @@ function handleChrono(i) {
         btn.className = 'btn-action stop';
         display.className = 'local-chrono state-run';
         
-        // Mise à jour du chrono
+        // Afficher le % VMA en temps réel si VMA disponible
+        const vma = s.selectedStudent ? parseFloat(s.selectedStudent.VMA) : 0;
+        if (vma > 0) {
+            vmaLive.classList.remove('hidden');
+        }
+        
+        // Mise à jour du chrono + VMA en temps réel
         s.interval = setInterval(() => {
             const elapsed = Date.now() - s.startTime;
             display.textContent = formatTime(elapsed);
+            
+            // Calculer et afficher le % VMA en temps réel
+            if (vma > 0) {
+                const elapsedSec = elapsed / 1000;
+                if (elapsedSec > 5) { // Attendre 5 secondes pour avoir une mesure stable
+                    const vitesseActuelle = (0.4 / (elapsedSec / 3600)); // km/h
+                    const pourcentVMA = (vitesseActuelle / vma) * 100;
+                    const vmaPercent = vmaLive.querySelector('.vma-percent');
+                    vmaPercent.textContent = pourcentVMA.toFixed(0) + '%';
+                    
+                    // Changer la couleur selon l'intensité
+                    if (pourcentVMA >= 110) {
+                        vmaPercent.style.color = '#00ff88'; // Vert
+                    } else if (pourcentVMA >= 100) {
+                        vmaPercent.style.color = '#00d2ff'; // Cyan
+                    } else if (pourcentVMA >= 90) {
+                        vmaPercent.style.color = '#ffcc00'; // Jaune
+                    } else {
+                        vmaPercent.style.color = '#ff4bb4'; // Rose
+                    }
+                }
+            }
         }, 100);
     }
     // ARRIVÉE
@@ -826,6 +924,9 @@ function handleChrono(i) {
         clearInterval(s.interval);
         const elapsed = Date.now() - s.startTime;
         s.laps.push(elapsed);
+        
+        // Masquer l'affichage VMA
+        if (vmaLive) vmaLive.classList.add('hidden');
         
         // Afficher le temps du tour
         const lapIndex = s.laps.length - 1;
@@ -865,6 +966,94 @@ function handleChrono(i) {
 }
 
 // ============================================================================
+// GESTION ABSENT / RESET
+// ============================================================================
+function markAbsent(i) {
+    const s = studentData[i];
+    const card = document.getElementById('grid').children[i];
+    
+    if (s.isAbsent) {
+        // Déjà absent, on ne fait rien
+        return;
+    }
+    
+    if (confirm('⚠️ Marquer cet élève comme ABSENT ?\n\nIl apparaîtra dans le bilan avec la mention "Absent".')) {
+        s.isAbsent = true;
+        card.classList.add('absent');
+        
+        // Arrêter tous les chronos en cours
+        if (s.interval) clearInterval(s.interval);
+        if (s.totalInterval) clearInterval(s.totalInterval);
+        
+        // Réinitialiser l'état
+        s.state = 'IDLE';
+        const btn = document.getElementById(`btn-${i}`);
+        btn.className = 'btn-action wait';
+        btn.innerHTML = '❌ ABSENT';
+        
+        const display = document.getElementById(`chrono-${i}`);
+        display.className = 'local-chrono state-idle';
+        display.textContent = 'ABSENT';
+    }
+}
+
+function resetStudent(i) {
+    if (!confirm('🔄 RESET cet élève ?\n\nToutes ses données (temps, sauts, lancers) seront effacées.')) {
+        return;
+    }
+    
+    const s = studentData[i];
+    const card = document.getElementById('grid').children[i];
+    
+    // Arrêter tous les intervalles
+    if (s.interval) clearInterval(s.interval);
+    if (s.totalInterval) clearInterval(s.totalInterval);
+    
+    // Réinitialiser complètement les données
+    studentData[i] = {
+        state: 'IDLE',
+        startTime: 0,
+        sessionStart: null,
+        totalInterval: null,
+        interval: null,
+        laps: [],
+        sauts: [],
+        lancers: [],
+        bpm: '',
+        rpe: '',
+        selectedStudent: s.selectedStudent, // Garder l'élève sélectionné
+        isAbsent: false
+    };
+    
+    // Retirer le statut absent
+    card.classList.remove('absent');
+    
+    // Réinitialiser l'interface
+    document.getElementById(`total-${i}`).textContent = '⏱️ Chrono épreuve: 00:00';
+    document.getElementById(`chrono-${i}`).textContent = '00:00.0';
+    document.getElementById(`chrono-${i}`).className = 'local-chrono state-idle';
+    
+    const btn = document.getElementById(`btn-${i}`);
+    btn.innerHTML = '🏁 DÉPART';
+    btn.className = 'btn-action start';
+    
+    // Réinitialiser les tours
+    for (let l = 0; l < maxLaps; l++) {
+        document.getElementById(`lap-${i}-${l}`).textContent = '--:--';
+    }
+    
+    // Réinitialiser les performances
+    document.getElementById(`list-s-${i}`).textContent = '';
+    document.getElementById(`list-l-${i}`).textContent = '';
+    
+    // Masquer le VMA live
+    const vmaLive = document.getElementById(`vma-live-${i}`);
+    if (vmaLive) vmaLive.classList.add('hidden');
+    
+    alert('✅ Élève réinitialisé avec succès !');
+}
+
+// ============================================================================
 // CALCUL DES NOTES - VERSION HYBRIDE 50% BARÈME + 50% VMA
 // ============================================================================
 function calculateNote(i) {
@@ -887,13 +1076,36 @@ function calculateNote(i) {
             meilleureAtelier: '--',
             niveauAtelier: '--',
             noteAtelier: 0,
-            noteFinale: 0
+            noteFinale: 0,
+            statut: ''
         };
     }
     
     const nomPrenom = s.selectedStudent['Nom Prénom'];
     const sexe = s.selectedStudent.Sexe || 'M';
     const vma = parseFloat(s.selectedStudent.VMA) || 0;
+    
+    // Vérifier si l'élève est absent
+    if (s.isAbsent) {
+        return {
+            nomPrenom,
+            sexe,
+            vma: vma > 0 ? vma.toFixed(1) : '--',
+            moyenneCourse: '--',
+            tempsTotal: '--',
+            pourcentVMA: '--',
+            niveauBareme: '--',
+            noteBareme: 0,
+            niveauVMA: '--',
+            noteVMA: 0,
+            noteCourse: 0,
+            meilleureAtelier: '--',
+            niveauAtelier: '--',
+            noteAtelier: 0,
+            noteFinale: 0,
+            statut: 'ABSENT'
+        };
+    }
     
     // ===== CALCUL COURSE (3x400m) - VERSION HYBRIDE =====
     let moyenneCourse = '--';
@@ -990,7 +1202,8 @@ function calculateNote(i) {
         meilleureAtelier,
         niveauAtelier,
         noteAtelier: noteAtelier.toFixed(2),
-        noteFinale: noteFinale.toFixed(2)
+        noteFinale: noteFinale.toFixed(2),
+        statut: s.laps.length === maxLaps ? 'TERMINÉ' : 'EN COURS'
     };
 }
 
@@ -1210,6 +1423,7 @@ function exportBilan() {
         report.push({
             'Nom Prénom': note.nomPrenom,
             'Sexe': note.sexe,
+            'Statut': note.statut,
             'VMA (km/h)': note.vma,
             'Temps Total 3x400m': note.tempsTotal,
             'Moyenne par 400m': note.moyenneCourse,
@@ -1240,6 +1454,7 @@ function exportBilan() {
     ws['!cols'] = [
         { wch: 20 }, // Nom Prénom
         { wch: 6 },  // Sexe
+        { wch: 12 }, // Statut
         { wch: 12 }, // VMA
         { wch: 18 }, // Temps Total
         { wch: 18 }, // Moyenne

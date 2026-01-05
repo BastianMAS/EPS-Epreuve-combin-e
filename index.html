@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO v24 - STABLE</title>
+    <title>EPS PRO v18 - Final avec Export Excel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --bg: #0b101d; --card: #1c2333; --accent: #00d2ff; --success: #00ff88; --danger: #ff4bb4; --warning: #ffcc00; }
@@ -13,88 +13,86 @@
         label { display: block; margin-bottom: 5px; font-weight: 800; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
         select, input { background: white; color: black; padding: 12px; border-radius: 10px; width: 100%; border: none; font-weight: 700; margin-bottom: 10px; box-sizing: border-box; }
         .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .local-chrono { font-family: monospace; font-size: 2.2rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 10px; color: var(--accent); }
-        button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .total-session-time { font-size: 0.8rem; color: #ffcc00; text-align: right; margin-bottom: 5px; font-family: monospace; font-weight: bold; }
+        .local-chrono { font-family: monospace; font-size: 2.2rem; text-align: center; font-weight: 800; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 10px; }
+        .state-run { color: var(--success); }
+        .state-recup { color: var(--danger); border: 1px solid var(--danger); }
+        .state-idle { color: var(--accent); }
+        .results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
+        .res-box { background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; text-align: center; font-size: 0.75rem; }
+        button { border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-action { height: 50px; font-size: 1rem; width: 100%; text-transform: uppercase; }
         .start { background: var(--success); color: black; }
+        .stop { background: var(--danger); color: white; }
+        .wait { background: #333; color: #777; cursor: not-allowed; }
         .perf-input { background: #000 !important; color: white !important; border: 1px solid #444; padding: 8px; border-radius: 8px; width: 80px; text-align: center; }
+        .perf-list { font-size: 0.75rem; color: var(--success); margin-top: 4px; font-weight: bold; }
         .hidden { display: none; }
+        .export-area { margin-top: 30px; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 20px; }
     </style>
 </head>
 <body>
 
-<div id="screen1">
+<div id="screen1" class="active">
     <h1 style="text-align:center;">EPS<span style="color:var(--accent)">PRO</span></h1>
     <div class="card" style="max-width: 500px; margin: auto;">
-        <div id="step1" class="step visible">
-            <label>1. Cycle</label>
-            <select id="cycle" onchange="updateTunnel(2)">
-                <option value="">--</option>
-                <option value="C3">Cycle 3</option>
-                <option value="C4">Cycle 4</option>
-            </select>
-        </div>
-        <div id="step2" class="step">
-            <label>2. Classe</label>
-            <select id="classe" onchange="updateTunnel(3)"></select>
-        </div>
-        <div id="step3" class="step">
-            <label>3. Ateliers</label>
-            <select id="configAteliers" onchange="updateTunnel(4)">
-                <option value="">--</option>
-                <option value="CS">Course + Saut (3+3 pts)</option>
-                <option value="CL">Course + Lancer (3+3 pts)</option>
-                <option value="CSL">Course + Saut + Lancer (2+2+2 pts)</option>
-            </select>
-        </div>
-        <div id="step4" class="step">
-            <label>4. Épreuve</label>
-            <select id="typeCourse" onchange="updateTunnel(5)"></select>
-        </div>
+        <div id="step1" class="step visible"><label>1. Cycle</label><select id="cycle" onchange="updateTunnel(2)"><option value="">--</option><option value="C3">Cycle 3</option><option value="C4">Cycle 4</option></select></div>
+        <div id="step2" class="step"><label>2. Classe</label><select id="classe" onchange="updateTunnel(3)"></select></div>
+        <div id="step3" class="step"><label>3. Ateliers</label><select id="configAteliers" onchange="updateTunnel(4)"><option value="">--</option><option value="C">Course Seule</option><option value="CS">Course + Saut</option><option value="CL">Course + Lancer</option><option value="CSL">Course + Saut + Lancer</option></select></div>
+        <div id="step4" class="step"><label>4. Épreuve</label><select id="typeCourse" onchange="updateTunnel(5)"></select></div>
         <div id="step5" class="step">
-            <label>5. Récupération (sec)</label>
+            <label>5. Technique & Récupération</label>
+            <div id="lancer-options" class="hidden">
+                <label style="color:white; font-size:0.7rem">Engin pour Lancer :</label>
+                <select id="enginLancer"><option value="Vortex">Vortex</option><option value="Poids 1kg">Poids 1kg</option></select>
+            </div>
+            <label style="color:white; font-size:0.7rem">Temps de Récup (sec) :</label>
             <input type="number" id="tempsRecup" value="120">
-            <button class="btn-action start" style="height:40px" onclick="updateTunnel(6)">Valider</button>
+            <button class="btn-action start" style="height:40px; font-size:0.8rem" onclick="updateTunnel(6)">Valider</button>
         </div>
-        <div id="step6" class="step">
-            <label>6. Liste (Nom Prénom, Sexe, VMA)</label>
-            <input type="file" id="importExcel" accept=".xlsx">
-            <button class="btn-action start" style="margin-top:10px" onclick="launch()">LANCER LE TERRAIN</button>
-        </div>
+        <div id="step6" class="step"><label>6. Liste Elèves</label><input type="file" id="importExcel" accept=".xlsx, .csv"><button class="btn-action start" style="background:var(--success); margin-top:10px" onclick="launch()">LANCER LE TERRAIN</button></div>
     </div>
 </div>
 
 <div id="screen2" class="hidden">
-    <div style="margin-bottom:15px; display:flex; justify-content:flex-start;">
-        <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px;">← QUITTER POUR REVENIR</button>
+    <div style="margin-bottom:15px; display: flex; justify-content: flex-start;">
+        <button onclick="location.reload()" style="background:var(--danger); color:white; padding:10px 20px; border-radius:10px;">← RETOUR CONFIG</button>
     </div>
+    
     <div id="grid" class="grid-6"></div>
-    <div style="text-align:center; padding:30px;">
-        <button onclick="exportBilan()" style="background:var(--warning); color:black; padding:20px; border-radius:15px; font-size:1.2rem; font-weight:900;">💾 BILAN EXCEL /6 PTS</button>
+
+    <div class="export-area">
+        <h3 style="color:var(--accent)">Fin de Séance</h3>
+        <button onclick="exportBilan()" style="background:var(--warning); color:black; padding:20px; border-radius:15px; font-size:1.2rem; width:300px;">💾 GÉNÉRER LE BILAN EXCEL</button>
     </div>
 </div>
 
 <script>
 let studentData = {};
 let allStudents = [];
+let maxLaps = 3;
 
 function updateTunnel(n) {
-    for(let i=n; i<=6; i++) {
-        let el = document.getElementById('step'+i);
-        if(el) el.classList.remove('visible');
-    }
+    for(let i=n; i<=6; i++) document.getElementById('step'+i)?.classList.remove('visible');
     const cycle = document.getElementById('cycle').value;
-    if(n===2 && cycle) {
-        document.getElementById('classe').innerHTML = cycle==='C3' ? '<option value="">--</option><option value="6e">6ème</option>' : '<option value="">--</option><option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
+    const config = document.getElementById('configAteliers').value;
+    if(n===2) {
+        document.getElementById('classe').innerHTML = cycle==='C3'?'<option value="">--</option><option value="6e">6ème</option>':'<option value="">--</option><option value="5e">5e</option><option value="4e">4e</option><option value="3e">3e</option>';
         document.getElementById('step2').classList.add('visible');
     }
     if(n===3) document.getElementById('step3').classList.add('visible');
     if(n===4) {
-        document.getElementById('typeCourse').innerHTML = '<option value="">--</option><option value="3x400m">3x400m</option><option value="Vitesse">Vitesse</option>';
+        let opts = '<option value="">--</option>';
+        if(cycle==='C3') opts += '<option value="3x400m">3x400m</option><option value="30m Vitesse">30m Vitesse</option>';
+        else opts += '<option value="3x400m">3x400m</option><option value="4x400m">4x400m</option>';
+        document.getElementById('typeCourse').innerHTML = opts;
         document.getElementById('step4').classList.add('visible');
     }
-    if(n===5) document.getElementById('step5').classList.add('visible');
+    if(n===5) {
+        document.getElementById('lancer-options').classList.toggle('hidden', !config.includes('L'));
+        document.getElementById('step5').classList.add('visible');
+    }
     if(n===6) document.getElementById('step6').classList.add('visible');
 }
 
@@ -107,111 +105,145 @@ document.getElementById('importExcel').onchange = (e) => {
 };
 
 function launch() {
-    if(!allStudents.length) return alert("Veuillez importer un fichier Excel.");
     document.getElementById('screen1').style.display = 'none';
     document.getElementById('screen2').classList.remove('hidden');
-    const config = document.getElementById('configAteliers').value;
     const grid = document.getElementById('grid');
-    grid.innerHTML = "";
+    const config = document.getElementById('configAteliers').value;
+    const engin = document.getElementById('enginLancer').value;
+    maxLaps = document.getElementById('typeCourse').value === '3x400m' ? 3 : 1;
 
+    grid.innerHTML = "";
     for(let i=0; i<6; i++) {
-        studentData[i] = { laps:[], sauts:[], lancers:[], vma:0, state:'IDLE' };
+        studentData[i] = { state:'IDLE', startTime:0, sessionStart:null, laps:[], sauts:[], lancers:[], bpm:"", rpe:"" };
         grid.innerHTML += `
             <div class="card">
-                <select id="sel-${i}" onchange="setStudent(${i}, this.value)">
-                    <option value="">-- Elève --</option>
+                <div class="total-session-time" id="total-${i}">Chrono épreuve: 00:00</div>
+                <select id="sel-${i}" onchange="updateProfile(${i})">
+                    <option value="">-- Choisir Elève --</option>
                     ${allStudents.map(s => `<option value="${s['Nom Prénom']}">${s['Nom Prénom']}</option>`).join('')}
                 </select>
-                <div id="prof-${i}" style="font-size:0.7rem; color:var(--warning); margin:5px 0; height:15px;"></div>
-                <div id="chrono-${i}" class="local-chrono">00:00.0</div>
+                <div id="prof-${i}" style="font-size:0.7rem; color:var(--warning); height:12px; margin-bottom:5px;"></div>
+                <div id="chrono-${i}" class="local-chrono state-idle">00:00.0</div>
+                <div class="results-row">${Array.from({length:maxLaps}).map((_,l)=>`<div class="res-box"><small>C${l+1}</small><b id="lap-${i}-${l}">--</b></div>`).join('')}</div>
                 <button id="btn-${i}" class="btn-action start" onclick="handleChrono(${i})">DÉPART</button>
-                <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
                     <div class="${config.includes('S')?'':'hidden'}">
-                        <label>Saut</label>
-                        <input type="number" id="in-s-${i}" class="perf-input" step="0.01">
-                        <button onclick="addP(${i},'s')" style="background:var(--accent); padding:5px">+</button>
+                        <label>Sauts (m)</label>
+                        <div style="display:flex; gap:5px">
+                            <input type="number" id="in-s-${i}" step="0.01" class="perf-input">
+                            <button onclick="addPerf(${i},'s')" style="background:var(--accent); padding:10px">+</button>
+                        </div>
+                        <div id="list-s-${i}" class="perf-list"></div>
                     </div>
                     <div class="${config.includes('L')?'':'hidden'}">
-                        <label>Lancer</label>
-                        <input type="number" id="in-l-${i}" class="perf-input" step="0.01">
-                        <button onclick="addP(${i},'l')" style="background:var(--accent); padding:5px">+</button>
+                        <label>${engin} (m)</label>
+                        <div style="display:flex; gap:5px">
+                            <input type="number" id="in-l-${i}" step="0.01" class="perf-input">
+                            <button onclick="addPerf(${i},'l')" style="background:var(--accent); padding:10px">+</button>
+                        </div>
+                        <div id="list-l-${i}" class="perf-list"></div>
                     </div>
                 </div>
-                <div id="list-perf-${i}" style="font-size:0.65rem; color:var(--success); margin-top:5px;"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
+                    <div><label>BPM</label><input type="number" onchange="studentData[${i}].bpm=this.value" class="perf-input" style="width:100%"></div>
+                    <div><label>RPE</label><input type="number" onchange="studentData[${i}].rpe=this.value" class="perf-input" style="width:100%"></div>
+                </div>
             </div>`;
     }
 }
 
-function setStudent(i, name) {
-    const s = allStudents.find(x => x['Nom Prénom'] === name);
-    if(s) {
-        studentData[i].vma = parseFloat(s.VMA) || 0;
-        document.getElementById(`prof-${i}`).innerText = `VMA: ${studentData[i].vma} km/h`;
+function updateProfile(i) {
+    const s = allStudents.find(x => x['Nom Prénom'] === document.getElementById(`sel-${i}`).value);
+    document.getElementById(`prof-${i}`).innerText = s ? `${s.Sexe} | ${s.Age} ans` : "";
+}
+
+function addPerf(i, type) {
+    const input = document.getElementById(`in-${type}-${i}`);
+    const val = parseFloat(input.value);
+    if(val && val > 0) {
+        if(type==='s') studentData[i].sauts.push(val);
+        else studentData[i].lancers.push(val);
+        document.getElementById(`list-${type}-${i}`).innerText = (type==='s' ? studentData[i].sauts : studentData[i].lancers).join('m | ') + "m";
+        input.value = "";
     }
 }
 
 function handleChrono(i) {
     let s = studentData[i];
     let btn = document.getElementById(`btn-${i}`);
-    let disp = document.getElementById(`chrono-${i}`);
-    if(s.state==='IDLE') {
-        s.state='RUN'; s.start = Date.now();
-        s.interval = setInterval(() => disp.innerText = formatTime(Date.now()-s.start), 100);
-        btn.innerText = "ARRIVÉE"; btn.style.background = "var(--danger)";
-    } else {
-        clearInterval(s.interval);
-        s.laps.push(Date.now()-s.start);
-        s.state='IDLE';
-        btn.innerText = s.laps.length < 3 ? "DÉPART TOUR " + (s.laps.length+1) : "TERMINÉ";
-        btn.style.background = s.laps.length < 3 ? "var(--success)" : "#333";
-        if(s.laps.length >= 3) btn.disabled = true;
-    }
-}
+    let display = document.getElementById(`chrono-${i}`);
 
-function addP(i,t) {
-    let input = document.getElementById(`in-${t}-${i}`);
-    let val = parseFloat(input.value);
-    if(val) {
-        (t==='s'?studentData[i].sauts:studentData[i].lancers).push(val);
-        document.getElementById(`list-perf-${i}`).innerText = "S: " + studentData[i].sauts.join('|') + " / L: " + studentData[i].lancers.join('|');
-        input.value = "";
+    if(s.state === 'IDLE') {
+        if(s.sessionStart === null) {
+            s.sessionStart = Date.now();
+            s.totalInterval = setInterval(() => {
+                document.getElementById(`total-${i}`).innerText = "Chrono épreuve: " + formatTotal(Date.now() - s.sessionStart);
+            }, 1000);
+        }
+        s.state = 'RUNNING'; s.startTime = Date.now();
+        btn.innerText = "ARRIVÉE"; btn.className = "btn-action stop";
+        display.className = "local-chrono state-run";
+        s.interval = setInterval(() => { display.innerText = formatTime(Date.now() - s.startTime); }, 100);
+    } else if(s.state === 'RUNNING') {
+        clearInterval(s.interval);
+        let elapsed = Date.now() - s.startTime;
+        s.laps.push(elapsed);
+        document.getElementById(`lap-${i}-${s.laps.length-1}`).innerText = formatTime(elapsed);
+        
+        if(s.laps.length >= maxLaps) {
+            s.state = 'FINISHED'; btn.innerText = "TERMINÉ"; btn.className = "btn-action wait";
+            display.className = "local-chrono state-idle"; display.innerText = "FINI";
+            clearInterval(s.totalInterval);
+        } else {
+            s.state = 'RECUP';
+            let target = Date.now() + (parseInt(document.getElementById('tempsRecup').value) * 1000);
+            display.className = "local-chrono state-recup";
+            s.interval = setInterval(() => {
+                let diff = Math.ceil((target - Date.now()) / 1000);
+                display.innerText = diff + "s";
+                btn.innerText = "REPOS..."; btn.className = "btn-action wait";
+                if(diff <= 0) {
+                    clearInterval(s.interval); s.state = 'IDLE';
+                    btn.innerText = "DÉPART C" + (s.laps.length + 1); btn.className = "btn-action start";
+                    display.className = "local-chrono state-idle"; display.innerText = "PRÊT";
+                }
+            }, 500);
+        }
     }
 }
 
 function exportBilan() {
-    const config = document.getElementById('configAteliers').value;
-    const ptsMax = config === 'CSL' ? 2 : 3;
     let report = [];
-    for(let i in studentData) {
+    for(let i=0; i<6; i++) {
         let name = document.getElementById(`sel-${i}`).value;
         if(!name) continue;
         let s = studentData[i];
-        let vit = s.laps.length ? (1.2 / ((s.laps.reduce((a,b)=>a+b)/3600000))) : 0;
-        let pct = s.vma > 0 ? (vit / s.vma) * 100 : 0;
-        let noteC = 0.25;
-        if(pct >= 110) noteC = ptsMax;
-        else if(pct >= 100) noteC = ptsMax * 0.75;
-        else if(pct >= 90) noteC = ptsMax * 0.4;
-        
-        report.push({ 
-            "Nom Prénom": name, 
-            "VMA Ref": s.vma, 
-            "Vitesse Moy (km/h)": vit.toFixed(2),
-            "% VMA": pct.toFixed(1)+"%", 
-            "Note Course /"+ptsMax: noteC.toFixed(2),
-            "Best Saut": s.sauts.length ? Math.max(...s.sauts) : 0,
-            "Best Lancer": s.lancers.length ? Math.max(...s.lancers) : 0
-        });
+        let row = {
+            "Nom Prénom": name,
+            "BPM": s.bpm,
+            "RPE": s.rpe,
+            "C1": s.laps[0] ? formatTime(s.laps[0]) : "--",
+            "C2": s.laps[1] ? formatTime(s.laps[1]) : "--",
+            "C3": s.laps[2] ? formatTime(s.laps[2]) : "--",
+            "Meilleur Saut (m)": s.sauts.length ? Math.max(...s.sauts) : "--",
+            "Meilleur Lancer (m)": s.lancers.length ? Math.max(...s.lancers) : "--"
+        };
+        report.push(row);
     }
     const ws = XLSX.utils.json_to_sheet(report);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Bilan");
-    XLSX.writeFile(wb, "Bilan_EPS_Final.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Bilan EPS");
+    XLSX.writeFile(wb, "Bilan_Session_EPS.xlsx");
 }
 
 function formatTime(ms) {
     let s = Math.floor(ms/1000);
-    return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
+    return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${Math.floor((ms%1000)/100)}`;
+}
+function formatTotal(ms) {
+    let s = Math.floor(ms/1000);
+    return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 </script>
 </body>

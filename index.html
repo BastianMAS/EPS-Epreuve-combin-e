@@ -600,6 +600,176 @@
             color: #aaa;
             text-transform: uppercase;
         }
+        
+        /* PAGE DIAGNOSTIQUE */
+        .diag-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-selector {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .test-selector.active {
+            border-color: var(--accent);
+            background: rgba(0,210,255,0.1);
+        }
+        
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .test-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        
+        .test-toggle {
+            font-size: 2rem;
+        }
+        
+        .test-content {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .test-content.visible {
+            display: block;
+        }
+        
+        .test-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .option-btn {
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .option-btn:hover {
+            background: rgba(0,210,255,0.2);
+            border-color: var(--accent);
+        }
+        
+        .option-btn.selected {
+            background: var(--accent);
+            color: black;
+            border-color: var(--accent);
+        }
+        
+        .result-input-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 15px;
+        }
+        
+        .result-input {
+            background: #000 !important;
+            color: var(--success) !important;
+            border: 2px solid var(--accent);
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn-add-result {
+            background: var(--accent);
+            color: black;
+            padding: 15px 25px;
+            font-size: 1rem;
+        }
+        
+        .results-list {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            min-height: 60px;
+        }
+        
+        .result-item {
+            display: inline-block;
+            background: var(--success);
+            color: black;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .result-item .delete-result {
+            margin-left: 10px;
+            cursor: pointer;
+            color: var(--danger);
+            font-weight: 900;
+        }
+        
+        .vma-result {
+            background: var(--accent);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .vma-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: black;
+        }
+        
+        .vma-label {
+            font-size: 1rem;
+            color: black;
+            font-weight: 700;
+        }
+        
+        .student-selector-diag {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .student-selector-diag select {
+            max-width: 400px;
+            margin: 0 auto;
+            font-size: 1.2rem;
+            padding: 15px;
+        }
+        
+        .current-student-info {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: var(--warning);
+        }
     </style>
 </head>
 <body>
@@ -696,8 +866,209 @@
             
             <!-- BOUTONS D'ACTION -->
             <div style="margin-top: 30px; display: flex; gap: 15px;">
+                <button onclick="goToDiagnostic()" class="btn-action" style="flex: 1; background: var(--warning); color: black;">
+                    🔬 ÉVALUATION DIAGNOSTIQUE
+                </button>
                 <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1;">
-                    ➡️ CONFIGURER UNE SÉANCE
+                    ➡️ SÉANCE D'ÉVALUATION
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 0.5 : ÉVALUATION DIAGNOSTIQUE -->
+<div id="screenDiag" class="hidden">
+    <h1>EPS<span class="accent-text">PRO</span></h1>
+    <p class="text-center" style="color: var(--warning); margin-bottom: 10px; font-size: 1.3rem;">
+        🔬 Évaluation Diagnostique
+    </p>
+    <p class="text-center" style="color: #aaa; margin-bottom: 30px; font-size: 0.9rem;">
+        Ces tests établissent les performances de départ (ne comptent pas pour la note)
+    </p>
+    
+    <div class="diag-container">
+        <!-- SÉLECTION ÉLÈVE -->
+        <div class="student-selector-diag">
+            <label style="color: var(--accent); font-size: 1.2rem; margin-bottom: 15px;">
+                👤 SÉLECTIONNER UN ÉLÈVE
+            </label>
+            <select id="diag-student-select" onchange="selectDiagStudent()">
+                <option value="">-- Choisir un élève --</option>
+            </select>
+            <div id="diag-student-info" class="current-student-info"></div>
+        </div>
+        
+        <div id="diag-tests-container" style="display: none;">
+            <!-- TEST VMA -->
+            <div class="test-selector" id="test-vma">
+                <div class="test-header" onclick="toggleTest('vma')">
+                    <div class="test-title">🏃 TEST VMA</div>
+                    <div class="test-toggle">▼</div>
+                </div>
+                <div class="test-content" id="content-vma">
+                    <p style="color: #aaa; margin-bottom: 15px;">Choisir un protocole :</p>
+                    <div class="test-options">
+                        <div class="option-btn" onclick="selectVMATest('demicooper')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">⏱️</div>
+                            <div>1/2 Cooper</div>
+                            <small style="color: #aaa;">(6 min)</small>
+                        </div>
+                        <div class="option-btn" onclick="selectVMATest('cooper')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">⏱️⏱️</div>
+                            <div>Cooper</div>
+                            <small style="color: #aaa;">(12 min)</small>
+                        </div>
+                        <div class="option-btn" onclick="selectVMATest('lucleger')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">🔊</div>
+                            <div>Luc Léger</div>
+                            <small style="color: #aaa;">(Paliers)</small>
+                        </div>
+                    </div>
+                    
+                    <div id="vma-input-demicooper" class="hidden">
+                        <label>Distance parcourue en 6 minutes (mètres) :</label>
+                        <div class="result-input-group">
+                            <input type="number" class="result-input" id="input-demicooper" placeholder="ex: 1200">
+                            <button class="btn-add-result" onclick="calculateVMA('demicooper')">✓ Calculer VMA</button>
+                        </div>
+                    </div>
+                    
+                    <div id="vma-input-cooper" class="hidden">
+                        <label>Distance parcourue en 12 minutes (mètres) :</label>
+                        <div class="result-input-group">
+                            <input type="number" class="result-input" id="input-cooper" placeholder="ex: 2400">
+                            <button class="btn-add-result" onclick="calculateVMA('cooper')">✓ Calculer VMA</button>
+                        </div>
+                    </div>
+                    
+                    <div id="vma-input-lucleger" class="hidden">
+                        <label>Dernier palier atteint (km/h) :</label>
+                        <div class="result-input-group">
+                            <input type="number" class="result-input" id="input-lucleger" step="0.5" placeholder="ex: 10.5">
+                            <button class="btn-add-result" onclick="calculateVMA('lucleger')">✓ Valider VMA</button>
+                        </div>
+                    </div>
+                    
+                    <div id="vma-result" class="vma-result hidden">
+                        <div class="vma-value" id="vma-value-display">--</div>
+                        <div class="vma-label">km/h VMA</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TEST 3x400m -->
+            <div class="test-selector" id="test-course">
+                <div class="test-header" onclick="toggleTest('course')">
+                    <div class="test-title">🏃‍♂️ TEST 3×400m</div>
+                    <div class="test-toggle">▼</div>
+                </div>
+                <div class="test-content" id="content-course">
+                    <div style="margin-bottom: 15px;">
+                        <label>Temps de récupération entre les tours (secondes) :</label>
+                        <input type="number" id="diag-recup-time" value="120" min="30" max="300" style="max-width: 150px;">
+                    </div>
+                    
+                    <label>Temps des 3 tours (format MM:SS) :</label>
+                    <div class="result-input-group">
+                        <input type="text" class="result-input" id="input-tour1" placeholder="Tour 1: ex 02:05" style="grid-column: 1;">
+                        <button class="btn-add-result" onclick="addTour(1)">+ Tour 1</button>
+                    </div>
+                    <div class="result-input-group">
+                        <input type="text" class="result-input" id="input-tour2" placeholder="Tour 2: ex 02:08">
+                        <button class="btn-add-result" onclick="addTour(2)">+ Tour 2</button>
+                    </div>
+                    <div class="result-input-group">
+                        <input type="text" class="result-input" id="input-tour3" placeholder="Tour 3: ex 02:10">
+                        <button class="btn-add-result" onclick="addTour(3)">+ Tour 3</button>
+                    </div>
+                    
+                    <div class="results-list" id="course-results">
+                        <small style="color: #aaa;">Les temps apparaîtront ici...</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TEST SAUT -->
+            <div class="test-selector" id="test-saut">
+                <div class="test-header" onclick="toggleTest('saut')">
+                    <div class="test-title">🦘 TEST SAUT EN LONGUEUR</div>
+                    <div class="test-toggle">▼</div>
+                </div>
+                <div class="test-content" id="content-saut">
+                    <p style="color: #aaa; margin-bottom: 15px;">Choisir le type :</p>
+                    <div class="test-options">
+                        <div class="option-btn" onclick="selectSautType('detente')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">🦘</div>
+                            <div>Détente horizontale</div>
+                            <small style="color: #aaa;">(Sans élan)</small>
+                        </div>
+                        <div class="option-btn" onclick="selectSautType('elan')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">🏃‍♂️🦘</div>
+                            <div>Avec élan</div>
+                            <small style="color: #aaa;">(1-15m)</small>
+                        </div>
+                    </div>
+                    
+                    <div id="saut-input" class="hidden">
+                        <div id="elan-distance" class="hidden" style="margin-bottom: 15px;">
+                            <label>Distance d'élan (mètres) :</label>
+                            <input type="number" id="input-elan-distance" min="1" max="15" value="10" style="max-width: 150px;">
+                        </div>
+                        
+                        <label>Distance sautée (mètres) :</label>
+                        <div class="result-input-group">
+                            <input type="number" class="result-input" id="input-saut" step="0.01" placeholder="ex: 2.45">
+                            <button class="btn-add-result" onclick="addSaut()">+ Ajouter</button>
+                        </div>
+                        
+                        <div class="results-list" id="saut-results">
+                            <small style="color: #aaa;">Les sauts apparaîtront ici...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TEST LANCER -->
+            <div class="test-selector" id="test-lancer">
+                <div class="test-header" onclick="toggleTest('lancer')">
+                    <div class="test-title">🎯 TEST LANCER</div>
+                    <div class="test-toggle">▼</div>
+                </div>
+                <div class="test-content" id="content-lancer">
+                    <p style="color: #aaa; margin-bottom: 15px;">Choisir l'engin :</p>
+                    <div class="test-options">
+                        <div class="option-btn" onclick="selectLancerType('vortex')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">🚀</div>
+                            <div>Vortex</div>
+                        </div>
+                        <div class="option-btn" onclick="selectLancerType('poids')">
+                            <div style="font-size: 1.5rem; margin-bottom: 5px;">⚽</div>
+                            <div>Poids 1kg</div>
+                        </div>
+                    </div>
+                    
+                    <div id="lancer-input" class="hidden">
+                        <label>Distance lancée (mètres) :</label>
+                        <div class="result-input-group">
+                            <input type="number" class="result-input" id="input-lancer" step="0.01" placeholder="ex: 6.80">
+                            <button class="btn-add-result" onclick="addLancer()">+ Ajouter</button>
+                        </div>
+                        
+                        <div class="results-list" id="lancer-results">
+                            <small style="color: #aaa;">Les lancers apparaîtront ici...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BOUTONS ACTION -->
+            <div style="margin-top: 30px; display: flex; gap: 15px;">
+                <button onclick="backToStudentsFromDiag()" class="btn-action" style="flex: 1; background: #666; color: white;">
+                    ← Retour
+                </button>
+                <button onclick="saveDiagnostic()" class="btn-action btn-primary" style="flex: 2;">
+                    💾 ENREGISTRER LE DIAGNOSTIC
                 </button>
             </div>
         </div>
@@ -816,6 +1187,20 @@ let sessionConfig = {
     recup: 120
 };
 let editingStudentId = null; // Pour savoir si on est en mode édition
+
+// Variables pour le diagnostic
+let currentDiagStudent = null;
+let diagData = {
+    vma: null,
+    vmaTest: null,
+    course: [],
+    courseRecup: 120,
+    saut: [],
+    sautType: null,
+    sautElan: null,
+    lancer: [],
+    lancerType: null
+};
 
 // ============================================================================
 // INITIALISATION AU CHARGEMENT
@@ -1057,6 +1442,35 @@ function updateStudentsStats() {
 }
 
 /**
+ * Passer à la page diagnostique
+ */
+function goToDiagnostic() {
+    if (storedStudents.length === 0) {
+        alert('⚠️ Veuillez ajouter au moins un élève avant de faire un diagnostic.');
+        return;
+    }
+    
+    // Remplir le select des élèves
+    const select = document.getElementById('diag-student-select');
+    select.innerHTML = '<option value="">-- Choisir un élève --</option>' +
+        storedStudents.map(s => `<option value="${s.id}">${s.nomPrenom}</option>`).join('');
+    
+    document.getElementById('screen0').classList.add('hidden');
+    document.getElementById('screenDiag').classList.remove('hidden');
+}
+
+/**
+ * Retour depuis la page diagnostique
+ */
+function backToStudentsFromDiag() {
+    if (confirm('⚠️ Retour à la gestion des élèves ?\n\nLes données non enregistrées seront perdues.')) {
+        resetDiagData();
+        document.getElementById('screenDiag').classList.add('hidden');
+        document.getElementById('screen0').classList.remove('hidden');
+    }
+}
+
+/**
  * Passer à la configuration de séance
  */
 function goToConfig() {
@@ -1158,6 +1572,440 @@ document.getElementById('import-excel-students').onchange = (e) => {
     };
     reader.readAsBinaryString(file);
 };
+
+// ============================================================================
+// GESTION PAGE DIAGNOSTIQUE
+// ============================================================================
+
+/**
+ * Réinitialiser les données du diagnostic
+ */
+function resetDiagData() {
+    currentDiagStudent = null;
+    diagData = {
+        vma: null,
+        vmaTest: null,
+        course: [],
+        courseRecup: 120,
+        saut: [],
+        sautType: null,
+        sautElan: null,
+        lancer: [],
+        lancerType: null
+    };
+}
+
+/**
+ * Sélectionner un élève pour le diagnostic
+ */
+function selectDiagStudent() {
+    const studentId = document.getElementById('diag-student-select').value;
+    if (!studentId) {
+        document.getElementById('diag-tests-container').style.display = 'none';
+        currentDiagStudent = null;
+        return;
+    }
+    
+    const student = storedStudents.find(s => s.id === studentId);
+    if (!student) return;
+    
+    currentDiagStudent = student;
+    resetDiagData();
+    
+    // Afficher les infos de l'élève
+    document.getElementById('diag-student-info').innerHTML = 
+        `<strong>${student.sexe === 'F' ? '👧 Fille' : '🧑 Garçon'}</strong> | VMA actuelle: <strong>${student.vma} km/h</strong>`;
+    
+    // Afficher les tests
+    document.getElementById('diag-tests-container').style.display = 'block';
+    
+    // Charger le diagnostic existant si présent
+    if (student.diagnostique) {
+        // TODO: pré-remplir les données
+        alert('ℹ️ Cet élève a déjà un diagnostic. Vous pouvez le modifier.');
+    }
+}
+
+/**
+ * Toggle un test (ouvrir/fermer)
+ */
+function toggleTest(testName) {
+    const content = document.getElementById(`content-${testName}`);
+    const toggle = document.querySelector(`#test-${testName} .test-toggle`);
+    
+    if (content.classList.contains('visible')) {
+        content.classList.remove('visible');
+        toggle.textContent = '▼';
+    } else {
+        content.classList.add('visible');
+        toggle.textContent = '▲';
+    }
+}
+
+// ============================================================================
+// TEST VMA
+// ============================================================================
+
+/**
+ * Sélectionner un test VMA
+ */
+function selectVMATest(testType) {
+    // Désélectionner tous
+    document.querySelectorAll('#test-vma .option-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    // Masquer tous les inputs
+    document.getElementById('vma-input-demicooper').classList.add('hidden');
+    document.getElementById('vma-input-cooper').classList.add('hidden');
+    document.getElementById('vma-input-lucleger').classList.add('hidden');
+    document.getElementById('vma-result').classList.add('hidden');
+    
+    // Sélectionner et afficher le bon
+    event.target.closest('.option-btn').classList.add('selected');
+    document.getElementById(`vma-input-${testType}`).classList.remove('hidden');
+    
+    diagData.vmaTest = testType;
+}
+
+/**
+ * Calculer la VMA selon le test
+ */
+function calculateVMA(testType) {
+    let vma = null;
+    
+    if (testType === 'demicooper') {
+        const distance = parseFloat(document.getElementById('input-demicooper').value);
+        if (!distance || distance <= 0) {
+            alert('⚠️ Veuillez entrer une distance valide.');
+            return;
+        }
+        // Formule 1/2 Cooper : VMA = (distance en m / 100)
+        vma = distance / 100;
+    } 
+    else if (testType === 'cooper') {
+        const distance = parseFloat(document.getElementById('input-cooper').value);
+        if (!distance || distance <= 0) {
+            alert('⚠️ Veuillez entrer une distance valide.');
+            return;
+        }
+        // Formule Cooper : VMA = (distance en m - 504) / 45
+        vma = (distance - 504) / 45;
+    }
+    else if (testType === 'lucleger') {
+        vma = parseFloat(document.getElementById('input-lucleger').value);
+        if (!vma || vma <= 0) {
+            alert('⚠️ Veuillez entrer un palier valide.');
+            return;
+        }
+    }
+    
+    // Arrondir à 1 décimale
+    vma = Math.round(vma * 10) / 10;
+    
+    // Afficher le résultat
+    diagData.vma = vma;
+    document.getElementById('vma-value-display').textContent = vma;
+    document.getElementById('vma-result').classList.remove('hidden');
+    
+    alert(`✅ VMA calculée : ${vma} km/h\n\nCette valeur sera mise à jour dans la fiche de l'élève.`);
+}
+
+// ============================================================================
+// TEST 3x400m
+// ============================================================================
+
+/**
+ * Ajouter un temps de tour
+ */
+function addTour(tourNum) {
+    const input = document.getElementById(`input-tour${tourNum}`);
+    const value = input.value.trim();
+    
+    if (!value) {
+        alert('⚠️ Veuillez entrer un temps.');
+        return;
+    }
+    
+    // Valider le format MM:SS
+    const regex = /^(\d{1,2}):(\d{2})$/;
+    const match = value.match(regex);
+    
+    if (!match) {
+        alert('⚠️ Format invalide. Utilisez MM:SS (ex: 02:05)');
+        return;
+    }
+    
+    const minutes = parseInt(match[1]);
+    const secondes = parseInt(match[2]);
+    
+    if (secondes >= 60) {
+        alert('⚠️ Les secondes doivent être inférieures à 60.');
+        return;
+    }
+    
+    // Convertir en millisecondes
+    const totalMs = (minutes * 60 + secondes) * 1000;
+    
+    // Enregistrer
+    diagData.course[tourNum - 1] = totalMs;
+    
+    // Afficher
+    renderCourseResults();
+    
+    // Vider l'input
+    input.value = '';
+    
+    alert(`✅ Tour ${tourNum} enregistré : ${value}`);
+}
+
+/**
+ * Afficher les temps de course
+ */
+function renderCourseResults() {
+    const container = document.getElementById('course-results');
+    
+    if (diagData.course.length === 0) {
+        container.innerHTML = '<small style="color: #aaa;">Les temps apparaîtront ici...</small>';
+        return;
+    }
+    
+    container.innerHTML = diagData.course.map((ms, index) => {
+        if (!ms) return '';
+        return `
+            <div class="result-item">
+                Tour ${index + 1}: ${formatTime(ms)}
+                <span class="delete-result" onclick="deleteTour(${index})">✕</span>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Supprimer un tour
+ */
+function deleteTour(index) {
+    if (confirm(`Supprimer le tour ${index + 1} ?`)) {
+        diagData.course[index] = null;
+        renderCourseResults();
+    }
+}
+
+// ============================================================================
+// TEST SAUT
+// ============================================================================
+
+/**
+ * Sélectionner le type de saut
+ */
+function selectSautType(type) {
+    // Désélectionner tous
+    document.querySelectorAll('#test-saut .option-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    // Sélectionner
+    event.target.closest('.option-btn').classList.add('selected');
+    
+    diagData.sautType = type;
+    diagData.saut = [];
+    
+    // Afficher l'input
+    document.getElementById('saut-input').classList.remove('hidden');
+    
+    // Afficher/masquer distance élan
+    if (type === 'elan') {
+        document.getElementById('elan-distance').classList.remove('hidden');
+    } else {
+        document.getElementById('elan-distance').classList.add('hidden');
+    }
+    
+    renderSautResults();
+}
+
+/**
+ * Ajouter un saut
+ */
+function addSaut() {
+    const distance = parseFloat(document.getElementById('input-saut').value);
+    
+    if (!distance || distance <= 0) {
+        alert('⚠️ Veuillez entrer une distance valide.');
+        return;
+    }
+    
+    // Si avec élan, enregistrer la distance d'élan
+    if (diagData.sautType === 'elan') {
+        const elan = parseInt(document.getElementById('input-elan-distance').value);
+        diagData.sautElan = elan;
+    }
+    
+    diagData.saut.push(distance);
+    renderSautResults();
+    
+    document.getElementById('input-saut').value = '';
+    alert(`✅ Saut enregistré : ${distance.toFixed(2)}m`);
+}
+
+/**
+ * Afficher les sauts
+ */
+function renderSautResults() {
+    const container = document.getElementById('saut-results');
+    
+    if (diagData.saut.length === 0) {
+        container.innerHTML = '<small style="color: #aaa;">Les sauts apparaîtront ici...</small>';
+        return;
+    }
+    
+    container.innerHTML = diagData.saut.map((dist, index) => `
+        <div class="result-item">
+            ${dist.toFixed(2)}m
+            <span class="delete-result" onclick="deleteSaut(${index})">✕</span>
+        </div>
+    `).join('');
+}
+
+/**
+ * Supprimer un saut
+ */
+function deleteSaut(index) {
+    if (confirm('Supprimer ce saut ?')) {
+        diagData.saut.splice(index, 1);
+        renderSautResults();
+    }
+}
+
+// ============================================================================
+// TEST LANCER
+// ============================================================================
+
+/**
+ * Sélectionner le type de lancer
+ */
+function selectLancerType(type) {
+    // Désélectionner tous
+    document.querySelectorAll('#test-lancer .option-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    // Sélectionner
+    event.target.closest('.option-btn').classList.add('selected');
+    
+    diagData.lancerType = type;
+    diagData.lancer = [];
+    
+    // Afficher l'input
+    document.getElementById('lancer-input').classList.remove('hidden');
+    
+    renderLancerResults();
+}
+
+/**
+ * Ajouter un lancer
+ */
+function addLancer() {
+    const distance = parseFloat(document.getElementById('input-lancer').value);
+    
+    if (!distance || distance <= 0) {
+        alert('⚠️ Veuillez entrer une distance valide.');
+        return;
+    }
+    
+    diagData.lancer.push(distance);
+    renderLancerResults();
+    
+    document.getElementById('input-lancer').value = '';
+    alert(`✅ Lancer enregistré : ${distance.toFixed(2)}m`);
+}
+
+/**
+ * Afficher les lancers
+ */
+function renderLancerResults() {
+    const container = document.getElementById('lancer-results');
+    
+    if (diagData.lancer.length === 0) {
+        container.innerHTML = '<small style="color: #aaa;">Les lancers apparaîtront ici...</small>';
+        return;
+    }
+    
+    container.innerHTML = diagData.lancer.map((dist, index) => `
+        <div class="result-item">
+            ${dist.toFixed(2)}m
+            <span class="delete-result" onclick="deleteLancer(${index})">✕</span>
+        </div>
+    `).join('');
+}
+
+/**
+ * Supprimer un lancer
+ */
+function deleteLancer(index) {
+    if (confirm('Supprimer ce lancer ?')) {
+        diagData.lancer.splice(index, 1);
+        renderLancerResults();
+    }
+}
+
+// ============================================================================
+// SAUVEGARDE DU DIAGNOSTIC
+// ============================================================================
+
+/**
+ * Enregistrer le diagnostic
+ */
+function saveDiagnostic() {
+    if (!currentDiagStudent) {
+        alert('⚠️ Aucun élève sélectionné.');
+        return;
+    }
+    
+    // Vérifier qu'au moins un test a été fait
+    if (!diagData.vma && diagData.course.length === 0 && diagData.saut.length === 0 && diagData.lancer.length === 0) {
+        alert('⚠️ Veuillez effectuer au moins un test avant d\'enregistrer.');
+        return;
+    }
+    
+    // Préparer les données à sauvegarder
+    const diagnostique = {
+        date: new Date().toISOString(),
+        vma: diagData.vma,
+        vmaTest: diagData.vmaTest,
+        course: {
+            tours: diagData.course.filter(t => t !== null),
+            tempsTotal: diagData.course.filter(t => t !== null).reduce((a, b) => a + b, 0),
+            recup: parseInt(document.getElementById('diag-recup-time').value) || 120
+        },
+        saut: {
+            type: diagData.sautType,
+            elan: diagData.sautElan,
+            essais: diagData.saut,
+            meilleur: diagData.saut.length > 0 ? Math.max(...diagData.saut) : null
+        },
+        lancer: {
+            type: diagData.lancerType,
+            essais: diagData.lancer,
+            meilleur: diagData.lancer.length > 0 ? Math.max(...diagData.lancer) : null
+        }
+    };
+    
+    // Mettre à jour l'élève
+    const studentIndex = storedStudents.findIndex(s => s.id === currentDiagStudent.id);
+    if (studentIndex !== -1) {
+        storedStudents[studentIndex].diagnostique = diagnostique;
+        
+        // Mettre à jour la VMA si test effectué
+        if (diagData.vma) {
+            storedStudents[studentIndex].vma = diagData.vma;
+        }
+        
+        // Sauvegarder
+        if (saveStudentsToStorage()) {
+            alert(`✅ Diagnostic enregistré pour ${currentDiagStudent.nomPrenom} !`);
+            
+            // Retour à la page élèves
+            resetDiagData();
+            document.getElementById('screenDiag').classList.add('hidden');
+            document.getElementById('screen0').classList.remove('hidden');
+            renderStudentsList();
+        }
+    }
+}
 
 // ============================================================================
 // TUNNEL DE CONFIGURATION

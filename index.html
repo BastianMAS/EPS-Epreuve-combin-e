@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EPS PRO - Évaluation Athlétisme Cycle 3</title>
+    <title>EPS PRO - Gestion Élèves & Évaluation Athlétisme</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -463,12 +463,249 @@
         .session-info strong {
             color: var(--accent);
         }
+        
+        /* GESTION ÉLÈVES */
+        .students-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .student-item {
+            background: var(--card);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        
+        .student-item:hover {
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .student-item-info {
+            flex: 1;
+        }
+        
+        .student-item-name {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .student-item-details {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        
+        .student-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        
+        .btn-edit {
+            background: var(--accent);
+            color: black;
+        }
+        
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            text-transform: none;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .stats-bar {
+            background: rgba(0,210,255,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            border: 1px solid var(--accent);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
+<!-- PAGE 0 : GESTION DES ÉLÈVES -->
+<div id="screen0">
+    <h1>EPS<span class="accent-text">PRO</span></h1>
+    <p class="text-center" style="color: var(--accent); margin-bottom: 30px; font-size: 1.1rem;">
+        Gestion des Élèves
+    </p>
+    
+    <div class="config-container">
+        <div class="card">
+            <h2 style="color: var(--accent); margin-bottom: 20px; font-size: 1.5rem;">
+                📋 Mes Élèves
+            </h2>
+            
+            <!-- STATISTIQUES -->
+            <div class="stats-bar" id="students-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="total-students">0</div>
+                    <div class="stat-label">Élèves</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="total-girls">0</div>
+                    <div class="stat-label">Filles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="total-boys">0</div>
+                    <div class="stat-label">Garçons</div>
+                </div>
+            </div>
+            
+            <!-- FORMULAIRE AJOUT/MODIFICATION -->
+            <div id="student-form" style="background: rgba(0,210,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;" id="form-title">
+                    ➕ Ajouter un élève
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nom Prénom *</label>
+                        <input type="text" id="input-nom" placeholder="ex: MARTIN Emma" style="text-transform: uppercase;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>VMA (km/h) *</label>
+                        <input type="number" id="input-vma" step="0.1" placeholder="ex: 10.5">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Sexe *</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="sexe" value="F" id="input-sexe-f">
+                            <span>👧 Fille</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="sexe" value="M" id="input-sexe-m">
+                            <span>🧑 Garçon</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveStudent()" class="btn-action btn-primary" style="flex: 1;">
+                        💾 Enregistrer
+                    </button>
+                    <button onclick="cancelEdit()" id="btn-cancel" class="btn-action" style="background: #666; color: white; display: none;">
+                        ❌ Annuler
+                    </button>
+                </div>
+            </div>
+            
+            <!-- IMPORT EXCEL (optionnel) -->
+            <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--warning);">
+                <label style="color: var(--warning); margin-bottom: 10px;">📁 Import Excel (optionnel)</label>
+                <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 10px;">
+                    Colonnes requises : <strong>Nom Prénom</strong>, <strong>Sexe</strong> (F/M), <strong>VMA</strong>
+                </p>
+                <input type="file" id="import-excel-students" accept=".xlsx, .xls">
+            </div>
+            
+            <!-- LISTE DES ÉLÈVES -->
+            <div>
+                <h3 style="color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">
+                    👥 Liste des élèves
+                </h3>
+                <div id="students-list" class="students-list">
+                    <!-- Rempli dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- BOUTONS D'ACTION -->
+            <div style="margin-top: 30px; display: flex; gap: 15px;">
+                <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1;">
+                    ➡️ CONFIGURER UNE SÉANCE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PAGE 1 : CONFIGURATION -->
-<div id="screen1">
+<div id="screen1" class="hidden">
     <h1>EPS<span class="accent-text">PRO</span></h1>
     <p class="text-center" style="color: var(--accent); margin-bottom: 30px; font-size: 1.1rem;">
         Évaluation Athlétisme - Cycle 3
@@ -522,13 +759,12 @@
                 </button>
             </div>
             
-            <!-- ÉTAPE 6 : IMPORT EXCEL -->
+            <!-- ÉTAPE 6 : VALIDATION -->
             <div id="step6" class="step">
-                <label>6️⃣ Importer la Liste des Élèves</label>
-                <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 10px;">
-                    Le fichier Excel doit contenir : <strong>Nom Prénom</strong>, <strong>Sexe</strong> (F ou M), <strong>VMA</strong> (km/h)
+                <label>6️⃣ Validation</label>
+                <p style="font-size: 0.85rem; color: var(--success); margin-bottom: 15px;">
+                    ✅ ${storedStudents.length} élève(s) disponible(s)
                 </p>
-                <input type="file" id="importExcel" accept=".xlsx, .xls">
                 <button class="btn-action btn-primary mt-2" onclick="launchTerrain()">
                     🚀 LANCER LE TERRAIN
                 </button>
@@ -540,8 +776,8 @@
 <!-- PAGE 2 : TERRAIN -->
 <div id="screen2" class="hidden">
     <div class="terrain-header">
-        <button class="btn-back" onclick="location.reload()">
-            ← Retour Configuration
+        <button class="btn-back" onclick="backToStudents()">
+            ← Retour Gestion Élèves
         </button>
         <div class="session-info">
             <div><strong>Classe :</strong> <span id="info-classe"></span></div>
@@ -570,6 +806,7 @@
 // ============================================================================
 let studentData = {};
 let allStudents = [];
+let storedStudents = []; // Liste des élèves en localStorage
 let maxLaps = 3;
 let sessionConfig = {
     cycle: '',
@@ -577,6 +814,349 @@ let sessionConfig = {
     ateliers: '',
     epreuve: '',
     recup: 120
+};
+let editingStudentId = null; // Pour savoir si on est en mode édition
+
+// ============================================================================
+// INITIALISATION AU CHARGEMENT
+// ============================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    loadStudentsFromStorage();
+    renderStudentsList();
+    updateStudentsStats();
+});
+
+// ============================================================================
+// GESTION LOCALSTORAGE - ÉLÈVES
+// ============================================================================
+
+/**
+ * Charger les élèves depuis le localStorage
+ */
+function loadStudentsFromStorage() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if (stored) {
+        try {
+            storedStudents = JSON.parse(stored);
+            console.log(`✅ ${storedStudents.length} élève(s) chargé(s) depuis localStorage`);
+        } catch (e) {
+            console.error('❌ Erreur lors du chargement des élèves:', e);
+            storedStudents = [];
+        }
+    } else {
+        storedStudents = [];
+    }
+}
+
+/**
+ * Sauvegarder les élèves dans le localStorage
+ */
+function saveStudentsToStorage() {
+    try {
+        localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+        console.log('✅ Élèves sauvegardés dans localStorage');
+        return true;
+    } catch (e) {
+        console.error('❌ Erreur lors de la sauvegarde:', e);
+        alert('⚠️ Erreur lors de la sauvegarde. Vérifiez l\'espace disponible.');
+        return false;
+    }
+}
+
+/**
+ * Générer un ID unique pour un élève
+ */
+function generateStudentId(nom) {
+    return nom.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Enlever accents
+        .replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+}
+
+/**
+ * Sauvegarder ou modifier un élève
+ */
+function saveStudent() {
+    const nom = document.getElementById('input-nom').value.trim().toUpperCase();
+    const vma = parseFloat(document.getElementById('input-vma').value);
+    const sexe = document.querySelector('input[name="sexe"]:checked')?.value;
+    
+    // Validation
+    if (!nom) {
+        alert('⚠️ Veuillez saisir le nom et prénom de l\'élève.');
+        return;
+    }
+    
+    if (!vma || vma <= 0 || vma > 25) {
+        alert('⚠️ Veuillez saisir une VMA valide (entre 1 et 25 km/h).');
+        return;
+    }
+    
+    if (!sexe) {
+        alert('⚠️ Veuillez sélectionner le sexe de l\'élève.');
+        return;
+    }
+    
+    // Mode édition
+    if (editingStudentId) {
+        const index = storedStudents.findIndex(s => s.id === editingStudentId);
+        if (index !== -1) {
+            storedStudents[index] = {
+                ...storedStudents[index],
+                nomPrenom: nom,
+                vma: vma,
+                sexe: sexe
+            };
+            editingStudentId = null;
+            document.getElementById('btn-cancel').style.display = 'none';
+            document.getElementById('form-title').textContent = '➕ Ajouter un élève';
+        }
+    } 
+    // Mode ajout
+    else {
+        // Vérifier si l'élève existe déjà
+        const exists = storedStudents.find(s => s.nomPrenom === nom);
+        if (exists) {
+            alert('⚠️ Un élève avec ce nom existe déjà.');
+            return;
+        }
+        
+        const newStudent = {
+            id: generateStudentId(nom),
+            nomPrenom: nom,
+            sexe: sexe,
+            vma: vma,
+            dateCreation: new Date().toISOString(),
+            diagnostique: null,
+            projet: null,
+            seances: []
+        };
+        
+        storedStudents.push(newStudent);
+    }
+    
+    // Sauvegarder et rafraîchir
+    if (saveStudentsToStorage()) {
+        resetForm();
+        renderStudentsList();
+        updateStudentsStats();
+        alert('✅ Élève enregistré avec succès !');
+    }
+}
+
+/**
+ * Réinitialiser le formulaire
+ */
+function resetForm() {
+    document.getElementById('input-nom').value = '';
+    document.getElementById('input-vma').value = '';
+    document.querySelectorAll('input[name="sexe"]').forEach(r => r.checked = false);
+    editingStudentId = null;
+    document.getElementById('btn-cancel').style.display = 'none';
+    document.getElementById('form-title').textContent = '➕ Ajouter un élève';
+}
+
+/**
+ * Annuler l'édition
+ */
+function cancelEdit() {
+    resetForm();
+}
+
+/**
+ * Éditer un élève
+ */
+function editStudent(id) {
+    const student = storedStudents.find(s => s.id === id);
+    if (!student) return;
+    
+    document.getElementById('input-nom').value = student.nomPrenom;
+    document.getElementById('input-vma').value = student.vma;
+    document.getElementById(`input-sexe-${student.sexe.toLowerCase()}`).checked = true;
+    
+    editingStudentId = id;
+    document.getElementById('btn-cancel').style.display = 'block';
+    document.getElementById('form-title').textContent = '✏️ Modifier l\'élève';
+    
+    // Scroller vers le formulaire
+    document.getElementById('student-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Supprimer un élève
+ */
+function deleteStudent(id) {
+    const student = storedStudents.find(s => s.id === id);
+    if (!student) return;
+    
+    if (!confirm(`⚠️ Supprimer ${student.nomPrenom} ?\n\nToutes ses données seront définitivement effacées.`)) {
+        return;
+    }
+    
+    storedStudents = storedStudents.filter(s => s.id !== id);
+    
+    if (saveStudentsToStorage()) {
+        renderStudentsList();
+        updateStudentsStats();
+        alert('✅ Élève supprimé.');
+    }
+}
+
+/**
+ * Afficher la liste des élèves
+ */
+function renderStudentsList() {
+    const container = document.getElementById('students-list');
+    
+    if (storedStudents.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <p style="font-size: 1.1rem; margin-bottom: 10px;">Aucun élève enregistré</p>
+                <p style="font-size: 0.85rem;">Ajoutez des élèves pour commencer</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Trier par nom
+    const sorted = [...storedStudents].sort((a, b) => a.nomPrenom.localeCompare(b.nomPrenom));
+    
+    container.innerHTML = sorted.map(student => `
+        <div class="student-item">
+            <div class="student-item-info">
+                <div class="student-item-name">
+                    ${student.sexe === 'F' ? '👧' : '🧑'} ${student.nomPrenom}
+                </div>
+                <div class="student-item-details">
+                    ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | VMA: ${student.vma} km/h
+                </div>
+            </div>
+            <div class="student-item-actions">
+                <button onclick="editStudent('${student.id}')" class="btn-small btn-edit">
+                    ✏️ Modifier
+                </button>
+                <button onclick="deleteStudent('${student.id}')" class="btn-small btn-delete">
+                    🗑️ Supprimer
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * Mettre à jour les statistiques
+ */
+function updateStudentsStats() {
+    const total = storedStudents.length;
+    const girls = storedStudents.filter(s => s.sexe === 'F').length;
+    const boys = storedStudents.filter(s => s.sexe === 'M').length;
+    
+    document.getElementById('total-students').textContent = total;
+    document.getElementById('total-girls').textContent = girls;
+    document.getElementById('total-boys').textContent = boys;
+}
+
+/**
+ * Passer à la configuration de séance
+ */
+function goToConfig() {
+    if (storedStudents.length === 0) {
+        alert('⚠️ Veuillez ajouter au moins un élève avant de configurer une séance.');
+        return;
+    }
+    
+    // Copier les élèves dans allStudents pour compatibilité
+    allStudents = storedStudents.map(s => ({
+        'Nom Prénom': s.nomPrenom,
+        'Sexe': s.sexe,
+        'VMA': s.vma
+    }));
+    
+    document.getElementById('screen0').classList.add('hidden');
+    document.getElementById('screen1').classList.remove('hidden');
+}
+
+/**
+ * Retour à la gestion des élèves
+ */
+function backToStudents() {
+    if (confirm('⚠️ Retour à la gestion des élèves ?\n\nLa séance en cours sera perdue.')) {
+        location.reload();
+    }
+}
+
+/**
+ * Import Excel des élèves
+ */
+document.getElementById('import-excel-students').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        try {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const imported = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (imported.length === 0) {
+                alert('❌ Le fichier Excel est vide.');
+                return;
+            }
+            
+            // Vérifier les colonnes
+            const first = imported[0];
+            if (!first['Nom Prénom'] || !first['Sexe'] || !first['VMA']) {
+                alert('❌ Le fichier doit contenir : "Nom Prénom", "Sexe" (F/M), "VMA"');
+                return;
+            }
+            
+            let added = 0;
+            let skipped = 0;
+            
+            imported.forEach(row => {
+                const nom = row['Nom Prénom'].trim().toUpperCase();
+                const sexe = row['Sexe'].toUpperCase();
+                const vma = parseFloat(row['VMA']);
+                
+                // Validation
+                if (!nom || (sexe !== 'F' && sexe !== 'M') || !vma || vma <= 0) {
+                    skipped++;
+                    return;
+                }
+                
+                // Vérifier si existe déjà
+                if (storedStudents.find(s => s.nomPrenom === nom)) {
+                    skipped++;
+                    return;
+                }
+                
+                storedStudents.push({
+                    id: generateStudentId(nom),
+                    nomPrenom: nom,
+                    sexe: sexe,
+                    vma: vma,
+                    dateCreation: new Date().toISOString(),
+                    diagnostique: null,
+                    projet: null,
+                    seances: []
+                });
+                added++;
+            });
+            
+            if (saveStudentsToStorage()) {
+                renderStudentsList();
+                updateStudentsStats();
+                alert(`✅ Import terminé !\n\n${added} élève(s) ajouté(s)\n${skipped} ignoré(s) (doublons ou erreurs)`);
+            }
+            
+        } catch (error) {
+            alert('❌ Erreur lors de l\'import : ' + error.message);
+        }
+    };
+    reader.readAsBinaryString(file);
 };
 
 // ============================================================================
@@ -624,49 +1204,11 @@ function updateTunnel(stepNumber) {
 }
 
 // ============================================================================
-// IMPORT EXCEL
-// ============================================================================
-document.getElementById('importExcel').onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-        try {
-            const data = evt.target.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            allStudents = XLSX.utils.sheet_to_json(worksheet);
-            
-            if (allStudents.length === 0) {
-                alert('❌ Le fichier Excel est vide ou mal formaté.');
-                return;
-            }
-            
-            // Vérifier les colonnes requises
-            const firstStudent = allStudents[0];
-            if (!firstStudent['Nom Prénom'] || !firstStudent['Sexe'] || !firstStudent['VMA']) {
-                alert('❌ Le fichier doit contenir les colonnes : "Nom Prénom", "Sexe" (F/M) et "VMA" (km/h)');
-                allStudents = [];
-                return;
-            }
-            
-            alert(`✅ ${allStudents.length} élève(s) importé(s) avec succès !`);
-        } catch (error) {
-            alert('❌ Erreur lors de la lecture du fichier : ' + error.message);
-            allStudents = [];
-        }
-    };
-    reader.readAsBinaryString(file);
-};
-
-// ============================================================================
 // LANCEMENT DU TERRAIN
 // ============================================================================
 function launchTerrain() {
     if (allStudents.length === 0) {
-        alert('⚠️ Veuillez d\'abord importer un fichier Excel avec la liste des élèves.');
+        alert('⚠️ Aucun élève disponible. Retournez à la gestion des élèves.');
         return;
     }
     

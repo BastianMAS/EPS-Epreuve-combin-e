@@ -770,6 +770,47 @@
             font-size: 1rem;
             color: var(--warning);
         }
+        
+        .photo-section {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            margin: 15px auto;
+            border-radius: 15px;
+            border: 3px dashed var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: rgba(0,210,255,0.1);
+        }
+        
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-placeholder {
+            font-size: 3rem;
+            color: var(--accent);
+        }
+        
+        .btn-photo {
+            background: var(--accent);
+            color: black;
+            padding: 12px 25px;
+            margin: 5px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -813,6 +854,11 @@
                     <div class="form-group">
                         <label>Nom Prénom *</label>
                         <input type="text" id="input-nom" placeholder="ex: MARTIN Emma" style="text-transform: uppercase;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Âge (ans) *</label>
+                        <input type="number" id="input-age" min="10" max="18" placeholder="ex: 12">
                     </div>
                     
                     <div class="form-group">
@@ -897,6 +943,23 @@
                 <option value="">-- Choisir un élève --</option>
             </select>
             <div id="diag-student-info" class="current-student-info"></div>
+            
+            <!-- SECTION PHOTO -->
+            <div id="photo-section" class="photo-section hidden">
+                <label style="color: var(--accent); font-size: 1rem; margin-bottom: 10px;">
+                    📸 PHOTO DE L'ÉLÈVE
+                </label>
+                <div class="photo-preview" id="photo-preview">
+                    <div class="photo-placeholder">📷</div>
+                </div>
+                <input type="file" id="photo-input" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoUpload(event)">
+                <button class="btn-photo" onclick="document.getElementById('photo-input').click()">
+                    📷 Prendre / Choisir une photo
+                </button>
+                <button class="btn-photo" onclick="deletePhoto()" style="background: var(--danger); color: white;">
+                    🗑️ Supprimer
+                </button>
+            </div>
         </div>
         
         <div id="diag-tests-container" style="display: none;">
@@ -1262,12 +1325,18 @@ function generateStudentId(nom) {
  */
 function saveStudent() {
     const nom = document.getElementById('input-nom').value.trim().toUpperCase();
+    const age = parseInt(document.getElementById('input-age').value);
     const vma = parseFloat(document.getElementById('input-vma').value);
     const sexe = document.querySelector('input[name="sexe"]:checked')?.value;
     
     // Validation
     if (!nom) {
         alert('⚠️ Veuillez saisir le nom et prénom de l\'élève.');
+        return;
+    }
+    
+    if (!age || age < 10 || age > 18) {
+        alert('⚠️ Veuillez saisir un âge valide (entre 10 et 18 ans).');
         return;
     }
     
@@ -1288,6 +1357,7 @@ function saveStudent() {
             storedStudents[index] = {
                 ...storedStudents[index],
                 nomPrenom: nom,
+                age: age,
                 vma: vma,
                 sexe: sexe
             };
@@ -1309,7 +1379,9 @@ function saveStudent() {
             id: generateStudentId(nom),
             nomPrenom: nom,
             sexe: sexe,
+            age: age,
             vma: vma,
+            photo: null,
             dateCreation: new Date().toISOString(),
             diagnostique: null,
             projet: null,
@@ -1333,6 +1405,7 @@ function saveStudent() {
  */
 function resetForm() {
     document.getElementById('input-nom').value = '';
+    document.getElementById('input-age').value = '';
     document.getElementById('input-vma').value = '';
     document.querySelectorAll('input[name="sexe"]').forEach(r => r.checked = false);
     editingStudentId = null;
@@ -1355,6 +1428,7 @@ function editStudent(id) {
     if (!student) return;
     
     document.getElementById('input-nom').value = student.nomPrenom;
+    document.getElementById('input-age').value = student.age || '';
     document.getElementById('input-vma').value = student.vma;
     document.getElementById(`input-sexe-${student.sexe.toLowerCase()}`).checked = true;
     
@@ -1413,7 +1487,7 @@ function renderStudentsList() {
                     ${student.sexe === 'F' ? '👧' : '🧑'} ${student.nomPrenom}
                 </div>
                 <div class="student-item-details">
-                    ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | VMA: ${student.vma} km/h
+                    ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | ${student.age || '?'} ans | VMA: ${student.vma} km/h
                 </div>
             </div>
             <div class="student-item-actions">
@@ -1609,6 +1683,7 @@ function selectDiagStudent() {
     const studentId = document.getElementById('diag-student-select').value;
     if (!studentId) {
         document.getElementById('diag-tests-container').style.display = 'none';
+        document.getElementById('photo-section').classList.add('hidden');
         currentDiagStudent = null;
         return;
     }
@@ -1621,14 +1696,24 @@ function selectDiagStudent() {
     
     // Afficher les infos de l'élève
     document.getElementById('diag-student-info').innerHTML = 
-        `<strong>${student.sexe === 'F' ? '👧 Fille' : '🧑 Garçon'}</strong> | VMA actuelle: <strong>${student.vma} km/h</strong>`;
+        `<strong>${student.sexe === 'F' ? '👧 Fille' : '🧑 Garçon'}</strong> | ${student.age || '?'} ans | VMA: <strong>${student.vma} km/h</strong>`;
+    
+    // Afficher la section photo
+    document.getElementById('photo-section').classList.remove('hidden');
+    
+    // Charger la photo si elle existe
+    const photoPreview = document.getElementById('photo-preview');
+    if (student.photo) {
+        photoPreview.innerHTML = `<img src="${student.photo}" alt="Photo élève">`;
+    } else {
+        photoPreview.innerHTML = '<div class="photo-placeholder">📷</div>';
+    }
     
     // Afficher les tests
     document.getElementById('diag-tests-container').style.display = 'block';
     
     // Charger le diagnostic existant si présent
     if (student.diagnostique) {
-        // TODO: pré-remplir les données
         alert('ℹ️ Cet élève a déjà un diagnostic. Vous pouvez le modifier.');
     }
 }
@@ -2014,6 +2099,103 @@ function saveDiagnostic() {
             document.getElementById('screen0').classList.remove('hidden');
             renderStudentsList();
         }
+    }
+}
+
+// ============================================================================
+// GESTION PHOTO
+// ============================================================================
+
+/**
+ * Gérer l'upload de photo
+ */
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Vérifier que c'est une image
+    if (!file.type.startsWith('image/')) {
+        alert('⚠️ Veuillez sélectionner une image.');
+        return;
+    }
+    
+    // Vérifier la taille (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        alert('⚠️ L\'image est trop grande. Maximum 2 MB.');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            // Redimensionner l'image à 300x300 max
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxSize = 300;
+            
+            if (width > height) {
+                if (width > maxSize) {
+                    height *= maxSize / width;
+                    width = maxSize;
+                }
+            } else {
+                if (height > maxSize) {
+                    width *= maxSize / height;
+                    height = maxSize;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Convertir en base64
+            const photoData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Mettre à jour l'élève
+            if (currentDiagStudent) {
+                const studentIndex = storedStudents.findIndex(s => s.id === currentDiagStudent.id);
+                if (studentIndex !== -1) {
+                    storedStudents[studentIndex].photo = photoData;
+                    saveStudentsToStorage();
+                    
+                    // Afficher la preview
+                    document.getElementById('photo-preview').innerHTML = `<img src="${photoData}" alt="Photo élève">`;
+                    
+                    alert('✅ Photo enregistrée !');
+                }
+            }
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+/**
+ * Supprimer la photo
+ */
+function deletePhoto() {
+    if (!currentDiagStudent) return;
+    
+    if (!confirm('🗑️ Supprimer la photo de cet élève ?')) {
+        return;
+    }
+    
+    const studentIndex = storedStudents.findIndex(s => s.id === currentDiagStudent.id);
+    if (studentIndex !== -1) {
+        storedStudents[studentIndex].photo = null;
+        saveStudentsToStorage();
+        
+        // Réinitialiser la preview
+        document.getElementById('photo-preview').innerHTML = '<div class="photo-placeholder">📷</div>';
+        
+        // Réinitialiser l'input
+        document.getElementById('photo-input').value = '';
+        
+        alert('✅ Photo supprimée !');
     }
 }
 

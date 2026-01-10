@@ -1258,9 +1258,9 @@ let diagData = {
     vmaTest: null,
     course: [],
     courseRecup: 120,
-    saut: [],
-    sautType: null,
-    sautElan: null,
+    sautDetente: [], // Sans élan
+    sautElan: [],    // Avec élan
+    sautElanDistance: null, // Distance d'élan
     lancer: [],
     lancerType: null
 };
@@ -1660,9 +1660,9 @@ function resetDiagData() {
         vmaTest: null,
         course: [],
         courseRecup: 120,
-        saut: [],
-        sautType: null,
-        sautElan: null,
+        sautDetente: [],
+        sautElan: [],
+        sautElanDistance: null,
         lancer: [],
         lancerType: null
     };
@@ -1895,18 +1895,18 @@ function selectSautType(type) {
     // Sélectionner
     event.target.closest('.option-btn').classList.add('selected');
     
-    diagData.sautType = type;
-    diagData.saut = [];
-    
     // Afficher l'input
     document.getElementById('saut-input').classList.remove('hidden');
     
-    // Afficher/masquer distance élan
+    // Afficher/masquer distance élan selon le type
     if (type === 'elan') {
         document.getElementById('elan-distance').classList.remove('hidden');
     } else {
         document.getElementById('elan-distance').classList.add('hidden');
     }
+    
+    // Stocker le type actuellement sélectionné (temporaire, pour savoir où ajouter)
+    diagData.currentSautType = type;
     
     renderSautResults();
 }
@@ -1922,13 +1922,21 @@ function addSaut() {
         return;
     }
     
-    // Si avec élan, enregistrer la distance d'élan
-    if (diagData.sautType === 'elan') {
-        const elan = parseInt(document.getElementById('input-elan-distance').value);
-        diagData.sautElan = elan;
+    if (!diagData.currentSautType) {
+        alert('⚠️ Veuillez d\'abord sélectionner un type de saut.');
+        return;
     }
     
-    diagData.saut.push(distance);
+    // Ajouter dans le bon tableau
+    if (diagData.currentSautType === 'detente') {
+        diagData.sautDetente.push(distance);
+    } else {
+        // Si avec élan, enregistrer aussi la distance d'élan
+        const elan = parseInt(document.getElementById('input-elan-distance').value);
+        diagData.sautElanDistance = elan;
+        diagData.sautElan.push(distance);
+    }
+    
     renderSautResults();
     
     document.getElementById('input-saut').value = '';
@@ -1941,25 +1949,50 @@ function addSaut() {
 function renderSautResults() {
     const container = document.getElementById('saut-results');
     
-    if (diagData.saut.length === 0) {
+    if (diagData.sautDetente.length === 0 && diagData.sautElan.length === 0) {
         container.innerHTML = '<small style="color: #aaa;">Les sauts apparaîtront ici...</small>';
         return;
     }
     
-    container.innerHTML = diagData.saut.map((dist, index) => `
-        <div class="result-item">
-            ${dist.toFixed(2)}m
-            <span class="delete-result" onclick="deleteSaut(${index})">✕</span>
-        </div>
-    `).join('');
+    let html = '';
+    
+    // Détente horizontale (sans élan)
+    if (diagData.sautDetente.length > 0) {
+        html += '<div style="margin-bottom: 10px;"><strong style="color: var(--accent);">Détente horizontale (sans élan) :</strong><br>';
+        html += diagData.sautDetente.map((dist, index) => `
+            <div class="result-item">
+                ${dist.toFixed(2)}m
+                <span class="delete-result" onclick="deleteSaut('detente', ${index})">✕</span>
+            </div>
+        `).join('');
+        html += '</div>';
+    }
+    
+    // Avec élan
+    if (diagData.sautElan.length > 0) {
+        html += `<div style="margin-bottom: 10px;"><strong style="color: var(--success);">Avec élan (${diagData.sautElanDistance || '?'}m) :</strong><br>`;
+        html += diagData.sautElan.map((dist, index) => `
+            <div class="result-item">
+                ${dist.toFixed(2)}m
+                <span class="delete-result" onclick="deleteSaut('elan', ${index})">✕</span>
+            </div>
+        `).join('');
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
 }
 
 /**
  * Supprimer un saut
  */
-function deleteSaut(index) {
+function deleteSaut(type, index) {
     if (confirm('Supprimer ce saut ?')) {
-        diagData.saut.splice(index, 1);
+        if (type === 'detente') {
+            diagData.sautDetente.splice(index, 1);
+        } else {
+            diagData.sautElan.splice(index, 1);
+        }
         renderSautResults();
     }
 }
@@ -2051,7 +2084,7 @@ function saveDiagnostic() {
     }
     
     // Vérifier qu'au moins un test a été fait
-    if (!diagData.vma && diagData.course.length === 0 && diagData.saut.length === 0 && diagData.lancer.length === 0) {
+    if (!diagData.vma && diagData.course.length === 0 && diagData.sautDetente.length === 0 && diagData.sautElan.length === 0 && diagData.lancer.length === 0) {
         alert('⚠️ Veuillez effectuer au moins un test avant d\'enregistrer.');
         return;
     }
@@ -2066,11 +2099,14 @@ function saveDiagnostic() {
             tempsTotal: diagData.course.filter(t => t !== null).reduce((a, b) => a + b, 0),
             recup: parseInt(document.getElementById('diag-recup-time').value) || 120
         },
-        saut: {
-            type: diagData.sautType,
-            elan: diagData.sautElan,
-            essais: diagData.saut,
-            meilleur: diagData.saut.length > 0 ? Math.max(...diagData.saut) : null
+        sautDetente: {
+            essais: diagData.sautDetente,
+            meilleur: diagData.sautDetente.length > 0 ? Math.max(...diagData.sautDetente) : null
+        },
+        sautElan: {
+            distanceElan: diagData.sautElanDistance,
+            essais: diagData.sautElan,
+            meilleur: diagData.sautElan.length > 0 ? Math.max(...diagData.sautElan) : null
         },
         lancer: {
             type: diagData.lancerType,

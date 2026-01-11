@@ -1931,8 +1931,13 @@ function renderCourseResults() {
         const sexe = currentDiagStudent.sexe;
         
         // Calculer le niveau selon le barème
-        const niveau = getNoteCourse(tempsTotal, sexe, 'CSL');
-        const motivant = getNiveauMotivant(niveau.niveau);
+        const niveauData = getNoteCourse(tempsTotal, sexe, 'CSL');
+        
+        // Extraire le numéro de niveau
+        const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
+        const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
+        
+        const motivant = getNiveauMotivant(niveauNum);
         
         feedbackContent.innerHTML = `
             <div class="diag-feedback-item">
@@ -2073,8 +2078,13 @@ function renderSautResults() {
         // Analyse détente
         if (diagData.sautDetente.length > 0) {
             const meilleurDetente = Math.max(...diagData.sautDetente);
-            const niveauDetente = getNoteSaut(meilleurDetente, sexe, 'CSL');
-            const motivant = getNiveauMotivant(niveauDetente.niveau);
+            const niveauData = getNoteSaut(meilleurDetente, sexe, 'CSL');
+            
+            // Extraire le numéro de niveau
+            const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
+            const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
+            
+            const motivant = getNiveauMotivant(niveauNum);
             feedback += `
                 <div class="diag-feedback-item">
                     🦘 Meilleur saut sans élan : <strong>${meilleurDetente.toFixed(2)}m</strong>
@@ -2091,8 +2101,13 @@ function renderSautResults() {
         // Analyse avec élan
         if (diagData.sautElan.length > 0) {
             const meilleurElan = Math.max(...diagData.sautElan);
-            const niveauElan = getNoteSaut(meilleurElan, sexe, 'CSL');
-            const motivant = getNiveauMotivant(niveauElan.niveau);
+            const niveauData = getNoteSaut(meilleurElan, sexe, 'CSL');
+            
+            // Extraire le numéro de niveau
+            const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
+            const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
+            
+            const motivant = getNiveauMotivant(niveauNum);
             
             if (diagData.sautDetente.length > 0) {
                 feedback += '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);"></div>';
@@ -2231,8 +2246,13 @@ function renderLancerResults() {
     if (diagData.lancer.length > 0 && currentDiagStudent && diagData.lancerType) {
         const meilleur = Math.max(...diagData.lancer);
         const sexe = currentDiagStudent.sexe;
-        const niveau = getNoteLancer(meilleur, sexe, 'CSL');
-        const motivant = getNiveauMotivant(niveau.niveau);
+        const niveauData = getNoteLancer(meilleur, sexe, 'CSL');
+        
+        // Extraire le numéro de niveau du texte "Niveau 7 (Très bon -)"
+        const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
+        const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
+        
+        const motivant = getNiveauMotivant(niveauNum);
         const enginLabel = diagData.lancerType === 'vortex' ? 'Vortex' : 'Poids 1kg';
         
         feedbackContent.innerHTML = `

@@ -1928,28 +1928,50 @@ function renderCourseResults() {
     if (toursComplets.length === 3 && currentDiagStudent) {
         const tempsTotal = toursComplets.reduce((a, b) => a + b, 0);
         const tempsFormate = formatTotal(tempsTotal);
-        const sexe = currentDiagStudent.sexe;
+        const vma = parseFloat(currentDiagStudent.vma);
         
-        // Calculer le niveau selon le barème
-        const niveauData = getNoteCourse(tempsTotal, sexe, 'CSL');
+        // Calculer le % VMA si VMA disponible
+        if (vma > 0) {
+            // Temps moyen par tour en secondes
+            const tempsMoyenSec = (tempsTotal / 1000) / 3;
+            
+            // Vitesse moyenne en km/h : 0.4 km / (temps en heures)
+            const vitesseMoyenne = 0.4 / (tempsMoyenSec / 3600);
+            
+            // % VMA
+            const pourcentVMA = (vitesseMoyenne / vma) * 100;
+            
+            // Étoiles basées sur le % VMA
+            const motivant = getNiveauMotivantVMA(pourcentVMA);
+            
+            feedbackContent.innerHTML = `
+                <div class="diag-feedback-item">
+                    ⏱️ Temps total : <strong>${tempsFormate}</strong>
+                </div>
+                <div class="diag-feedback-item">
+                    💪 Intensité : <strong>${pourcentVMA.toFixed(1)}% VMA</strong>
+                </div>
+                ${motivant.etoiles ? `
+                    <div class="diag-feedback-item" style="font-size: 1.3rem; margin: 10px 0;">
+                        ${motivant.etoiles}
+                    </div>
+                ` : ''}
+                <div class="diag-feedback-item" style="color: ${motivant.color}; font-weight: 800; font-size: 1.1rem;">
+                    ${motivant.message}
+                </div>
+            `;
+        } else {
+            // Pas de VMA, on affiche juste le temps
+            feedbackContent.innerHTML = `
+                <div class="diag-feedback-item">
+                    ⏱️ Temps total : <strong>${tempsFormate}</strong>
+                </div>
+                <div class="diag-feedback-item" style="color: #aaa; font-style: italic;">
+                    Renseigne ta VMA pour avoir une analyse complète !
+                </div>
+            `;
+        }
         
-        // Extraire le numéro de niveau
-        const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
-        const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
-        
-        const motivant = getNiveauMotivant(niveauNum);
-        
-        feedbackContent.innerHTML = `
-            <div class="diag-feedback-item">
-                ⏱️ Temps total : <strong>${tempsFormate}</strong>
-            </div>
-            <div class="diag-feedback-item" style="font-size: 1.3rem; margin: 10px 0;">
-                ${motivant.etoiles}
-            </div>
-            <div class="diag-feedback-item" style="color: ${motivant.color}; font-weight: 800; font-size: 1.1rem;">
-                ${motivant.message}
-            </div>
-        `;
         feedbackContainer.classList.remove('hidden');
     } else {
         feedbackContainer.classList.add('hidden');
@@ -2343,6 +2365,43 @@ function saveDiagnostic() {
 // ============================================================================
 // FEEDBACK MOTIVANT POUR DIAGNOSTIC
 // ============================================================================
+
+/**
+ * Convertir un % VMA en étoiles et message motivant (pour la course)
+ */
+function getNiveauMotivantVMA(pourcentVMA) {
+    if (pourcentVMA >= 120) {
+        return {
+            etoiles: '⭐⭐⭐⭐',
+            message: 'EXCELLENT ! 🔥',
+            color: '#00ff88'
+        };
+    } else if (pourcentVMA >= 110) {
+        return {
+            etoiles: '⭐⭐⭐',
+            message: 'Très bien, bravo !',
+            color: '#00d2ff'
+        };
+    } else if (pourcentVMA >= 100) {
+        return {
+            etoiles: '⭐⭐',
+            message: 'Pas mal, continue !',
+            color: '#ffcc00'
+        };
+    } else if (pourcentVMA >= 90) {
+        return {
+            etoiles: '⭐',
+            message: 'Allez, tu peux mieux faire !',
+            color: '#ff8800'
+        };
+    } else {
+        return {
+            etoiles: '',
+            message: 'Augmente ton intensité !',
+            color: '#ff4bb4'
+        };
+    }
+}
 
 /**
  * Convertir un niveau (1-8) en étoiles et message motivant

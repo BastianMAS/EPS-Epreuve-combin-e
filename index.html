@@ -2075,30 +2075,17 @@ function renderSautResults() {
         let feedback = '';
         const sexe = currentDiagStudent.sexe;
         
-        // Analyse détente
+        // Analyse détente (SANS étoiles ni niveau)
         if (diagData.sautDetente.length > 0) {
             const meilleurDetente = Math.max(...diagData.sautDetente);
-            const niveauData = getNoteSaut(meilleurDetente, sexe, 'CSL');
-            
-            // Extraire le numéro de niveau
-            const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
-            const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
-            
-            const motivant = getNiveauMotivant(niveauNum);
             feedback += `
                 <div class="diag-feedback-item">
                     🦘 Meilleur saut sans élan : <strong>${meilleurDetente.toFixed(2)}m</strong>
                 </div>
-                <div class="diag-feedback-item" style="font-size: 1.2rem;">
-                    ${motivant.etoiles}
-                </div>
-                <div class="diag-feedback-item" style="color: ${motivant.color}; font-weight: 700;">
-                    ${motivant.message}
-                </div>
             `;
         }
         
-        // Analyse avec élan
+        // Analyse avec élan (AVEC étoiles et niveau)
         if (diagData.sautElan.length > 0) {
             const meilleurElan = Math.max(...diagData.sautElan);
             const niveauData = getNoteSaut(meilleurElan, sexe, 'CSL');

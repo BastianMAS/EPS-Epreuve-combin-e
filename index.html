@@ -1067,6 +1067,12 @@
                         <input type="number" id="diag-recup-time" value="120" min="30" max="300" style="max-width: 150px;">
                     </div>
                     
+                    <!-- TEMPS CIBLES -->
+                    <div id="course-temps-cibles" class="diag-feedback hidden">
+                        <div class="diag-feedback-title">🎯 TES TEMPS CIBLES</div>
+                        <div id="course-temps-cibles-content"></div>
+                    </div>
+                    
                     <label>Temps des 3 tours (format MM:SS) :</label>
                     <div class="result-input-group">
                         <input type="text" class="result-input" id="input-tour1" placeholder="Tour 1: ex 02:05" style="grid-column: 1;">
@@ -1762,6 +1768,9 @@ function selectDiagStudent() {
     // Afficher les tests
     document.getElementById('diag-tests-container').style.display = 'block';
     
+    // Afficher les temps cibles si VMA disponible
+    displayTempsCibles();
+    
     // Charger le diagnostic existant si présent
     if (student.diagnostique) {
         alert('ℹ️ Cet élève a déjà un diagnostic. Vous pouvez le modifier.');
@@ -1782,6 +1791,58 @@ function toggleTest(testName) {
         content.classList.add('visible');
         toggle.textContent = '▲';
     }
+}
+
+/**
+ * Afficher les temps cibles selon la VMA
+ */
+function displayTempsCibles() {
+    const container = document.getElementById('course-temps-cibles');
+    const content = document.getElementById('course-temps-cibles-content');
+    
+    if (!currentDiagStudent || !currentDiagStudent.vma || currentDiagStudent.vma <= 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    const vma = parseFloat(currentDiagStudent.vma);
+    
+    // Calculer les temps pour chaque intensité
+    const intensites = [
+        { pourcent: 90, label: '90% VMA', color: '#ff8800', emoji: '🟧' },
+        { pourcent: 100, label: '100% VMA', color: '#ffcc00', emoji: '🟡' },
+        { pourcent: 110, label: '110% VMA', color: '#00d2ff', emoji: '🔵' },
+        { pourcent: 120, label: '120% VMA', color: '#00ff88', emoji: '🟢' }
+    ];
+    
+    let html = `<div style="text-align: center; margin-bottom: 10px; color: var(--accent); font-weight: 700;">VMA : ${vma} km/h</div>`;
+    
+    intensites.forEach(int => {
+        // Vitesse cible en km/h
+        const vitesseCible = vma * (int.pourcent / 100);
+        
+        // Temps pour 400m en secondes : (0.4 km / vitesse) * 3600
+        const tempsSecondes = (0.4 / vitesseCible) * 3600;
+        
+        // Formater en MM:SS
+        const minutes = Math.floor(tempsSecondes / 60);
+        const secondes = Math.round(tempsSecondes % 60);
+        const tempsFormate = `${minutes}:${secondes.toString().padStart(2, '0')}`;
+        
+        html += `
+            <div class="diag-feedback-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <span style="color: ${int.color}; font-weight: 700;">
+                    ${int.emoji} ${int.label}
+                </span>
+                <span style="font-size: 1.2rem; font-weight: 900; font-family: 'Courier New', monospace;">
+                    ${tempsFormate}
+                </span>
+            </div>
+        `;
+    });
+    
+    content.innerHTML = html;
+    container.classList.remove('hidden');
 }
 
 // ============================================================================

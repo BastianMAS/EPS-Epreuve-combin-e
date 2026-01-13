@@ -1768,9 +1768,6 @@ function selectDiagStudent() {
     // Afficher les tests
     document.getElementById('diag-tests-container').style.display = 'block';
     
-    // Afficher les temps cibles si VMA disponible
-    displayTempsCibles();
-    
     // Charger le diagnostic existant si présent
     if (student.diagnostique) {
         alert('ℹ️ Cet élève a déjà un diagnostic. Vous pouvez le modifier.');
@@ -1790,6 +1787,11 @@ function toggleTest(testName) {
     } else {
         content.classList.add('visible');
         toggle.textContent = '▲';
+        
+        // Si on ouvre le test course, afficher les temps cibles
+        if (testName === 'course') {
+            displayTempsCibles();
+        }
     }
 }
 

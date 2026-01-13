@@ -1053,11 +1053,14 @@
                     </div>
                     
                     <div id="vma-input-lucleger" class="hidden">
-                        <label>Dernier palier atteint (km/h) :</label>
+                        <label>Dernier palier atteint :</label>
                         <div class="result-input-group">
-                            <input type="number" class="result-input" id="input-lucleger" step="0.5" placeholder="ex: 10.5">
-                            <button class="btn-add-result" onclick="calculateVMA('lucleger')">✓ Valider VMA</button>
+                            <input type="number" class="result-input" id="input-lucleger" min="1" max="25" placeholder="ex: 8">
+                            <button class="btn-add-result" onclick="calculateVMA('lucleger')">✓ Calculer VMA</button>
                         </div>
+                        <small style="color: #aaa; font-style: italic; margin-top: 5px; display: block;">
+                            Entrez le numéro de palier (test 20m)
+                        </small>
                     </div>
                     
                     <div id="vma-result" class="vma-result hidden">
@@ -1917,10 +1920,22 @@ function calculateVMA(testType) {
         vma = (distance - 504) / 45;
     }
     else if (testType === 'lucleger') {
-        vma = parseFloat(document.getElementById('input-lucleger').value);
-        if (!vma || vma <= 0) {
-            alert('⚠️ Veuillez entrer un palier valide.');
+        const palier = parseInt(document.getElementById('input-lucleger').value);
+        if (!palier || palier < 1 || palier > 25) {
+            alert('⚠️ Veuillez entrer un palier valide (1-25).');
             return;
+        }
+        
+        // Table de correspondance Luc Léger 20m
+        // Palier 1 = 8.0 km/h, puis +0.5 km/h pour palier 3+
+        // Palier 2 = 9.0 km/h (exception)
+        if (palier === 1) {
+            vma = 8.0;
+        } else if (palier === 2) {
+            vma = 9.0;
+        } else {
+            // À partir du palier 3 : 9.5 + (palier - 3) * 0.5
+            vma = 9.5 + ((palier - 3) * 0.5);
         }
     }
     

@@ -3190,14 +3190,11 @@ function calculateNote(i) {
             moyenneCourse: '--',
             tempsTotal: '--',
             pourcentVMA: '--',
-            niveauBareme: '--',
-            noteBareme: 0,
-            niveauVMA: '--',
-            noteVMA: 0,
             noteCourse: 0,
-            meilleureAtelier: '--',
-            niveauAtelier: '--',
-            noteAtelier: 0,
+            distanceSaut: '--',
+            noteSaut: 0,
+            distanceLancer: '--',
+            noteLancer: 0,
             noteFinale: 0,
             statut: ''
         };
@@ -3216,98 +3213,83 @@ function calculateNote(i) {
             moyenneCourse: '--',
             tempsTotal: '--',
             pourcentVMA: '--',
-            niveauBareme: '--',
-            noteBareme: 0,
-            niveauVMA: '--',
-            noteVMA: 0,
             noteCourse: 0,
-            meilleureAtelier: '--',
-            niveauAtelier: '--',
-            noteAtelier: 0,
+            distanceSaut: '--',
+            noteSaut: 0,
+            distanceLancer: '--',
+            noteLancer: 0,
             noteFinale: 0,
             statut: 'ABSENT'
         };
     }
     
-    // ===== CALCUL COURSE (3x400m) - VERSION HYBRIDE =====
+    // ===== COURSE /2 (basée uniquement sur % VMA) =====
     let moyenneCourse = '--';
     let tempsTotal = '--';
     let pourcentVMA = '--';
-    let niveauBareme = '--';
-    let noteBareme = 0;
-    let niveauVMA = '--';
-    let noteVMA = 0;
     let noteCourse = 0;
     
-    if (s.laps.length === 3) {
-        // Calculer le temps TOTAL des 3 tours (en secondes)
+    if (s.laps.length === 3 && vma > 0) {
         const totalMs = s.laps.reduce((acc, lap) => acc + lap, 0);
-        const totalSec = totalMs / 1000;
         tempsTotal = formatTotal(totalMs);
         
-        // Moyenne par tour
         const moyenneMs = totalMs / 3;
         moyenneCourse = formatTime(moyenneMs);
         
-        // 1️⃣ NOTE BARÈME (50%)
-        const resultatBareme = getNoteCourse(totalSec, sexe, config);
-        niveauBareme = resultatBareme.niveau;
-        noteBareme = resultatBareme.note;
+        // Calculer % VMA
+        const moyenneSec = moyenneMs / 1000;
+        const vitesseMoyenne = (0.4 / (moyenneSec / 3600)); // km/h
+        const pourcentVMAValue = (vitesseMoyenne / vma) * 100;
+        pourcentVMA = pourcentVMAValue.toFixed(1) + '%';
         
-        // 2️⃣ NOTE VMA (50%)
-        if (vma > 0) {
-            // Calculer la vitesse moyenne sur un tour de 400m
-            const moyenneSec = moyenneMs / 1000;
-            const vitesseMoyenne = (0.4 / (moyenneSec / 3600)); // km/h
-            const pourcentVMAValue = (vitesseMoyenne / vma) * 100;
-            pourcentVMA = pourcentVMAValue.toFixed(1) + '%';
-            
-            // Appliquer le barème % VMA
-            const resultatVMA = getNoteVMA(pourcentVMAValue, config);
-            niveauVMA = resultatVMA.niveau;
-            noteVMA = resultatVMA.note;
-            
-            // 🎯 NOTE FINALE COURSE = MOYENNE 50/50
-            noteCourse = (noteBareme + noteVMA) / 2;
+        // Note /2 basée sur % VMA avec paliers de 5%
+        if (pourcentVMAValue >= 120) {
+            noteCourse = 2.0;
+        } else if (pourcentVMAValue >= 115) {
+            noteCourse = 1.8;
+        } else if (pourcentVMAValue >= 110) {
+            noteCourse = 1.6;
+        } else if (pourcentVMAValue >= 105) {
+            noteCourse = 1.4;
+        } else if (pourcentVMAValue >= 100) {
+            noteCourse = 1.2;
+        } else if (pourcentVMAValue >= 95) {
+            noteCourse = 1.0;
+        } else if (pourcentVMAValue >= 90) {
+            noteCourse = 0.8;
+        } else if (pourcentVMAValue >= 85) {
+            noteCourse = 0.6;
+        } else if (pourcentVMAValue >= 80) {
+            noteCourse = 0.4;
         } else {
-            // Pas de VMA renseignée → on garde 100% barème
-            noteCourse = noteBareme;
-            niveauVMA = 'VMA non renseignée';
-            pourcentVMA = '--';
+            noteCourse = 0.2;
         }
     }
     
-    // ===== CALCUL ATELIERS (inchangé) =====
-    let meilleureAtelier = '--';
-    let niveauAtelier = '--';
-    let noteAtelier = 0;
+    // ===== SAUT /2 =====
+    let distanceSaut = '--';
+    let noteSaut = 0;
     
     if (config.includes('S') && s.sauts.length > 0) {
         const meilleurSaut = Math.max(...s.sauts);
-        const resultatSaut = getNoteSaut(meilleurSaut, sexe, config);
-        meilleureAtelier = `Saut: ${meilleurSaut.toFixed(2)}m`;
-        niveauAtelier = resultatSaut.niveau;
-        noteAtelier = resultatSaut.note;
+        distanceSaut = meilleurSaut.toFixed(2) + 'm';
+        const resultatSaut = getNoteSaut(meilleurSaut, sexe, 'CSL');
+        noteSaut = resultatSaut.note;
     }
+    
+    // ===== LANCER /2 =====
+    let distanceLancer = '--';
+    let noteLancer = 0;
     
     if (config.includes('L') && s.lancers.length > 0) {
         const meilleurLancer = Math.max(...s.lancers);
-        const resultatLancer = getNoteLancer(meilleurLancer, sexe, config);
-        
-        if (meilleureAtelier !== '--') {
-            // CSL : moyenne des deux ateliers
-            meilleureAtelier += ` | Lancer: ${meilleurLancer.toFixed(2)}m`;
-            niveauAtelier += ` | ${resultatLancer.niveau}`;
-            noteAtelier = (noteAtelier + resultatLancer.note) / 2;
-        } else {
-            meilleureAtelier = `Lancer: ${meilleurLancer.toFixed(2)}m`;
-            niveauAtelier = resultatLancer.niveau;
-            noteAtelier = resultatLancer.note;
-        }
+        distanceLancer = meilleurLancer.toFixed(2) + 'm';
+        const resultatLancer = getNoteLancer(meilleurLancer, sexe, 'CSL');
+        noteLancer = resultatLancer.note;
     }
     
-    // Note finale
-    const noteFinale = noteCourse + noteAtelier;
+    // ===== NOTE FINALE /6 =====
+    const noteFinale = noteCourse + noteSaut + noteLancer;
     
     return {
         nomPrenom,
@@ -3316,14 +3298,11 @@ function calculateNote(i) {
         moyenneCourse,
         tempsTotal,
         pourcentVMA,
-        niveauBareme,
-        noteBareme: noteBareme.toFixed(2),
-        niveauVMA,
-        noteVMA: noteVMA.toFixed(2),
         noteCourse: noteCourse.toFixed(2),
-        meilleureAtelier,
-        niveauAtelier,
-        noteAtelier: noteAtelier.toFixed(2),
+        distanceSaut,
+        noteSaut: noteSaut.toFixed(2),
+        distanceLancer,
+        noteLancer: noteLancer.toFixed(2),
         noteFinale: noteFinale.toFixed(2),
         statut: s.laps.length === maxLaps ? 'TERMINÉ' : 'EN COURS'
     };
@@ -3547,6 +3526,13 @@ function exportBilan() {
         const diagnostic = student?.diagnostique;
         const age = student?.age || '--';
         
+        console.log(`=== ÉLÈVE: ${note.nomPrenom} ===`);
+        console.log('Student trouvé:', student ? 'OUI' : 'NON');
+        console.log('Diagnostic présent:', diagnostic ? 'OUI' : 'NON');
+        if (diagnostic) {
+            console.log('Diagnostic data:', diagnostic);
+        }
+        
         // Calculer les progressions si diagnostic existe
         let progCourse = "Pas de diag";
         let progSaut = "Pas de diag";
@@ -3554,41 +3540,50 @@ function exportBilan() {
         
         if (diagnostic) {
             // Progression course (% VMA)
-            if (diagnostic.vma && s.laps && s.laps.length === 3) {
+            if (diagnostic.course && diagnostic.course.tours && diagnostic.course.tours.length === 3 && s.laps && s.laps.length === 3) {
                 const tempsTotal = s.laps.reduce((a, b) => a + b, 0);
                 const tempsMoyenSec = (tempsTotal / 1000) / 3;
                 const vitesseFinal = 0.4 / (tempsMoyenSec / 3600);
                 const pourcentVMAFinal = (vitesseFinal / parseFloat(note.vma)) * 100;
                 
-                const tempsDiagTotal = diagnostic.course.tempsTotal;
+                const tempsDiagTotal = diagnostic.course.tours.reduce((a, b) => a + b, 0);
                 const tempsDiagMoyenSec = (tempsDiagTotal / 1000) / 3;
                 const vitesseDiag = 0.4 / (tempsDiagMoyenSec / 3600);
                 const pourcentVMADiag = (vitesseDiag / diagnostic.vma) * 100;
                 
                 const progression = pourcentVMAFinal - pourcentVMADiag;
                 progCourse = (progression >= 0 ? "+" : "") + progression.toFixed(1) + "%";
+                console.log('Progression course calculée:', progCourse);
+            } else {
+                console.log('Pas de données course complètes');
             }
             
             // Progression saut
-            if (diagnostic.sautElan && diagnostic.sautElan.meilleur && note.meilleureAtelier) {
+            if (diagnostic.sautElan && diagnostic.sautElan.meilleur && s.atelierPerf) {
                 const ateliers = sessionConfig.ateliers;
                 if (ateliers === 'saut') {
-                    const sautFinal = s.atelierPerf || 0;
+                    const sautFinal = s.atelierPerf;
                     const sautDiag = diagnostic.sautElan.meilleur;
                     const progression = sautFinal - sautDiag;
                     progSaut = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                    console.log('Progression saut calculée:', progSaut);
                 }
+            } else {
+                console.log('Pas de données saut. atelierPerf:', s.atelierPerf, 'config:', sessionConfig.ateliers);
             }
             
             // Progression lancer
-            if (diagnostic.lancer && diagnostic.lancer.meilleur && note.meilleureAtelier) {
+            if (diagnostic.lancer && diagnostic.lancer.meilleur && s.atelierPerf) {
                 const ateliers = sessionConfig.ateliers;
                 if (ateliers === 'lancer') {
-                    const lancerFinal = s.atelierPerf || 0;
+                    const lancerFinal = s.atelierPerf;
                     const lancerDiag = diagnostic.lancer.meilleur;
                     const progression = lancerFinal - lancerDiag;
                     progLancer = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                    console.log('Progression lancer calculée:', progLancer);
                 }
+            } else {
+                console.log('Pas de données lancer. atelierPerf:', s.atelierPerf, 'config:', sessionConfig.ateliers);
             }
         }
         
@@ -3598,17 +3593,14 @@ function exportBilan() {
             'Âge': age,
             'Statut': note.statut,
             'VMA (km/h)': note.vma,
-            'Temps Total 3x400m': note.tempsTotal,
-            'Moyenne par 400m': note.moyenneCourse,
-            '% VMA Exploitée': note.pourcentVMA,
-            'Niveau Barème': note.niveauBareme,
-            'Note Barème': note.noteBareme,
-            'Niveau VMA': note.niveauVMA,
-            'Note VMA': note.noteVMA,
-            'NOTE COURSE (50/50)': note.noteCourse,
-            'Meilleure Perf Atelier': note.meilleureAtelier,
-            'Niveau Atelier': note.niveauAtelier,
-            'Note Atelier': note.noteAtelier,
+            'Course - Temps Total': note.tempsTotal,
+            'Course - Temps Moyen': note.moyenneCourse,
+            'Course - % VMA': note.pourcentVMA,
+            'Course - Note /2': note.noteCourse,
+            'Saut - Distance': note.distanceSaut,
+            'Saut - Note /2': note.noteSaut,
+            'Lancer - Distance': note.distanceLancer,
+            'Lancer - Note /2': note.noteLancer,
             'NOTE FINALE /6': note.noteFinale,
             'BPM': s.bpm || '--',
             'RPE': s.rpe || '--',
@@ -3637,23 +3629,20 @@ function exportBilan() {
         { wch: 6 },  // Âge
         { wch: 12 }, // Statut
         { wch: 12 }, // VMA
-        { wch: 18 }, // Temps Total
-        { wch: 18 }, // Moyenne
-        { wch: 15 }, // % VMA
-        { wch: 28 }, // Niveau Barème
-        { wch: 12 }, // Note Barème
-        { wch: 35 }, // Niveau VMA
-        { wch: 10 }, // Note VMA
-        { wch: 18 }, // Note Course
-        { wch: 30 }, // Meilleure Perf
-        { wch: 28 }, // Niveau Atelier
-        { wch: 12 }, // Note Atelier
-        { wch: 15 }, // Note Finale
+        { wch: 16 }, // Course Temps Total
+        { wch: 16 }, // Course Temps Moyen
+        { wch: 14 }, // Course % VMA
+        { wch: 14 }, // Course Note /2
+        { wch: 14 }, // Saut Distance
+        { wch: 14 }, // Saut Note /2
+        { wch: 16 }, // Lancer Distance
+        { wch: 14 }, // Lancer Note /2
+        { wch: 16 }, // Note Finale /6
         { wch: 8 },  // BPM
         { wch: 8 },  // RPE
-        { wch: 16 }, // Progression Course
-        { wch: 16 }, // Progression Saut
-        { wch: 16 }  // Progression Lancer
+        { wch: 18 }, // Progression Course
+        { wch: 18 }, // Progression Saut
+        { wch: 18 }  // Progression Lancer
     ];
     
     XLSX.utils.book_append_sheet(wb, ws, 'Bilan EPS');

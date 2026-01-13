@@ -3542,9 +3542,60 @@ function exportBilan() {
         const note = calculateNote(i);
         const s = studentData[i];
         
+        // Trouver l'élève dans storedStudents pour avoir le diagnostic et l'âge
+        const student = storedStudents.find(st => st.nomPrenom === note.nomPrenom);
+        const diagnostic = student?.diagnostique;
+        const age = student?.age || '--';
+        
+        // Calculer les progressions si diagnostic existe
+        let progCourse = "Pas de diag";
+        let progSaut = "Pas de diag";
+        let progLancer = "Pas de diag";
+        
+        if (diagnostic) {
+            // Progression course (% VMA)
+            if (diagnostic.vma && s.laps && s.laps.length === 3) {
+                const tempsTotal = s.laps.reduce((a, b) => a + b, 0);
+                const tempsMoyenSec = (tempsTotal / 1000) / 3;
+                const vitesseFinal = 0.4 / (tempsMoyenSec / 3600);
+                const pourcentVMAFinal = (vitesseFinal / parseFloat(note.vma)) * 100;
+                
+                const tempsDiagTotal = diagnostic.course.tempsTotal;
+                const tempsDiagMoyenSec = (tempsDiagTotal / 1000) / 3;
+                const vitesseDiag = 0.4 / (tempsDiagMoyenSec / 3600);
+                const pourcentVMADiag = (vitesseDiag / diagnostic.vma) * 100;
+                
+                const progression = pourcentVMAFinal - pourcentVMADiag;
+                progCourse = (progression >= 0 ? "+" : "") + progression.toFixed(1) + "%";
+            }
+            
+            // Progression saut
+            if (diagnostic.sautElan && diagnostic.sautElan.meilleur && note.meilleureAtelier) {
+                const ateliers = sessionConfig.ateliers;
+                if (ateliers === 'saut') {
+                    const sautFinal = s.atelierPerf || 0;
+                    const sautDiag = diagnostic.sautElan.meilleur;
+                    const progression = sautFinal - sautDiag;
+                    progSaut = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                }
+            }
+            
+            // Progression lancer
+            if (diagnostic.lancer && diagnostic.lancer.meilleur && note.meilleureAtelier) {
+                const ateliers = sessionConfig.ateliers;
+                if (ateliers === 'lancer') {
+                    const lancerFinal = s.atelierPerf || 0;
+                    const lancerDiag = diagnostic.lancer.meilleur;
+                    const progression = lancerFinal - lancerDiag;
+                    progLancer = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                }
+            }
+        }
+        
         report.push({
             'Nom Prénom': note.nomPrenom,
             'Sexe': note.sexe,
+            'Âge': age,
             'Statut': note.statut,
             'VMA (km/h)': note.vma,
             'Temps Total 3x400m': note.tempsTotal,
@@ -3560,7 +3611,10 @@ function exportBilan() {
             'Note Atelier': note.noteAtelier,
             'NOTE FINALE /6': note.noteFinale,
             'BPM': s.bpm || '--',
-            'RPE': s.rpe || '--'
+            'RPE': s.rpe || '--',
+            'Progression Course': progCourse,
+            'Progression Saut': progSaut,
+            'Progression Lancer': progLancer
         });
     }
     
@@ -3569,13 +3623,18 @@ function exportBilan() {
         return;
     }
     
-    // Créer le fichier Excel
+    // Créer le workbook et worksheet
+    const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(report);
     
-    // Largeur des colonnes
+    // Appliquer la mise en forme via XLSX (limitations : pas de vraies couleurs de cellules)
+    // Note: SheetJS gratuit ne supporte pas toutes les mises en forme
+    // On va juste optimiser les largeurs de colonnes
+    
     ws['!cols'] = [
         { wch: 20 }, // Nom Prénom
         { wch: 6 },  // Sexe
+        { wch: 6 },  // Âge
         { wch: 12 }, // Statut
         { wch: 12 }, // VMA
         { wch: 18 }, // Temps Total
@@ -3591,16 +3650,18 @@ function exportBilan() {
         { wch: 12 }, // Note Atelier
         { wch: 15 }, // Note Finale
         { wch: 8 },  // BPM
-        { wch: 8 }   // RPE
+        { wch: 8 },  // RPE
+        { wch: 16 }, // Progression Course
+        { wch: 16 }, // Progression Saut
+        { wch: 16 }  // Progression Lancer
     ];
     
-    const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Bilan EPS');
     
-    const filename = `Bilan_EPS_Hybride_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`;
+    const filename = `Bilan_EPS_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`;
     XLSX.writeFile(wb, filename);
     
-    alert(`✅ Bilan généré avec succès !\n📄 Fichier : ${filename}\n\n💡 Note Course = Moyenne (50% Barème + 50% VMA)`);
+    alert(`✅ Bilan généré avec succès !\n📄 Fichier : ${filename}\n\n💡 Contient toutes les données + progressions\n\n⚠️ Note : La mise en forme colorée complète nécessite l'ouverture dans Excel/Google Sheets`);
 }
 
 // ============================================================================

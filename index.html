@@ -1005,6 +1005,18 @@
                     <div class="test-toggle">▼</div>
                 </div>
                 <div class="test-content" id="content-vma">
+                    <!-- HISTORIQUE VMA -->
+                    <div id="vma-historique" class="hidden" style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
+                        <div style="color: var(--accent); font-weight: 800; font-size: 1.1rem; margin-bottom: 10px;">
+                            📊 HISTORIQUE VMA
+                        </div>
+                        <div id="vma-historique-list"></div>
+                        <div id="vma-moyenne" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--accent); text-align: center;">
+                            <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">VMA MOYENNE</div>
+                            <div style="font-size: 2rem; font-weight: 900; color: var(--success);"></div>
+                        </div>
+                    </div>
+                    
                     <p style="color: #aaa; margin-bottom: 15px;">Choisir un protocole :</p>
                     <div class="test-options">
                         <div class="option-btn" onclick="selectVMATest('demicooper')">
@@ -1051,6 +1063,9 @@
                     <div id="vma-result" class="vma-result hidden">
                         <div class="vma-value" id="vma-value-display">--</div>
                         <div class="vma-label">km/h VMA</div>
+                        <button class="btn-add-result" onclick="saveVMATest()" style="margin-top: 15px;">
+                            💾 ENREGISTRER CE TEST
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1309,6 +1324,7 @@ let editingStudentId = null; // Pour savoir si on est en mode édition
 
 // Variables pour le diagnostic
 let currentDiagStudent = null;
+let currentVMATest = null; // Stocker temporairement le test VMA en cours
 let diagData = {
     vma: null,
     vmaTest: null,
@@ -1792,6 +1808,11 @@ function toggleTest(testName) {
         if (testName === 'course') {
             displayTempsCibles();
         }
+        
+        // Si on ouvre le test VMA, afficher l'historique
+        if (testName === 'vma') {
+            displayVMAHistorique();
+        }
     }
 }
 
@@ -1906,12 +1927,121 @@ function calculateVMA(testType) {
     // Arrondir à 1 décimale
     vma = Math.round(vma * 10) / 10;
     
+    // Stocker temporairement le test
+    currentVMATest = {
+        type: testType,
+        vma: vma,
+        date: new Date().toISOString()
+    };
+    
     // Afficher le résultat
-    diagData.vma = vma;
     document.getElementById('vma-value-display').textContent = vma;
     document.getElementById('vma-result').classList.remove('hidden');
+}
+
+/**
+ * Sauvegarder le test VMA dans l'historique
+ */
+function saveVMATest() {
+    if (!currentVMATest || !currentDiagStudent) {
+        alert('⚠️ Erreur lors de la sauvegarde.');
+        return;
+    }
     
-    alert(`✅ VMA calculée : ${vma} km/h\n\nCette valeur sera mise à jour dans la fiche de l'élève.`);
+    const studentIndex = storedStudents.findIndex(s => s.id === currentDiagStudent.id);
+    if (studentIndex === -1) return;
+    
+    // Initialiser l'historique VMA si nécessaire
+    if (!storedStudents[studentIndex].vmaHistorique) {
+        storedStudents[studentIndex].vmaHistorique = [];
+    }
+    
+    // Ajouter le test à l'historique
+    const testLabel = {
+        'demicooper': '1/2 Cooper',
+        'cooper': 'Cooper',
+        'lucleger': 'Luc Léger'
+    }[currentVMATest.type];
+    
+    storedStudents[studentIndex].vmaHistorique.push({
+        date: currentVMATest.date,
+        type: currentVMATest.type,
+        typeLabel: testLabel,
+        vma: currentVMATest.vma
+    });
+    
+    // Calculer la moyenne VMA
+    const moyenneVMA = storedStudents[studentIndex].vmaHistorique.reduce((sum, test) => sum + test.vma, 0) / 
+                       storedStudents[studentIndex].vmaHistorique.length;
+    
+    // Mettre à jour la VMA de l'élève avec la moyenne
+    storedStudents[studentIndex].vma = Math.round(moyenneVMA * 10) / 10;
+    
+    // Sauvegarder
+    if (saveStudentsToStorage()) {
+        alert(`✅ Test VMA enregistré !\n\nNouvelle VMA moyenne : ${storedStudents[studentIndex].vma} km/h`);
+        
+        // Réinitialiser
+        currentVMATest = null;
+        document.getElementById('vma-result').classList.add('hidden');
+        
+        // Vider les inputs
+        document.getElementById('input-demicooper').value = '';
+        document.getElementById('input-cooper').value = '';
+        document.getElementById('input-lucleger').value = '';
+        
+        // Rafraîchir l'affichage
+        displayVMAHistorique();
+        
+        // Mettre à jour l'affichage de l'élève
+        currentDiagStudent.vma = storedStudents[studentIndex].vma;
+        document.getElementById('diag-student-info').innerHTML = 
+            `<strong>${currentDiagStudent.sexe === 'F' ? '👧 Fille' : '🧑 Garçon'}</strong> | ${currentDiagStudent.age || '?'} ans | VMA: <strong>${currentDiagStudent.vma} km/h</strong>`;
+        
+        // Rafraîchir les temps cibles si le test course est ouvert
+        if (document.getElementById('content-course').classList.contains('visible')) {
+            displayTempsCibles();
+        }
+    }
+}
+
+/**
+ * Afficher l'historique VMA
+ */
+function displayVMAHistorique() {
+    const container = document.getElementById('vma-historique');
+    const listContainer = document.getElementById('vma-historique-list');
+    const moyenneContainer = document.getElementById('vma-moyenne').querySelector('div:last-child');
+    
+    if (!currentDiagStudent || !currentDiagStudent.vmaHistorique || currentDiagStudent.vmaHistorique.length === 0) {
+        // Charger depuis storedStudents
+        const student = storedStudents.find(s => s.id === currentDiagStudent?.id);
+        if (!student || !student.vmaHistorique || student.vmaHistorique.length === 0) {
+            container.classList.add('hidden');
+            return;
+        }
+        currentDiagStudent.vmaHistorique = student.vmaHistorique;
+    }
+    
+    // Afficher l'historique
+    const html = currentDiagStudent.vmaHistorique.map(test => {
+        const date = new Date(test.date).toLocaleDateString('fr-FR');
+        return `
+            <div style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                <span style="color: #aaa; font-size: 0.9rem;">${date} - ${test.typeLabel}</span>
+                <span style="font-weight: 700; color: white;">${test.vma} km/h</span>
+            </div>
+        `;
+    }).join('');
+    
+    listContainer.innerHTML = html;
+    
+    // Afficher la moyenne
+    const moyenneVMA = currentDiagStudent.vmaHistorique.reduce((sum, test) => sum + test.vma, 0) / 
+                       currentDiagStudent.vmaHistorique.length;
+    moyenneContainer.textContent = `${Math.round(moyenneVMA * 10) / 10} km/h`;
+    
+    container.classList.remove('hidden');
 }
 
 // ============================================================================

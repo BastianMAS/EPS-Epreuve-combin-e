@@ -3544,46 +3544,42 @@ function exportBilan() {
                 const tempsTotal = s.laps.reduce((a, b) => a + b, 0);
                 const tempsMoyenSec = (tempsTotal / 1000) / 3;
                 const vitesseFinal = 0.4 / (tempsMoyenSec / 3600);
-                const pourcentVMAFinal = (vitesseFinal / parseFloat(note.vma)) * 100;
+                const vmaActuelle = parseFloat(note.vma);
+                const pourcentVMAFinal = (vitesseFinal / vmaActuelle) * 100;
                 
                 const tempsDiagTotal = diagnostic.course.tours.reduce((a, b) => a + b, 0);
                 const tempsDiagMoyenSec = (tempsDiagTotal / 1000) / 3;
                 const vitesseDiag = 0.4 / (tempsDiagMoyenSec / 3600);
-                const pourcentVMADiag = (vitesseDiag / diagnostic.vma) * 100;
+                const vmaDiag = diagnostic.vma || vmaActuelle;
+                const pourcentVMADiag = (vitesseDiag / vmaDiag) * 100;
                 
                 const progression = pourcentVMAFinal - pourcentVMADiag;
                 progCourse = (progression >= 0 ? "+" : "") + progression.toFixed(1) + "%";
-                console.log('Progression course calculée:', progCourse);
+                console.log('Progression course calculée:', progCourse, 'Final:', pourcentVMAFinal.toFixed(1), 'Diag:', pourcentVMADiag.toFixed(1));
             } else {
                 console.log('Pas de données course complètes');
             }
             
             // Progression saut
-            if (diagnostic.sautElan && diagnostic.sautElan.meilleur && s.atelierPerf) {
-                const ateliers = sessionConfig.ateliers;
-                if (ateliers === 'saut') {
-                    const sautFinal = s.atelierPerf;
-                    const sautDiag = diagnostic.sautElan.meilleur;
-                    const progression = sautFinal - sautDiag;
-                    progSaut = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
-                    console.log('Progression saut calculée:', progSaut);
-                }
+            if (diagnostic.sautElan && diagnostic.sautElan.meilleur && s.sauts && s.sauts.length > 0) {
+                const sautFinal = Math.max(...s.sauts);
+                const sautDiag = diagnostic.sautElan.meilleur;
+                const progression = sautFinal - sautDiag;
+                progSaut = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                console.log('Progression saut calculée:', progSaut);
             } else {
-                console.log('Pas de données saut. atelierPerf:', s.atelierPerf, 'config:', sessionConfig.ateliers);
+                console.log('Pas de données saut. sauts:', s.sauts, 'diag:', diagnostic.sautElan);
             }
             
             // Progression lancer
-            if (diagnostic.lancer && diagnostic.lancer.meilleur && s.atelierPerf) {
-                const ateliers = sessionConfig.ateliers;
-                if (ateliers === 'lancer') {
-                    const lancerFinal = s.atelierPerf;
-                    const lancerDiag = diagnostic.lancer.meilleur;
-                    const progression = lancerFinal - lancerDiag;
-                    progLancer = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
-                    console.log('Progression lancer calculée:', progLancer);
-                }
+            if (diagnostic.lancer && diagnostic.lancer.meilleur && s.lancers && s.lancers.length > 0) {
+                const lancerFinal = Math.max(...s.lancers);
+                const lancerDiag = diagnostic.lancer.meilleur;
+                const progression = lancerFinal - lancerDiag;
+                progLancer = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                console.log('Progression lancer calculée:', progLancer);
             } else {
-                console.log('Pas de données lancer. atelierPerf:', s.atelierPerf, 'config:', sessionConfig.ateliers);
+                console.log('Pas de données lancer. lancers:', s.lancers, 'diag:', diagnostic.lancer);
             }
         }
         

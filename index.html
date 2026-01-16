@@ -1563,9 +1563,11 @@ function renderStudentsList() {
                 </div>
                 <div class="student-item-details">
                     ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | ${student.age || '?'} ans | VMA: ${student.vma} km/h
+                    ${student.diagnostique ? `<span style="color: var(--success); margin-left: 10px; font-weight: 700;">🔬 Diagnostic (${new Date(student.diagnostique.date).toLocaleDateString('fr-FR')})</span>` : ''}
                 </div>
             </div>
             <div class="student-item-actions">
+                ${student.diagnostique ? `<button onclick="viewDiagnostic('${student.id}')" class="btn-small" style="background: var(--accent); color: black; margin-right: 8px;">👁️ Diagnostic</button>` : ''}
                 <button onclick="editStudent('${student.id}')" class="btn-small btn-edit">
                     ✏️ Modifier
                 </button>
@@ -1721,6 +1723,189 @@ document.getElementById('import-excel-students').onchange = (e) => {
     };
     reader.readAsBinaryString(file);
 };
+
+/**
+ * Afficher le diagnostic dans un pop-up
+ */
+function viewDiagnostic(studentId) {
+    const student = storedStudents.find(s => s.id === studentId);
+    if (!student || !student.diagnostique) {
+        alert('⚠️ Aucun diagnostic trouvé pour cet élève.');
+        return;
+    }
+    
+    const diag = student.diagnostique;
+    const date = new Date(diag.date).toLocaleDateString('fr-FR');
+    
+    let content = `
+        <div style="font-family: Arial; max-width: 600px; background: #1a1a2e; color: white; padding: 30px; border-radius: 20px; border: 3px solid var(--accent);">
+            <h2 style="color: var(--accent); text-align: center; margin-bottom: 20px;">
+                📊 DIAGNOSTIC DE ${student.nomPrenom}
+            </h2>
+            <p style="text-align: center; color: #aaa; margin-bottom: 30px;">📅 ${date}</p>
+    `;
+    
+    // Historique VMA si présent
+    if (student.vmaHistorique && student.vmaHistorique.length > 0) {
+        content += `
+            <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 HISTORIQUE VMA</h3>
+        `;
+        student.vmaHistorique.forEach(test => {
+            const testDate = new Date(test.date).toLocaleDateString('fr-FR');
+            content += `<p style="margin: 5px 0;">✓ ${testDate} - ${test.typeLabel} : <strong>${test.vma} km/h</strong></p>`;
+        });
+        content += `
+                <p style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--accent); text-align: center;">
+                    📊 VMA Moyenne : <strong style="font-size: 1.3rem; color: var(--success);">${student.vma} km/h</strong>
+                </p>
+            </div>
+        `;
+    } else if (diag.vma) {
+        content += `
+            <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 TEST VMA</h3>
+                <p>VMA : <strong style="font-size: 1.3rem; color: var(--success);">${diag.vma} km/h</strong></p>
+                ${diag.vmaTest ? `<p style="color: #aaa; font-size: 0.9rem;">Test : ${diag.vmaTest === 'demicooper' ? '1/2 Cooper' : diag.vmaTest === 'cooper' ? 'Cooper' : 'Luc Léger'}</p>` : ''}
+            </div>
+        `;
+    }
+    
+    // Course
+    if (diag.course && diag.course.tours && diag.course.tours.length > 0) {
+        const tempsTotal = diag.course.tours.reduce((a, b) => a + b, 0);
+        const tempsFormate = formatTotal(tempsTotal);
+        
+        // Calculer % VMA et étoiles
+        const tempsMoyenSec = (tempsTotal / 1000) / 3;
+        const vitesseMoyenne = 0.4 / (tempsMoyenSec / 3600);
+        const pourcentVMA = ((vitesseMoyenne / student.vma) * 100).toFixed(1);
+        
+        const motivant = getNiveauMotivantVMA(parseFloat(pourcentVMA));
+        
+        content += `
+            <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--success);">
+                <h3 style="color: var(--success); margin-bottom: 10px;">🏃‍♂️ COURSE 3×400m</h3>
+                <p>Temps total : <strong>${tempsFormate}</strong></p>
+                <p>💪 Intensité : <strong>${pourcentVMA}% VMA</strong></p>
+                <p style="font-size: 1.5rem; margin: 10px 0;">${motivant.etoiles}</p>
+                <p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>
+            </div>
+        `;
+    }
+    
+    // Saut
+    if ((diag.sautDetente && diag.sautDetente.essais && diag.sautDetente.essais.length > 0) || 
+        (diag.sautElan && diag.sautElan.essais && diag.sautElan.essais.length > 0)) {
+        content += `
+            <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--warning);">
+                <h3 style="color: var(--warning); margin-bottom: 10px;">🦘 SAUT EN LONGUEUR</h3>
+        `;
+        
+        if (diag.sautDetente && diag.sautDetente.meilleur) {
+            content += `<p>Sans élan : <strong>${diag.sautDetente.meilleur.toFixed(2)}m</strong></p>`;
+        }
+        
+        if (diag.sautElan && diag.sautElan.meilleur) {
+            const niveauData = getNoteSaut(diag.sautElan.meilleur, student.sexe, 'CSL');
+            const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
+            const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
+            const motivant = getNiveauMotivant(niveauNum);
+            
+            content += `<p>Avec élan : <strong>${diag.sautElan.meilleur.toFixed(2)}m</strong> (${diag.sautElan.distanceElan || '?'}m d'élan)</p>`;
+            
+            if (diag.sautDetente && diag.sautDetente.meilleur) {
+                const apport = diag.sautElan.meilleur - diag.sautDetente.meilleur;
+                const apportPourcent = ((apport / diag.sautDetente.meilleur) * 100).toFixed(1);
+                content += `<p style="color: var(--success); font-weight: 700;">💪 Apport : ${apport >= 0 ? '+' : ''}${apport.toFixed(2)}m (${apport >= 0 ? '+' : ''}${apportPourcent}%)</p>`;
+            }
+            
+            content += `<p style="font-size: 1.3rem; margin: 10px 0;">${motivant.etoiles}</p>`;
+            content += `<p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>`;
+        }
+        
+        content += `</div>`;
+    }
+    
+    // Lancer
+    if (diag.lancer && diag.lancer.essais && diag.lancer.essais.length > 0) {
+        const niveauData = getNoteLancer(diag.lancer.meilleur, student.sexe, 'CSL');
+        const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
+        const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
+        const motivant = getNiveauMotivant(niveauNum);
+        const enginLabel = diag.lancer.type === 'vortex' ? 'Vortex' : 'Poids 1kg';
+        
+        content += `
+            <div style="background: rgba(255,75,180,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--danger);">
+                <h3 style="color: var(--danger); margin-bottom: 10px;">🎯 LANCER (${enginLabel})</h3>
+                <p>Meilleur : <strong>${diag.lancer.meilleur.toFixed(2)}m</strong></p>
+                <p style="font-size: 1.3rem; margin: 10px 0;">${motivant.etoiles}</p>
+                <p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>
+            </div>
+        `;
+    }
+    
+    content += `
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="closeDiagnosticPopup()" style="background: var(--danger); color: white; padding: 12px 30px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-right: 10px;">
+                    ✕ Fermer
+                </button>
+                <button onclick="editDiagnostic('${studentId}')" style="background: var(--warning); color: black; padding: 12px 30px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer;">
+                    ✏️ Modifier le diagnostic
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Créer et afficher le popup
+    const popup = document.createElement('div');
+    popup.id = 'diagnostic-popup';
+    popup.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        overflow-y: auto;
+        padding: 20px;
+    `;
+    popup.innerHTML = content;
+    popup.onclick = (e) => {
+        if (e.target === popup) closeDiagnosticPopup();
+    };
+    
+    document.body.appendChild(popup);
+}
+
+/**
+ * Fermer le popup diagnostic
+ */
+function closeDiagnosticPopup() {
+    const popup = document.getElementById('diagnostic-popup');
+    if (popup) popup.remove();
+}
+
+/**
+ * Modifier le diagnostic (retour à la page diag avec données pré-remplies)
+ */
+function editDiagnostic(studentId) {
+    closeDiagnosticPopup();
+    
+    // Aller à la page diagnostic
+    document.getElementById('screen0').classList.add('hidden');
+    document.getElementById('screenDiag').classList.remove('hidden');
+    
+    // Sélectionner l'élève
+    document.getElementById('diag-student-select').value = studentId;
+    selectDiagStudent();
+    
+    // TODO: Pré-remplir les données du diagnostic si nécessaire
+}
 
 // ============================================================================
 // GESTION PAGE DIAGNOSTIQUE

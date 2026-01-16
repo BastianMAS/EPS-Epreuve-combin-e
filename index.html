@@ -3554,7 +3554,7 @@ function exportBilan() {
                 const pourcentVMADiag = (vitesseDiag / vmaDiag) * 100;
                 
                 const progression = pourcentVMAFinal - pourcentVMADiag;
-                progCourse = (progression >= 0 ? "+" : "") + progression.toFixed(1) + "%";
+                progCourse = (progression >= 0 ? "+" : "") + progression.toFixed(1) + "% VMA";
                 console.log('Progression course calculée:', progCourse, 'Final:', pourcentVMAFinal.toFixed(1), 'Diag:', pourcentVMADiag.toFixed(1));
             } else {
                 console.log('Pas de données course complètes');
@@ -3565,7 +3565,9 @@ function exportBilan() {
                 const sautFinal = Math.max(...s.sauts);
                 const sautDiag = diagnostic.sautElan.meilleur;
                 const progression = sautFinal - sautDiag;
-                progSaut = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                const progressionPourcent = (progression / sautDiag) * 100;
+                progSaut = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m (" + 
+                           (progression >= 0 ? "+" : "") + progressionPourcent.toFixed(1) + "%)";
                 console.log('Progression saut calculée:', progSaut);
             } else {
                 console.log('Pas de données saut. sauts:', s.sauts, 'diag:', diagnostic.sautElan);
@@ -3576,7 +3578,9 @@ function exportBilan() {
                 const lancerFinal = Math.max(...s.lancers);
                 const lancerDiag = diagnostic.lancer.meilleur;
                 const progression = lancerFinal - lancerDiag;
-                progLancer = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m";
+                const progressionPourcent = (progression / lancerDiag) * 100;
+                progLancer = (progression >= 0 ? "+" : "") + progression.toFixed(2) + "m (" + 
+                             (progression >= 0 ? "+" : "") + progressionPourcent.toFixed(1) + "%)";
                 console.log('Progression lancer calculée:', progLancer);
             } else {
                 console.log('Pas de données lancer. lancers:', s.lancers, 'diag:', diagnostic.lancer);

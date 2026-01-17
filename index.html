@@ -1299,12 +1299,27 @@
     <div class="export-area">
         <h3>📊 Fin de Séance</h3>
         <p style="margin-bottom: 20px; color: #ccc;">
-            Génère un bilan Excel complet avec <strong>notation HYBRIDE</strong><br>
-            📌 Note Course = <strong>50% Barème officiel + 50% % VMA exploitée</strong>
+            Génère un bilan Excel complet avec toutes les notes et progressions
         </p>
         <button class="btn-export" onclick="exportBilan()">
             💾 GÉNÉRER LE BILAN EXCEL
         </button>
+        
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid rgba(255,255,255,0.1);">
+            <h3>💾 Gestion de Séance</h3>
+            <p style="margin-bottom: 20px; color: #ccc;">
+                Sauvegardez vos données pour continuer plus tard
+            </p>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn-export" onclick="saveSession()" style="flex: 1; min-width: 200px;">
+                    💾 SAUVEGARDER LA SÉANCE
+                </button>
+                <button class="btn-export" onclick="document.getElementById('load-session-input').click()" style="flex: 1; min-width: 200px; background: var(--accent); color: black;">
+                    📥 CHARGER UNE SÉANCE
+                </button>
+            </div>
+            <input type="file" id="load-session-input" accept=".json" style="display: none;" onchange="loadSession(event)">
+        </div>
     </div>
 </div>
 
@@ -1776,6 +1791,7 @@ function viewDiagnostic(studentId) {
     if (diag.course && diag.course.tours && diag.course.tours.length > 0) {
         const tempsTotal = diag.course.tours.reduce((a, b) => a + b, 0);
         const tempsFormate = formatTotal(tempsTotal);
+        const tempsMoyen = formatTime(tempsTotal / 3);
         
         // Calculer % VMA et étoiles
         const tempsMoyenSec = (tempsTotal / 1000) / 3;
@@ -1788,6 +1804,7 @@ function viewDiagnostic(studentId) {
             <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--success);">
                 <h3 style="color: var(--success); margin-bottom: 10px;">🏃‍♂️ COURSE 3×400m</h3>
                 <p>Temps total : <strong>${tempsFormate}</strong></p>
+                <p>Temps moyen par tour : <strong>${tempsMoyen}</strong></p>
                 <p>💪 Intensité : <strong>${pourcentVMA}% VMA</strong></p>
                 <p style="font-size: 1.5rem; margin: 10px 0;">${motivant.etoiles}</p>
                 <p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>
@@ -3696,6 +3713,81 @@ function getNoteLancer(distance, sexe, config) {
 
 // ============================================================================
 // EXPORT EXCEL - VERSION HYBRIDE
+// ============================================================================
+// ============================================================================
+// SAUVEGARDE ET CHARGEMENT DE SÉANCE
+// ============================================================================
+
+/**
+ * Sauvegarder la séance en cours dans un fichier JSON
+ */
+function saveSession() {
+    const sessionData = {
+        version: '1.0',
+        date: new Date().toISOString(),
+        config: sessionConfig,
+        studentData: studentData,
+        timestamp: Date.now()
+    };
+    
+    // Créer le fichier JSON
+    const dataStr = JSON.stringify(sessionData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    // Télécharger le fichier
+    const filename = `Seance_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.json`;
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    alert(`✅ Séance sauvegardée !\n📄 Fichier : ${filename}\n\n💡 Conservez ce fichier pour reprendre la séance plus tard.`);
+}
+
+/**
+ * Charger une séance depuis un fichier JSON
+ */
+function loadSession(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const sessionData = JSON.parse(e.target.result);
+            
+            // Vérifier la validité des données
+            if (!sessionData.config || !sessionData.studentData) {
+                throw new Error('Fichier de séance invalide');
+            }
+            
+            // Restaurer la configuration
+            sessionConfig = sessionData.config;
+            
+            // Restaurer les données des élèves
+            studentData = sessionData.studentData;
+            
+            // Rafraîchir l'affichage
+            displayResults();
+            
+            const loadDate = new Date(sessionData.date).toLocaleDateString('fr-FR');
+            alert(`✅ Séance chargée avec succès !\n\n📅 Date de sauvegarde : ${loadDate}\n👥 Classe : ${sessionConfig.classe}\n🎯 Configuration : ${sessionConfig.ateliers}\n\nVous pouvez continuer où vous vous étiez arrêté.`);
+            
+        } catch (error) {
+            console.error('Erreur lors du chargement:', error);
+            alert('⚠️ Erreur lors du chargement de la séance.\n\nVérifiez que le fichier est valide.');
+        }
+    };
+    reader.readAsText(file);
+    
+    // Réinitialiser l'input pour permettre de charger le même fichier plusieurs fois
+    event.target.value = '';
+}
+
+// ============================================================================
+// EXPORT EXCEL
 // ============================================================================
 function exportBilan() {
     const report = [];

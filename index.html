@@ -1737,6 +1737,11 @@ function viewDiagnostic(studentId) {
     const diag = student.diagnostique;
     const date = new Date(diag.date).toLocaleDateString('fr-FR');
     
+    console.log('=== AFFICHAGE DIAGNOSTIC ===');
+    console.log('Student:', student);
+    console.log('VMA Historique:', student.vmaHistorique);
+    console.log('Diagnostic VMA:', diag.vma);
+    
     let content = `
         <div style="font-family: Arial; max-width: 600px; background: #1a1a2e; color: white; padding: 30px; border-radius: 20px; border: 3px solid var(--accent);">
             <h2 style="color: var(--accent); text-align: center; margin-bottom: 20px;">
@@ -1745,31 +1750,27 @@ function viewDiagnostic(studentId) {
             <p style="text-align: center; color: #aaa; margin-bottom: 30px;">📅 ${date}</p>
     `;
     
+    // Afficher la VMA actuelle toujours
+    content += `
+        <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
+            <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 VMA ACTUELLE</h3>
+            <p style="text-align: center;">
+                <strong style="font-size: 1.5rem; color: var(--success);">${student.vma} km/h</strong>
+            </p>
+    `;
+    
     // Historique VMA si présent
     if (student.vmaHistorique && student.vmaHistorique.length > 0) {
-        content += `
-            <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 HISTORIQUE VMA</h3>
-        `;
+        content += `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">`;
+        content += `<p style="font-weight: 700; margin-bottom: 10px; color: var(--accent);">Historique des tests :</p>`;
         student.vmaHistorique.forEach(test => {
             const testDate = new Date(test.date).toLocaleDateString('fr-FR');
-            content += `<p style="margin: 5px 0;">✓ ${testDate} - ${test.typeLabel} : <strong>${test.vma} km/h</strong></p>`;
+            content += `<p style="margin: 5px 0; font-size: 0.9rem;">✓ ${testDate} - ${test.typeLabel} : ${test.vma} km/h</p>`;
         });
-        content += `
-                <p style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--accent); text-align: center;">
-                    📊 VMA Moyenne : <strong style="font-size: 1.3rem; color: var(--success);">${student.vma} km/h</strong>
-                </p>
-            </div>
-        `;
-    } else if (diag.vma) {
-        content += `
-            <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 TEST VMA</h3>
-                <p>VMA : <strong style="font-size: 1.3rem; color: var(--success);">${diag.vma} km/h</strong></p>
-                ${diag.vmaTest ? `<p style="color: #aaa; font-size: 0.9rem;">Test : ${diag.vmaTest === 'demicooper' ? '1/2 Cooper' : diag.vmaTest === 'cooper' ? 'Cooper' : 'Luc Léger'}</p>` : ''}
-            </div>
-        `;
+        content += `</div>`;
     }
+    
+    content += `</div>`;
     
     // Course
     if (diag.course && diag.course.tours && diag.course.tours.length > 0) {
@@ -1868,11 +1869,11 @@ function viewDiagnostic(studentId) {
         height: 100%;
         background: rgba(0,0,0,0.8);
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         z-index: 10000;
         overflow-y: auto;
-        padding: 20px;
+        padding: 40px 20px;
     `;
     popup.innerHTML = content;
     popup.onclick = (e) => {

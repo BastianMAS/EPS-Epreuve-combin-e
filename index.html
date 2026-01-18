@@ -945,6 +945,25 @@
                 </div>
             </div>
             
+            <!-- EXPORT/IMPORT DIAGNOSTICS -->
+            <div style="margin-top: 30px; padding: 20px; background: rgba(0,210,255,0.1); border-radius: 12px; border: 2px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 10px; font-size: 1.1rem;">
+                    💾 Sauvegarde des Diagnostics
+                </h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+                    Exportez les diagnostics de cette tablette pour les transférer sur votre tablette pro ou pour les fusionner plus tard.
+                </p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button onclick="exportDiagnostics()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--success); color: black;">
+                        💾 EXPORTER DIAGNOSTICS
+                    </button>
+                    <button onclick="document.getElementById('import-diagnostics-input').click()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--accent); color: black;">
+                        📥 IMPORTER DIAGNOSTICS
+                    </button>
+                </div>
+                <input type="file" id="import-diagnostics-input" accept=".json" style="display: none;" onchange="importDiagnostics(event)">
+            </div>
+            
             <!-- BOUTONS D'ACTION -->
             <div style="margin-top: 30px; display: flex; gap: 15px;">
                 <button onclick="goToDiagnostic()" class="btn-action" style="flex: 1; background: var(--warning); color: black;">
@@ -1304,22 +1323,6 @@
         <button class="btn-export" onclick="exportBilan()">
             💾 GÉNÉRER LE BILAN EXCEL
         </button>
-        
-        <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid rgba(255,255,255,0.1);">
-            <h3>💾 Gestion de Séance</h3>
-            <p style="margin-bottom: 20px; color: #ccc;">
-                Sauvegardez vos données pour continuer plus tard
-            </p>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <button class="btn-export" onclick="saveSession()" style="flex: 1; min-width: 200px;">
-                    💾 SAUVEGARDER LA SÉANCE
-                </button>
-                <button class="btn-export" onclick="document.getElementById('load-session-input').click()" style="flex: 1; min-width: 200px; background: var(--accent); color: black;">
-                    📥 CHARGER UNE SÉANCE
-                </button>
-            </div>
-            <input type="file" id="load-session-input" accept=".json" style="display: none;" onchange="loadSession(event)">
-        </div>
     </div>
 </div>
 
@@ -3715,27 +3718,35 @@ function getNoteLancer(distance, sexe, config) {
 // EXPORT EXCEL - VERSION HYBRIDE
 // ============================================================================
 // ============================================================================
-// SAUVEGARDE ET CHARGEMENT DE SÉANCE
+// EXPORT/IMPORT DIAGNOSTICS
 // ============================================================================
 
 /**
- * Sauvegarder la séance en cours dans un fichier JSON
+ * Exporter les diagnostics des élèves dans un fichier JSON
  */
-function saveSession() {
-    const sessionData = {
+function exportDiagnostics() {
+    // Filtrer uniquement les élèves qui ont un diagnostic
+    const studentsWithDiag = storedStudents.filter(s => s.diagnostique);
+    
+    if (studentsWithDiag.length === 0) {
+        alert('⚠️ Aucun diagnostic à exporter.\n\nEffectuez d\'abord des évaluations diagnostiques.');
+        return;
+    }
+    
+    const exportData = {
         version: '1.0',
+        type: 'diagnostics',
         date: new Date().toISOString(),
-        config: sessionConfig,
-        studentData: studentData,
-        timestamp: Date.now()
+        students: studentsWithDiag,
+        count: studentsWithDiag.length
     };
     
     // Créer le fichier JSON
-    const dataStr = JSON.stringify(sessionData, null, 2);
+    const dataStr = JSON.stringify(exportData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     
     // Télécharger le fichier
-    const filename = `Seance_${sessionConfig.classe}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.json`;
+    const filename = `Diagnostics_6eme_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.json`;
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
@@ -3743,46 +3754,76 @@ function saveSession() {
     link.click();
     URL.revokeObjectURL(url);
     
-    alert(`✅ Séance sauvegardée !\n📄 Fichier : ${filename}\n\n💡 Conservez ce fichier pour reprendre la séance plus tard.`);
+    alert(`✅ Diagnostics exportés !\n\n📄 Fichier : ${filename}\n👥 ${studentsWithDiag.length} élève(s) avec diagnostic\n\n💡 Transférez ce fichier sur votre tablette pro ou conservez-le pour fusion ultérieure.`);
 }
 
 /**
- * Charger une séance depuis un fichier JSON
+ * Importer des diagnostics depuis un fichier JSON
  */
-function loadSession(event) {
+function importDiagnostics(event) {
     const file = event.target.files[0];
     if (!file) return;
     
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const sessionData = JSON.parse(e.target.result);
+            const importData = JSON.parse(e.target.result);
             
             // Vérifier la validité des données
-            if (!sessionData.config || !sessionData.studentData) {
-                throw new Error('Fichier de séance invalide');
+            if (!importData.students || importData.type !== 'diagnostics') {
+                throw new Error('Fichier de diagnostics invalide');
             }
             
-            // Restaurer la configuration
-            sessionConfig = sessionData.config;
+            let imported = 0;
+            let updated = 0;
+            let skipped = 0;
             
-            // Restaurer les données des élèves
-            studentData = sessionData.studentData;
+            // Fusionner les élèves
+            importData.students.forEach(importStudent => {
+                const existingIndex = storedStudents.findIndex(s => s.nomPrenom === importStudent.nomPrenom);
+                
+                if (existingIndex >= 0) {
+                    // Élève existe déjà
+                    const existing = storedStudents[existingIndex];
+                    
+                    // Demander confirmation si l'élève a déjà un diagnostic
+                    if (existing.diagnostique) {
+                        const overwrite = confirm(`L'élève "${importStudent.nomPrenom}" a déjà un diagnostic.\n\nVoulez-vous le remplacer par celui importé ?`);
+                        if (overwrite) {
+                            storedStudents[existingIndex] = importStudent;
+                            updated++;
+                        } else {
+                            skipped++;
+                        }
+                    } else {
+                        // Pas de diagnostic existant, on met à jour
+                        storedStudents[existingIndex] = importStudent;
+                        updated++;
+                    }
+                } else {
+                    // Nouvel élève, on l'ajoute
+                    storedStudents.push(importStudent);
+                    imported++;
+                }
+            });
             
-            // Rafraîchir l'affichage
-            displayResults();
-            
-            const loadDate = new Date(sessionData.date).toLocaleDateString('fr-FR');
-            alert(`✅ Séance chargée avec succès !\n\n📅 Date de sauvegarde : ${loadDate}\n👥 Classe : ${sessionConfig.classe}\n🎯 Configuration : ${sessionConfig.ateliers}\n\nVous pouvez continuer où vous vous étiez arrêté.`);
+            // Sauvegarder
+            if (saveStudentsToStorage()) {
+                renderStudentsList();
+                updateStats();
+                
+                const importDate = new Date(importData.date).toLocaleDateString('fr-FR');
+                alert(`✅ Import terminé !\n\n📅 Date d'export : ${importDate}\n\n👥 Résultats :\n• ${imported} nouvel(le)(s) élève(s)\n• ${updated} élève(s) mis à jour\n• ${skipped} élève(s) ignoré(s)`);
+            }
             
         } catch (error) {
-            console.error('Erreur lors du chargement:', error);
-            alert('⚠️ Erreur lors du chargement de la séance.\n\nVérifiez que le fichier est valide.');
+            console.error('Erreur lors de l\'import:', error);
+            alert('⚠️ Erreur lors de l\'import des diagnostics.\n\nVérifiez que le fichier est valide.');
         }
     };
     reader.readAsText(file);
     
-    // Réinitialiser l'input pour permettre de charger le même fichier plusieurs fois
+    // Réinitialiser l'input
     event.target.value = '';
 }
 

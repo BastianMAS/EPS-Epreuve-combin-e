@@ -879,6 +879,32 @@
                 </div>
             </div>
             
+            <!-- GESTION DES CLASSES -->
+            <div style="background: rgba(0,210,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;">
+                    📚 Gestion des Classes
+                </h3>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <input type="text" id="input-new-class" placeholder="ex: 6èmeA" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 2px solid var(--accent); background: #0f0f23; color: white; font-size: 1rem; text-transform: uppercase;">
+                    <button onclick="addClass()" class="btn-action" style="background: var(--success); color: black; padding: 10px 20px;">
+                        ➕ Ajouter une classe
+                    </button>
+                </div>
+                
+                <div id="classes-list" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <!-- Rempli dynamiquement -->
+                </div>
+                
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <label style="color: var(--accent); font-weight: 700; margin-bottom: 10px; display: block;">📊 Filtrer par classe :</label>
+                    <select id="filter-classe" onchange="renderStudentsList()" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--accent); background: #0f0f23; color: white; font-size: 1rem;">
+                        <option value="">Toutes les classes</option>
+                        <!-- Rempli dynamiquement -->
+                    </select>
+                </div>
+            </div>
+            
             <!-- FORMULAIRE AJOUT/MODIFICATION -->
             <div id="student-form" style="background: rgba(0,210,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
                 <h3 style="color: var(--accent); margin-bottom: 15px; font-size: 1.2rem;" id="form-title">
@@ -889,6 +915,13 @@
                     <div class="form-group">
                         <label>Nom Prénom *</label>
                         <input type="text" id="input-nom" placeholder="ex: MARTIN Emma" style="text-transform: uppercase;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Classe *</label>
+                        <select id="input-classe" style="padding: 10px; border-radius: 8px; border: 2px solid var(--accent); background: #0f0f23; color: white; font-size: 1rem;">
+                            <!-- Rempli dynamiquement -->
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -1333,6 +1366,7 @@
 let studentData = {};
 let allStudents = [];
 let storedStudents = []; // Liste des élèves en localStorage
+let storedClasses = []; // Liste des classes
 let maxLaps = 3;
 let sessionConfig = {
     cycle: '',
@@ -1363,6 +1397,9 @@ let diagData = {
 // ============================================================================
 document.addEventListener('DOMContentLoaded', function() {
     loadStudentsFromStorage();
+    loadClassesFromStorage();
+    renderClassesList();
+    updateClassSelects();
     renderStudentsList();
     updateStudentsStats();
 });
@@ -1404,6 +1441,138 @@ function saveStudentsToStorage() {
     }
 }
 
+// ============================================================================
+// GESTION DES CLASSES
+// ============================================================================
+
+/**
+ * Charger les classes depuis le localStorage
+ */
+function loadClassesFromStorage() {
+    const stored = localStorage.getItem('eps_pro_classes');
+    if (stored) {
+        try {
+            storedClasses = JSON.parse(stored);
+            console.log(`✅ ${storedClasses.length} classe(s) chargée(s)`);
+        } catch (e) {
+            console.error('❌ Erreur lors du chargement des classes:', e);
+            storedClasses = [];
+        }
+    } else {
+        // Créer des classes par défaut si aucune n'existe
+        storedClasses = ['6èmeA', '6èmeB', '6èmeC'];
+        saveClassesToStorage();
+    }
+}
+
+/**
+ * Sauvegarder les classes dans le localStorage
+ */
+function saveClassesToStorage() {
+    try {
+        localStorage.setItem('eps_pro_classes', JSON.stringify(storedClasses));
+        console.log('✅ Classes sauvegardées');
+        return true;
+    } catch (e) {
+        console.error('❌ Erreur sauvegarde classes:', e);
+        return false;
+    }
+}
+
+/**
+ * Ajouter une nouvelle classe
+ */
+function addClass() {
+    const input = document.getElementById('input-new-class');
+    const className = input.value.trim().toUpperCase();
+    
+    if (!className) {
+        alert('⚠️ Veuillez entrer un nom de classe.');
+        return;
+    }
+    
+    if (storedClasses.includes(className)) {
+        alert('⚠️ Cette classe existe déjà.');
+        return;
+    }
+    
+    storedClasses.push(className);
+    storedClasses.sort();
+    
+    if (saveClassesToStorage()) {
+        renderClassesList();
+        updateClassSelects();
+        input.value = '';
+        alert(`✅ Classe "${className}" ajoutée !`);
+    }
+}
+
+/**
+ * Supprimer une classe
+ */
+function deleteClass(className) {
+    // Vérifier si des élèves sont dans cette classe
+    const studentsInClass = storedStudents.filter(s => s.classe === className);
+    
+    if (studentsInClass.length > 0) {
+        const confirm = window.confirm(`⚠️ ${studentsInClass.length} élève(s) sont dans cette classe.\n\nVoulez-vous vraiment supprimer "${className}" ?\n\nLes élèves seront transférés dans "Sans classe".`);
+        if (!confirm) return;
+        
+        // Transférer les élèves
+        storedStudents.forEach(s => {
+            if (s.classe === className) {
+                s.classe = 'Sans classe';
+            }
+        });
+        saveStudentsToStorage();
+    }
+    
+    storedClasses = storedClasses.filter(c => c !== className);
+    
+    if (saveClassesToStorage()) {
+        renderClassesList();
+        updateClassSelects();
+        renderStudentsList();
+        alert(`✅ Classe "${className}" supprimée.`);
+    }
+}
+
+/**
+ * Afficher la liste des classes
+ */
+function renderClassesList() {
+    const container = document.getElementById('classes-list');
+    
+    if (storedClasses.length === 0) {
+        container.innerHTML = '<p style="color: #aaa; font-style: italic;">Aucune classe créée</p>';
+        return;
+    }
+    
+    container.innerHTML = storedClasses.map(classe => `
+        <div style="background: var(--accent); color: black; padding: 8px 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: 700;">
+            <span>📚 ${classe}</span>
+            <button onclick="deleteClass('${classe}')" style="background: var(--danger); color: white; border: none; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-size: 0.9rem;">
+                ✕
+            </button>
+        </div>
+    `).join('');
+}
+
+/**
+ * Mettre à jour les selects de classe (formulaire élève + filtre)
+ */
+function updateClassSelects() {
+    // Select formulaire élève
+    const selectForm = document.getElementById('input-classe');
+    selectForm.innerHTML = '<option value="">Sélectionner une classe</option>' +
+        storedClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+    
+    // Select filtre
+    const selectFilter = document.getElementById('filter-classe');
+    selectFilter.innerHTML = '<option value="">Toutes les classes</option>' +
+        storedClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
 /**
  * Générer un ID unique pour un élève
  */
@@ -1418,6 +1587,7 @@ function generateStudentId(nom) {
  */
 function saveStudent() {
     const nom = document.getElementById('input-nom').value.trim().toUpperCase();
+    const classe = document.getElementById('input-classe').value;
     const age = parseInt(document.getElementById('input-age').value);
     const vma = parseFloat(document.getElementById('input-vma').value);
     const sexe = document.querySelector('input[name="sexe"]:checked')?.value;
@@ -1425,6 +1595,11 @@ function saveStudent() {
     // Validation
     if (!nom) {
         alert('⚠️ Veuillez saisir le nom et prénom de l\'élève.');
+        return;
+    }
+    
+    if (!classe) {
+        alert('⚠️ Veuillez sélectionner une classe.');
         return;
     }
     
@@ -1450,6 +1625,7 @@ function saveStudent() {
             storedStudents[index] = {
                 ...storedStudents[index],
                 nomPrenom: nom,
+                classe: classe,
                 age: age,
                 vma: vma,
                 sexe: sexe
@@ -1471,6 +1647,7 @@ function saveStudent() {
         const newStudent = {
             id: generateStudentId(nom),
             nomPrenom: nom,
+            classe: classe,
             sexe: sexe,
             age: age,
             vma: vma,
@@ -1498,6 +1675,7 @@ function saveStudent() {
  */
 function resetForm() {
     document.getElementById('input-nom').value = '';
+    document.getElementById('input-classe').value = '';
     document.getElementById('input-age').value = '';
     document.getElementById('input-vma').value = '';
     document.querySelectorAll('input[name="sexe"]').forEach(r => r.checked = false);
@@ -1521,6 +1699,7 @@ function editStudent(id) {
     if (!student) return;
     
     document.getElementById('input-nom').value = student.nomPrenom;
+    document.getElementById('input-classe').value = student.classe || '';
     document.getElementById('input-age').value = student.age || '';
     document.getElementById('input-vma').value = student.vma;
     document.getElementById(`input-sexe-${student.sexe.toLowerCase()}`).checked = true;
@@ -1558,26 +1737,46 @@ function deleteStudent(id) {
  */
 function renderStudentsList() {
     const container = document.getElementById('students-list');
+    const filterClasse = document.getElementById('filter-classe')?.value || '';
     
-    if (storedStudents.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">👥</div>
-                <p style="font-size: 1.1rem; margin-bottom: 10px;">Aucun élève enregistré</p>
-                <p style="font-size: 0.85rem;">Ajoutez des élèves pour commencer</p>
-            </div>
-        `;
+    // Filtrer par classe si sélectionnée
+    let filtered = storedStudents;
+    if (filterClasse) {
+        filtered = storedStudents.filter(s => s.classe === filterClasse);
+    }
+    
+    if (filtered.length === 0) {
+        if (filterClasse) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <p style="font-size: 1.1rem; margin-bottom: 10px;">Aucun élève dans ${filterClasse}</p>
+                    <p style="font-size: 0.85rem;">Changez le filtre ou ajoutez des élèves</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p style="font-size: 1.1rem; margin-bottom: 10px;">Aucun élève enregistré</p>
+                    <p style="font-size: 0.85rem;">Ajoutez des élèves pour commencer</p>
+                </div>
+            `;
+        }
         return;
     }
     
     // Trier par nom
-    const sorted = [...storedStudents].sort((a, b) => a.nomPrenom.localeCompare(b.nomPrenom));
+    const sorted = [...filtered].sort((a, b) => a.nomPrenom.localeCompare(b.nomPrenom));
     
     container.innerHTML = sorted.map(student => `
         <div class="student-item">
             <div class="student-item-info">
                 <div class="student-item-name">
                     ${student.sexe === 'F' ? '👧' : '🧑'} ${student.nomPrenom}
+                    <span style="background: var(--accent); color: black; padding: 2px 8px; border-radius: 5px; font-size: 0.75rem; margin-left: 8px; font-weight: 700;">
+                        📚 ${student.classe || 'Sans classe'}
+                    </span>
                 </div>
                 <div class="student-item-details">
                     ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | ${student.age || '?'} ans | VMA: ${student.vma} km/h

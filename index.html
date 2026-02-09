@@ -1251,6 +1251,17 @@
                 </div>
             </div>
             
+            <!-- COMMENTAIRES -->
+            <div style="background: rgba(255,204,0,0.1); padding: 20px; border-radius: 12px; margin-top: 20px; border: 2px solid var(--warning);">
+                <h3 style="color: var(--warning); margin-bottom: 15px; font-size: 1.2rem;">
+                    💬 Commentaires / Observations
+                </h3>
+                <textarea id="diag-commentaire" placeholder="Ex: Élève très motivé, bonne technique au saut, à encourager pour la course..." style="width: 100%; min-height: 100px; padding: 15px; border-radius: 8px; border: 2px solid var(--warning); background: #0f0f23; color: white; font-size: 1rem; font-family: Arial; resize: vertical;"></textarea>
+                <p style="font-size: 0.8rem; color: #aaa; margin-top: 10px;">
+                    💡 Ces commentaires seront visibles dans le profil de l'élève et exportés dans le bilan Excel.
+                </p>
+            </div>
+            
             <!-- BOUTONS ACTION -->
             <div style="margin-top: 30px; display: flex; gap: 15px;">
                 <button onclick="backToStudentsFromDiag()" class="btn-action" style="flex: 1; background: #666; color: white;">
@@ -2061,6 +2072,16 @@ function viewDiagnostic(studentId) {
                 <p>Meilleur : <strong>${diag.lancer.meilleur.toFixed(2)}m</strong></p>
                 <p style="font-size: 1.3rem; margin: 10px 0;">${motivant.etoiles}</p>
                 <p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>
+            </div>
+        `;
+    }
+    
+    // Commentaire
+    if (diag.commentaire) {
+        content += `
+            <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--warning);">
+                <h3 style="color: var(--warning); margin-bottom: 10px;">💬 Commentaires / Observations</h3>
+                <p style="white-space: pre-wrap; line-height: 1.6;">${diag.commentaire}</p>
             </div>
         `;
     }
@@ -2927,10 +2948,13 @@ function saveDiagnostic() {
     }
     
     // Préparer les données à sauvegarder
+    const commentaire = document.getElementById('diag-commentaire').value.trim();
+    
     const diagnostique = {
         date: new Date().toISOString(),
         vma: diagData.vma,
         vmaTest: diagData.vmaTest,
+        commentaire: commentaire,
         course: {
             tours: diagData.course.filter(t => t !== null),
             tempsTotal: diagData.course.filter(t => t !== null).reduce((a, b) => a + b, 0),
@@ -4105,10 +4129,14 @@ function exportBilan() {
             }
         }
         
+        // Récupérer le commentaire du diagnostic
+        const commentaireDiag = diagnostic?.commentaire || '';
+        
         report.push({
             'Nom Prénom': note.nomPrenom,
             'Sexe': note.sexe,
             'Âge': age,
+            'Classe': student?.classe || '--',
             'Statut': note.statut,
             'VMA (km/h)': note.vma,
             'Course - Temps Total': note.tempsTotal,
@@ -4124,7 +4152,8 @@ function exportBilan() {
             'RPE': s.rpe || '--',
             'Progression Course': progCourse,
             'Progression Saut': progSaut,
-            'Progression Lancer': progLancer
+            'Progression Lancer': progLancer,
+            'Commentaires Diagnostic': commentaireDiag
         });
     }
     
@@ -4145,6 +4174,7 @@ function exportBilan() {
         { wch: 20 }, // Nom Prénom
         { wch: 6 },  // Sexe
         { wch: 6 },  // Âge
+        { wch: 10 }, // Classe
         { wch: 12 }, // Statut
         { wch: 12 }, // VMA
         { wch: 16 }, // Course Temps Total
@@ -4160,7 +4190,8 @@ function exportBilan() {
         { wch: 8 },  // RPE
         { wch: 18 }, // Progression Course
         { wch: 18 }, // Progression Saut
-        { wch: 18 }  // Progression Lancer
+        { wch: 18 }, // Progression Lancer
+        { wch: 40 }  // Commentaires Diagnostic
     ];
     
     XLSX.utils.book_append_sheet(wb, ws, 'Bilan EPS');

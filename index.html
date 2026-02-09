@@ -998,11 +998,14 @@
             </div>
             
             <!-- BOUTONS D'ACTION -->
-            <div style="margin-top: 30px; display: flex; gap: 15px;">
-                <button onclick="goToDiagnostic()" class="btn-action" style="flex: 1; background: var(--warning); color: black;">
+            <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="goToDiagnostic()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--warning); color: black;">
                     🔬 ÉVALUATION DIAGNOSTIQUE
                 </button>
-                <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1;">
+                <button onclick="goToStats()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--success); color: black;">
+                    📊 STATISTIQUES
+                </button>
+                <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1; min-width: 200px;">
                     ➡️ SÉANCE D'ÉVALUATION
                 </button>
             </div>
@@ -1270,6 +1273,58 @@
                 <button onclick="saveDiagnostic()" class="btn-action btn-primary" style="flex: 2;">
                     💾 ENREGISTRER LE DIAGNOSTIC
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE STATS : STATISTIQUES -->
+<div id="screenStats" class="hidden">
+    <h1>EPS<span class="accent-text">PRO</span></h1>
+    <p class="text-center" style="color: var(--success); margin-bottom: 10px; font-size: 1.3rem;">
+        📊 Statistiques de Classe
+    </p>
+    <p class="text-center" style="color: #aaa; margin-bottom: 30px; font-size: 0.9rem;">
+        Vue d'ensemble des performances
+    </p>
+    
+    <div class="config-container">
+        <div class="card">
+            <!-- BOUTON RETOUR -->
+            <button onclick="backToStudentsFromStats()" class="btn-action" style="background: #666; color: white; margin-bottom: 20px;">
+                ← Retour
+            </button>
+            
+            <!-- STATISTIQUES GLOBALES -->
+            <div id="stats-global" style="background: rgba(0,255,136,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--success);">
+                <h2 style="color: var(--success); margin-bottom: 20px;">📊 STATISTIQUES GLOBALES</h2>
+                <div id="stats-global-content">
+                    <!-- Rempli dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- MOYENNES PAR SEXE -->
+            <div id="stats-sexe" style="background: rgba(0,210,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
+                <h2 style="color: var(--accent); margin-bottom: 20px;">👧🧑 MOYENNES PAR SEXE</h2>
+                <div id="stats-sexe-content">
+                    <!-- Rempli dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- STATISTIQUES PAR CLASSE -->
+            <div id="stats-classe" style="background: rgba(255,204,0,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--warning);">
+                <h2 style="color: var(--warning); margin-bottom: 20px;">📚 STATISTIQUES PAR CLASSE</h2>
+                <div id="stats-classe-content">
+                    <!-- Rempli dynamiquement -->
+                </div>
+            </div>
+            
+            <!-- ÉLÈVES EN DIFFICULTÉ -->
+            <div id="stats-difficulte" style="background: rgba(255,107,107,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--danger);">
+                <h2 style="color: var(--danger); margin-bottom: 20px;">⚠️ ÉLÈVES EN DIFFICULTÉ</h2>
+                <div id="stats-difficulte-content">
+                    <!-- Rempli dynamiquement -->
+                </div>
             </div>
         </div>
     </div>
@@ -1836,6 +1891,242 @@ function goToDiagnostic() {
     
     document.getElementById('screen0').classList.add('hidden');
     document.getElementById('screenDiag').classList.remove('hidden');
+}
+
+/**
+ * Aller à la page statistiques
+ */
+function goToStats() {
+    if (storedStudents.length === 0) {
+        alert('⚠️ Aucun élève enregistré. Ajoutez des élèves pour voir les statistiques.');
+        return;
+    }
+    
+    document.getElementById('screen0').classList.add('hidden');
+    document.getElementById('screenStats').classList.remove('hidden');
+    
+    // Calculer et afficher les statistiques
+    calculateAndDisplayStats();
+}
+
+/**
+ * Retour depuis la page stats
+ */
+function backToStudentsFromStats() {
+    document.getElementById('screenStats').classList.add('hidden');
+    document.getElementById('screen0').classList.remove('hidden');
+}
+
+/**
+ * Calculer et afficher toutes les statistiques
+ */
+function calculateAndDisplayStats() {
+    const stats = calculateStats();
+    displayGlobalStats(stats.global);
+    displayStatsBySexe(stats.bySexe);
+    displayStatsByClasse(stats.byClasse);
+    displayDifficulty(stats.difficulty);
+}
+
+/**
+ * Calculer toutes les statistiques
+ */
+function calculateStats() {
+    const elevesAvecDiag = storedStudents.filter(s => s.diagnostique);
+    
+    // Stats globales
+    const totalEleves = storedStudents.length;
+    const totalFilles = storedStudents.filter(s => s.sexe === 'F').length;
+    const totalGarcons = storedStudents.filter(s => s.sexe === 'M').length;
+    
+    const vmas = storedStudents.map(s => parseFloat(s.vma)).filter(v => v > 0);
+    const moyenneVMA = vmas.length > 0 ? (vmas.reduce((a, b) => a + b, 0) / vmas.length).toFixed(1) : 0;
+    
+    // Stats par sexe
+    const vmasFilles = storedStudents.filter(s => s.sexe === 'F').map(s => parseFloat(s.vma)).filter(v => v > 0);
+    const vmasGarcons = storedStudents.filter(s => s.sexe === 'M').map(s => parseFloat(s.vma)).filter(v => v > 0);
+    
+    const moyenneVMAFilles = vmasFilles.length > 0 ? (vmasFilles.reduce((a, b) => a + b, 0) / vmasFilles.length).toFixed(1) : 0;
+    const moyenneVMAGarcons = vmasGarcons.length > 0 ? (vmasGarcons.reduce((a, b) => a + b, 0) / vmasGarcons.length).toFixed(1) : 0;
+    
+    // Stats par classe
+    const statsByClasse = {};
+    storedClasses.forEach(classe => {
+        const elevesClasse = storedStudents.filter(s => s.classe === classe);
+        const vmasClasse = elevesClasse.map(s => parseFloat(s.vma)).filter(v => v > 0);
+        const vmasClasseFilles = elevesClasse.filter(s => s.sexe === 'F').map(s => parseFloat(s.vma)).filter(v => v > 0);
+        const vmasClasseGarcons = elevesClasse.filter(s => s.sexe === 'M').map(s => parseFloat(s.vma)).filter(v => v > 0);
+        
+        statsByClasse[classe] = {
+            total: elevesClasse.length,
+            filles: elevesClasse.filter(s => s.sexe === 'F').length,
+            garcons: elevesClasse.filter(s => s.sexe === 'M').length,
+            moyenneVMA: vmasClasse.length > 0 ? (vmasClasse.reduce((a, b) => a + b, 0) / vmasClasse.length).toFixed(1) : 0,
+            moyenneVMAFilles: vmasClasseFilles.length > 0 ? (vmasClasseFilles.reduce((a, b) => a + b, 0) / vmasClasseFilles.length).toFixed(1) : 0,
+            moyenneVMAGarcons: vmasClasseGarcons.length > 0 ? (vmasClasseGarcons.reduce((a, b) => a + b, 0) / vmasClasseGarcons.length).toFixed(1) : 0
+        };
+    });
+    
+    // Élèves en difficulté (VMA < 9 km/h par exemple)
+    const elevesDifficulte = storedStudents.filter(s => parseFloat(s.vma) < 9);
+    
+    return {
+        global: {
+            total: totalEleves,
+            filles: totalFilles,
+            garcons: totalGarcons,
+            moyenneVMA: moyenneVMA,
+            classes: storedClasses.join(', ')
+        },
+        bySexe: {
+            filles: {
+                total: totalFilles,
+                moyenneVMA: moyenneVMAFilles
+            },
+            garcons: {
+                total: totalGarcons,
+                moyenneVMA: moyenneVMAGarcons
+            }
+        },
+        byClasse: statsByClasse,
+        difficulty: elevesDifficulte
+    };
+}
+
+/**
+ * Afficher les stats globales
+ */
+function displayGlobalStats(stats) {
+    const container = document.getElementById('stats-global-content');
+    
+    container.innerHTML = `
+        <div class="stats-bar" style="margin-bottom: 20px;">
+            <div class="stat-item">
+                <div class="stat-number">${stats.total}</div>
+                <div class="stat-label">Élèves total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">${stats.filles}</div>
+                <div class="stat-label">👧 Filles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">${stats.garcons}</div>
+                <div class="stat-label">🧑 Garçons</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">${stats.moyenneVMA}</div>
+                <div class="stat-label">VMA moyenne (km/h)</div>
+            </div>
+        </div>
+        <p style="color: #ccc; text-align: center; font-size: 0.9rem;">
+            📚 Classes : ${stats.classes}
+        </p>
+    `;
+}
+
+/**
+ * Afficher les stats par sexe
+ */
+function displayStatsBySexe(stats) {
+    const container = document.getElementById('stats-sexe-content');
+    
+    container.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background: rgba(255,105,180,0.2); padding: 15px; border-radius: 10px; text-align: center;">
+                <h3 style="color: var(--danger); font-size: 1.2rem; margin-bottom: 10px;">👧 FILLES</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--danger); margin: 15px 0;">${stats.filles.moyenneVMA} km/h</p>
+                <p style="color: #aaa; font-size: 0.9rem;">${stats.filles.total} élèves</p>
+            </div>
+            <div style="background: rgba(0,210,255,0.2); padding: 15px; border-radius: 10px; text-align: center;">
+                <h3 style="color: var(--accent); font-size: 1.2rem; margin-bottom: 10px;">🧑 GARÇONS</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--accent); margin: 15px 0;">${stats.garcons.moyenneVMA} km/h</p>
+                <p style="color: #aaa; font-size: 0.9rem;">${stats.garcons.total} élèves</p>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Afficher les stats par classe
+ */
+function displayStatsByClasse(statsByClasse) {
+    const container = document.getElementById('stats-classe-content');
+    
+    if (Object.keys(statsByClasse).length === 0) {
+        container.innerHTML = '<p style="color: #aaa; text-align: center;">Aucune classe créée</p>';
+        return;
+    }
+    
+    let html = '<div style="display: grid; gap: 15px;">';
+    
+    Object.entries(statsByClasse).forEach(([classe, stats]) => {
+        html += `
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="color: var(--warning); font-size: 1.1rem; margin-bottom: 10px;">📚 ${classe}</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                    <div>
+                        <p style="color: #aaa; font-size: 0.85rem;">Total élèves</p>
+                        <p style="font-size: 1.3rem; font-weight: 700;">${stats.total}</p>
+                    </div>
+                    <div>
+                        <p style="color: #aaa; font-size: 0.85rem;">VMA moyenne</p>
+                        <p style="font-size: 1.3rem; font-weight: 700; color: var(--success);">${stats.moyenneVMA} km/h</p>
+                    </div>
+                    <div>
+                        <p style="color: var(--danger); font-size: 0.85rem;">👧 Filles (${stats.filles})</p>
+                        <p style="font-size: 1.1rem; font-weight: 700;">${stats.moyenneVMAFilles} km/h</p>
+                    </div>
+                    <div>
+                        <p style="color: var(--accent); font-size: 0.85rem;">🧑 Garçons (${stats.garcons})</p>
+                        <p style="font-size: 1.1rem; font-weight: 700;">${stats.moyenneVMAGarcons} km/h</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+/**
+ * Afficher les élèves en difficulté
+ */
+function displayDifficulty(elevesDifficulte) {
+    const container = document.getElementById('stats-difficulte-content');
+    
+    if (elevesDifficulte.length === 0) {
+        container.innerHTML = `
+            <p style="color: var(--success); text-align: center; font-size: 1.1rem;">
+                ✅ Aucun élève en difficulté détecté (VMA < 9 km/h)
+            </p>
+        `;
+        return;
+    }
+    
+    let html = `
+        <p style="color: #ccc; margin-bottom: 15px;">
+            ${elevesDifficulte.length} élève(s) avec VMA < 9 km/h
+        </p>
+        <div style="display: grid; gap: 10px;">
+    `;
+    
+    elevesDifficulte.forEach(eleve => {
+        html += `
+            <div style="background: rgba(255,107,107,0.2); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nomPrenom}</strong>
+                    <span style="color: #aaa; margin-left: 10px;">📚 ${eleve.classe || 'Sans classe'}</span>
+                </div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--danger);">
+                    ${eleve.vma} km/h
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 /**

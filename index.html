@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>EPS PRO - Gestion Élèves & Évaluation Athlétisme</title>
+    
+    <!-- PWA -->
+    <meta name="description" content="Application d'évaluation EPS pour le cycle 3 (6ème) - Diagnostics et évaluations finales">
+    <meta name="theme-color" content="#00d2ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EPS PRO">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%230f0f23' width='512' height='512'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='280' font-weight='bold' fill='%2300d2ff'%3E⚽%3C/text%3E%3C/svg%3E">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -852,6 +862,20 @@
 
 <!-- PAGE 0 : GESTION DES ÉLÈVES -->
 <div id="screen0">
+    <!-- Bandeau installation PWA -->
+    <div id="pwa-install-banner" style="display: none; background: linear-gradient(135deg, var(--accent), var(--success)); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; color: black; font-weight: 700;">
+        <p style="margin: 0 0 10px 0; font-size: 1.1rem;">📱 Installer EPS PRO sur votre iPad</p>
+        <p style="margin: 0 0 15px 0; font-size: 0.9rem; opacity: 0.8;">Fonctionne hors ligne • Accès rapide • Comme une vraie app</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="showInstallInstructions()" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                ℹ️ Comment installer ?
+            </button>
+            <button onclick="dismissPWABanner()" style="background: rgba(0,0,0,0.2); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                ✕ Masquer
+            </button>
+        </div>
+    </div>
+    
     <h1>EPS<span class="accent-text">PRO</span></h1>
     <p class="text-center" style="color: var(--accent); margin-bottom: 30px; font-size: 1.1rem;">
         Gestion des Élèves
@@ -4514,5 +4538,102 @@ function formatTotal(ms) {
 }
 </script>
 
+
+<!-- Gestion PWA et installation -->
+<script>
+// Afficher le bandeau d'installation si pas encore installé
+window.addEventListener('load', () => {
+    // Vérifier si l'app est déjà installée (mode standalone)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    
+    // Vérifier si le bandeau a déjà été masqué
+    const bannerDismissed = localStorage.getItem('pwa-banner-dismissed');
+    
+    if (!isStandalone && !bannerDismissed) {
+        // Afficher le bandeau après 2 secondes
+        setTimeout(() => {
+            document.getElementById('pwa-install-banner').style.display = 'block';
+        }, 2000);
+    }
+});
+
+// Masquer le bandeau
+function dismissPWABanner() {
+    document.getElementById('pwa-install-banner').style.display = 'none';
+    localStorage.setItem('pwa-banner-dismissed', 'true');
+}
+
+// Afficher les instructions d'installation
+function showInstallInstructions() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    let instructions = '';
+    
+    if (isIOS) {
+        instructions = `
+📱 INSTALLER SUR iPad/iPhone :
+
+1️⃣ Appuyez sur le bouton PARTAGER 📤
+   (en haut ou en bas de Safari)
+
+2️⃣ Faites défiler et appuyez sur
+   "Sur l'écran d'accueil"
+
+3️⃣ Appuyez sur "Ajouter"
+
+✅ L'icône EPS PRO apparaît sur votre écran d'accueil !
+
+💡 L'app fonctionnera même sans WiFi.
+        `;
+    } else if (isAndroid) {
+        instructions = `
+📱 INSTALLER SUR Android :
+
+1️⃣ Appuyez sur le menu ⋮
+   (en haut à droite de Chrome)
+
+2️⃣ Appuyez sur
+   "Installer l'application"
+
+3️⃣ Confirmez l'installation
+
+✅ L'icône EPS PRO apparaît sur votre écran d'accueil !
+
+💡 L'app fonctionnera même sans connexion.
+        `;
+    } else {
+        instructions = `
+💻 INSTALLER SUR ORDINATEUR :
+
+1️⃣ Cliquez sur l'icône d'installation
+   dans la barre d'adresse
+
+2️⃣ Cliquez sur "Installer"
+
+✅ L'app s'ouvre dans sa propre fenêtre !
+
+💡 Fonctionne aussi hors ligne.
+        `;
+    }
+    
+    alert(instructions);
+}
+</script>
+
+<!-- Enregistrement du Service Worker pour mode hors ligne -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('✅ Service Worker enregistré:', registration.scope);
+            })
+            .catch(error => {
+                console.log('❌ Erreur Service Worker:', error);
+            });
+    });
+}
+</script>
 </body>
 </html>

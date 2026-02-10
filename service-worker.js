@@ -1,8 +1,9 @@
 // Service Worker pour EPS PRO - Mode hors ligne
-const CACHE_NAME = 'eps-pro-v1';
+const CACHE_NAME = 'eps-pro-v2-logo';
 const urlsToCache = [
-  '/',
-  '/index.html'
+  './',
+  './index.html',
+  './logo.png'
 ];
 
 // Installation du Service Worker
@@ -66,7 +67,7 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         // En cas d'erreur réseau, retourne la page en cache
-        return caches.match('/index.html');
+        return caches.match('./index.html');
       })
   );
 });

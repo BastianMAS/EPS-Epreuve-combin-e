@@ -986,11 +986,13 @@
             
             <!-- IMPORT EXCEL (optionnel) -->
             <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--warning);">
-                <label style="color: var(--warning); margin-bottom: 10px;">📁 Import Excel (optionnel)</label>
+                <label style="color: var(--warning); margin-bottom: 10px;">📁 Import Excel / Numbers / CSV (optionnel)</label>
                 <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 10px;">
-                    Colonnes requises : <strong>Nom Prénom</strong>, <strong>Sexe</strong> (F/M), <strong>VMA</strong>
+                    Colonnes requises : <strong>Nom Prénom</strong>, <strong>Sexe</strong> (F/M), <strong>VMA</strong><br>
+                    Optionnelles : <strong>Classe</strong>, <strong>Age</strong><br>
+                    💡 Pour Numbers : Fichier → Exporter → CSV
                 </p>
-                <input type="file" id="import-excel-students" accept=".xlsx, .xls">
+                <input type="file" id="import-excel-students" accept=".xlsx, .xls, .csv">
             </div>
             
             <!-- LISTE DES ÉLÈVES -->
@@ -1029,6 +1031,9 @@
                 </button>
                 <button onclick="goToStats()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--success); color: black;">
                     📊 STATISTIQUES
+                </button>
+                <button onclick="openPrintCards()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--orange); color: black;">
+                    🖨️ IMPRIMER CARTES
                 </button>
                 <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1; min-width: 200px;">
                     ➡️ SÉANCE D'ÉVALUATION
@@ -1935,6 +1940,19 @@ function goToStats() {
 }
 
 /**
+ * Ouvrir la page d'impression des cartes terrain
+ */
+function openPrintCards() {
+    if (storedStudents.length === 0) {
+        alert('⚠️ Aucun élève enregistré. Ajoutez des élèves pour imprimer les cartes.');
+        return;
+    }
+    
+    // Ouvrir la page d'impression dans un nouvel onglet
+    window.open('./print-cards.html', '_blank');
+}
+
+/**
  * Retour depuis la page stats
  */
 function backToStudentsFromStats() {
@@ -2201,17 +2219,63 @@ document.getElementById('import-excel-students').onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
+    const fileName = file.name.toLowerCase();
+    const isCSV = fileName.endsWith('.csv');
+    
     const reader = new FileReader();
     reader.onload = (evt) => {
         try {
-            const data = evt.target.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const imported = XLSX.utils.sheet_to_json(worksheet);
+            let imported = [];
+            
+            if (isCSV) {
+                // Traitement CSV
+                const text = evt.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                if (lines.length < 2) {
+                    alert('❌ Le fichier CSV est vide.');
+                    return;
+                }
+                
+                // Lire l'en-tête
+                const headers = lines[0].split(/[,;]/).map(h => h.trim());
+                
+                // Vérifier les colonnes requises
+                const nomIndex = headers.findIndex(h => h.toLowerCase().includes('nom') || h.toLowerCase().includes('prénom'));
+                const sexeIndex = headers.findIndex(h => h.toLowerCase() === 'sexe');
+                const vmaIndex = headers.findIndex(h => h.toLowerCase() === 'vma');
+                const classeIndex = headers.findIndex(h => h.toLowerCase() === 'classe');
+                const ageIndex = headers.findIndex(h => h.toLowerCase().includes('age') || h.toLowerCase().includes('âge'));
+                
+                if (nomIndex === -1 || sexeIndex === -1 || vmaIndex === -1) {
+                    alert('❌ Le fichier CSV doit contenir au minimum : "Nom Prénom" (ou "Nom"), "Sexe", "VMA"');
+                    return;
+                }
+                
+                // Lire les données
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(/[,;]/).map(v => v.trim());
+                    if (values.length > 1) {
+                        imported.push({
+                            'Nom Prénom': values[nomIndex] || '',
+                            'Sexe': values[sexeIndex] || '',
+                            'VMA': values[vmaIndex] || '',
+                            'Classe': classeIndex !== -1 ? values[classeIndex] : '',
+                            'Age': ageIndex !== -1 ? values[ageIndex] : ''
+                        });
+                    }
+                }
+            } else {
+                // Traitement Excel
+                const data = evt.target.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                imported = XLSX.utils.sheet_to_json(worksheet);
+            }
             
             if (imported.length === 0) {
-                alert('❌ Le fichier Excel est vide.');
+                alert('❌ Le fichier est vide.');
                 return;
             }
             
@@ -2229,6 +2293,8 @@ document.getElementById('import-excel-students').onchange = (e) => {
                 const nom = row['Nom Prénom'].trim().toUpperCase();
                 const sexe = row['Sexe'].toUpperCase();
                 const vma = parseFloat(row['VMA']);
+                const classe = row['Classe'] ? row['Classe'].trim().toUpperCase() : (storedClasses.length > 0 ? storedClasses[0] : 'Sans classe');
+                const age = row['Age'] ? parseInt(row['Age']) : null;
                 
                 // Validation
                 if (!nom || (sexe !== 'F' && sexe !== 'M') || !vma || vma <= 0) {
@@ -2245,8 +2311,11 @@ document.getElementById('import-excel-students').onchange = (e) => {
                 storedStudents.push({
                     id: generateStudentId(nom),
                     nomPrenom: nom,
+                    classe: classe,
                     sexe: sexe,
+                    age: age,
                     vma: vma,
+                    photo: null,
                     dateCreation: new Date().toISOString(),
                     diagnostique: null,
                     projet: null,
@@ -2262,10 +2331,16 @@ document.getElementById('import-excel-students').onchange = (e) => {
             }
             
         } catch (error) {
+            console.error('Erreur import:', error);
             alert('❌ Erreur lors de l\'import : ' + error.message);
         }
     };
-    reader.readAsBinaryString(file);
+    
+    if (isCSV) {
+        reader.readAsText(file);
+    } else {
+        reader.readAsBinaryString(file);
+    }
 };
 
 /**

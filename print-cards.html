@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impression Cartes Terrain - EPS PRO</title>
+    <style>
+        /* Styles pour l'écran */
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b101d;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .screen-only {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1c2333;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #00d2ff;
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #00ff88;
+        }
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+        
+        /* Styles pour l'impression */
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .screen-only { display: none !important; }
+            .card { 
+                page-break-after: always; 
+                page-break-inside: avoid;
+                margin: 0;
+                padding: 0;
+            }
+            .card:last-child { page-break-after: avoid; }
+        }
+        
+        @page { 
+            size: A4 portrait; 
+            margin: 1.5cm; 
+        }
+        
+        /* Styles des cartes */
+        .cards-container { display: none; }
+        .cards-container.printing { display: block; }
+        
+        .card { 
+            background: white;
+            color: black;
+            border: 3px solid #00d2ff;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 2px solid #00d2ff; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px;
+        }
+        .header h1 { 
+            margin: 0 0 5px 0; 
+            color: #00d2ff; 
+            font-size: 1.5rem; 
+        }
+        .header p { 
+            margin: 0; 
+            color: #666; 
+            font-size: 0.9rem;
+        }
+        .student-info { 
+            background: #f0f0f0; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .student-info h2 { 
+            margin: 5px 0; 
+            font-size: 1.8rem;
+            color: #333;
+        }
+        .student-info p { 
+            margin: 5px 0; 
+            color: #666;
+        }
+        .section { 
+            border: 2px solid #ddd; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: 10px;
+            background: white;
+        }
+        .section h3 { 
+            margin: 0 0 10px 0; 
+            color: #333; 
+            font-size: 1.2rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .targets { 
+            background: #fffacd; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+            font-size: 0.85rem;
+            border: 1px solid #ffd700;
+        }
+        .targets strong { color: #cc8800; }
+        .input-line { 
+            margin: 8px 0; 
+            padding: 10px 5px; 
+            border-bottom: 2px solid #333;
+            min-height: 30px;
+            font-size: 1rem;
+        }
+        .footer { 
+            text-align: center; 
+            margin-top: 20px; 
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Interface de configuration (écran uniquement) -->
+    <div class="screen-only">
+        <h1 style="color: #00d2ff; text-align: center;">🖨️ IMPRESSION DES CARTES TERRAIN</h1>
+        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">
+            Génère des cartes d'évaluation imprimables pour chaque élève
+        </p>
+        
+        <div style="background: rgba(0,210,255,0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #00d2ff;">
+            <h3 style="color: #00d2ff; margin-top: 0;">📋 Instructions</h3>
+            <ol style="line-height: 1.8;">
+                <li>Cette page charge automatiquement les élèves depuis le localStorage</li>
+                <li>Cliquez sur "🖨️ Générer et Imprimer"</li>
+                <li>Une carte sera créée pour chaque élève</li>
+                <li>La fenêtre d'impression s'ouvrira automatiquement</li>
+            </ol>
+        </div>
+        
+        <div id="student-count" style="text-align: center; font-size: 1.2rem; margin: 20px 0;">
+            Chargement...
+        </div>
+        
+        <div style="text-align: center;">
+            <button onclick="generateAndPrint()" class="btn">
+                🖨️ GÉNÉRER ET IMPRIMER
+            </button>
+            <button onclick="window.close()" class="btn btn-secondary">
+                ← Retour
+            </button>
+        </div>
+    </div>
+    
+    <!-- Conteneur des cartes (pour impression) -->
+    <div id="cards-container" class="cards-container">
+        <!-- Rempli dynamiquement -->
+    </div>
+    
+    <script>
+    // Charger les élèves depuis le localStorage
+    let students = [];
+    
+    function loadStudents() {
+        try {
+            const stored = localStorage.getItem('eps_pro_students');
+            if (stored) {
+                students = JSON.parse(stored);
+                document.getElementById('student-count').innerHTML = `
+                    <strong style="color: #00ff88;">${students.length} élève(s)</strong> chargé(s)<br>
+                    <span style="font-size: 0.9rem; color: #aaa;">Prêt à imprimer</span>
+                `;
+            } else {
+                document.getElementById('student-count').innerHTML = `
+                    <strong style="color: #ff4bb4;">Aucun élève trouvé</strong><br>
+                    <span style="font-size: 0.9rem; color: #aaa;">Ajoutez des élèves dans l'app principale</span>
+                `;
+            }
+        } catch (e) {
+            document.getElementById('student-count').innerHTML = `
+                <strong style="color: #ff4bb4;">Erreur de chargement</strong><br>
+                <span style="font-size: 0.9rem; color: #aaa;">${e.message}</span>
+            `;
+        }
+    }
+    
+    function formatTime(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const min = Math.floor(totalSec / 60);
+        const sec = totalSec % 60;
+        return min + "'" + (sec < 10 ? '0' : '') + sec + '"';
+    }
+    
+    function generateAndPrint() {
+        if (students.length === 0) {
+            alert('⚠️ Aucun élève à imprimer.');
+            return;
+        }
+        
+        const container = document.getElementById('cards-container');
+        let html = '';
+        
+        students.forEach(student => {
+            const vma = parseFloat(student.vma);
+            
+            // Calculer les temps cibles pour 400m
+            const temps90 = formatTime((0.4 / (vma * 0.9)) * 3600 * 1000);
+            const temps100 = formatTime((0.4 / vma) * 3600 * 1000);
+            const temps110 = formatTime((0.4 / (vma * 1.1)) * 3600 * 1000);
+            const temps120 = formatTime((0.4 / (vma * 1.2)) * 3600 * 1000);
+            
+            html += `
+<div class="card">
+    <div class="header">
+        <h1>📋 CARTE D'ÉVALUATION TERRAIN</h1>
+        <p>EPS ÉPREUVES COMBINÉES - CYCLE 3</p>
+    </div>
+    
+    <div class="student-info">
+        <h2>${student.sexe === 'F' ? '👧' : '🧑'} ${student.nomPrenom}</h2>
+        <p><strong>Classe :</strong> ${student.classe || 'Sans classe'} | <strong>VMA :</strong> ${vma} km/h</p>
+    </div>
+    
+    <div class="section">
+        <h3>🏃 COURSE 3×400m</h3>
+        <div class="targets">
+            <strong>🎯 Objectifs temps cibles :</strong><br>
+            • 90% VMA : <strong>${temps90}</strong> → ⭐<br>
+            • 100% VMA : <strong>${temps100}</strong> → ⭐⭐<br>
+            • 110% VMA : <strong>${temps110}</strong> → ⭐⭐⭐<br>
+            • 120% VMA : <strong>${temps120}</strong> → ⭐⭐⭐⭐
+        </div>
+        <div class="input-line"><strong>Tour 1 :</strong> _____ min _____ sec</div>
+        <div class="input-line"><strong>Tour 2 :</strong> _____ min _____ sec</div>
+        <div class="input-line"><strong>Tour 3 :</strong> _____ min _____ sec</div>
+    </div>
+    
+    <div class="section">
+        <h3>🦘 SAUT EN LONGUEUR AVEC ÉLAN</h3>
+        <div class="input-line"><strong>Essai 1 :</strong> _____ m</div>
+        <div class="input-line"><strong>Essai 2 :</strong> _____ m</div>
+        <div class="input-line"><strong>Essai 3 :</strong> _____ m</div>
+    </div>
+    
+    <div class="section">
+        <h3>🎯 LANCER (Poids 1kg)</h3>
+        <div class="input-line"><strong>Essai 1 :</strong> _____ m</div>
+        <div class="input-line"><strong>Essai 2 :</strong> _____ m</div>
+        <div class="input-line"><strong>Essai 3 :</strong> _____ m</div>
+    </div>
+    
+    <div class="footer">
+        <strong>💓 BPM :</strong> _____ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>📊 RPE :</strong> _____
+    </div>
+</div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        container.classList.add('printing');
+        
+        // Attendre un peu puis imprimer
+        setTimeout(() => {
+            window.print();
+            // Réinitialiser après impression
+            setTimeout(() => {
+                container.classList.remove('printing');
+            }, 1000);
+        }, 500);
+    }
+    
+    // Charger automatiquement au démarrage
+    window.onload = loadStudents;
+    </script>
+</body>
+</html>

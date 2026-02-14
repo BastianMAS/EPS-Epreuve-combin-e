@@ -2370,19 +2370,57 @@ document.getElementById('import-excel-students').onchange = (e) => {
                 // Calcul de l'âge depuis date de naissance si présente
                 let age = null;
                 if (row['Date']) {
-                    const dateStr = row['Date'].toString();
-                    // Essayer de parser la date
-                    const dateNaissance = new Date(dateStr);
-                    if (!isNaN(dateNaissance)) {
+                    const dateValue = row['Date'];
+                    let dateNaissance = null;
+                    
+                    // Si c'est un nombre Excel (nombre de jours depuis 1900)
+                    if (typeof dateValue === 'number' && dateValue > 1000) {
+                        // Conversion du format Excel (jours depuis 1/1/1900)
+                        const excelEpoch = new Date(1900, 0, 1);
+                        dateNaissance = new Date(excelEpoch.getTime() + (dateValue - 2) * 24 * 60 * 60 * 1000);
+                        console.log('Date Excel convertie:', dateValue, '→', dateNaissance);
+                    } 
+                    // Si c'est déjà un objet Date
+                    else if (dateValue instanceof Date) {
+                        dateNaissance = dateValue;
+                    }
+                    // Si c'est une chaîne
+                    else {
+                        const dateStr = dateValue.toString();
+                        
+                        // Essayer format français JJ/MM/AAAA ou JJ-MM-AAAA
+                        const frenchMatch = dateStr.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+                        if (frenchMatch) {
+                            const [, jour, mois, annee] = frenchMatch;
+                            dateNaissance = new Date(parseInt(annee), parseInt(mois) - 1, parseInt(jour));
+                            console.log('Date FR parsée:', dateStr, '→', dateNaissance);
+                        } 
+                        // Essayer format ISO AAAA-MM-JJ
+                        else {
+                            dateNaissance = new Date(dateStr);
+                        }
+                        
+                        // Si c'est juste un nombre (âge direct)
+                        if (isNaN(dateNaissance) && !isNaN(parseInt(dateStr))) {
+                            age = parseInt(dateStr);
+                            console.log('Âge direct:', age);
+                        }
+                    }
+                    
+                    // Calculer l'âge si on a une date valide
+                    if (dateNaissance && !isNaN(dateNaissance) && age === null) {
                         const today = new Date();
                         age = today.getFullYear() - dateNaissance.getFullYear();
                         const m = today.getMonth() - dateNaissance.getMonth();
                         if (m < 0 || (m === 0 && today.getDate() < dateNaissance.getDate())) {
                             age--;
                         }
-                    } else if (!isNaN(parseInt(dateStr))) {
-                        // Si c'est déjà un nombre, c'est l'âge
-                        age = parseInt(dateStr);
+                        console.log('Âge calculé:', age, 'ans pour', nom);
+                        
+                        // Validation : un 6ème devrait avoir entre 10 et 14 ans
+                        if (age < 8 || age > 16) {
+                            console.warn(`⚠️ Âge suspect pour ${nom}: ${age} ans (date: ${dateNaissance})`);
+                        }
                     }
                 }
                 

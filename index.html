@@ -2296,12 +2296,18 @@ document.getElementById('import-excel-students').onchange = (e) => {
                     }
                 }
             } else {
-                // Traitement Excel - Compatible iOS
+                // Traitement Excel
                 const data = evt.target.result;
-                const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+                console.log('Type de données Excel:', typeof data, 'Longueur:', data.length);
+                
+                const workbook = XLSX.read(data, { type: 'binary' });
+                console.log('Workbook chargé, sheets:', workbook.SheetNames);
+                
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
                 const rawData = XLSX.utils.sheet_to_json(worksheet);
+                
+                console.log('Nombre de lignes Excel:', rawData.length);
                 
                 if (rawData.length === 0) {
                     alert('❌ Le fichier Excel est vide.');

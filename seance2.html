@@ -22,56 +22,57 @@
             line-height: 1.6;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2.5rem; margin-bottom: 10px; }
+        h1 { text-align: center; font-size: 2rem; margin-bottom: 5px; }
         .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 15px; font-size: 0.9rem; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
         .btn-secondary { background: #666; color: white; }
         .student-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 15px;
         }
         .student-card {
             background: var(--card);
             border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 12px;
         }
         .student-header {
             background: linear-gradient(135deg, var(--accent), var(--success));
             color: black;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
             font-weight: 700;
             text-align: center;
+            font-size: 0.9rem;
         }
         select, input, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
             border: 2px solid var(--accent);
             background: #0f0f23;
             color: white;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
-        textarea { font-family: Arial; resize: vertical; min-height: 60px; }
-        label { display: block; margin: 8px 0 4px 0; font-weight: 600; font-size: 0.85rem; color: var(--accent); }
+        textarea { font-family: Arial; resize: vertical; min-height: 50px; }
+        label { display: block; margin: 6px 0 3px 0; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
         .btn-pct {
-            padding: 6px 10px;
+            padding: 5px 8px;
             border: 2px solid var(--accent);
             background: #0f0f23;
             color: white;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin: 2px;
         }
         .btn-pct.active { background: var(--accent); color: black; }
-        .pct-group { display: flex; gap: 4px; flex-wrap: wrap; margin: 10px 0; }
+        .pct-group { display: flex; gap: 3px; flex-wrap: wrap; margin: 8px 0; }
         .time-input-group { display: flex; gap: 5px; align-items: center; margin: 8px 0; }
         .time-input-group input {
             width: 50px;
@@ -83,42 +84,67 @@
             text-align: center;
             font-size: 1rem;
         }
-        .time-input-group span { font-size: 0.85rem; color: #aaa; }
+        .time-input-group span { font-size: 0.8rem; color: #aaa; }
         .results-box {
             background: rgba(0,255,136,0.1);
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid var(--success);
-            margin: 10px 0;
-            font-size: 0.85rem;
+            margin: 8px 0;
+            font-size: 0.8rem;
         }
-        .analysis-box {
-            background: rgba(255,204,0,0.1);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--warning);
-            margin: 10px 0;
+        .btn-analyse {
+            background: var(--warning);
+            color: black;
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
             font-size: 0.85rem;
-            line-height: 1.4;
         }
         .atelier-box {
             background: rgba(155,89,182,0.1);
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid var(--purple);
-            margin: 10px 0;
+            margin: 8px 0;
         }
         .save-btn {
             width: 100%;
             padding: 15px;
-            margin-top: 30px;
+            margin-top: 20px;
             background: var(--success);
             color: black;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-weight: 700;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid var(--warning);
         }
         @media (max-width: 900px) { .student-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .student-grid { grid-template-columns: 1fr; } }
@@ -127,10 +153,10 @@
 <body>
     <div class="container">
         <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.5rem; font-weight: 700;">📅 SÉANCE 2 - ENTRAÎNEMENT</p>
-        <p class="subtitle" style="font-size: 1.1rem;">3×400m + Saut</p>
+        <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 SÉANCE 2</p>
+        <p class="subtitle">3×400m + Saut</p>
         
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
+        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 15px;">← Retour</button>
         
         <div id="student-grid" class="student-grid">
             <div class="student-card" id="card-0"></div>
@@ -141,7 +167,15 @@
             <div class="student-card" id="card-5"></div>
         </div>
         
-        <button onclick="saveAll()" class="save-btn">💾 ENREGISTRER TOUTE LA SÉANCE</button>
+        <button onclick="saveAll()" class="save-btn">💾 ENREGISTRER</button>
+    </div>
+    
+    <div id="modal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="color: var(--warning); margin-bottom: 15px;">📈 ANALYSE</h2>
+            <div id="modal-content"></div>
+            <button onclick="closeModal()" class="btn" style="background: var(--accent); color: black; width: 100%; margin-top: 15px;">Fermer</button>
+        </div>
     </div>
     
     <script>
@@ -151,7 +185,7 @@
     window.onload = function() {
         const stored = localStorage.getItem('eps_pro_students');
         if (!stored) {
-            alert('⚠️ Aucun élève. Ajoutez des élèves dans app principale.');
+            alert('⚠️ Aucun élève.');
             return;
         }
         allStudents = JSON.parse(stored);
@@ -162,7 +196,7 @@
         const card = document.getElementById('card-'+cardIndex);
         const data = cardData[cardIndex];
         
-        let content = '<label>Élève :</label><select id="sel-'+cardIndex+'" onchange="selectStudent('+cardIndex+')">';
+        let content = '<select id="sel-'+cardIndex+'" onchange="selectStudent('+cardIndex+')" style="font-size: 0.85rem;">';
         content += '<option value="">-- Choisir --</option>';
         allStudents.forEach((s,i) => {
             content += '<option value="'+i+'" '+(data.studentIndex===i?'selected':'')+'>'+s.nomPrenom+'</option>';
@@ -175,12 +209,12 @@
             const pct = data.pctVMA || 100;
             const cible = formatTime((0.4 / (vma * (pct/100))) * 3600 * 1000);
             
-            content += '<div class="student-header">'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+' | VMA: '+vma+' km/h</div>';
-            content += '<label>% VMA :</label><div class="pct-group">';
+            content += '<div class="student-header">'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+' | VMA: '+vma+'</div>';
+            content += '<div class="pct-group">';
             [90,95,100,105,110,115,120,125,130].forEach(p => {
                 content += '<button onclick="setPct('+cardIndex+','+p+')" class="btn-pct '+(pct===p?'active':'')+'" id="pct-'+cardIndex+'-'+p+'">'+p+'%</button>';
             });
-            content += '</div><p style="color:var(--success);font-weight:700;margin:10px 0">⏱️ Temps cible: '+cible+'</p>';
+            content += '</div><p style="color:var(--success);font-weight:700;font-size:0.85rem;margin:5px 0">Cible: '+cible+'</p>';
             
             const t1m = data.tour1 ? Math.floor(data.tour1/60) : '';
             const t1s = data.tour1 ? data.tour1%60 : '';
@@ -189,40 +223,35 @@
             const t3m = data.tour3 ? Math.floor(data.tour3/60) : '';
             const t3s = data.tour3 ? data.tour3%60 : '';
             
-            content += '<label>Tour 1:</label><div class="time-input-group">';
-            content += '<input type="number" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span><input type="number" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
+            content += '<label>T1:</label><div class="time-input-group">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
+            content += '<span>min</span>';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>sec</span></div>';
             
-            content += '<label>Tour 2:</label><div class="time-input-group">';
-            content += '<input type="number" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span><input type="number" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
+            content += '<label>T2:</label><div class="time-input-group">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
+            content += '<span>min</span>';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>sec</span></div>';
             
-            content += '<label>Tour 3:</label><div class="time-input-group">';
-            content += '<input type="number" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span><input type="number" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
+            content += '<label>T3:</label><div class="time-input-group">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
+            content += '<span>min</span>';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>sec</span></div>';
             
-            if(data.tour1 && data.tour2 && data.tour3) {
-                const moy = (data.tour1 + data.tour2 + data.tour3) / 3;
-                const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-                
-                content += '<div class="results-box"><strong>Moyenne:</strong> '+formatTime(moy*1000)+'<br>';
-                content += '<strong>% VMA réalisé:</strong> '+pctRealise.toFixed(1)+'%</div>';
-                
-                let analyse = generateAnalysis(data, pct, pctRealise);
-                content += '<div class="analysis-box"><strong>📈 ANALYSE AUTO:</strong><br>'+analyse+'</div>';
-            }
+            content += '<div id="results-'+cardIndex+'"></div>';
             
-            content += '<label>💓 BPM:</label><input type="number" id="bpm-'+cardIndex+'" min="60" max="220" value="'+(data.bpm||'')+'" placeholder="Ex: 180">';
-            content += '<label>⏱️ Récup (min):</label><input type="number" id="recup-'+cardIndex+'" min="1" max="10" value="'+(data.tempsRecup||'')+'" placeholder="Ex: 3">';
-            content += '<label>💬 Commentaire:</label><textarea id="comment-'+cardIndex+'" placeholder="Points forts, à améliorer...">'+(data.commentaire||'')+'</textarea>';
-            content += '<div class="atelier-box"><label style="color:var(--purple)">🦘 Atelier SAUT:</label>';
-            content += '<textarea id="saut-'+cardIndex+'" placeholder="Travail technique...">'+(data.atelierSaut||'')+'</textarea></div>';
+            content += '<label>💓 BPM:</label><input type="number" inputmode="numeric" id="bpm-'+cardIndex+'" value="'+(data.bpm||'')+'" placeholder="180" style="width:70px">';
+            content += '<label>⏱️ Récup:</label><input type="number" inputmode="numeric" id="recup-'+cardIndex+'" value="'+(data.tempsRecup||'')+'" placeholder="3" style="width:70px">';
+            content += '<label>💬 Notes:</label><textarea id="comment-'+cardIndex+'" placeholder="Commentaire...">'+(data.commentaire||'')+'</textarea>';
+            content += '<div class="atelier-box"><label style="color:var(--purple);font-size:0.75rem">🦘 Saut:</label>';
+            content += '<textarea id="saut-'+cardIndex+'" placeholder="Travail..." style="min-height:40px">'+(data.atelierSaut||'')+'</textarea></div>';
         }
         
         card.innerHTML = content;
+        updateResults(cardIndex);
     }
     
     function selectStudent(cardIndex) {
@@ -260,47 +289,74 @@
         const t2s = parseInt(document.getElementById('t2s-'+cardIndex).value)||0;
         const t3m = parseInt(document.getElementById('t3m-'+cardIndex).value)||0;
         const t3s = parseInt(document.getElementById('t3s-'+cardIndex).value)||0;
+        
         d.tour1 = t1m*60+t1s||null;
         d.tour2 = t2m*60+t2s||null;
         d.tour3 = t3m*60+t3s||null;
-        renderCard(cardIndex);
+        
+        updateResults(cardIndex);
     }
     
-    function generateAnalysis(data, pctCible, pctRealise) {
-        let txt = '';
+    function updateResults(cardIndex) {
+        const d = cardData[cardIndex];
+        const resultsDiv = document.getElementById('results-'+cardIndex);
+        if(!resultsDiv) return;
         
-        // Profil de course
-        const t1=data.tour1, t2=data.tour2, t3=data.tour3;
+        if(d.tour1 && d.tour2 && d.tour3 && d.student) {
+            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+            const vma = parseFloat(d.student.vma);
+            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
+            
+            resultsDiv.innerHTML = '<div class="results-box"><strong>Moy:</strong> '+formatTime(moy*1000)+' | <strong>VMA:</strong> '+pctRealise.toFixed(1)+'%</div><button onclick="showAnalysis('+cardIndex+')" class="btn-analyse">📈 VOIR ANALYSE</button>';
+        } else {
+            resultsDiv.innerHTML = '';
+        }
+    }
+    
+    function showAnalysis(cardIndex) {
+        const d = cardData[cardIndex];
+        const vma = parseFloat(d.student.vma);
+        const pct = d.pctVMA;
+        const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+        const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
+        
+        let txt = '<p style="line-height:1.6">';
+        
+        const t1=d.tour1, t2=d.tour2, t3=d.tour3;
         if(t3 > t2 && t2 > t1) {
-            txt += 'Course <strong>dégressive</strong> (rapide puis ralentissement). ';
-            txt += 'Bon départ mais baisse de rythme sur le 3ème tour. ';
+            txt += '<strong>Profil:</strong> Dégressive 📉<br>Rapide au départ puis ralentissement. Bon départ mais baisse de rythme.<br><br>';
         } else if(t3 < t2 && t2 < t1) {
-            txt += 'Course <strong>progressive</strong> (accélération). ';
-            txt += 'Montée en puissance, bon finish. ';
+            txt += '<strong>Profil:</strong> Progressive 📈<br>Accélération progressive. Montée en puissance, bon finish.<br><br>';
         } else {
-            txt += 'Course <strong>constante</strong> (régulier). ';
-            txt += 'Bonne gestion du rythme. ';
+            txt += '<strong>Profil:</strong> Constante ➡️<br>Rythme régulier. Bonne gestion.<br><br>';
         }
         
-        // Objectif
-        if(pctRealise >= pctCible) {
-            txt += '<strong>Objectif atteint ✅</strong> ('+pctRealise.toFixed(1)+'% ≥ '+pctCible+'%). ';
-        } else if(pctRealise >= pctCible - 5) {
-            txt += '<strong>Objectif presque atteint ⚠️</strong> ('+pctRealise.toFixed(1)+'% vs '+pctCible+'%). ';
+        txt += '<strong>Objectif '+pct+'%:</strong><br>';
+        if(pctRealise >= pct) {
+            txt += '✅ <span style="color:var(--success)">ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
+        } else if(pctRealise >= pct - 5) {
+            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
         } else {
-            txt += '<strong>Objectif non atteint ❌</strong> ('+pctRealise.toFixed(1)+'% < '+pctCible+'%). ';
+            txt += '❌ NON ATTEINT ('+pctRealise.toFixed(1)+'%)<br><br>';
         }
         
-        // Conseil
+        txt += '<strong>Conseil:</strong><br>';
         if(t3 > t2 && t2 > t1) {
-            txt += 'Travailler l\'endurance pour maintenir le rythme.';
+            txt += 'Travailler l\'endurance pour tenir le rythme.';
         } else if(t3 < t2 && t2 < t1) {
-            txt += 'Bon finish, travailler le départ pour être régulier.';
+            txt += 'Bon finish ! Travailler le départ pour être régulier.';
         } else {
-            txt += 'Continue comme ça !';
+            txt += 'Excellent ! Continue, rythme bien géré.';
         }
         
-        return txt;
+        txt += '</p>';
+        
+        document.getElementById('modal-content').innerHTML = txt;
+        document.getElementById('modal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
     }
     
     function saveAll() {
@@ -324,7 +380,7 @@
             if(d.student && (!d.tour1 || !d.tour2 || !d.tour3)) err++;
         });
         
-        if(err > 0 && !confirm(err+' élève(s) sans les 3 temps. Sauvegarder ?')) return;
+        if(err > 0 && !confirm(err+' élève(s) sans temps. Continuer ?')) return;
         
         cardData.forEach(d => {
             if(d.student) {

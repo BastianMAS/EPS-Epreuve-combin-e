@@ -2296,9 +2296,9 @@ document.getElementById('import-excel-students').onchange = (e) => {
                     }
                 }
             } else {
-                // Traitement Excel
+                // Traitement Excel - Compatible iOS
                 const data = evt.target.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
+                const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
                 const rawData = XLSX.utils.sheet_to_json(worksheet);
@@ -2434,30 +2434,6 @@ document.getElementById('import-excel-students').onchange = (e) => {
         } catch (error) {
             console.error('Erreur import:', error);
             alert('❌ Erreur lors de l\'import : ' + error.message + '\n\nVoir la console pour plus de détails.');
-        }
-    };
-    
-    if (isCSV) {
-        reader.readAsText(file);
-    } else {
-        reader.readAsBinaryString(file);
-    }
-};
-                    projet: null,
-                    seances: []
-                });
-                added++;
-            });
-            
-            if (saveStudentsToStorage()) {
-                renderStudentsList();
-                updateStudentsStats();
-                alert(`✅ Import terminé !\n\n${added} élève(s) ajouté(s)\n${skipped} ignoré(s) (doublons ou erreurs)`);
-            }
-            
-        } catch (error) {
-            console.error('Erreur import:', error);
-            alert('❌ Erreur lors de l\'import : ' + error.message);
         }
     };
     

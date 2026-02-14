@@ -986,11 +986,19 @@
             
             <!-- IMPORT EXCEL (optionnel) -->
             <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--warning);">
-                <label style="color: var(--warning); margin-bottom: 10px;">📁 Import Excel / Numbers / CSV (optionnel)</label>
+                <label style="color: var(--warning); margin-bottom: 10px;">📁 Import Excel / Numbers / CSV</label>
                 <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 10px;">
-                    Colonnes requises : <strong>Nom Prénom</strong>, <strong>Sexe</strong> (F/M), <strong>VMA</strong><br>
-                    Optionnelles : <strong>Classe</strong>, <strong>Age</strong><br>
-                    💡 Pour Numbers : Fichier → Exporter → CSV
+                    <strong>Colonnes OBLIGATOIRES :</strong><br>
+                    • <strong>Nom Prénom</strong> (ou "Nom", "Prénom", "Élève"...)<br>
+                    • <strong>Sexe</strong> (F/M, Fille/Garçon, Femme/Homme...)<br>
+                    <br>
+                    <strong>Colonnes OPTIONNELLES :</strong><br>
+                    • <strong>Classe</strong> (6èmeA, 6èmeB...)<br>
+                    • <strong>Date de naissance</strong> (ou "Age", "Âge"...)<br>
+                    • <strong>VMA</strong> (si absente, sera calculée par les tests)<br>
+                    <br>
+                    💡 Pour Numbers : Fichier → Exporter → CSV<br>
+                    💡 Les accents, espaces et majuscules sont ignorés
                 </p>
                 <input type="file" id="import-excel-students" accept=".xlsx, .xls, .csv">
             </div>
@@ -2213,7 +2221,7 @@ function backToStudents() {
 }
 
 /**
- * Import Excel des élèves
+ * Import Excel des élèves - VERSION ASSOUPLIE
  */
 document.getElementById('import-excel-students').onchange = (e) => {
     const file = e.target.files[0];
@@ -2226,6 +2234,24 @@ document.getElementById('import-excel-students').onchange = (e) => {
     reader.onload = (evt) => {
         try {
             let imported = [];
+            let headers = [];
+            
+            // Fonction helper pour normaliser les noms de colonnes
+            function normalize(str) {
+                return str.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Enlever accents
+                    .replace(/[^a-z0-9]/g, ''); // Enlever espaces et caractères spéciaux
+            }
+            
+            // Fonction pour trouver une colonne de manière flexible
+            function findColumn(headers, keywords) {
+                const normalized = headers.map(h => normalize(h));
+                for (let keyword of keywords) {
+                    const idx = normalized.findIndex(h => h.includes(normalize(keyword)));
+                    if (idx !== -1) return idx;
+                }
+                return -1;
+            }
             
             if (isCSV) {
                 // Traitement CSV
@@ -2238,30 +2264,34 @@ document.getElementById('import-excel-students').onchange = (e) => {
                 }
                 
                 // Lire l'en-tête
-                const headers = lines[0].split(/[,;]/).map(h => h.trim());
+                headers = lines[0].split(/[,;]/).map(h => h.trim());
                 
-                // Vérifier les colonnes requises
-                const nomIndex = headers.findIndex(h => h.toLowerCase().includes('nom') || h.toLowerCase().includes('prénom'));
-                const sexeIndex = headers.findIndex(h => h.toLowerCase() === 'sexe');
-                const vmaIndex = headers.findIndex(h => h.toLowerCase() === 'vma');
-                const classeIndex = headers.findIndex(h => h.toLowerCase() === 'classe');
-                const ageIndex = headers.findIndex(h => h.toLowerCase().includes('age') || h.toLowerCase().includes('âge'));
+                console.log('Headers CSV:', headers);
                 
-                if (nomIndex === -1 || sexeIndex === -1 || vmaIndex === -1) {
-                    alert('❌ Le fichier CSV doit contenir au minimum : "Nom Prénom" (ou "Nom"), "Sexe", "VMA"');
+                // Trouver les colonnes de manière flexible
+                const nomIndex = findColumn(headers, ['nom', 'prenom', 'eleve', 'etudiant']);
+                const sexeIndex = findColumn(headers, ['sexe', 'genre', 'f/m']);
+                const vmaIndex = findColumn(headers, ['vma']);
+                const classeIndex = findColumn(headers, ['classe', 'group']);
+                const dateIndex = findColumn(headers, ['date', 'naissance', 'age']);
+                
+                console.log('Colonnes trouvées - Nom:', nomIndex, 'Sexe:', sexeIndex, 'VMA:', vmaIndex, 'Classe:', classeIndex, 'Date/Age:', dateIndex);
+                
+                if (nomIndex === -1 || sexeIndex === -1) {
+                    alert(`❌ Colonnes introuvables.\n\nColonnes détectées :\n${headers.join(', ')}\n\nColonnes requises :\n- Une colonne contenant "nom" ou "prénom"\n- Une colonne contenant "sexe"`);
                     return;
                 }
                 
                 // Lire les données
                 for (let i = 1; i < lines.length; i++) {
                     const values = lines[i].split(/[,;]/).map(v => v.trim());
-                    if (values.length > 1) {
+                    if (values.length > 1 && values[nomIndex]) {
                         imported.push({
                             'Nom Prénom': values[nomIndex] || '',
                             'Sexe': values[sexeIndex] || '',
-                            'VMA': values[vmaIndex] || '',
+                            'VMA': vmaIndex !== -1 ? values[vmaIndex] : '',
                             'Classe': classeIndex !== -1 ? values[classeIndex] : '',
-                            'Age': ageIndex !== -1 ? values[ageIndex] : ''
+                            'Date': dateIndex !== -1 ? values[dateIndex] : ''
                         });
                     }
                 }
@@ -2271,33 +2301,94 @@ document.getElementById('import-excel-students').onchange = (e) => {
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
-                imported = XLSX.utils.sheet_to_json(worksheet);
+                const rawData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if (rawData.length === 0) {
+                    alert('❌ Le fichier Excel est vide.');
+                    return;
+                }
+                
+                // Récupérer les en-têtes
+                headers = Object.keys(rawData[0]);
+                console.log('Headers Excel:', headers);
+                
+                // Trouver les colonnes de manière flexible
+                const nomCol = headers.find(h => normalize(h).includes('nom') || normalize(h).includes('prenom'));
+                const sexeCol = headers.find(h => normalize(h).includes('sexe'));
+                const vmaCol = headers.find(h => normalize(h).includes('vma'));
+                const classeCol = headers.find(h => normalize(h).includes('classe'));
+                const dateCol = headers.find(h => normalize(h).includes('date') || normalize(h).includes('naissance') || normalize(h).includes('age'));
+                
+                console.log('Colonnes trouvées - Nom:', nomCol, 'Sexe:', sexeCol, 'VMA:', vmaCol, 'Classe:', classeCol, 'Date/Age:', dateCol);
+                
+                if (!nomCol || !sexeCol) {
+                    alert(`❌ Colonnes introuvables.\n\nColonnes détectées :\n${headers.join(', ')}\n\nColonnes requises :\n- Une colonne contenant "nom" ou "prénom"\n- Une colonne contenant "sexe"`);
+                    return;
+                }
+                
+                // Mapper les données
+                rawData.forEach(row => {
+                    imported.push({
+                        'Nom Prénom': row[nomCol] || '',
+                        'Sexe': row[sexeCol] || '',
+                        'VMA': vmaCol ? row[vmaCol] : '',
+                        'Classe': classeCol ? row[classeCol] : '',
+                        'Date': dateCol ? row[dateCol] : ''
+                    });
+                });
             }
             
             if (imported.length === 0) {
-                alert('❌ Le fichier est vide.');
+                alert('❌ Aucune donnée valide trouvée dans le fichier.');
                 return;
             }
             
-            // Vérifier les colonnes
-            const first = imported[0];
-            if (!first['Nom Prénom'] || !first['Sexe'] || !first['VMA']) {
-                alert('❌ Le fichier doit contenir : "Nom Prénom", "Sexe" (F/M), "VMA"');
-                return;
-            }
+            console.log('Données importées:', imported);
             
             let added = 0;
             let skipped = 0;
+            let errors = [];
             
-            imported.forEach(row => {
-                const nom = row['Nom Prénom'].trim().toUpperCase();
-                const sexe = row['Sexe'].toUpperCase();
-                const vma = parseFloat(row['VMA']);
-                const classe = row['Classe'] ? row['Classe'].trim().toUpperCase() : (storedClasses.length > 0 ? storedClasses[0] : 'Sans classe');
-                const age = row['Age'] ? parseInt(row['Age']) : null;
+            imported.forEach((row, index) => {
+                const nom = row['Nom Prénom'] ? row['Nom Prénom'].toString().trim().toUpperCase() : '';
+                const sexeRaw = row['Sexe'] ? row['Sexe'].toString().trim().toUpperCase() : '';
+                const sexe = sexeRaw === 'F' || sexeRaw === 'FILLE' || sexeRaw === 'FEMME' ? 'F' : 
+                             sexeRaw === 'M' || sexeRaw === 'GARCON' || sexeRaw === 'GARÇON' || sexeRaw === 'HOMME' ? 'M' : '';
+                
+                const vmaRaw = row['VMA'] ? parseFloat(row['VMA'].toString().replace(',', '.')) : null;
+                const vma = vmaRaw && vmaRaw > 0 ? vmaRaw : 10; // VMA par défaut à 10 km/h
+                
+                const classe = row['Classe'] ? row['Classe'].toString().trim().toUpperCase() : 
+                               (storedClasses.length > 0 ? storedClasses[0] : 'Sans classe');
+                
+                // Calcul de l'âge depuis date de naissance si présente
+                let age = null;
+                if (row['Date']) {
+                    const dateStr = row['Date'].toString();
+                    // Essayer de parser la date
+                    const dateNaissance = new Date(dateStr);
+                    if (!isNaN(dateNaissance)) {
+                        const today = new Date();
+                        age = today.getFullYear() - dateNaissance.getFullYear();
+                        const m = today.getMonth() - dateNaissance.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < dateNaissance.getDate())) {
+                            age--;
+                        }
+                    } else if (!isNaN(parseInt(dateStr))) {
+                        // Si c'est déjà un nombre, c'est l'âge
+                        age = parseInt(dateStr);
+                    }
+                }
                 
                 // Validation
-                if (!nom || (sexe !== 'F' && sexe !== 'M') || !vma || vma <= 0) {
+                if (!nom) {
+                    errors.push(`Ligne ${index + 2}: Nom manquant`);
+                    skipped++;
+                    return;
+                }
+                
+                if (!sexe || (sexe !== 'F' && sexe !== 'M')) {
+                    errors.push(`Ligne ${index + 2}: Sexe invalide pour ${nom} (doit être F ou M)`);
                     skipped++;
                     return;
                 }
@@ -2318,6 +2409,40 @@ document.getElementById('import-excel-students').onchange = (e) => {
                     photo: null,
                     dateCreation: new Date().toISOString(),
                     diagnostique: null,
+                    projet: null,
+                    seances: []
+                });
+                added++;
+            });
+            
+            if (saveStudentsToStorage()) {
+                renderStudentsList();
+                updateStudentsStats();
+                
+                let message = `✅ Import terminé !\n\n${added} élève(s) ajouté(s)\n${skipped} ignoré(s) (doublons ou erreurs)`;
+                
+                if (errors.length > 0 && errors.length <= 5) {
+                    message += '\n\nErreurs :\n' + errors.join('\n');
+                } else if (errors.length > 5) {
+                    message += `\n\n${errors.length} erreurs détectées (voir console)`;
+                    console.log('Erreurs import:', errors);
+                }
+                
+                alert(message);
+            }
+            
+        } catch (error) {
+            console.error('Erreur import:', error);
+            alert('❌ Erreur lors de l\'import : ' + error.message + '\n\nVoir la console pour plus de détails.');
+        }
+    };
+    
+    if (isCSV) {
+        reader.readAsText(file);
+    } else {
+        reader.readAsBinaryString(file);
+    }
+};
                     projet: null,
                     seances: []
                 });

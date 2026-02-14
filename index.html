@@ -1043,8 +1043,11 @@
                 <button onclick="openPrintCards()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--orange); color: black;">
                     🖨️ IMPRIMER CARTES
                 </button>
+                <button onclick="window.open('./seance2.html', '_blank')" class="btn-action" style="flex: 1; min-width: 200px; background: #9b59b6; color: white;">
+                    📅 SÉANCE 2
+                </button>
                 <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1; min-width: 200px;">
-                    ➡️ SÉANCE D'ÉVALUATION
+                    ➡️ ÉVALUATION FINALE (S7)
                 </button>
             </div>
         </div>
@@ -1363,6 +1366,40 @@
                 <div id="stats-difficulte-content">
                     <!-- Rempli dynamiquement -->
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- PAGE SÉANCE 2 : ENTRAÎNEMENT -->
+<div id="screenSeance2" class="hidden">
+    <h1>EPS<span class="accent-text">PRO</span></h1>
+    <p class="text-center" style="color: #9b59b6; margin-bottom: 10px; font-size: 1.3rem;">
+        📅 SÉANCE 2 - ENTRAÎNEMENT
+    </p>
+    <p class="text-center" style="color: #aaa; margin-bottom: 30px; font-size: 0.9rem;">
+        3×400m + Saut
+    </p>
+    
+    <div class="config-container">
+        <div class="card">
+            <!-- BOUTON RETOUR -->
+            <button onclick="backToStudentsFromSeance2()" class="btn-action" style="background: #666; color: white; margin-bottom: 20px;">
+                ← Retour
+            </button>
+            
+            <!-- SÉLECTION ÉLÈVE -->
+            <div style="background: rgba(155,89,182,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #9b59b6;">
+                <h3 style="color: #9b59b6; margin-bottom: 15px;">👤 Sélectionner un élève</h3>
+                <select id="seance2-student-select" onchange="selectSeance2Student()" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #9b59b6; background: #0f0f23; color: white; font-size: 1.1rem;">
+                    <option value="">-- Choisir un élève --</option>
+                </select>
+            </div>
+            
+            <!-- FORMULAIRE SÉANCE (caché jusqu'à sélection) -->
+            <div id="seance2-form" style="display: none;">
+                <!-- Rempli dynamiquement par JavaScript -->
             </div>
         </div>
     </div>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Séance 2 - EPS PRO</title>
+    <style>
+        :root {
+            --bg: #0b101d;
+            --card: #1c2333;
+            --accent: #00d2ff;
+            --success: #00ff88;
+            --danger: #ff4bb4;
+            --warning: #ffcc00;
+            --purple: #9b59b6;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .accent-text { color: var(--accent); }
+        
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: black;
+        }
+        
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+        
+        .btn-pct {
+            padding: 10px 15px;
+            border: 2px solid var(--accent);
+            background: #0f0f23;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        
+        .btn-pct.active {
+            background: var(--accent);
+            color: black;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+            background: #0f0f23;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            font-family: Arial;
+            resize: vertical;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            color: white;
+            font-weight: normal;
+        }
+        
+        .time-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 5px;
+        }
+        
+        .time-inputs input {
+            width: 80px;
+        }
+        
+        .results-box {
+            background: rgba(0,255,136,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--success);
+            margin-top: 20px;
+        }
+        
+        .results-box h4 {
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        
+        .btn-pct-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EPS<span class="accent-text">PRO</span></h1>
+        <p class="subtitle" style="color: var(--purple); font-size: 1.3rem; font-weight: 700;">
+            📅 SÉANCE 2 - ENTRAÎNEMENT
+        </p>
+        <p class="subtitle">
+            3×400m + Saut
+        </p>
+        
+        <!-- Bouton retour -->
+        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">
+            ← Retour à l'app principale
+        </button>
+        
+        <!-- Sélection élève -->
+        <div class="card">
+            <div class="section">
+                <label>👤 Sélectionner un élève</label>
+                <select id="student-select" onchange="selectStudent()">
+                    <option value="">-- Choisir un élève --</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Formulaire séance (caché jusqu'à sélection) -->
+        <div id="seance-form" style="display: none;">
+            <!-- Rempli dynamiquement -->
+        </div>
+    </div>
+    
+    <script>
+    let students = [];
+    let currentStudent = null;
+    let seanceData = {
+        pctVMA: 100,
+        tour1: null,
+        tour2: null,
+        tour3: null,
+        profil: null,
+        objectif: null,
+        pointsForts: '',
+        pointsAmeliorer: '',
+        atelierTechnique: ''
+    };
+    
+    // Charger les élèves au démarrage
+    window.onload = function() {
+        loadStudents();
+    };
+    
+    function loadStudents() {
+        const stored = localStorage.getItem('eps_pro_students');
+        if (stored) {
+            students = JSON.parse(stored);
+            const select = document.getElementById('student-select');
+            select.innerHTML = '<option value="">-- Choisir un élève --</option>' +
+                students.map((s, i) => `<option value="${i}">${s.nomPrenom}</option>`).join('');
+        } else {
+            alert('⚠️ Aucun élève trouvé. Ajoutez des élèves dans l\'app principale.');
+        }
+    }
+    
+    function selectStudent() {
+        const select = document.getElementById('student-select');
+        const index = select.value;
+        
+        if (index === '') {
+            document.getElementById('seance-form').style.display = 'none';
+            currentStudent = null;
+            return;
+        }
+        
+        currentStudent = students[index];
+        
+        // Charger données existantes si présentes
+        if (currentStudent.seance2) {
+            seanceData = {...currentStudent.seance2};
+        } else {
+            // Réinitialiser
+            seanceData = {
+                pctVMA: 100,
+                tour1: null,
+                tour2: null,
+                tour3: null,
+                profil: null,
+                objectif: null,
+                pointsForts: '',
+                pointsAmeliorer: '',
+                atelierTechnique: ''
+            };
+        }
+        
+        renderForm();
+    }
+    
+    function renderForm() {
+        if (!currentStudent) return;
+        
+        const vma = parseFloat(currentStudent.vma);
+        const tempsCible = formatTime((0.4 / (vma * (seanceData.pctVMA / 100))) * 3600 * 1000);
+        
+        const formDiv = document.getElementById('seance-form');
+        formDiv.style.display = 'block';
+        
+        formDiv.innerHTML = `
+            <!-- Info élève -->
+            <div class="card" style="background: rgba(155,89,182,0.1); border: 2px solid var(--purple);">
+                <h2 style="color: var(--purple);">${currentStudent.sexe === 'F' ? '👧' : '🧑'} ${currentStudent.nomPrenom}</h2>
+                <p style="color: #aaa;">📚 ${currentStudent.classe || 'Sans classe'} | 💨 VMA: ${vma} km/h</p>
+            </div>
+            
+            <!-- Course -->
+            <div class="card" style="background: rgba(0,210,255,0.1); border: 2px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 20px;">🏃 COURSE 3×400m</h3>
+                
+                <div class="section">
+                    <label>% VMA pour cette séance :</label>
+                    <div class="btn-pct-group">
+                        ${[90, 95, 100, 105, 110, 115, 120, 125, 130].map(pct => `
+                            <button onclick="setPctVMA(${pct})" class="btn-pct ${seanceData.pctVMA === pct ? 'active' : ''}" id="btn-${pct}">
+                                ${pct}%
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p style="color: var(--success); font-size: 1.1rem; font-weight: 700; margin-top: 10px;">
+                        ⏱️ Temps cible : ${tempsCible} / tour
+                    </p>
+                </div>
+                
+                <div class="section">
+                    <label>Tour 1 :</label>
+                    <div class="time-inputs">
+                        <input type="number" id="tour1-min" placeholder="min" min="0" max="10" value="${seanceData.tour1 ? Math.floor(seanceData.tour1 / 60) : ''}" oninput="calculateResults()">
+                        <span>min</span>
+                        <input type="number" id="tour1-sec" placeholder="sec" min="0" max="59" value="${seanceData.tour1 ? seanceData.tour1 % 60 : ''}" oninput="calculateResults()">
+                        <span>sec</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <label>Tour 2 :</label>
+                    <div class="time-inputs">
+                        <input type="number" id="tour2-min" placeholder="min" min="0" max="10" value="${seanceData.tour2 ? Math.floor(seanceData.tour2 / 60) : ''}" oninput="calculateResults()">
+                        <span>min</span>
+                        <input type="number" id="tour2-sec" placeholder="sec" min="0" max="59" value="${seanceData.tour2 ? seanceData.tour2 % 60 : ''}" oninput="calculateResults()">
+                        <span>sec</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <label>Tour 3 :</label>
+                    <div class="time-inputs">
+                        <input type="number" id="tour3-min" placeholder="min" min="0" max="10" value="${seanceData.tour3 ? Math.floor(seanceData.tour3 / 60) : ''}" oninput="calculateResults()">
+                        <span>min</span>
+                        <input type="number" id="tour3-sec" placeholder="sec" min="0" max="59" value="${seanceData.tour3 ? seanceData.tour3 % 60 : ''}" oninput="calculateResults()">
+                        <span>sec</span>
+                    </div>
+                </div>
+                
+                <div id="results" class="results-box">
+                    <p style="color: #aaa;">Entrez les 3 temps pour voir les résultats</p>
+                </div>
+            </div>
+            
+            <!-- Analyse -->
+            <div class="card" style="background: rgba(255,204,0,0.1); border: 2px solid var(--warning);">
+                <h3 style="color: var(--warning); margin-bottom: 20px;">📈 ANALYSE DE LA COURSE</h3>
+                
+                <div class="section">
+                    <label style="color: var(--warning);">Profil de course :</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="profil" value="progressive" ${seanceData.profil === 'progressive' ? 'checked' : ''}>
+                            Progressive (lent → rapide)
+                        </label>
+                        <label>
+                            <input type="radio" name="profil" value="constante" ${seanceData.profil === 'constante' ? 'checked' : ''}>
+                            Constante (régulier)
+                        </label>
+                        <label>
+                            <input type="radio" name="profil" value="degressive" ${seanceData.profil === 'degressive' ? 'checked' : ''}>
+                            Dégressive (rapide → lent)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <label style="color: var(--warning);">Objectif de course :</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="objectif" value="reussi" ${seanceData.objectif === 'reussi' ? 'checked' : ''}>
+                            ✅ Réussi
+                        </label>
+                        <label>
+                            <input type="radio" name="objectif" value="partiel" ${seanceData.objectif === 'partiel' ? 'checked' : ''}>
+                            ⚠️ Partiellement réussi
+                        </label>
+                        <label>
+                            <input type="radio" name="objectif" value="non" ${seanceData.objectif === 'non' ? 'checked' : ''}>
+                            ❌ Non réussi
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <label style="color: var(--warning);">💪 Points forts :</label>
+                    <textarea id="points-forts" rows="3" placeholder="Ex: Bon départ, engagement dans les 2 premiers tours...">${seanceData.pointsForts}</textarea>
+                </div>
+                
+                <div class="section">
+                    <label style="color: var(--warning);">🎯 Points à améliorer :</label>
+                    <textarea id="points-ameliorer" rows="3" placeholder="Ex: Maintenir le rythme sur le 3ème tour, gérer l'effort...">${seanceData.pointsAmeliorer}</textarea>
+                </div>
+            </div>
+            
+            <!-- Atelier technique -->
+            <div class="card" style="background: rgba(155,89,182,0.1); border: 2px solid var(--purple);">
+                <h3 style="color: var(--purple); margin-bottom: 20px;">🦘 ATELIER TECHNIQUE - SAUT</h3>
+                
+                <div class="section">
+                    <label style="color: var(--purple);">📝 Travail effectué :</label>
+                    <textarea id="atelier" rows="5" placeholder="Ex: Travail sur l'élan et l'impulsion : course d'élan (6 foulées), placement du pied d'appel, gainage en l'air. Exercices : sauts sans élan, avec élan court. Progrès visible sur la technique...">${seanceData.atelierTechnique}</textarea>
+                </div>
+            </div>
+            
+            <!-- Bouton enregistrer -->
+            <button onclick="saveSeance()" class="btn btn-primary" style="width: 100%; padding: 20px; font-size: 1.2rem;">
+                💾 ENREGISTRER LA SÉANCE 2
+            </button>
+        `;
+        
+        calculateResults();
+    }
+    
+    function setPctVMA(pct) {
+        seanceData.pctVMA = pct;
+        renderForm();
+    }
+    
+    function calculateResults() {
+        const t1Min = parseInt(document.getElementById('tour1-min')?.value) || 0;
+        const t1Sec = parseInt(document.getElementById('tour1-sec')?.value) || 0;
+        const t2Min = parseInt(document.getElementById('tour2-min')?.value) || 0;
+        const t2Sec = parseInt(document.getElementById('tour2-sec')?.value) || 0;
+        const t3Min = parseInt(document.getElementById('tour3-min')?.value) || 0;
+        const t3Sec = parseInt(document.getElementById('tour3-sec')?.value) || 0;
+        
+        const tour1 = t1Min * 60 + t1Sec;
+        const tour2 = t2Min * 60 + t2Sec;
+        const tour3 = t3Min * 60 + t3Sec;
+        
+        seanceData.tour1 = tour1 > 0 ? tour1 : null;
+        seanceData.tour2 = tour2 > 0 ? tour2 : null;
+        seanceData.tour3 = tour3 > 0 ? tour3 : null;
+        
+        const resultsDiv = document.getElementById('results');
+        if (!resultsDiv) return;
+        
+        if (tour1 > 0 && tour2 > 0 && tour3 > 0) {
+            const moyenne = (tour1 + tour2 + tour3) / 3;
+            const vma = parseFloat(currentStudent.vma);
+            const pctRealise = ((0.4 / (moyenne / 3600)) / vma) * 100;
+            
+            resultsDiv.innerHTML = `
+                <h4 style="color: var(--success);">📊 RÉSULTATS</h4>
+                <p style="font-size: 1.1rem; margin: 5px 0;"><strong>Moyenne :</strong> ${formatTime(moyenne * 1000)}</p>
+                <p style="font-size: 1.1rem; margin: 5px 0;"><strong>% VMA réalisé :</strong> ${pctRealise.toFixed(1)}%</p>
+            `;
+        } else {
+            resultsDiv.innerHTML = '<p style="color: #aaa;">Entrez les 3 temps pour voir les résultats</p>';
+        }
+    }
+    
+    function saveSeance() {
+        if (!currentStudent) return;
+        
+        // Récupérer toutes les données
+        seanceData.profil = document.querySelector('input[name="profil"]:checked')?.value || null;
+        seanceData.objectif = document.querySelector('input[name="objectif"]:checked')?.value || null;
+        seanceData.pointsForts = document.getElementById('points-forts')?.value || '';
+        seanceData.pointsAmeliorer = document.getElementById('points-ameliorer')?.value || '';
+        seanceData.atelierTechnique = document.getElementById('atelier')?.value || '';
+        
+        // Validation
+        if (!seanceData.tour1 || !seanceData.tour2 || !seanceData.tour3) {
+            alert('⚠️ Veuillez entrer les 3 temps de course.');
+            return;
+        }
+        
+        // Sauvegarder
+        currentStudent.seance2 = {
+            ...seanceData,
+            date: new Date().toISOString()
+        };
+        
+        const select = document.getElementById('student-select');
+        const index = select.value;
+        students[index] = currentStudent;
+        
+        localStorage.setItem('eps_pro_students', JSON.stringify(students));
+        
+        alert('✅ Séance 2 enregistrée pour ' + currentStudent.nomPrenom + ' !');
+    }
+    
+    function formatTime(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const min = Math.floor(totalSec / 60);
+        const sec = totalSec % 60;
+        return min + "'" + (sec < 10 ? '0' : '') + sec + '"';
+    }
+    </script>
+</body>
+</html>

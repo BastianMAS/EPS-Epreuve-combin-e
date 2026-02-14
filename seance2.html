@@ -320,33 +320,88 @@
         const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
         const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
         
+        // Calcul des écarts
+        const ecart1_2 = d.tour2 - d.tour1; // Positif = ralentissement
+        const ecart2_3 = d.tour3 - d.tour2;
+        const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
+        
         let txt = '<p style="line-height:1.6">';
         
-        const t1=d.tour1, t2=d.tour2, t3=d.tour3;
-        if(t3 > t2 && t2 > t1) {
-            txt += '<strong>Profil:</strong> Dégressive 📉<br>Rapide au départ puis ralentissement. Bon départ mais baisse de rythme.<br><br>';
-        } else if(t3 < t2 && t2 < t1) {
-            txt += '<strong>Profil:</strong> Progressive 📈<br>Accélération progressive. Montée en puissance, bon finish.<br><br>';
+        // PROFIL DÉTAILLÉ
+        txt += '<strong>Profil de course:</strong><br>';
+        
+        if(ecartMax <= 5) {
+            // Course régulière
+            txt += '➡️ <strong>RÉGULIÈRE</strong><br>';
+            txt += 'Excellent ! Rythme constant, très bonne gestion de l\'effort.<br><br>';
         } else {
-            txt += '<strong>Profil:</strong> Constante ➡️<br>Rythme régulier. Bonne gestion.<br><br>';
+            // Course irrégulière - analyser en détail
+            txt += '⚠️ <strong>IRRÉGULIÈRE</strong><br>';
+            
+            // Détails par tour
+            if(Math.abs(ecart1_2) > 10 || Math.abs(ecart2_3) > 10) {
+                txt += 'Gros écarts de rythme détectés :<br>';
+                if(ecart1_2 > 10) {
+                    txt += '• T1→T2 : <strong style="color:var(--danger)">+'+ecart1_2+'s</strong> (grosse baisse) 📉<br>';
+                } else if(ecart1_2 > 5) {
+                    txt += '• T1→T2 : +'+ecart1_2+'s (ralentissement)<br>';
+                } else if(ecart1_2 < -10) {
+                    txt += '• T1→T2 : '+ecart1_2+'s (grosse accélération) 📈<br>';
+                } else if(ecart1_2 < -5) {
+                    txt += '• T1→T2 : '+ecart1_2+'s (accélération)<br>';
+                } else {
+                    txt += '• T1→T2 : '+ecart1_2+'s<br>';
+                }
+                
+                if(ecart2_3 > 10) {
+                    txt += '• T2→T3 : <strong style="color:var(--danger)">+'+ecart2_3+'s</strong> (grosse baisse) 📉<br>';
+                } else if(ecart2_3 > 5) {
+                    txt += '• T2→T3 : +'+ecart2_3+'s (ralentissement)<br>';
+                } else if(ecart2_3 < -10) {
+                    txt += '• T2→T3 : '+ecart2_3+'s (grosse accélération) 📈<br>';
+                } else if(ecart2_3 < -5) {
+                    txt += '• T2→T3 : '+ecart2_3+'s (accélération)<br>';
+                } else {
+                    txt += '• T2→T3 : '+ecart2_3+'s<br>';
+                }
+            } else {
+                // Écarts modérés (5-10s)
+                if(ecart1_2 > 0 && ecart2_3 > 0) {
+                    txt += 'Ralentissement progressif sur les 3 tours. 📉<br>';
+                } else if(ecart1_2 < 0 && ecart2_3 < 0) {
+                    txt += 'Accélération progressive sur les 3 tours. 📈<br>';
+                } else {
+                    txt += 'Rythme variable. T1→T2: '+ecart1_2+'s, T2→T3: '+ecart2_3+'s<br>';
+                }
+            }
+            
+            txt += '<br>';
         }
         
-        txt += '<strong>Objectif '+pct+'%:</strong><br>';
+        // OBJECTIF
+        txt += '<strong>Objectif '+pct+'% VMA:</strong><br>';
         if(pctRealise >= pct) {
             txt += '✅ <span style="color:var(--success)">ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
         } else if(pctRealise >= pct - 5) {
-            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
+            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'% vs '+pct+'%)<br><br>';
         } else {
-            txt += '❌ NON ATTEINT ('+pctRealise.toFixed(1)+'%)<br><br>';
+            txt += '❌ <span style="color:var(--danger)">NON ATTEINT</span> ('+pctRealise.toFixed(1)+'% vs '+pct+'%)<br><br>';
         }
         
+        // CONSEIL PERSONNALISÉ
         txt += '<strong>Conseil:</strong><br>';
-        if(t3 > t2 && t2 > t1) {
-            txt += 'Travailler l\'endurance pour tenir le rythme.';
-        } else if(t3 < t2 && t2 < t1) {
-            txt += 'Bon finish ! Travailler le départ pour être régulier.';
+        if(ecartMax <= 5) {
+            txt += 'Parfait ! Continue comme ça, la régularité est la clé.';
+        } else if(ecart1_2 > 10) {
+            txt += 'Grosse baisse au T2. Travailler l\'endurance pour maintenir le rythme. Partir moins vite au T1.';
+        } else if(ecart2_3 > 10) {
+            txt += 'Grosse baisse au T3. Travailler la résistance pour finir fort.';
+        } else if(ecart1_2 > 5 && ecart2_3 > 5) {
+            txt += 'Ralentissement continu. Travailler l\'endurance et partir moins vite.';
+        } else if(ecart1_2 < -5 && ecart2_3 < -5) {
+            txt += 'Bon finish ! Partir un peu plus vite au T1 pour être plus régulier.';
         } else {
-            txt += 'Excellent ! Continue, rythme bien géré.';
+            txt += 'Travailler la régularité. Viser des écarts < 5s entre les tours.';
         }
         
         txt += '</p>';

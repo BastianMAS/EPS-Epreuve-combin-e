@@ -58,7 +58,7 @@
             color: white;
             font-size: 0.85rem;
         }
-        textarea { font-family: Arial; resize: vertical; min-height: 100px; }
+        textarea { font-family: Arial; resize: vertical; min-height: 50px; }
         label { display: block; margin: 6px 0 3px 0; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
         .btn-pct {
             padding: 5px 8px;
@@ -105,33 +105,12 @@
             font-weight: 700;
             font-size: 0.85rem;
         }
-        .atelier-section {
+        .atelier-box {
             background: rgba(155,89,182,0.1);
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid var(--purple);
-            margin-top: 20px;
-        }
-        .atelier-choice {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
-        }
-        .atelier-btn {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--purple);
-            background: rgba(155,89,182,0.2);
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .atelier-btn.active {
-            background: var(--purple);
-            color: black;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--purple);
+            margin: 8px 0;
         }
         .save-btn {
             width: 100%;
@@ -175,7 +154,7 @@
     <div class="container">
         <h1>EPS<span class="accent-text">PRO</span></h1>
         <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 SÉANCE 2</p>
-        <p class="subtitle">3×400m</p>
+        <p class="subtitle">3×400m + Saut</p>
         
         <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 15px;">← Retour</button>
         
@@ -186,20 +165,6 @@
             <div class="student-card" id="card-3"></div>
             <div class="student-card" id="card-4"></div>
             <div class="student-card" id="card-5"></div>
-        </div>
-        
-        <div class="atelier-section">
-            <h3 style="color: var(--purple); margin-bottom: 15px;">🏋️ ATELIER TECHNIQUE (COMMUN)</h3>
-            
-            <div class="atelier-choice">
-                <button onclick="selectAtelier('saut')" class="atelier-btn" id="btn-saut">🦘 SAUT</button>
-                <button onclick="selectAtelier('lancer')" class="atelier-btn" id="btn-lancer">🎯 LANCER</button>
-            </div>
-            
-            <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;" id="atelier-instruction">
-                Sélectionnez l'atelier technique effectué
-            </p>
-            <textarea id="atelier-commun" placeholder="Décrivez le travail technique effectué pour tout le groupe..."></textarea>
         </div>
         
         <button onclick="saveAll()" class="save-btn">💾 ENREGISTRER</button>
@@ -216,8 +181,6 @@
     <script>
     let allStudents = [];
     let cardData = [{},{},{},{},{},{}];
-    let atelierType = null;
-    let atelierTexte = '';
     
     window.onload = function() {
         const stored = localStorage.getItem('eps_pro_students');
@@ -226,32 +189,8 @@
             return;
         }
         allStudents = JSON.parse(stored);
-        
-        const seanceData = JSON.parse(localStorage.getItem('seance2_data') || '{}');
-        if(seanceData.atelierType) {
-            selectAtelier(seanceData.atelierType);
-            document.getElementById('atelier-commun').value = seanceData.atelierTexte || '';
-        }
-        
         for(let i=0; i<6; i++) renderCard(i);
     };
-    
-    function selectAtelier(type) {
-        atelierType = type;
-        document.getElementById('btn-saut').classList.toggle('active', type === 'saut');
-        document.getElementById('btn-lancer').classList.toggle('active', type === 'lancer');
-        
-        const textarea = document.getElementById('atelier-commun');
-        const instruction = document.getElementById('atelier-instruction');
-        
-        if(type === 'saut') {
-            instruction.textContent = '🦘 Décrivez le travail technique sur le SAUT';
-            textarea.placeholder = 'Ex: Travail sur l\'élan et l\'impulsion : course d\'élan (6 foulées), placement du pied d\'appel, gainage en l\'air. Exercices : sauts sans élan, avec élan court...';
-        } else {
-            instruction.textContent = '🎯 Décrivez le travail technique sur le LANCER';
-            textarea.placeholder = 'Ex: Travail technique sur le lancer poids : position de départ, rotation du bassin, accompagnement du geste. Exercices : lancer à genoux, debout, avec rotation...';
-        }
-    }
     
     function renderCard(cardIndex) {
         const card = document.getElementById('card-'+cardIndex);
@@ -285,28 +224,30 @@
             const t3s = data.tour3 ? data.tour3%60 : '';
             
             content += '<label>T1:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>sec</span></div>';
             
             content += '<label>T2:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>sec</span></div>';
             
             content += '<label>T3:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
+            content += '<input type="number" inputmode="numeric" pattern="[0-9]*" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
             content += '<span>sec</span></div>';
             
             content += '<div id="results-'+cardIndex+'"></div>';
             
             content += '<label>💓 BPM:</label><input type="number" inputmode="numeric" id="bpm-'+cardIndex+'" value="'+(data.bpm||'')+'" placeholder="180" style="width:70px">';
             content += '<label>⏱️ Récup:</label><input type="number" inputmode="numeric" id="recup-'+cardIndex+'" value="'+(data.tempsRecup||'')+'" placeholder="3" style="width:70px">';
-            content += '<label>💬 Notes:</label><textarea id="comment-'+cardIndex+'" placeholder="Points forts, à améliorer..." style="min-height:50px">'+(data.commentaire||'')+'</textarea>';
+            content += '<label>💬 Notes:</label><textarea id="comment-'+cardIndex+'" placeholder="Commentaire...">'+(data.commentaire||'')+'</textarea>';
+            content += '<div class="atelier-box"><label style="color:var(--purple);font-size:0.75rem">🦘 Saut:</label>';
+            content += '<textarea id="saut-'+cardIndex+'" placeholder="Travail..." style="min-height:40px">'+(data.atelierSaut||'')+'</textarea></div>';
         }
         
         card.innerHTML = content;
@@ -327,7 +268,7 @@
                 pctVMA: 100,
                 tour1: null, tour2: null, tour3: null,
                 bpm: null, tempsRecup: null,
-                commentaire: ''
+                commentaire: '', atelierSaut: ''
             };
             cardData[cardIndex].studentIndex = studentIndex;
             cardData[cardIndex].student = s;
@@ -379,50 +320,88 @@
         const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
         const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
         
-        const ecart1_2 = d.tour2 - d.tour1;
+        // Calcul des écarts
+        const ecart1_2 = d.tour2 - d.tour1; // Positif = ralentissement
         const ecart2_3 = d.tour3 - d.tour2;
         const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
         
         let txt = '<p style="line-height:1.6">';
+        
+        // PROFIL DÉTAILLÉ
         txt += '<strong>Profil de course:</strong><br>';
         
         if(ecartMax <= 5) {
-            txt += '➡️ <strong>RÉGULIÈRE</strong><br>Excellent ! Rythme constant, très bonne gestion.<br><br>';
+            // Course régulière
+            txt += '➡️ <strong>RÉGULIÈRE</strong><br>';
+            txt += 'Excellent ! Rythme constant, très bonne gestion de l\'effort.<br><br>';
         } else {
+            // Course irrégulière - analyser en détail
             txt += '⚠️ <strong>IRRÉGULIÈRE</strong><br>';
+            
+            // Détails par tour
             if(Math.abs(ecart1_2) > 10 || Math.abs(ecart2_3) > 10) {
-                txt += 'Gros écarts détectés :<br>';
-                if(ecart1_2 > 10) txt += '• T1→T2 : <strong style="color:var(--danger)">+'+ecart1_2+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart1_2 > 5) txt += '• T1→T2 : +'+ecart1_2+'s<br>';
-                else if(ecart1_2 < -10) txt += '• T1→T2 : '+ecart1_2+'s (grosse accélération) 📈<br>';
-                else if(ecart1_2 < -5) txt += '• T1→T2 : '+ecart1_2+'s<br>';
+                txt += 'Gros écarts de rythme détectés :<br>';
+                if(ecart1_2 > 10) {
+                    txt += '• T1→T2 : <strong style="color:var(--danger)">+'+ecart1_2+'s</strong> (grosse baisse) 📉<br>';
+                } else if(ecart1_2 > 5) {
+                    txt += '• T1→T2 : +'+ecart1_2+'s (ralentissement)<br>';
+                } else if(ecart1_2 < -10) {
+                    txt += '• T1→T2 : '+ecart1_2+'s (grosse accélération) 📈<br>';
+                } else if(ecart1_2 < -5) {
+                    txt += '• T1→T2 : '+ecart1_2+'s (accélération)<br>';
+                } else {
+                    txt += '• T1→T2 : '+ecart1_2+'s<br>';
+                }
                 
-                if(ecart2_3 > 10) txt += '• T2→T3 : <strong style="color:var(--danger)">+'+ecart2_3+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart2_3 > 5) txt += '• T2→T3 : +'+ecart2_3+'s<br>';
-                else if(ecart2_3 < -10) txt += '• T2→T3 : '+ecart2_3+'s (grosse accélération) 📈<br>';
-                else if(ecart2_3 < -5) txt += '• T2→T3 : '+ecart2_3+'s<br>';
+                if(ecart2_3 > 10) {
+                    txt += '• T2→T3 : <strong style="color:var(--danger)">+'+ecart2_3+'s</strong> (grosse baisse) 📉<br>';
+                } else if(ecart2_3 > 5) {
+                    txt += '• T2→T3 : +'+ecart2_3+'s (ralentissement)<br>';
+                } else if(ecart2_3 < -10) {
+                    txt += '• T2→T3 : '+ecart2_3+'s (grosse accélération) 📈<br>';
+                } else if(ecart2_3 < -5) {
+                    txt += '• T2→T3 : '+ecart2_3+'s (accélération)<br>';
+                } else {
+                    txt += '• T2→T3 : '+ecart2_3+'s<br>';
+                }
+            } else {
+                // Écarts modérés (5-10s)
+                if(ecart1_2 > 0 && ecart2_3 > 0) {
+                    txt += 'Ralentissement progressif sur les 3 tours. 📉<br>';
+                } else if(ecart1_2 < 0 && ecart2_3 < 0) {
+                    txt += 'Accélération progressive sur les 3 tours. 📈<br>';
+                } else {
+                    txt += 'Rythme variable. T1→T2: '+ecart1_2+'s, T2→T3: '+ecart2_3+'s<br>';
+                }
             }
+            
             txt += '<br>';
         }
         
+        // OBJECTIF
         txt += '<strong>Objectif '+pct+'% VMA:</strong><br>';
         if(pctRealise >= pct) {
             txt += '✅ <span style="color:var(--success)">ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
         } else if(pctRealise >= pct - 5) {
-            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
+            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'% vs '+pct+'%)<br><br>';
         } else {
-            txt += '❌ <span style="color:var(--danger)">NON ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
+            txt += '❌ <span style="color:var(--danger)">NON ATTEINT</span> ('+pctRealise.toFixed(1)+'% vs '+pct+'%)<br><br>';
         }
         
+        // CONSEIL PERSONNALISÉ
         txt += '<strong>Conseil:</strong><br>';
         if(ecartMax <= 5) {
-            txt += 'Parfait ! Continue, la régularité est la clé.';
+            txt += 'Parfait ! Continue comme ça, la régularité est la clé.';
         } else if(ecart1_2 > 10) {
-            txt += 'Grosse baisse au T2. Travailler l\'endurance. Partir moins vite.';
+            txt += 'Grosse baisse au T2. Travailler l\'endurance pour maintenir le rythme. Partir moins vite au T1.';
         } else if(ecart2_3 > 10) {
-            txt += 'Grosse baisse au T3. Travailler la résistance.';
+            txt += 'Grosse baisse au T3. Travailler la résistance pour finir fort.';
+        } else if(ecart1_2 > 5 && ecart2_3 > 5) {
+            txt += 'Ralentissement continu. Travailler l\'endurance et partir moins vite.';
+        } else if(ecart1_2 < -5 && ecart2_3 < -5) {
+            txt += 'Bon finish ! Partir un peu plus vite au T1 pour être plus régulier.';
         } else {
-            txt += 'Travailler la régularité. Viser écarts < 5s.';
+            txt += 'Travailler la régularité. Viser des écarts < 5s entre les tours.';
         }
         
         txt += '</p>';
@@ -436,25 +415,20 @@
     }
     
     function saveAll() {
-        if(!atelierType) {
-            alert('⚠️ Sélectionnez l\'atelier technique (Saut ou Lancer)');
-            return;
-        }
-        
         for(let i=0; i<6; i++) {
             const d = cardData[i];
             if(d.student) {
                 const bpm = document.getElementById('bpm-'+i);
                 const recup = document.getElementById('recup-'+i);
                 const comment = document.getElementById('comment-'+i);
+                const saut = document.getElementById('saut-'+i);
                 
                 if(bpm) d.bpm = parseInt(bpm.value)||null;
                 if(recup) d.tempsRecup = parseInt(recup.value)||null;
                 if(comment) d.commentaire = comment.value;
+                if(saut) d.atelierSaut = saut.value;
             }
         }
-        
-        const atelierTexte = document.getElementById('atelier-commun').value;
         
         let err = 0;
         cardData.forEach(d => {
@@ -475,6 +449,7 @@
                         bpm: d.bpm,
                         tempsRecup: d.tempsRecup,
                         commentaire: d.commentaire,
+                        atelierSaut: d.atelierSaut,
                         date: new Date().toISOString()
                     };
                 }
@@ -482,11 +457,6 @@
         });
         
         localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-        localStorage.setItem('seance2_data', JSON.stringify({
-            atelierType: atelierType,
-            atelierTexte: atelierTexte
-        }));
-        
         alert('✅ Séance 2 enregistrée !');
     }
     

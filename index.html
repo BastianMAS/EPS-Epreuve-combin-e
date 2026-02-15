@@ -1032,6 +1032,25 @@
                 <input type="file" id="import-diagnostics-input" accept=".json" style="display: none;" onchange="importDiagnostics(event)">
             </div>
             
+            <!-- SAUVEGARDE LISTE ÉLÈVES -->
+            <div style="background: rgba(255,136,0,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--orange);">
+                <h3 style="color: var(--orange); margin-bottom: 10px; font-size: 1.1rem;">
+                    👥 Sauvegarde de la Liste d'Élèves
+                </h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+                    Exportez votre liste complète d'élèves pour la sauvegarder ou la charger sur une autre tablette.
+                </p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button onclick="exportStudents()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--orange); color: black;">
+                        💾 EXPORTER ÉLÈVES
+                    </button>
+                    <button onclick="document.getElementById('import-students-input').click()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--warning); color: black;">
+                        📥 IMPORTER ÉLÈVES
+                    </button>
+                </div>
+                <input type="file" id="import-students-input" accept=".json" style="display: none;" onchange="importStudents(event)">
+            </div>
+            
             <!-- BOUTONS D'ACTION -->
             <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
                 <button onclick="goToDiagnostic()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--warning); color: black;">
@@ -1045,6 +1064,9 @@
                 </button>
                 <button onclick="window.open('./seance2.html', '_blank')" class="btn-action" style="flex: 1; min-width: 200px; background: #9b59b6; color: white;">
                     📅 SÉANCE 2
+                </button>
+                <button onclick="window.open('./bilan-s2.html', '_blank')" class="btn-action" style="flex: 1; min-width: 200px; background: #e74c3c; color: white;">
+                    📊 BILAN S2
                 </button>
                 <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1; min-width: 200px;">
                     ➡️ ÉVALUATION FINALE (S7)
@@ -4620,6 +4642,125 @@ function importDiagnostics(event) {
     reader.readAsText(file);
     
     // Réinitialiser l'input
+    event.target.value = '';
+}
+
+// ============================================================================
+// EXPORT/IMPORT ÉLÈVES
+// ============================================================================
+
+/**
+ * Exporter la liste complète d'élèves
+ */
+function exportStudents() {
+    if (storedStudents.length === 0) {
+        alert('⚠️ Aucun élève à exporter.');
+        return;
+    }
+    
+    const data = {
+        exportDate: new Date().toISOString(),
+        version: 'eps_pro_students_v1',
+        totalStudents: storedStudents.length,
+        students: storedStudents
+    };
+    
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    const now = new Date();
+    const dateStr = now.getFullYear() + '-' + 
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(now.getDate()).padStart(2, '0');
+    
+    a.download = 'Eleves_' + dateStr + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    alert('✅ Liste d\'élèves exportée !\n\n' + storedStudents.length + ' élève(s)');
+}
+
+/**
+ * Importer une liste d'élèves
+ */
+function importStudents(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importData = JSON.parse(e.target.result);
+            
+            if (!importData.students || !Array.isArray(importData.students)) {
+                alert('⚠️ Fichier invalide.');
+                return;
+            }
+            
+            const choice = confirm(
+                'ATTENTION !\n\n' +
+                'Comment voulez-vous importer ?\n\n' +
+                'OK = REMPLACER tous les élèves actuels (' + storedStudents.length + ')\n' +
+                'Annuler = FUSIONNER avec les élèves existants'
+            );
+            
+            let imported = 0;
+            let updated = 0;
+            let skipped = 0;
+            
+            if (choice) {
+                // REMPLACER
+                storedStudents = importData.students;
+                imported = importData.students.length;
+            } else {
+                // FUSIONNER
+                importData.students.forEach(importStudent => {
+                    const existingIndex = storedStudents.findIndex(s => s.nomPrenom === importStudent.nomPrenom);
+                    
+                    if (existingIndex >= 0) {
+                        const overwrite = confirm(
+                            'L\'élève "' + importStudent.nomPrenom + '" existe déjà.\n\n' +
+                            'Voulez-vous le remplacer ?'
+                        );
+                        if (overwrite) {
+                            storedStudents[existingIndex] = importStudent;
+                            updated++;
+                        } else {
+                            skipped++;
+                        }
+                    } else {
+                        storedStudents.push(importStudent);
+                        imported++;
+                    }
+                });
+            }
+            
+            if (saveStudentsToStorage()) {
+                renderStudentsList();
+                updateStudentsStats();
+                
+                let msg = '✅ Import terminé !\n\n';
+                if (choice) {
+                    msg += imported + ' élève(s) chargé(s)';
+                } else {
+                    msg += imported + ' nouveau(x)\n';
+                    msg += updated + ' mis à jour\n';
+                    msg += skipped + ' ignoré(s)';
+                }
+                
+                alert(msg);
+            }
+            
+        } catch (error) {
+            console.error('Erreur import élèves:', error);
+            alert('⚠️ Erreur lors de l\'import.\n\nVérifiez que le fichier est valide.');
+        }
+    };
+    reader.readAsText(file);
+    
     event.target.value = '';
 }
 

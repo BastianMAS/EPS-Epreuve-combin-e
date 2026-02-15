@@ -11,7 +11,6 @@
             --accent: #00d2ff;
             --success: #00ff88;
             --warning: #ffcc00;
-            --purple: #9b59b6;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -27,28 +26,6 @@
         .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
         .btn-secondary { background: #666; color: white; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
-            font-size: 0.8rem;
-        }
-        th {
-            background: linear-gradient(135deg, var(--warning), var(--success));
-            color: black;
-            padding: 10px 8px;
-            font-weight: 700;
-            text-align: left;
-            font-size: 0.75rem;
-        }
-        td {
-            padding: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        tr:hover { background: rgba(0,210,255,0.05); }
         .stat-box {
             background: var(--card);
             padding: 15px;
@@ -56,6 +33,44 @@
             margin: 10px 0;
             border: 2px solid var(--accent);
         }
+        .student-card {
+            background: var(--card);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .student-header {
+            background: linear-gradient(135deg, var(--warning), var(--success));
+            color: black;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .epreuve-box {
+            background: rgba(0,210,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent);
+        }
+        .stars { color: var(--warning); font-size: 1.2rem; margin: 5px 0; }
+        .conseil {
+            background: rgba(255,204,0,0.1);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            color: #ffcc00;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -66,7 +81,7 @@
         <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
         
         <div id="stats"></div>
-        <div id="table-container"></div>
+        <div id="students-container"></div>
     </div>
     
     <script>
@@ -120,31 +135,138 @@
             </div>
         `;
         
-        // Tableau
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>Classe</th><th>VMA</th><th>T1</th><th>T2</th><th>T3</th><th>Moy</th><th>Saut -</th><th>Saut +</th><th>Lancer</th></tr></thead><tbody>';
-        
+        // Cartes élèves
+        let html = '<div class="grid-2">';
         withDiag.forEach(s => {
-            const d = s.diagnostique;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+s.classe+'</td>';
-            html += '<td>'+vma+' km/h</td>';
-            html += '<td>'+formatTime(d.tour1*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour2*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour3*1000)+'</td>';
-            html += '<td>'+formatTime(moy*1000)+'</td>';
-            html += '<td>'+(d.sautSansElan ? d.sautSansElan.toFixed(2)+' m' : '-')+'</td>';
-            html += '<td>'+(d.sautAvecElan ? d.sautAvecElan.toFixed(2)+' m' : '-')+'</td>';
-            html += '<td>'+(d.lancer ? d.lancer.toFixed(1)+' m' : '-')+'</td>';
-            html += '</tr>';
+            html += renderStudentCard(s);
         });
+        html += '</div>';
         
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
+        document.getElementById('students-container').innerHTML = html;
+    }
+    
+    function renderStudentCard(student) {
+        const d = student.diagnostique;
+        const sexe = student.sexe;
+        const icon = sexe === 'F' ? '👧' : '🧑';
+        
+        let html = '<div class="student-card">';
+        html += '<div class="student-header">'+icon+' '+student.nomPrenom+'</div>';
+        
+        // VMA / Course
+        const vma = parseFloat(student.vma);
+        const evalVMA = evaluateVMA(vma, sexe);
+        html += '<div class="epreuve-box">';
+        html += '<strong>🏃 VMA / Course 3×400m</strong>';
+        html += '<div class="stars">'+evalVMA.stars+'</div>';
+        html += '<p>VMA : '+vma+' km/h</p>';
+        if(d.tour1 && d.tour2 && d.tour3) {
+            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+            html += '<p>Moyenne 3×400m : '+formatTime(moy*1000)+'</p>';
+        }
+        html += '<div class="conseil">💬 '+evalVMA.conseil+'</div>';
+        html += '</div>';
+        
+        // Saut
+        if(d.sautSansElan && d.sautAvecElan) {
+            const evalSaut = evaluateSaut(d.sautAvecElan, sexe);
+            html += '<div class="epreuve-box">';
+            html += '<strong>🦘 Saut en longueur</strong>';
+            html += '<div class="stars">'+evalSaut.stars+'</div>';
+            html += '<p>Sans élan : '+d.sautSansElan.toFixed(2)+' m</p>';
+            html += '<p>Avec élan : '+d.sautAvecElan.toFixed(2)+' m</p>';
+            html += '<div class="conseil">💬 '+evalSaut.conseil+'</div>';
+            html += '</div>';
+        }
+        
+        // Lancer
+        if(d.lancer) {
+            const evalLancer = evaluateLancer(d.lancer, sexe);
+            html += '<div class="epreuve-box">';
+            html += '<strong>🎯 Lancer (poids 1kg)</strong>';
+            html += '<div class="stars">'+evalLancer.stars+'</div>';
+            html += '<p>Distance : '+d.lancer.toFixed(1)+' m</p>';
+            html += '<div class="conseil">💬 '+evalLancer.conseil+'</div>';
+            html += '</div>';
+        }
+        
+        html += '</div>';
+        return html;
+    }
+    
+    // Barèmes VMA (km/h)
+    function evaluateVMA(vma, sexe) {
+        let stars, niveau, conseil;
+        
+        if(sexe === 'F') {
+            if(vma >= 13.5) { stars = 5; niveau = 'Excellent'; conseil = 'Excellente VMA ! Continue sur cette lancée.'; }
+            else if(vma >= 12.5) { stars = 4; niveau = 'Très bien'; conseil = 'Très bonne VMA, tu peux viser 13.5 km/h.'; }
+            else if(vma >= 11.5) { stars = 3; niveau = 'Bien'; conseil = 'Bonne base, travaille pour atteindre 12.5 km/h.'; }
+            else if(vma >= 10.5) { stars = 2; niveau = 'Moyen'; conseil = 'Travaille ton endurance pour progresser.'; }
+            else { stars = 1; niveau = 'À améliorer'; conseil = 'Entraîne-toi régulièrement pour améliorer ta VMA.'; }
+        } else {
+            if(vma >= 15) { stars = 5; niveau = 'Excellent'; conseil = 'Excellente VMA ! Continue sur cette lancée.'; }
+            else if(vma >= 14) { stars = 4; niveau = 'Très bien'; conseil = 'Très bonne VMA, tu peux viser 15 km/h.'; }
+            else if(vma >= 13) { stars = 3; niveau = 'Bien'; conseil = 'Bonne base, travaille pour atteindre 14 km/h.'; }
+            else if(vma >= 12) { stars = 2; niveau = 'Moyen'; conseil = 'Travaille ton endurance pour progresser.'; }
+            else { stars = 1; niveau = 'À améliorer'; conseil = 'Entraîne-toi régulièrement pour améliorer ta VMA.'; }
+        }
+        
+        return {
+            stars: '⭐'.repeat(stars),
+            niveau: niveau,
+            conseil: conseil
+        };
+    }
+    
+    // Barèmes Saut avec élan (m)
+    function evaluateSaut(distance, sexe) {
+        let stars, niveau, conseil;
+        
+        if(sexe === 'F') {
+            if(distance >= 3.2) { stars = 5; niveau = 'Excellent'; conseil = 'Excellent saut ! Technique et détente au top.'; }
+            else if(distance >= 2.8) { stars = 4; niveau = 'Très bien'; conseil = 'Très bon saut, travaille l\'impulsion pour viser 3.2m.'; }
+            else if(distance >= 2.4) { stars = 3; niveau = 'Bien'; conseil = 'Bon saut, améliore ta course d\'élan.'; }
+            else if(distance >= 2.0) { stars = 2; niveau = 'Moyen'; conseil = 'Travaille la coordination élan-impulsion.'; }
+            else { stars = 1; niveau = 'À améliorer'; conseil = 'Entraîne-toi sur la technique et l\'impulsion.'; }
+        } else {
+            if(distance >= 3.8) { stars = 5; niveau = 'Excellent'; conseil = 'Excellent saut ! Technique et détente au top.'; }
+            else if(distance >= 3.3) { stars = 4; niveau = 'Très bien'; conseil = 'Très bon saut, travaille l\'impulsion pour viser 3.8m.'; }
+            else if(distance >= 2.8) { stars = 3; niveau = 'Bien'; conseil = 'Bon saut, améliore ta course d\'élan.'; }
+            else if(distance >= 2.3) { stars = 2; niveau = 'Moyen'; conseil = 'Travaille la coordination élan-impulsion.'; }
+            else { stars = 1; niveau = 'À améliorer'; conseil = 'Entraîne-toi sur la technique et l\'impulsion.'; }
+        }
+        
+        return {
+            stars: '⭐'.repeat(stars),
+            niveau: niveau,
+            conseil: conseil
+        };
+    }
+    
+    // Barèmes Lancer poids 1kg (m)
+    function evaluateLancer(distance, sexe) {
+        let stars, niveau, conseil;
+        
+        if(sexe === 'F') {
+            if(distance >= 10) { stars = 5; niveau = 'Excellent'; conseil = 'Excellent lancer ! Technique parfaite.'; }
+            else if(distance >= 8) { stars = 4; niveau = 'Très bien'; conseil = 'Très bon lancer, travaille la rotation pour viser 10m.'; }
+            else if(distance >= 6) { stars = 3; niveau = 'Bien'; conseil = 'Bon lancer, améliore l\'accompagnement du geste.'; }
+            else if(distance >= 4) { stars = 2; niveau = 'Moyen'; conseil = 'Travaille la technique de lancer.'; }
+            else { stars = 1; niveau = 'À améliorer'; conseil = 'Entraîne-toi sur le geste technique.'; }
+        } else {
+            if(distance >= 12) { stars = 5; niveau = 'Excellent'; conseil = 'Excellent lancer ! Technique parfaite.'; }
+            else if(distance >= 10) { stars = 4; niveau = 'Très bien'; conseil = 'Très bon lancer, travaille la rotation pour viser 12m.'; }
+            else if(distance >= 8) { stars = 3; niveau = 'Bien'; conseil = 'Bon lancer, améliore l\'accompagnement du geste.'; }
+            else if(distance >= 6) { stars = 2; niveau = 'Moyen'; conseil = 'Travaille la technique de lancer.'; }
+            else { stars = 1; niveau = 'À améliorer'; conseil = 'Entraîne-toi sur le geste technique.'; }
+        }
+        
+        return {
+            stars: '⭐'.repeat(stars),
+            niveau: niveau,
+            conseil: conseil
+        };
     }
     
     function formatTime(ms) {

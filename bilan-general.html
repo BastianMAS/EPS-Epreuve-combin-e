@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan Général - EPS PRO</title>
+    <style>
+        :root {
+            --bg: #0b101d;
+            --card: #1c2333;
+            --accent: #00d2ff;
+            --success: #00ff88;
+            --warning: #ffcc00;
+            --purple: #9b59b6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
+        .accent-text { color: var(--accent); }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .btn-secondary { background: #666; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+        th {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: black;
+            padding: 10px 8px;
+            font-weight: 700;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        tr:hover { background: rgba(0,210,255,0.05); }
+        .stat-box {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 2px solid var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EPS<span class="accent-text">PRO</span></h1>
+        <p class="subtitle" style="color: var(--purple); font-size: 1.5rem; font-weight: 700;">📈 BILAN GÉNÉRAL</p>
+        <p class="subtitle">Leçons 1 à 6 - Préparation L7 (Évaluation finale)</p>
+        
+        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
+        
+        <div id="stats"></div>
+        <div id="table-container"></div>
+    </div>
+    
+    <script>
+    let students = [];
+    
+    window.onload = function() {
+        const stored = localStorage.getItem('eps_pro_students');
+        if (!stored) {
+            alert('⚠️ Aucun élève.');
+            return;
+        }
+        students = JSON.parse(stored);
+        displayBilan();
+    };
+    
+    function displayBilan() {
+        let html = '<table><thead><tr>';
+        html += '<th>Élève</th><th>Classe</th><th>VMA</th>';
+        html += '<th>L1 Diag</th>';
+        html += '<th>L2</th><th>L3</th><th>L4</th><th>L5</th><th>L6</th>';
+        html += '<th>Progression</th></tr></thead><tbody>';
+        
+        students.forEach(s => {
+            const vma = parseFloat(s.vma);
+            
+            // L1 Diagnostic
+            const l1 = s.diagnostique ? '✅' : '❌';
+            
+            // L2-L6
+            const l2 = s.lecon2 ? formatPct(s.lecon2) : '-';
+            const l3 = s.lecon3 ? formatPct(s.lecon3) : '-';
+            const l4 = s.lecon4 ? formatPct(s.lecon4) : '-';
+            const l5 = s.lecon5 ? formatPct(s.lecon5) : '-';
+            const l6 = s.lecon6 ? formatPct(s.lecon6) : '-';
+            
+            // Progression
+            let progression = '-';
+            const pcts = [];
+            [s.lecon2, s.lecon3, s.lecon4, s.lecon5, s.lecon6].forEach(l => {
+                if(l && l.tour1 && l.tour2 && l.tour3) {
+                    const moy = (l.tour1 + l.tour2 + l.tour3) / 3;
+                    const pct = ((0.4 / (moy/3600)) / vma) * 100;
+                    pcts.push(pct);
+                }
+            });
+            
+            if(pcts.length >= 2) {
+                const diff = pcts[pcts.length-1] - pcts[0];
+                if(diff > 5) progression = '📈 +' + diff.toFixed(0) + '%';
+                else if(diff < -5) progression = '📉 ' + diff.toFixed(0) + '%';
+                else progression = '➡️ Stable';
+            }
+            
+            html += '<tr>';
+            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
+            html += '<td>'+s.classe+'</td>';
+            html += '<td>'+vma+' km/h</td>';
+            html += '<td>'+l1+'</td>';
+            html += '<td>'+l2+'</td>';
+            html += '<td>'+l3+'</td>';
+            html += '<td>'+l4+'</td>';
+            html += '<td>'+l5+'</td>';
+            html += '<td>'+l6+'</td>';
+            html += '<td>'+progression+'</td>';
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table>';
+        document.getElementById('table-container').innerHTML = html;
+        
+        // Stats
+        const withDiag = students.filter(s => s.diagnostique).length;
+        const withL2 = students.filter(s => s.lecon2).length;
+        const withL6 = students.filter(s => s.lecon6).length;
+        
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-box">
+                <h3 style="color: var(--accent); margin-bottom: 10px;">Participation</h3>
+                <p><strong>L1 Diagnostic :</strong> ${withDiag} / ${students.length}</p>
+                <p><strong>L2 réalisée :</strong> ${withL2} / ${students.length}</p>
+                <p><strong>L6 réalisée :</strong> ${withL6} / ${students.length}</p>
+                <p><strong>Prêts pour L7 :</strong> ${withL6} élèves</p>
+            </div>
+        `;
+    }
+    
+    function formatPct(lecon) {
+        if(!lecon || !lecon.tour1 || !lecon.tour2 || !lecon.tour3) return '-';
+        return lecon.pctVMA + '%';
+    }
+    </script>
+</body>
+</html>

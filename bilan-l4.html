@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan Leçon 4 - EPS PRO</title>
+    <style>
+        :root {
+            --bg: #0b101d;
+            --card: #1c2333;
+            --accent: #00d2ff;
+            --success: #00ff88;
+            --warning: #ffcc00;
+            --purple: #9b59b6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
+        .accent-text { color: var(--accent); }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .btn-secondary { background: #666; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: black;
+            padding: 12px;
+            font-weight: 700;
+            text-align: left;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        tr:hover {
+            background: rgba(0,210,255,0.05);
+        }
+        .stat-box {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 2px solid var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EPS<span class="accent-text">PRO</span></h1>
+        <p class="subtitle" style="color: var(--purple); font-size: 1.3rem; font-weight: 700;">📊 BILAN LEÇON 4</p>
+        
+        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
+        
+        <div id="stats"></div>
+        <div id="table-container"></div>
+    </div>
+    
+    <script>
+    let students = [];
+    
+    window.onload = function() {
+        const stored = localStorage.getItem('eps_pro_students');
+        if (!stored) {
+            alert('⚠️ Aucun élève.');
+            return;
+        }
+        students = JSON.parse(stored);
+        displayBilan();
+    };
+    
+    function displayBilan() {
+        const withL4 = students.filter(s => s.lecon4);
+        
+        if(withL4.length === 0) {
+            document.getElementById('stats').innerHTML = '<div class="stat-box"><p>Aucune donnée Leçon 4 enregistrée.</p></div>';
+            return;
+        }
+        
+        // Stats globales
+        let totalPct = 0;
+        let totalReguliers = 0;
+        
+        withL4.forEach(s => {
+            const d = s.lecon4;
+            const vma = parseFloat(s.vma);
+            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
+            totalPct += pctRealise;
+            
+            const ecart1_2 = Math.abs(d.tour2 - d.tour1);
+            const ecart2_3 = Math.abs(d.tour3 - d.tour2);
+            if(Math.max(ecart1_2, ecart2_3) <= 5) totalReguliers++;
+        });
+        
+        const moyPct = totalPct / withL4.length;
+        
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-box">
+                <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
+                <p><strong>Élèves ayant fait la lecon :</strong> ${withL4.length} / ${students.length}</p>
+                <p><strong>% VMA moyen réalisé :</strong> ${moyPct.toFixed(1)}%</p>
+                <p><strong>Courses régulières (écarts ≤5s) :</strong> ${totalReguliers} / ${withL4.length} (${((totalReguliers/withL4.length)*100).toFixed(0)}%)</p>
+            </div>
+        `;
+        
+        // Tableau
+        let html = '<table><thead><tr>';
+        html += '<th>Élève</th><th>Classe</th><th>VMA</th><th>% Objectif</th><th>T1</th><th>T2</th><th>T3</th><th>Moyenne</th><th>% Réalisé</th><th>Profil</th></tr></thead><tbody>';
+        
+        withL4.forEach(s => {
+            const d = s.lecon4;
+            const vma = parseFloat(s.vma);
+            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
+            
+            const ecart1_2 = d.tour2 - d.tour1;
+            const ecart2_3 = d.tour3 - d.tour2;
+            const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
+            
+            let profil = '';
+            if(ecartMax <= 5) {
+                profil = '➡️ Régulière';
+            } else if(ecart1_2 > 10 || ecart2_3 > 10) {
+                profil = '⚠️ Grosse baisse';
+            } else {
+                profil = '⚠️ Irrégulière';
+            }
+            
+            const objectif = pctRealise >= d.pctVMA ? '✅' : '❌';
+            
+            html += '<tr>';
+            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
+            html += '<td>'+s.classe+'</td>';
+            html += '<td>'+vma+' km/h</td>';
+            html += '<td>'+d.pctVMA+'%</td>';
+            html += '<td>'+formatTime(d.tour1*1000)+'</td>';
+            html += '<td>'+formatTime(d.tour2*1000)+'</td>';
+            html += '<td>'+formatTime(d.tour3*1000)+'</td>';
+            html += '<td>'+formatTime(moy*1000)+'</td>';
+            html += '<td>'+pctRealise.toFixed(1)+'% '+objectif+'</td>';
+            html += '<td>'+profil+'</td>';
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table>';
+        document.getElementById('table-container').innerHTML = html;
+    }
+    
+    function formatTime(ms) {
+        const sec = Math.floor(ms/1000);
+        const m = Math.floor(sec/60);
+        const s = sec%60;
+        return m+"'"+(s<10?'0':'')+s+'"';
+    }
+    </script>
+</body>
+</html>

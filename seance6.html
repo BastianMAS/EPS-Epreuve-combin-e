@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Séance 2 - EPS PRO</title>
+    <title>Séance 6 - EPS PRO</title>
     <style>
         :root {
             --bg: #0b101d;
@@ -174,7 +174,7 @@
 <body>
     <div class="container">
         <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 SÉANCE 2</p>
+        <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 SÉANCE 6</p>
         <p class="subtitle">3×400m</p>
         
         <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 15px;">← Retour</button>
@@ -227,7 +227,7 @@
         }
         allStudents = JSON.parse(stored);
         
-        const seanceData = JSON.parse(localStorage.getItem('seance2_data') || '{}');
+        const seanceData = JSON.parse(localStorage.getItem('seance6_data') || '{}');
         if(seanceData.atelierType) {
             selectAtelier(seanceData.atelierType);
             document.getElementById('atelier-commun').value = seanceData.atelierTexte || '';
@@ -321,7 +321,7 @@
             cardData[cardIndex] = {};
         } else {
             const s = allStudents[studentIndex];
-            cardData[cardIndex] = s.seance2 || {
+            cardData[cardIndex] = s.seance6 || {
                 studentIndex: studentIndex,
                 student: s,
                 pctVMA: 100,
@@ -467,7 +467,7 @@
             if(d.student) {
                 const i = allStudents.findIndex(s => s.id === d.student.id);
                 if(i !== -1) {
-                    allStudents[i].seance2 = {
+                    allStudents[i].seance6 = {
                         pctVMA: d.pctVMA,
                         tour1: d.tour1,
                         tour2: d.tour2,
@@ -482,12 +482,12 @@
         });
         
         localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-        localStorage.setItem('seance2_data', JSON.stringify({
+        localStorage.setItem('seance6_data', JSON.stringify({
             atelierType: atelierType,
             atelierTexte: atelierTexte
         }));
         
-        alert('✅ Séance 2 enregistrée !');
+        alert('✅ Séance 6 enregistrée !');
     }
     
     function formatTime(ms) {

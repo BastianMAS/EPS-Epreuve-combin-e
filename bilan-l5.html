@@ -108,6 +108,17 @@
         
         const moyPct = totalPct / withL5.length;
         
+        // Récupérer l'atelier de la lecon5
+        const lecon5Data = JSON.parse(localStorage.getItem('lecon5_data') || '{}');
+        const atelierHTML = lecon5Data.atelierType ? `
+            <div class="stat-box" style="border-color: var(--purple);">
+                <h3 style="color: var(--purple); margin-bottom: 10px;">
+                    ${lecon5Data.atelierType === 'saut' ? '🦘 Atelier SAUT' : '🎯 Atelier LANCER'}
+                </h3>
+                <p style="white-space: pre-wrap;">${lecon5Data.atelierTexte || 'Aucune description'}</p>
+            </div>
+        ` : '';
+        
         document.getElementById('stats').innerHTML = `
             <div class="stat-box">
                 <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
@@ -115,6 +126,7 @@
                 <p><strong>% VMA moyen réalisé :</strong> ${moyPct.toFixed(1)}%</p>
                 <p><strong>Courses régulières (écarts ≤5s) :</strong> ${totalReguliers} / ${withL5.length} (${((totalReguliers/withL5.length)*100).toFixed(0)}%)</p>
             </div>
+            ${atelierHTML}
         `;
         
         // Tableau

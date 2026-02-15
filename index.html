@@ -1052,25 +1052,78 @@
             </div>
             
             <!-- BOUTONS D'ACTION -->
-            <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
-                <button onclick="goToDiagnostic()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--warning); color: black;">
-                    🔬 ÉVALUATION DIAGNOSTIQUE
+            <div style="margin-top: 30px;">
+                
+                <!-- Diagnostic S1 -->
+                <button onclick="goToDiagnostic()" class="btn-action" style="width: 100%; margin-bottom: 15px; background: var(--warning); color: black; font-size: 1.1rem;">
+                    🔬 DIAGNOSTIC (S1)
                 </button>
-                <button onclick="goToStats()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--success); color: black;">
-                    📊 STATISTIQUES
+                
+                <!-- Menu Séances S2-S6 -->
+                <div style="margin-bottom: 15px;">
+                    <button onclick="toggleMenu('seances-menu')" class="btn-action" style="width: 100%; background: #9b59b6; color: white; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📅 SÉANCES D'ENTRAÎNEMENT (S2-S6)</span>
+                        <span id="seances-arrow">▼</span>
+                    </button>
+                    <div id="seances-menu" style="display: none; margin-top: 10px; padding-left: 20px;">
+                        <button onclick="window.open('./seance2.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → S2 : 3×400m + Saut
+                        </button>
+                        <button onclick="alert('Séance 3 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → S3 : 3×400m + Lancer (bientôt)
+                        </button>
+                        <button onclick="alert('Séance 4 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → S4 : 3×400m + Saut (bientôt)
+                        </button>
+                        <button onclick="alert('Séance 5 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → S5 : 3×400m + Lancer (bientôt)
+                        </button>
+                        <button onclick="alert('Séance 6 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → S6 : 3×400m % choix + Saut (bientôt)
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Menu Bilans -->
+                <div style="margin-bottom: 15px;">
+                    <button onclick="toggleMenu('bilans-menu')" class="btn-action" style="width: 100%; background: #e74c3c; color: white; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📊 BILANS SÉANCES</span>
+                        <span id="bilans-arrow">▼</span>
+                    </button>
+                    <div id="bilans-menu" style="display: none; margin-top: 10px; padding-left: 20px;">
+                        <button onclick="window.open('./bilan-s2.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → Bilan S2
+                        </button>
+                        <button onclick="alert('Bilan S3 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → Bilan S3 (bientôt)
+                        </button>
+                        <button onclick="alert('Bilan S4 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → Bilan S4 (bientôt)
+                        </button>
+                        <button onclick="alert('Bilan S5 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → Bilan S5 (bientôt)
+                        </button>
+                        <button onclick="alert('Bilan S6 à venir')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.2); color: #888; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → Bilan S6 (bientôt)
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Statistiques globales -->
+                <button onclick="goToStats()" class="btn-action" style="width: 100%; margin-bottom: 15px; background: var(--success); color: black; font-size: 1.1rem;">
+                    📊 STATISTIQUES GLOBALES
                 </button>
-                <button onclick="openPrintCards()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--orange); color: black;">
+                
+                <!-- Imprimer cartes -->
+                <button onclick="openPrintCards()" class="btn-action" style="width: 100%; margin-bottom: 15px; background: var(--orange); color: black; font-size: 1.1rem;">
                     🖨️ IMPRIMER CARTES
                 </button>
-                <button onclick="window.open('./seance2.html', '_blank')" class="btn-action" style="flex: 1; min-width: 200px; background: #9b59b6; color: white;">
-                    📅 SÉANCE 2
-                </button>
-                <button onclick="window.open('./bilan-s2.html', '_blank')" class="btn-action" style="flex: 1; min-width: 200px; background: #e74c3c; color: white;">
-                    📊 BILAN S2
-                </button>
-                <button onclick="goToConfig()" class="btn-action btn-primary" style="flex: 1; min-width: 200px;">
+                
+                <!-- Évaluation finale S7 -->
+                <button onclick="goToConfig()" class="btn-action btn-primary" style="width: 100%; font-size: 1.1rem;">
                     ➡️ ÉVALUATION FINALE (S7)
                 </button>
+                
             </div>
         </div>
     </div>
@@ -2008,6 +2061,25 @@ function goToStats() {
 
 /**
  * Ouvrir la page d'impression des cartes terrain
+ */
+/**
+ * Ouvrir/Fermer les menus déroulants
+ */
+function toggleMenu(menuId) {
+    const menu = document.getElementById(menuId);
+    const arrow = document.getElementById(menuId.replace('-menu', '-arrow'));
+    
+    if (menu.style.display === 'none') {
+        menu.style.display = 'block';
+        if (arrow) arrow.textContent = '▲';
+    } else {
+        menu.style.display = 'none';
+        if (arrow) arrow.textContent = '▼';
+    }
+}
+
+/**
+ * Ouvrir la page d'impression des cartes
  */
 function openPrintCards() {
     if (storedStudents.length === 0) {

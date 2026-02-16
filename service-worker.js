@@ -1,8 +1,22 @@
 // Service Worker pour EPS PRO - Mode hors ligne
-const CACHE_NAME = 'eps-pro-v3';
+const CACHE_NAME = 'eps-pro-v4';
 const urlsToCache = [
   './',
   './index.html',
+  './diagnostic.html',
+  './lecon2.html',
+  './lecon3.html',
+  './lecon4.html',
+  './lecon5.html',
+  './lecon6.html',
+  './bilan-diagnostic.html',
+  './bilan-l2.html',
+  './bilan-l3.html',
+  './bilan-l4.html',
+  './bilan-l5.html',
+  './bilan-l6.html',
+  './bilan-general.html',
+  './print-cards.html',
   './logo.png'
 ];
 

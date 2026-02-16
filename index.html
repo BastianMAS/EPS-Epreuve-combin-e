@@ -953,11 +953,6 @@
                         <label>Âge (ans) *</label>
                         <input type="number" id="input-age" min="10" max="18" placeholder="ex: 12">
                     </div>
-                    
-                    <div class="form-group">
-                        <label>VMA (km/h) *</label>
-                        <input type="number" id="input-vma" step="0.1" placeholder="ex: 10.5">
-                    </div>
                 </div>
                 
                 <div class="form-group" style="margin-bottom: 15px;">
@@ -1811,7 +1806,6 @@ function saveStudent() {
     const nom = document.getElementById('input-nom').value.trim().toUpperCase();
     const classe = document.getElementById('input-classe').value;
     const age = parseInt(document.getElementById('input-age').value);
-    const vma = parseFloat(document.getElementById('input-vma').value);
     const sexe = document.querySelector('input[name="sexe"]:checked')?.value;
     
     // Validation
@@ -1830,11 +1824,6 @@ function saveStudent() {
         return;
     }
     
-    if (!vma || vma <= 0 || vma > 25) {
-        alert('⚠️ Veuillez saisir une VMA valide (entre 1 et 25 km/h).');
-        return;
-    }
-    
     if (!sexe) {
         alert('⚠️ Veuillez sélectionner le sexe de l\'élève.');
         return;
@@ -1849,7 +1838,6 @@ function saveStudent() {
                 nomPrenom: nom,
                 classe: classe,
                 age: age,
-                vma: vma,
                 sexe: sexe
             };
             editingStudentId = null;
@@ -1872,7 +1860,7 @@ function saveStudent() {
             classe: classe,
             sexe: sexe,
             age: age,
-            vma: vma,
+            vma: null,
             photo: null,
             dateCreation: new Date().toISOString(),
             diagnostique: null,
@@ -1899,7 +1887,6 @@ function resetForm() {
     document.getElementById('input-nom').value = '';
     document.getElementById('input-classe').value = '';
     document.getElementById('input-age').value = '';
-    document.getElementById('input-vma').value = '';
     document.querySelectorAll('input[name="sexe"]').forEach(r => r.checked = false);
     editingStudentId = null;
     document.getElementById('btn-cancel').style.display = 'none';
@@ -1923,7 +1910,6 @@ function editStudent(id) {
     document.getElementById('input-nom').value = student.nomPrenom;
     document.getElementById('input-classe').value = student.classe || '';
     document.getElementById('input-age').value = student.age || '';
-    document.getElementById('input-vma').value = student.vma;
     document.getElementById(`input-sexe-${student.sexe.toLowerCase()}`).checked = true;
     
     editingStudentId = id;

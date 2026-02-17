@@ -2795,16 +2795,8 @@ function closeDiagnosticPopup() {
  */
 function editDiagnostic(studentId) {
     closeDiagnosticPopup();
-    
-    // Aller à la page diagnostic
-    document.getElementById('screen0').classList.add('hidden');
-    document.getElementById('screenDiag').classList.remove('hidden');
-    
-    // Sélectionner l'élève
-    document.getElementById('diag-student-select').value = studentId;
-    selectDiagStudent();
-    
-    // TODO: Pré-remplir les données du diagnostic si nécessaire
+    // Ouvrir diagnostic.html - les données sont dans localStorage
+    window.open('./diagnostic.html', '_blank');
 }
 
 // ============================================================================

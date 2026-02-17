@@ -40,19 +40,26 @@
             background: var(--card);
             border-radius: 12px;
             overflow: hidden;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            margin-top: 20px;
         }
         th {
             background: linear-gradient(135deg, var(--warning), var(--success));
             color: black;
-            padding: 10px 8px;
+            padding: 8px 6px;
             font-weight: 700;
             text-align: left;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
+            white-space: nowrap;
         }
         td {
-            padding: 8px;
+            padding: 7px 6px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
         }
         tr:hover { background: rgba(0,210,255,0.05); }
         .stars { color: var(--warning); font-size: 0.9rem; }
@@ -134,7 +141,7 @@
         });
         
         html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
+        document.getElementById('table-container').innerHTML = '<div class="table-wrapper">'+html+'</div>';
     }
     
     function evaluateVMA(vma, sexe) {

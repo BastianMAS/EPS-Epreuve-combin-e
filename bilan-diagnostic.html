@@ -92,7 +92,7 @@
         
         // Stats
         let totalVMA = 0;
-        withDiag.forEach(s => totalVMA += s.vma);
+        withDiag.forEach(s => totalVMA += parseFloat(s.vma));
         
         document.getElementById('stats').innerHTML = `
             <div class="stat-box">
@@ -104,34 +104,32 @@
         
         // Tableau compact
         let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>VMA</th><th>3×400m</th><th>Saut</th><th>Lanc.</th><th>⭐Course</th><th>⭐Saut</th><th>⭐Lanc</th><th>Conseil</th></tr></thead><tbody>';
+        html += '<th>Élève</th><th>VMA</th><th>Moy 3×400</th><th>Saut -élan</th><th>Saut +élan</th><th>Lancer</th><th>⭐Course</th><th>⭐Saut</th><th>⭐Lanc</th></tr></thead><tbody>';
         
         withDiag.forEach(s => {
             const d = s.diagnostique;
-            const vma = s.vma;
-            const moy = d.tour1 && d.tour2 && d.tour3 ? (d.tour1 + d.tour2 + d.tour3) / 3 : null;
+            const vma = parseFloat(s.vma);
+            
+            // Lire les bons champs selon le nouveau format
+            const moy = d.moyenneCourse || (d.tour1 && d.tour2 && d.tour3 ? (d.tour1+d.tour2+d.tour3)/3 : null);
+            const sautSansBest = d.sautSansBest || (d.sautSans && d.sautSans.length ? Math.max(...d.sautSans) : null);
+            const sautAvecBest = d.sautAvecBest || (d.sautAvec && d.sautAvec.length ? Math.max(...d.sautAvec) : null);
+            const lancerBest = d.lancerBest || (d.lancerResults && d.lancerResults.length ? Math.max(...d.lancerResults) : null);
             
             const evalVMA = evaluateVMA(vma, s.sexe);
-            const evalSaut = d.sautAvecElan ? evaluateSaut(d.sautAvecElan, s.sexe) : null;
-            const evalLancer = d.lancer ? evaluateLancer(d.lancer, s.sexe) : null;
-            
-            // Conseil principal
-            let conseil = '';
-            if(evalVMA.stars < 3) conseil = 'Endurance';
-            else if(evalSaut && evalSaut.stars < 3) conseil = 'Saut';
-            else if(evalLancer && evalLancer.stars < 3) conseil = 'Lancer';
-            else conseil = 'Continuer !';
+            const evalSaut = sautAvecBest ? evaluateSaut(sautAvecBest, s.sexe) : null;
+            const evalLancer = lancerBest ? evaluateLancer(lancerBest, s.sexe) : null;
             
             html += '<tr>';
             html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+vma.toFixed(1)+'</td>';
+            html += '<td>'+vma.toFixed(1)+' km/h</td>';
             html += '<td>'+(moy ? formatTime(moy*1000) : '-')+'</td>';
-            html += '<td>'+(d.sautAvecElan ? d.sautAvecElan.toFixed(2)+'m' : '-')+'</td>';
-            html += '<td>'+(d.lancer ? d.lancer.toFixed(1)+'m' : '-')+'</td>';
+            html += '<td>'+(sautSansBest ? sautSansBest.toFixed(2)+'m' : '-')+'</td>';
+            html += '<td>'+(sautAvecBest ? sautAvecBest.toFixed(2)+'m' : '-')+'</td>';
+            html += '<td>'+(lancerBest ? lancerBest.toFixed(1)+'m'+(d.lancerType?' ('+d.lancerType+')':'') : '-')+'</td>';
             html += '<td class="stars">'+evalVMA.stars+'</td>';
             html += '<td class="stars">'+(evalSaut ? evalSaut.stars : '-')+'</td>';
             html += '<td class="stars">'+(evalLancer ? evalLancer.stars : '-')+'</td>';
-            html += '<td>'+conseil+'</td>';
             html += '</tr>';
         });
         

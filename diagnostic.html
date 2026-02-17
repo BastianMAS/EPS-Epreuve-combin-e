@@ -630,8 +630,17 @@ function saveAll() {
     cardState.forEach((d, i) => {
         if(!d.student) return;
 
-        // Récupérer commentaire
+        // Relire TOUS les inputs au moment de sauvegarder
+        const t1 = parseTime(document.getElementById(`t1-${i}`)?.value);
+        const t2 = parseTime(document.getElementById(`t2-${i}`)?.value);
+        const t3 = parseTime(document.getElementById(`t3-${i}`)?.value);
+        const tours = [t1, t2, t3];
+
         const comment = document.getElementById(`comment-${i}`)?.value || '';
+
+        const sautSans = d.sautSans || [];
+        const sautAvec = d.sautAvec || [];
+        const lancerResults = d.lancerResults || [];
 
         // Trouver l'élève dans le localStorage
         const idx = allStudents.findIndex(s => s.id === d.student.id);
@@ -644,14 +653,17 @@ function saveAll() {
         // Sauvegarder diagnostic complet
         allStudents[idx].diagnostique = {
             vma: d.vma,
-            tours: d.tours,
-            sautSans: d.sautSans,
-            sautAvec: d.sautAvec,
-            sautSansBest: d.sautSans.length ? Math.max(...d.sautSans) : null,
-            sautAvecBest: d.sautAvec.length ? Math.max(...d.sautAvec) : null,
+            tour1: t1,
+            tour2: t2,
+            tour3: t3,
+            moyenneCourse: (t1 && t2 && t3) ? (t1+t2+t3)/3 : null,
+            sautSans: sautSans,
+            sautAvec: sautAvec,
+            sautSansBest: sautSans.length ? Math.max(...sautSans) : null,
+            sautAvecBest: sautAvec.length ? Math.max(...sautAvec) : null,
             lancerType: d.lancerType,
-            lancerResults: d.lancerResults,
-            lancerBest: d.lancerResults.length ? Math.max(...d.lancerResults) : null,
+            lancerResults: lancerResults,
+            lancerBest: lancerResults.length ? Math.max(...lancerResults) : null,
             commentaire: comment,
             date: new Date().toISOString()
         };

@@ -14,17 +14,17 @@
             --danger: #ff4b4b;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 15px; }
-        h1 { text-align: center; font-size: 1.8rem; margin-bottom: 5px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 12px; }
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 4px; }
         .accent { color: var(--accent); }
-        .subtitle { text-align: center; color: var(--warning); font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; }
+        .subtitle { text-align: center; color: var(--warning); font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
 
         /* GRILLE 6 CARTES */
         .grid6 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
         @media (max-width: 900px) { .grid6 { grid-template-columns: repeat(2,1fr); } }
         @media (max-width: 600px) { .grid6 { grid-template-columns: 1fr; } }
@@ -32,53 +32,53 @@
         /* CARTE ÉLÈVE */
         .card {
             background: var(--card);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
             overflow: hidden;
         }
         .card-header {
             background: linear-gradient(135deg, var(--warning), var(--success));
             color: black;
-            padding: 8px 12px;
-            font-weight: 800;
-            font-size: 0.9rem;
+            padding: 6px 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
-        .card-body { padding: 10px; }
+        .card-body { padding: 8px; }
 
         /* SELECT ÉLÈVE */
         .student-select {
             width: 100%;
-            padding: 8px;
-            border-radius: 8px;
-            border: 2px solid var(--accent);
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid var(--accent);
             background: #0f1628;
             color: white;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
         }
         .student-info {
             background: rgba(0,210,255,0.1);
             border: 1px solid var(--accent);
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 0.8rem;
-            margin-bottom: 8px;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.7rem;
+            margin-bottom: 6px;
             display: none;
         }
 
         /* SECTIONS DÉPLIABLES */
-        .section { border-radius: 8px; overflow: hidden; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .section { border-radius: 6px; overflow: hidden; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.1); }
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 10px;
+            padding: 6px 8px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             user-select: none;
         }
         .section-header:hover { opacity: 0.85; }
@@ -86,90 +86,90 @@
         .section-header.course-h { background: rgba(255,204,0,0.2); color: var(--warning); }
         .section-header.saut-h { background: rgba(0,255,136,0.2); color: var(--success); }
         .section-header.lancer-h { background: rgba(255,75,75,0.2); color: var(--danger); }
-        .section-body { display: none; padding: 10px; background: rgba(255,255,255,0.03); }
+        .section-body { display: none; padding: 8px; background: rgba(255,255,255,0.02); }
         .section-body.open { display: block; }
-        .arrow { transition: transform 0.3s; font-size: 0.75rem; }
+        .arrow { transition: transform 0.3s; font-size: 0.7rem; }
         .arrow.open { transform: rotate(180deg); }
 
         /* INPUTS */
         input[type=number], input[type=text] {
             background: #0f1628;
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
+            border-radius: 4px;
             color: white;
-            padding: 6px 8px;
-            font-size: 0.85rem;
+            padding: 4px 6px;
+            font-size: 0.75rem;
         }
         input:focus { outline: none; border-color: var(--accent); }
-        label { display: block; font-size: 0.75rem; color: #aaa; margin: 6px 0 3px; }
+        label { display: block; font-size: 0.7rem; color: #aaa; margin: 4px 0 2px; }
 
         /* BOUTONS TYPE TEST */
-        .type-btns { display: flex; gap: 5px; margin: 6px 0; flex-wrap: wrap; }
+        .type-btns { display: flex; gap: 3px; margin: 4px 0; flex-wrap: wrap; }
         .type-btn {
             flex: 1;
-            padding: 6px;
-            border: 2px solid rgba(255,255,255,0.2);
+            padding: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: white;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             text-align: center;
-            min-width: 60px;
+            min-width: 50px;
         }
         .type-btn.selected { border-color: var(--accent); background: rgba(0,210,255,0.2); color: var(--accent); }
 
         /* INPUT + BOUTON AJOUTER */
-        .input-row { display: flex; gap: 5px; align-items: center; margin: 6px 0; }
+        .input-row { display: flex; gap: 4px; align-items: center; margin: 4px 0; }
         .input-row input { flex: 1; }
         .btn-add {
-            padding: 6px 10px;
+            padding: 4px 8px;
             background: var(--accent);
             color: black;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             white-space: nowrap;
         }
         .btn-save-vma {
             width: 100%;
-            padding: 7px;
+            padding: 5px;
             background: var(--success);
             color: black;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.8rem;
-            margin-top: 6px;
+            font-size: 0.7rem;
+            margin-top: 4px;
         }
 
         /* RÉSULTATS */
         .vma-display {
             background: rgba(0,255,136,0.1);
-            border: 2px solid var(--success);
-            border-radius: 8px;
-            padding: 8px;
+            border: 1px solid var(--success);
+            border-radius: 6px;
+            padding: 6px;
             text-align: center;
-            margin: 6px 0;
+            margin: 4px 0;
             display: none;
         }
-        .vma-display .vma-val { font-size: 1.6rem; font-weight: 900; color: var(--success); }
+        .vma-display .vma-val { font-size: 1.4rem; font-weight: 900; color: var(--success); }
 
         .historique {
             background: rgba(0,210,255,0.05);
             border: 1px solid var(--accent);
-            border-radius: 6px;
-            padding: 8px;
-            margin: 6px 0;
-            font-size: 0.78rem;
+            border-radius: 4px;
+            padding: 6px;
+            margin: 4px 0;
+            font-size: 0.7rem;
             display: none;
         }
-        .historique-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .moy-vma { text-align: center; padding-top: 6px; font-weight: 800; color: var(--success); font-size: 0.95rem; }
+        .historique-item { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .moy-vma { text-align: center; padding-top: 4px; font-weight: 800; color: var(--success); font-size: 0.8rem; }
 
         .results-pills { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0; }
         .pill {
@@ -185,12 +185,13 @@
         /* FEEDBACK ET PROGRESS */
         .feedback-box {
             background: rgba(0,255,136,0.15);
-            border: 2px solid var(--success);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 8px 0;
+            border: 1px solid var(--success);
+            border-radius: 4px;
+            padding: 6px;
+            margin: 4px 0;
             font-weight: 700;
             text-align: center;
+            font-size: 0.7rem;
             animation: pulse 0.5s ease-in-out;
         }
         .feedback-warning { background: rgba(255,204,0,0.15); border-color: var(--warning); color: var(--warning); }
@@ -198,38 +199,39 @@
         
         .progress-bar {
             background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            height: 8px;
-            margin: 8px 0;
+            border-radius: 6px;
+            height: 6px;
+            margin: 4px 0;
             overflow: hidden;
         }
         .progress-fill {
             background: linear-gradient(90deg, var(--accent), var(--success));
             height: 100%;
-            border-radius: 12px;
+            border-radius: 6px;
             transition: width 0.5s ease;
         }
         
         .conseil-box {
             background: rgba(255,204,0,0.08);
-            border: 2px solid var(--warning);
-            border-radius: 10px;
-            padding: 12px;
-            margin: 10px 0;
-            font-size: 0.8rem;
-            line-height: 1.4;
+            border: 1px solid var(--warning);
+            border-radius: 6px;
+            padding: 8px;
+            margin: 6px 0;
+            font-size: 0.7rem;
+            line-height: 1.3;
         }
-        .conseil-title { color: var(--warning); font-weight: 800; margin-bottom: 6px; }
-        .conseil-item { margin: 3px 0; }
+        .conseil-title { color: var(--warning); font-weight: 800; margin-bottom: 4px; font-size: 0.75rem; }
+        .conseil-item { margin: 2px 0; }
         
         .objectif-box {
             background: rgba(0,210,255,0.1);
-            border: 2px solid var(--accent);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 8px 0;
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            padding: 6px;
+            margin: 4px 0;
             text-align: center;
             font-weight: 700;
+            font-size: 0.75rem;
         }
         
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -247,17 +249,17 @@
         /* BOUTON SAVE GLOBAL */
         .save-all {
             width: 100%;
-            padding: 18px;
+            padding: 12px;
             background: var(--success);
             color: black;
             border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 900;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 8px;
         }
-        .btn-back { padding: 10px 20px; background: #555; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; margin-bottom: 15px; }
+        .btn-back { padding: 8px 16px; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; margin-bottom: 12px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -324,15 +326,14 @@ function buildCard(i) {
 
                     <!-- Objectif -->
                     <div class="objectif-box">
-                        🎯 <strong>TON DÉFI :</strong> Teste ta vitesse maximale !
+                        🎯 <strong>DÉFI :</strong> Ta vitesse max !
                     </div>
 
                     <!-- Conseil technique -->
                     <div class="conseil-box">
-                        <div class="conseil-title">💡 ASTUCE VMA</div>
-                        <div class="conseil-item">• Garde un rythme régulier sur toute la durée</div>
-                        <div class="conseil-item">• Cours le plus loin possible sans t'arrêter</div>
-                        <div class="conseil-item">• Respire bien : inspire par le nez, expire par la bouche</div>
+                        <div class="conseil-title">💡 ASTUCE</div>
+                        <div class="conseil-item">• Garde un rythme régulier</div>
+                        <div class="conseil-item">• Cours le plus loin possible</div>
                     </div>
 
                     <!-- Historique -->
@@ -370,11 +371,10 @@ function buildCard(i) {
 
                     <!-- Résultat VMA calculé -->
                     <div class="vma-display" id="vma-res-${i}">
-                        <div style="font-size:0.75rem;color:#aaa">🏃 TA VITESSE DE COURSE</div>
+                        <div style="font-size:0.7rem;color:#aaa">🏃 Vitesse de course</div>
                         <div class="vma-val" id="vma-val-${i}">--</div>
-                        <div style="font-size:0.8rem;color:#aaa">km/h</div>
-                        <div style="font-size:0.75rem;color:#aaa;margin-top:4px">C'est ta vitesse max qu'on peut tenir 6 minutes !</div>
-                        <button class="btn-save-vma" onclick="saveVMATest(${i})">💾 Enregistrer ce test</button>
+                        <div style="font-size:0.7rem;color:#aaa">km/h</div>
+                        <button class="btn-save-vma" onclick="saveVMATest(${i})">💾 Enregistrer</button>
                     </div>
 
                 </div>
@@ -404,20 +404,20 @@ function buildCard(i) {
 
                     <div class="tour-row">
                         <span class="tour-label">T1</span>
-                        <input type="text" id="t1-${i}" placeholder="02:05" oninput="updateTours(${i})">
+                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i})" style="width:60px">
                         <span class="tour-result" id="t1r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T2</span>
-                        <input type="text" id="t2-${i}" placeholder="02:08" oninput="updateTours(${i})">
+                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i})" style="width:60px">
                         <span class="tour-result" id="t2r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T3</span>
-                        <input type="text" id="t3-${i}" placeholder="02:10" oninput="updateTours(${i})">
+                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i})" style="width:60px">
                         <span class="tour-result" id="t3r-${i}"></span>
                     </div>
-                    <div id="moy-course-${i}" style="font-size:0.85rem;margin-top:6px;color:var(--success);font-weight:700"></div>
+                    <div id="moy-course-${i}" style="font-size:0.75rem;margin-top:4px;color:var(--success);font-weight:700"></div>
                 </div>
             </div>
 
@@ -430,16 +430,15 @@ function buildCard(i) {
 
                     <!-- Objectif -->
                     <div class="objectif-box">
-                        🎯 <strong>TON DÉFI :</strong> Saute le plus loin possible !
+                        🎯 <strong>DÉFI :</strong> Saute le plus loin !
                     </div>
 
                     <!-- Conseils techniques saut sans élan -->
                     <div class="conseil-box">
-                        <div class="conseil-title">💡 TECHNIQUE SAUT SANS ÉLAN</div>
-                        <div class="conseil-item">• Plie les genoux (position accroupie)</div>
-                        <div class="conseil-item">• Balancement des bras vers l'arrière puis l'avant</div>
-                        <div class="conseil-item">• Pousse fort avec les deux pieds en même temps</div>
-                        <div class="conseil-item">• Atterrissage : pieds joints, fléchis</div>
+                        <div class="conseil-title">💡 SAUT SANS ÉLAN</div>
+                        <div class="conseil-item">• Plie les genoux</div>
+                        <div class="conseil-item">• Bras vers l'arrière puis avant</div>
+                        <div class="conseil-item">• Pousse fort avec les 2 pieds</div>
                     </div>
 
                     <label>Sans élan (m) :</label>
@@ -451,13 +450,11 @@ function buildCard(i) {
                     <div class="best-label" id="saut-sans-best-${i}"></div>
 
                     <!-- Conseils techniques saut avec élan -->
-                    <div class="conseil-box" style="margin-top:15px">
-                        <div class="conseil-title">💡 TECHNIQUE SAUT AVEC ÉLAN</div>
-                        <div class="conseil-item">• Course d'élan : 6-8 foulées, accélère progressivement</div>
-                        <div class="conseil-item">• Pied d'appel : ton pied le plus fort sur la ligne</div>
-                        <div class="conseil-item">• Impulsion : pousse fort vers le haut ET l'avant</div>
-                        <div class="conseil-item">• En l'air : remonte les genoux vers la poitrine</div>
-                        <div class="conseil-item">• Atterrissage : pieds joints devant toi, fléchis</div>
+                    <div class="conseil-box" style="margin-top:10px">
+                        <div class="conseil-title">💡 SAUT AVEC ÉLAN</div>
+                        <div class="conseil-item">• 6-8 foulées d'élan</div>
+                        <div class="conseil-item">• Pied fort sur la ligne</div>
+                        <div class="conseil-item">• Pousse vers le haut ET l'avant</div>
                     </div>
 
                     <label style="margin-top:10px">Avec élan (m) :</label>
@@ -480,30 +477,28 @@ function buildCard(i) {
 
                     <!-- Objectif -->
                     <div class="objectif-box">
-                        🎯 <strong>TON DÉFI :</strong> Lance le plus loin possible !
+                        🎯 <strong>DÉFI :</strong> Lance le plus loin !
                     </div>
 
                     <div class="type-btns">
                         <div class="type-btn" id="btn-vortex-${i}" onclick="selectLancerType(${i},'vortex')">🚀 Vortex</div>
-                        <div class="type-btn" id="btn-poids-${i}" onclick="selectLancerType(${i},'poids')">🟡 Poids 1kg</div>
+                        <div class="type-btn" id="btn-poids-${i}" onclick="selectLancerType(${i},'poids')">🟡 Poids</div>
                     </div>
 
                     <!-- Conseils techniques vortex -->
                     <div class="conseil-box" id="conseil-vortex-${i}" style="display:none">
-                        <div class="conseil-title">💡 TECHNIQUE LANCER VORTEX</div>
-                        <div class="conseil-item">• Position : de profil, pied gauche devant (si droitier)</div>
-                        <div class="conseil-item">• Bras : vortex au niveau de l'oreille</div>
-                        <div class="conseil-item">• Lancer : rotation du bassin puis du bras</div>
-                        <div class="conseil-item">• Accompagne le mouvement jusqu'au bout</div>
+                        <div class="conseil-title">💡 VORTEX</div>
+                        <div class="conseil-item">• De profil, pied gauche devant</div>
+                        <div class="conseil-item">• Vortex au niveau oreille</div>
+                        <div class="conseil-item">• Rotation bassin puis bras</div>
                     </div>
 
                     <!-- Conseils techniques poids -->
                     <div class="conseil-box" id="conseil-poids-${i}" style="display:none">
-                        <div class="conseil-title">💡 TECHNIQUE LANCER POIDS</div>
-                        <div class="conseil-item">• Position : poids contre le cou/épaule</div>
-                        <div class="conseil-item">• Pied fort derrière, de profil</div>
-                        <div class="conseil-item">• Pousse avec les jambes, rotation du bassin</div>
-                        <div class="conseil-item">• Bras pousse le poids vers l'avant-haut (45°)</div>
+                        <div class="conseil-title">💡 POIDS</div>
+                        <div class="conseil-item">• Poids contre le cou</div>
+                        <div class="conseil-item">• Pied fort derrière</div>
+                        <div class="conseil-item">• Pousse vers l'avant-haut</div>
                     </div>
 
                     <label>Distance (m) :</label>
@@ -518,8 +513,8 @@ function buildCard(i) {
             </div>
 
             <!-- COMMENTAIRES -->
-            <label style="margin-top:8px;color:var(--warning)">💬 Commentaires :</label>
-            <textarea id="comment-${i}" placeholder="Observations..." style="width:100%;min-height:50px;background:#0f1628;border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:white;padding:6px;font-size:0.8rem;resize:vertical;margin-top:4px"></textarea>
+            <label style="margin-top:6px;color:var(--warning);font-size:0.7rem">💬 Commentaires :</label>
+            <textarea id="comment-${i}" placeholder="Observations..." style="width:100%;min-height:40px;background:#0f1628;border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:white;padding:4px;font-size:0.7rem;resize:vertical;margin-top:3px"></textarea>
         </div>
     </div>`;
 }

@@ -181,6 +181,58 @@
         }
         .pill.best { background: rgba(0,255,136,0.3); color: var(--success); }
         .best-label { font-size: 0.8rem; color: var(--success); font-weight: 700; margin-top: 4px; }
+        
+        /* FEEDBACK ET PROGRESS */
+        .feedback-box {
+            background: rgba(0,255,136,0.15);
+            border: 2px solid var(--success);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            font-weight: 700;
+            text-align: center;
+            animation: pulse 0.5s ease-in-out;
+        }
+        .feedback-warning { background: rgba(255,204,0,0.15); border-color: var(--warning); color: var(--warning); }
+        .feedback-danger { background: rgba(255,75,75,0.15); border-color: var(--danger); color: var(--danger); }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            height: 8px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+        
+        .conseil-box {
+            background: rgba(255,204,0,0.08);
+            border: 2px solid var(--warning);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .conseil-title { color: var(--warning); font-weight: 800; margin-bottom: 6px; }
+        .conseil-item { margin: 3px 0; }
+        
+        .objectif-box {
+            background: rgba(0,210,255,0.1);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
         /* TEMPS CIBLES */
         .cibles { background: rgba(255,204,0,0.08); border: 1px solid var(--warning); border-radius: 6px; padding: 8px; margin: 6px 0; font-size: 0.78rem; }
@@ -270,6 +322,19 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-vma-${i}">
 
+                    <!-- Objectif -->
+                    <div class="objectif-box">
+                        🎯 <strong>TON DÉFI :</strong> Teste ta vitesse maximale !
+                    </div>
+
+                    <!-- Conseil technique -->
+                    <div class="conseil-box">
+                        <div class="conseil-title">💡 ASTUCE VMA</div>
+                        <div class="conseil-item">• Garde un rythme régulier sur toute la durée</div>
+                        <div class="conseil-item">• Cours le plus loin possible sans t'arrêter</div>
+                        <div class="conseil-item">• Respire bien : inspire par le nez, expire par la bouche</div>
+                    </div>
+
                     <!-- Historique -->
                     <div class="historique" id="histo-${i}">
                         <div id="histo-list-${i}"></div>
@@ -305,9 +370,10 @@ function buildCard(i) {
 
                     <!-- Résultat VMA calculé -->
                     <div class="vma-display" id="vma-res-${i}">
-                        <div style="font-size:0.75rem;color:#aaa">VMA CALCULÉE</div>
+                        <div style="font-size:0.75rem;color:#aaa">🏃 TA VITESSE DE COURSE</div>
                         <div class="vma-val" id="vma-val-${i}">--</div>
                         <div style="font-size:0.8rem;color:#aaa">km/h</div>
+                        <div style="font-size:0.75rem;color:#aaa;margin-top:4px">C'est ta vitesse max qu'on peut tenir 6 minutes !</div>
                         <button class="btn-save-vma" onclick="saveVMATest(${i})">💾 Enregistrer ce test</button>
                     </div>
 
@@ -320,6 +386,29 @@ function buildCard(i) {
                     <span>🏃‍♂️ TEST 3×400m</span><span class="arrow" id="arr-course-${i}">▼</span>
                 </div>
                 <div class="section-body" id="body-course-${i}">
+
+                    <!-- Objectif -->
+                    <div class="objectif-box">
+                        🎯 <strong>TON DÉFI :</strong> 3 tours à ton rythme VMA !
+                    </div>
+
+                    <!-- Conseil technique -->
+                    <div class="conseil-box">
+                        <div class="conseil-title">💡 TECHNIQUE DE COURSE</div>
+                        <div class="conseil-item">• Garde le même rythme sur les 3 tours</div>
+                        <div class="conseil-item">• Objectif : écart entre tes tours &lt; 5 secondes</div>
+                        <div class="conseil-item">• Si tu vas trop vite au début, tu seras fatigué à la fin</div>
+                    </div>
+
+                    <!-- Progress bar course -->
+                    <div style="margin: 10px 0;">
+                        <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 4px;">Progression :</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="course-progress-${i}" style="width: 0%"></div>
+                        </div>
+                        <div style="text-align: center; font-size: 0.75rem; color: #aaa;" id="course-progress-text-${i}">0/3 tours</div>
+                    </div>
+
                     <!-- Temps cibles -->
                     <div class="cibles" id="cibles-${i}" style="display:none">
                         <div style="font-weight:700;color:var(--warning);margin-bottom:4px">🎯 Temps cibles :</div>
@@ -352,6 +441,20 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-saut-${i}">
 
+                    <!-- Objectif -->
+                    <div class="objectif-box">
+                        🎯 <strong>TON DÉFI :</strong> Saute le plus loin possible !
+                    </div>
+
+                    <!-- Conseils techniques saut sans élan -->
+                    <div class="conseil-box">
+                        <div class="conseil-title">💡 TECHNIQUE SAUT SANS ÉLAN</div>
+                        <div class="conseil-item">• Plie les genoux (position accroupie)</div>
+                        <div class="conseil-item">• Balancement des bras vers l'arrière puis l'avant</div>
+                        <div class="conseil-item">• Pousse fort avec les deux pieds en même temps</div>
+                        <div class="conseil-item">• Atterrissage : pieds joints, fléchis</div>
+                    </div>
+
                     <label>Sans élan (m) :</label>
                     <div class="input-row">
                         <input type="number" step="0.01" id="saut-sans-input-${i}" placeholder="ex: 1.85">
@@ -359,6 +462,16 @@ function buildCard(i) {
                     </div>
                     <div class="results-pills" id="saut-sans-pills-${i}"></div>
                     <div class="best-label" id="saut-sans-best-${i}"></div>
+
+                    <!-- Conseils techniques saut avec élan -->
+                    <div class="conseil-box" style="margin-top:15px">
+                        <div class="conseil-title">💡 TECHNIQUE SAUT AVEC ÉLAN</div>
+                        <div class="conseil-item">• Course d'élan : 6-8 foulées, accélère progressivement</div>
+                        <div class="conseil-item">• Pied d'appel : ton pied le plus fort sur la ligne</div>
+                        <div class="conseil-item">• Impulsion : pousse fort vers le haut ET l'avant</div>
+                        <div class="conseil-item">• En l'air : remonte les genoux vers la poitrine</div>
+                        <div class="conseil-item">• Atterrissage : pieds joints devant toi, fléchis</div>
+                    </div>
 
                     <label style="margin-top:10px">Avec élan (m) :</label>
                     <div class="input-row">
@@ -378,9 +491,32 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-lancer-${i}">
 
+                    <!-- Objectif -->
+                    <div class="objectif-box">
+                        🎯 <strong>TON DÉFI :</strong> Lance le plus loin possible !
+                    </div>
+
                     <div class="type-btns">
                         <div class="type-btn" id="btn-vortex-${i}" onclick="selectLancerType(${i},'vortex')">🚀 Vortex</div>
                         <div class="type-btn" id="btn-poids-${i}" onclick="selectLancerType(${i},'poids')">🟡 Poids 1kg</div>
+                    </div>
+
+                    <!-- Conseils techniques vortex -->
+                    <div class="conseil-box" id="conseil-vortex-${i}" style="display:none">
+                        <div class="conseil-title">💡 TECHNIQUE LANCER VORTEX</div>
+                        <div class="conseil-item">• Position : de profil, pied gauche devant (si droitier)</div>
+                        <div class="conseil-item">• Bras : vortex au niveau de l'oreille</div>
+                        <div class="conseil-item">• Lancer : rotation du bassin puis du bras</div>
+                        <div class="conseil-item">• Accompagne le mouvement jusqu'au bout</div>
+                    </div>
+
+                    <!-- Conseils techniques poids -->
+                    <div class="conseil-box" id="conseil-poids-${i}" style="display:none">
+                        <div class="conseil-title">💡 TECHNIQUE LANCER POIDS</div>
+                        <div class="conseil-item">• Position : poids contre le cou/épaule</div>
+                        <div class="conseil-item">• Pied fort derrière, de profil</div>
+                        <div class="conseil-item">• Pousse avec les jambes, rotation du bassin</div>
+                        <div class="conseil-item">• Bras pousse le poids vers l'avant-haut (45°)</div>
                     </div>
 
                     <label>Distance (m) :</label>
@@ -540,26 +676,114 @@ function updateCibles(i) {
     const el = document.getElementById(`cibles-${i}`);
     if(!vma) { el.style.display = 'none'; return; }
     el.style.display = 'block';
-    const pcts = [{p:90,c:'#ff8800'},{p:100,c:'#ffcc00'},{p:110,c:'#00d2ff'},{p:120,c:'#00ff88'}];
-    document.getElementById(`cibles-content-${i}`).innerHTML = pcts.map(({p,c}) => {
-        const t = (0.4 / (vma * p/100)) * 3600;
-        return `<div class="cible-row"><span style="color:${c};font-weight:700">${p}% VMA</span><span style="font-weight:700;font-family:monospace">${fmtSec(t)}</span></div>`;
-    }).join('');
+    
+    // Seul le 100% VMA nous intéresse pour le diagnostic
+    const temps100 = (0.4 / vma) * 3600;
+    
+    document.getElementById(`cibles-content-${i}`).innerHTML = `
+        <div style="text-align: center; padding: 8px; background: rgba(255,204,0,0.2); border-radius: 6px;">
+            <div style="font-size: 0.9rem; color: var(--warning); font-weight: 800;">
+                🎯 TON OBJECTIF PAR TOUR
+            </div>
+            <div style="font-size: 1.4rem; font-weight: 900; color: var(--warning); margin: 6px 0; font-family: monospace;">
+                ${fmtSec(temps100)}
+            </div>
+            <div style="font-size: 0.75rem; color: #aaa;">
+                Garde ce rythme sur les 3 tours !
+            </div>
+        </div>
+    `;
 }
 
 function updateTours(i) {
+    const cardData = cardState[i];
+    if(!cardData?.student?.vma) return;
+    
+    const vma = parseFloat(cardData.student.vma);
+    const cible = (0.4 / vma) * 3600; // Temps cible en secondes pour 400m
+    
     let moy = null, valid = 0, total = 0;
+    const temps = [];
+    
     [1,2,3].forEach(n => {
         const val = parseTime(document.getElementById(`t${n}-${i}`).value);
         const el = document.getElementById(`t${n}r-${i}`);
-        if(val) { el.textContent = fmtSec(val); el.style.color = 'var(--success)'; total += val; valid++; }
-        else { el.textContent = ''; }
+        if(val) { 
+            el.textContent = fmtSec(val); 
+            el.style.color = 'var(--success)'; 
+            total += val; 
+            valid++;
+            temps.push(val);
+            
+            // FEEDBACK TEMPS RÉEL
+            const ecart = Math.abs(val - cible);
+            let feedback = '';
+            let feedbackClass = 'feedback-box';
+            
+            if(ecart <= 3) {
+                feedback = `🔥 PARFAIT ! Excellent rythme !`;
+            } else if(ecart <= 8) {
+                feedback = `👍 Bon rythme ! Continue comme ça !`;
+            } else if(val > cible + 8) {
+                feedback = `⚠️ Un peu lent ! Tu peux accélérer !`;
+                feedbackClass += ' feedback-warning';
+            } else {
+                feedback = `⚠️ Un peu rapide ! Garde des forces !`;
+                feedbackClass += ' feedback-warning';
+            }
+            
+            // Afficher feedback
+            let feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
+            if(!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = `feedback-t${n}-${i}`;
+                el.parentNode.appendChild(feedbackEl);
+            }
+            feedbackEl.className = feedbackClass;
+            feedbackEl.textContent = feedback;
+            
+        } else { 
+            el.textContent = '';
+            const feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
+            if(feedbackEl) feedbackEl.remove();
+        }
     });
+    
+    // Mettre à jour la progress bar
+    const progressBar = document.getElementById(`course-progress-${i}`);
+    const progressText = document.getElementById(`course-progress-text-${i}`);
+    if(progressBar) {
+        const percent = (valid / 3) * 100;
+        progressBar.style.width = percent + '%';
+        progressText.textContent = `${valid}/3 tours`;
+        
+        if(valid === 3) {
+            progressText.innerHTML = `🏆 <strong>3/3 tours terminés !</strong>`;
+            progressText.style.color = 'var(--success)';
+        }
+    }
+    
     const moyEl = document.getElementById(`moy-course-${i}`);
     if(valid === 3) {
         moy = total / 3;
-        moyEl.textContent = `Moy : ${fmtSec(moy)}`;
-        if(cardState[i]) cardState[i].tours = [1,2,3].map(n => parseTime(document.getElementById(`t${n}-${i}`).value));
+        const ecartMax = Math.max(
+            Math.abs(temps[1] - temps[0]),
+            Math.abs(temps[2] - temps[1])
+        );
+        
+        let moyFeedback = `Moy : ${fmtSec(moy)}`;
+        if(ecartMax <= 5) {
+            moyFeedback += ` 🏆 RÉGULARITÉ PARFAITE !`;
+        } else if(ecartMax <= 10) {
+            moyFeedback += ` 👍 Bonne régularité`;
+        } else {
+            moyFeedback += ` ⚠️ Travaille la régularité`;
+        }
+        
+        moyEl.innerHTML = moyFeedback;
+        moyEl.style.color = ecartMax <= 5 ? 'var(--success)' : (ecartMax <= 10 ? 'var(--warning)' : 'var(--danger)');
+        
+        if(cardState[i]) cardState[i].tours = temps;
     } else {
         moyEl.textContent = '';
     }
@@ -597,6 +821,11 @@ function renderSaut(i, type) {
 function selectLancerType(i, type) {
     ['vortex','poids'].forEach(t => document.getElementById(`btn-${t}-${i}`).classList.remove('selected'));
     document.getElementById(`btn-${type}-${i}`).classList.add('selected');
+    
+    // Afficher le bon conseil
+    document.getElementById(`conseil-vortex-${i}`).style.display = type === 'vortex' ? 'block' : 'none';
+    document.getElementById(`conseil-poids-${i}`).style.display = type === 'poids' ? 'block' : 'none';
+    
     cardState[i].lancerType = type;
 }
 

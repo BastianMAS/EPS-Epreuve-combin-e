@@ -387,19 +387,6 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-course-${i}">
 
-                    <!-- Objectif -->
-                    <div class="objectif-box">
-                        🎯 <strong>TON DÉFI :</strong> 3 tours à ton rythme VMA !
-                    </div>
-
-                    <!-- Conseil technique -->
-                    <div class="conseil-box">
-                        <div class="conseil-title">💡 TECHNIQUE DE COURSE</div>
-                        <div class="conseil-item">• Garde le même rythme sur les 3 tours</div>
-                        <div class="conseil-item">• Objectif : écart entre tes tours &lt; 5 secondes</div>
-                        <div class="conseil-item">• Si tu vas trop vite au début, tu seras fatigué à la fin</div>
-                    </div>
-
                     <!-- Progress bar course -->
                     <div style="margin: 10px 0;">
                         <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 4px;">Progression :</div>
@@ -672,36 +659,12 @@ function updateHistorique(i) {
 // 3×400m
 // =============================================
 function updateCibles(i) {
-    const vma = cardState[i]?.vma;
+    // Pas de temps cibles dans le diagnostic - juste faire son maximum
     const el = document.getElementById(`cibles-${i}`);
-    if(!vma) { el.style.display = 'none'; return; }
-    el.style.display = 'block';
-    
-    // Seul le 100% VMA nous intéresse pour le diagnostic
-    const temps100 = (0.4 / vma) * 3600;
-    
-    document.getElementById(`cibles-content-${i}`).innerHTML = `
-        <div style="text-align: center; padding: 8px; background: rgba(255,204,0,0.2); border-radius: 6px;">
-            <div style="font-size: 0.9rem; color: var(--warning); font-weight: 800;">
-                🎯 TON OBJECTIF PAR TOUR
-            </div>
-            <div style="font-size: 1.4rem; font-weight: 900; color: var(--warning); margin: 6px 0; font-family: monospace;">
-                ${fmtSec(temps100)}
-            </div>
-            <div style="font-size: 0.75rem; color: #aaa;">
-                Garde ce rythme sur les 3 tours !
-            </div>
-        </div>
-    `;
+    if(el) el.style.display = 'none';
 }
 
 function updateTours(i) {
-    const cardData = cardState[i];
-    if(!cardData?.student?.vma) return;
-    
-    const vma = parseFloat(cardData.student.vma);
-    const cible = (0.4 / vma) * 3600; // Temps cible en secondes pour 400m
-    
     let moy = null, valid = 0, total = 0;
     const temps = [];
     
@@ -715,31 +678,17 @@ function updateTours(i) {
             valid++;
             temps.push(val);
             
-            // FEEDBACK TEMPS RÉEL
-            const ecart = Math.abs(val - cible);
-            let feedback = '';
-            let feedbackClass = 'feedback-box';
+            // Pas de feedback dans le diagnostic - juste encourager
+            let feedback = `✅ Tour ${n} enregistré !`;
             
-            if(ecart <= 3) {
-                feedback = `🔥 PARFAIT ! Excellent rythme !`;
-            } else if(ecart <= 8) {
-                feedback = `👍 Bon rythme ! Continue comme ça !`;
-            } else if(val > cible + 8) {
-                feedback = `⚠️ Un peu lent ! Tu peux accélérer !`;
-                feedbackClass += ' feedback-warning';
-            } else {
-                feedback = `⚠️ Un peu rapide ! Garde des forces !`;
-                feedbackClass += ' feedback-warning';
-            }
-            
-            // Afficher feedback
+            // Afficher feedback simple
             let feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
             if(!feedbackEl) {
                 feedbackEl = document.createElement('div');
                 feedbackEl.id = `feedback-t${n}-${i}`;
+                feedbackEl.className = 'feedback-box';
                 el.parentNode.appendChild(feedbackEl);
             }
-            feedbackEl.className = feedbackClass;
             feedbackEl.textContent = feedback;
             
         } else { 
@@ -773,15 +722,17 @@ function updateTours(i) {
         
         let moyFeedback = `Moy : ${fmtSec(moy)}`;
         if(ecartMax <= 5) {
-            moyFeedback += ` 🏆 RÉGULARITÉ PARFAITE !`;
+            moyFeedback += ` 🏆 SUPER RÉGULARITÉ !`;
+            moyEl.style.color = 'var(--success)';
         } else if(ecartMax <= 10) {
             moyFeedback += ` 👍 Bonne régularité`;
+            moyEl.style.color = 'var(--warning)';
         } else {
-            moyFeedback += ` ⚠️ Travaille la régularité`;
+            moyFeedback += ` 💪 Continue à t'entraîner !`;
+            moyEl.style.color = 'var(--warning)';
         }
         
-        moyEl.innerHTML = moyFeedback;
-        moyEl.style.color = ecartMax <= 5 ? 'var(--success)' : (ecartMax <= 10 ? 'var(--warning)' : 'var(--danger)');
+        moyEl.textContent = moyFeedback;
         
         if(cardState[i]) cardState[i].tours = temps;
     } else {

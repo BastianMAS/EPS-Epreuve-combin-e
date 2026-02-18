@@ -2624,140 +2624,94 @@ function viewDiagnostic(studentId) {
     const diag = student.diagnostique;
     const date = new Date(diag.date).toLocaleDateString('fr-FR');
     
-    console.log('=== AFFICHAGE DIAGNOSTIC ===');
-    console.log('Student:', student);
-    console.log('VMA Historique:', student.vmaHistorique);
-    console.log('Diagnostic VMA:', diag.vma);
-    
     let content = `
-        <div style="font-family: Arial; max-width: 600px; background: #1a1a2e; color: white; padding: 30px; border-radius: 20px; border: 3px solid var(--accent);">
+        <div style="font-family: Arial; max-width: 700px; background: #1a1a2e; color: white; padding: 30px; border-radius: 20px; border: 3px solid var(--accent);">
             <h2 style="color: var(--accent); text-align: center; margin-bottom: 20px;">
-                📊 DIAGNOSTIC DE ${student.nomPrenom}
+                📊 DIAGNOSTIC COMPLET DE ${student.nomPrenom}
             </h2>
             <p style="text-align: center; color: #aaa; margin-bottom: 30px;">📅 ${date}</p>
     `;
     
-    // Afficher la VMA actuelle toujours
+    // VMA
     content += `
-        <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
-            <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 VMA ACTUELLE</h3>
+        <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid var(--accent);">
+            <h3 style="color: var(--accent); margin-bottom: 10px;">🏃 VMA</h3>
             <p style="text-align: center;">
-                <strong style="font-size: 1.5rem; color: var(--success);">${student.vma} km/h</strong>
+                <strong style="font-size: 1.5rem; color: var(--success);">${student.vma || '?'} km/h</strong>
             </p>
+        </div>
     `;
     
-    // Historique VMA si présent
-    if (student.vmaHistorique && student.vmaHistorique.length > 0) {
-        content += `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">`;
-        content += `<p style="font-weight: 700; margin-bottom: 10px; color: var(--accent);">Historique des tests :</p>`;
-        student.vmaHistorique.forEach(test => {
-            const testDate = new Date(test.date).toLocaleDateString('fr-FR');
-            content += `<p style="margin: 5px 0; font-size: 0.9rem;">✓ ${testDate} - ${test.typeLabel} : ${test.vma} km/h</p>`;
-        });
-        content += `</div>`;
-    }
-    
-    content += `</div>`;
-    
-    // Course
-    if (diag.course && diag.course.tours && diag.course.tours.length > 0) {
-        const tempsTotal = diag.course.tours.reduce((a, b) => a + b, 0);
-        const tempsFormate = formatTotal(tempsTotal);
-        const tempsMoyen = formatTime(tempsTotal / 3);
-        
-        // Calculer % VMA et étoiles
-        const tempsMoyenSec = (tempsTotal / 1000) / 3;
-        const vitesseMoyenne = 0.4 / (tempsMoyenSec / 3600);
-        const pourcentVMA = ((vitesseMoyenne / student.vma) * 100).toFixed(1);
-        
-        const motivant = getNiveauMotivantVMA(parseFloat(pourcentVMA));
-        
+    // 3×400m
+    if(diag.tour1 && diag.tour2 && diag.tour3) {
+        const moy = (diag.tour1 + diag.tour2 + diag.tour3) / 3;
         content += `
-            <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--success);">
-                <h3 style="color: var(--success); margin-bottom: 10px;">🏃‍♂️ COURSE 3×400m</h3>
-                <p>Temps total : <strong>${tempsFormate}</strong></p>
-                <p>Temps moyen par tour : <strong>${tempsMoyen}</strong></p>
-                <p>💪 Intensité : <strong>${pourcentVMA}% VMA</strong></p>
-                <p style="font-size: 1.5rem; margin: 10px 0;">${motivant.etoiles}</p>
-                <p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>
+            <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid var(--warning);">
+                <h3 style="color: var(--warning); margin-bottom: 10px;">🏃‍♂️ COURSE 3×400m</h3>
+                <p>T1: <strong>${Math.floor(diag.tour1/60)}'${(diag.tour1%60).toString().padStart(2,'0')}"</strong></p>
+                <p>T2: <strong>${Math.floor(diag.tour2/60)}'${(diag.tour2%60).toString().padStart(2,'0')}"</strong></p>
+                <p>T3: <strong>${Math.floor(diag.tour3/60)}'${(diag.tour3%60).toString().padStart(2,'0')}"</strong></p>
+                <p style="margin-top: 10px;">Moy: <strong style="color: var(--success)">${Math.floor(moy/60)}'${Math.round(moy%60).toString().padStart(2,'0')}"</strong></p>
             </div>
         `;
     }
     
     // Saut
-    if ((diag.sautDetente && diag.sautDetente.essais && diag.sautDetente.essais.length > 0) || 
-        (diag.sautElan && diag.sautElan.essais && diag.sautElan.essais.length > 0)) {
+    if(diag.sautSansBest || diag.sautAvecBest) {
         content += `
-            <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--warning);">
-                <h3 style="color: var(--warning); margin-bottom: 10px;">🦘 SAUT EN LONGUEUR</h3>
+            <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid var(--success);">
+                <h3 style="color: var(--success); margin-bottom: 10px;">🦘 SAUT EN LONGUEUR</h3>
         `;
-        
-        if (diag.sautDetente && diag.sautDetente.meilleur) {
-            content += `<p>Sans élan : <strong>${diag.sautDetente.meilleur.toFixed(2)}m</strong></p>`;
+        if(diag.sautSansBest) {
+            content += `<p>Sans élan: <strong>${diag.sautSansBest.toFixed(2)}m</strong></p>`;
         }
-        
-        if (diag.sautElan && diag.sautElan.meilleur) {
-            const niveauData = getNoteSaut(diag.sautElan.meilleur, student.sexe, 'CSL');
-            const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
-            const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
-            const motivant = getNiveauMotivant(niveauNum);
-            
-            content += `<p>Avec élan : <strong>${diag.sautElan.meilleur.toFixed(2)}m</strong> (${diag.sautElan.distanceElan || '?'}m d'élan)</p>`;
-            
-            if (diag.sautDetente && diag.sautDetente.meilleur) {
-                const apport = diag.sautElan.meilleur - diag.sautDetente.meilleur;
-                const apportPourcent = ((apport / diag.sautDetente.meilleur) * 100).toFixed(1);
-                content += `<p style="color: var(--success); font-weight: 700;">💪 Apport : ${apport >= 0 ? '+' : ''}${apport.toFixed(2)}m (${apport >= 0 ? '+' : ''}${apportPourcent}%)</p>`;
-            }
-            
-            content += `<p style="font-size: 1.3rem; margin: 10px 0;">${motivant.etoiles}</p>`;
-            content += `<p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>`;
+        if(diag.sautAvecBest) {
+            content += `<p>Avec élan: <strong>${diag.sautAvecBest.toFixed(2)}m</strong></p>`;
         }
-        
         content += `</div>`;
     }
     
     // Lancer
-    if (diag.lancer && diag.lancer.essais && diag.lancer.essais.length > 0) {
-        const niveauData = getNoteLancer(diag.lancer.meilleur, student.sexe, 'CSL');
-        const niveauMatch = niveauData.niveau.match(/Niveau (\d+)/);
-        const niveauNum = niveauMatch ? parseInt(niveauMatch[1]) : 1;
-        const motivant = getNiveauMotivant(niveauNum);
-        const enginLabel = diag.lancer.type === 'vortex' ? 'Vortex' : 'Poids 1kg';
-        
+    if(diag.lancerBest) {
         content += `
-            <div style="background: rgba(255,75,180,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--danger);">
-                <h3 style="color: var(--danger); margin-bottom: 10px;">🎯 LANCER (${enginLabel})</h3>
-                <p>Meilleur : <strong>${diag.lancer.meilleur.toFixed(2)}m</strong></p>
-                <p style="font-size: 1.3rem; margin: 10px 0;">${motivant.etoiles}</p>
-                <p style="color: ${motivant.color}; font-weight: 700;">${motivant.message}</p>
+            <div style="background: rgba(255,75,75,0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid #ff4b4b;">
+                <h3 style="color: #ff4b4b; margin-bottom: 10px;">🎯 LANCER</h3>
+                <p>Type: <strong>${diag.lancerType || '?'}</strong></p>
+                <p>Meilleur: <strong>${diag.lancerBest.toFixed(1)}m</strong></p>
             </div>
         `;
     }
     
     // Commentaire
-    if (diag.commentaire) {
+    if(diag.commentaire) {
         content += `
-            <div style="background: rgba(255,204,0,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--warning);">
-                <h3 style="color: var(--warning); margin-bottom: 10px;">💬 Commentaires / Observations</h3>
-                <p style="white-space: pre-wrap; line-height: 1.6;">${diag.commentaire}</p>
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid #888;">
+                <h3 style="color: #ccc; margin-bottom: 10px;">💬 Commentaire</h3>
+                <p style="font-style: italic;">"${diag.commentaire}"</p>
             </div>
         `;
     }
     
     content += `
-            <div style="text-align: center; margin-top: 30px;">
-                <button onclick="closeDiagnosticPopup()" style="background: var(--danger); color: white; padding: 12px 30px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-right: 10px;">
-                    ✕ Fermer
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="editDiagnostic('${studentId}')" style="background: var(--warning); color: black; padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin-right: 10px;">
+                    ✏️ Modifier
                 </button>
-                <button onclick="editDiagnostic('${studentId}')" style="background: var(--warning); color: black; padding: 12px 30px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer;">
-                    ✏️ Modifier le diagnostic
+                <button onclick="closeDiagnosticPopup()" style="background: #666; color: white; padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer;">
+                    Fermer
                 </button>
             </div>
         </div>
     `;
     
-    // Créer et afficher le popup
+    // Créer la popup
+    showDiagnosticPopup(content);
+}
+
+/**
+ * Afficher popup diagnostic
+ */
+function showDiagnosticPopup(content) {
     const popup = document.createElement('div');
     popup.id = 'diagnostic-popup';
     popup.style.cssText = `
@@ -2772,7 +2726,7 @@ function viewDiagnostic(studentId) {
         justify-content: center;
         z-index: 10000;
         overflow-y: auto;
-        padding: 40px 20px;
+        padding: 20px;
     `;
     popup.innerHTML = content;
     popup.onclick = (e) => {

@@ -4,7 +4,7 @@ const urlsToCache = [
   './',
   './index.html',
   './diagnostic.html',
-  './lecon2.html',
+  './lecon2-gaming.html',
   './lecon3.html',
   './lecon4.html',
   './lecon5.html',

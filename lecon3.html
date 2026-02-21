@@ -3,499 +3,894 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leçon 3 - EPS PRO</title>
+    <title>L3 - Découverte & Technique - EPS PRO</title>
     <style>
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #00d9ff;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
-            line-height: 1.6;
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 5px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 15px; font-size: 0.9rem; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        .student-grid {
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .grid6 {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
-        .student-card {
+
+        .card {
             background: var(--card);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 12px;
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-        .student-header {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+        
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139,92,246,0.4);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--accent) 100%);
+            color: white;
+            padding: 12px 16px;
             font-weight: 700;
-            text-align: center;
             font-size: 0.9rem;
-        }
-        select, input, textarea {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            font-size: 0.85rem;
-        }
-        textarea { font-family: Arial; resize: vertical; min-height: 100px; }
-        label { display: block; margin: 6px 0 3px 0; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
-        .btn-pct {
-            padding: 5px 8px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.75rem;
-            margin: 2px;
-        }
-        .btn-pct.active { background: var(--accent); color: black; }
-        .pct-group { display: flex; gap: 3px; flex-wrap: wrap; margin: 8px 0; }
-        .time-input-group { display: flex; gap: 5px; align-items: center; margin: 8px 0; }
-        .time-input-group input {
-            width: 50px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            text-align: center;
-            font-size: 1rem;
-        }
-        .time-input-group span { font-size: 0.8rem; color: #aaa; }
-        .results-box {
-            background: rgba(0,255,136,0.1);
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid var(--success);
-            margin: 8px 0;
-            font-size: 0.8rem;
-        }
-        .btn-analyse {
-            background: var(--warning);
-            color: black;
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .atelier-section {
-            background: rgba(155,89,182,0.1);
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid var(--purple);
-            margin-top: 20px;
-        }
-        .atelier-choice {
             display: flex;
-            gap: 15px;
-            margin: 15px 0;
+            align-items: center;
+            gap: 8px;
         }
-        .atelier-btn {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--purple);
-            background: rgba(155,89,182,0.2);
+        
+        .card-body { 
+            padding: 16px; 
+        }
+
+        .student-select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(139,92,246,0.3);
+            background: rgba(15,20,25,0.8);
+            color: white;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            transition: border-color 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .student-select:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+        }
+        
+        .student-info {
+            background: rgba(139,92,246,0.1);
+            border: 1px solid var(--purple);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            margin-bottom: 12px;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .niveau-box {
+            background: rgba(0,217,255,0.1);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        
+        .niveau-title { 
+            color: var(--accent); 
+            font-weight: 800; 
+            margin-bottom: 10px; 
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .niveau-options { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+        }
+        
+        .niveau-btn {
+            padding: 10px 12px;
+            border: 1px solid rgba(0,217,255,0.3);
+            background: rgba(0,217,255,0.05);
             color: white;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 0.75rem;
+            text-align: left;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .niveau-btn:hover { 
+            background: rgba(0,217,255,0.15); 
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .niveau-btn.selected { 
+            background: var(--accent); 
+            color: black; 
             font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
+            border-color: var(--accent);
         }
-        .atelier-btn.active {
-            background: var(--purple);
-            color: black;
-        }
-        .save-btn {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background: var(--success);
-            color: black;
-            font-size: 1.1rem;
-            border: none;
+
+        .objectif-box {
+            background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(0,217,255,0.1));
+            border: 1px solid var(--purple);
             border-radius: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: none;
+        }
+        
+        .cible-box {
+            background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.2));
+            border: 1px solid var(--warning);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .cible-temps {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--warning);
+            font-family: 'SF Mono', monospace;
+            text-shadow: 0 0 10px rgba(251,191,36,0.3);
+        }
+
+        .section { 
+            border-radius: 12px; 
+            overflow: hidden; 
+            margin-bottom: 8px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
             cursor: pointer;
             font-weight: 700;
+            font-size: 0.8rem;
+            user-select: none;
+            transition: all 0.3s ease;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        
+        .section-header:hover { 
+            opacity: 0.8; 
+            transform: translateX(2px);
+        }
+        
+        .section-header.course-h { 
+            background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(139,92,246,0.1)); 
+            color: var(--purple); 
+        }
+        
+        .section-header.saut-h { 
+            background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.1)); 
+            color: var(--success); 
+        }
+        
+        .section-header.lancer-h { 
+            background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.1)); 
+            color: var(--danger); 
+        }
+        
+        .section-body { 
+            display: none; 
+            padding: 16px; 
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .section-body.open { 
+            display: block; 
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .arrow { 
+            transition: transform 0.3s ease; 
+            font-size: 0.7rem; 
+        }
+        .arrow.open { 
+            transform: rotate(180deg); 
+        }
+
+        input[type=number], input[type=text] {
+            background: rgba(15,20,25,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            transition: border-color 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        input:focus { 
+            outline: none; 
+            border-color: var(--purple); 
+            box-shadow: 0 0 0 2px rgba(139,92,246,0.1);
+        }
+        
+        label { 
+            display: block; 
+            font-size: 0.75rem; 
+            color: #94a3b8; 
+            margin: 6px 0 4px; 
+            font-weight: 500;
+        }
+
+        .tours-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .tour-input-box {
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .tour-label {
+            font-size: 0.7rem;
+            color: var(--purple);
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        
+        .tour-input {
             width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.8rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .tour-result {
+            font-size: 0.7rem;
+            color: var(--success);
+            font-weight: 600;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+
+        .feedback-box {
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            color: black;
+            border-radius: 10px;
+            padding: 8px;
+            margin: 8px 0;
+            font-weight: 800;
+            text-align: center;
+            font-size: 0.75rem;
+            animation: feedbackPulse 1s ease-in-out;
+            box-shadow: 0 4px 15px rgba(74,222,128,0.3);
+        }
+        
+        .feedback-warning {
+            background: linear-gradient(135deg, var(--warning), var(--gold));
+            box-shadow: 0 4px 15px rgba(251,191,36,0.3);
+        }
+        
+        .feedback-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+        }
+        
+        @keyframes feedbackPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, var(--purple), var(--success));
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(139,92,246,0.3);
+        }
+
+        .technique-box {
+            background: rgba(74,222,128,0.1);
+            border: 1px solid var(--success);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+        
+        .technique-title { 
+            color: var(--success); 
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-row {
+            display: flex;
             align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+            font-size: 0.75rem;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
         }
-        .modal-content {
-            background: var(--card);
-            padding: 20px;
+        
+        .checkbox-row:hover {
+            background: rgba(74,222,128,0.1);
+        }
+        
+        .checkbox-row input[type=checkbox] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--success);
+        }
+
+        .btn-back { 
+            padding: 10px 20px; 
+            background: linear-gradient(135deg, #374151, #4b5563); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .save-all {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            color: white;
+            border: none;
             border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 2px solid var(--warning);
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        @media (max-width: 900px) { .student-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .student-grid { grid-template-columns: 1fr; } }
+        
+        .save-all:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(74,222,128,0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid6 { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6rem; }
+            .subtitle { font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 LEÇON 3</p>
-        <p class="subtitle">3×400m</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 15px;">← Retour</button>
-        
-        <div id="student-grid" class="student-grid">
-            <div class="student-card" id="card-0"></div>
-            <div class="student-card" id="card-1"></div>
-            <div class="student-card" id="card-2"></div>
-            <div class="student-card" id="card-3"></div>
-            <div class="student-card" id="card-4"></div>
-            <div class="student-card" id="card-5"></div>
-        </div>
-        
-        <div class="atelier-section">
-            <h3 style="color: var(--purple); margin-bottom: 15px;">🏋️ ATELIER TECHNIQUE (COMMUN)</h3>
+
+<h1>EPS<span style="color: var(--accent);">PRO</span></h1>
+<p class="subtitle">🚀 L3 - DÉCOUVERTE & TECHNIQUE</p>
+<button class="btn-back" onclick="window.location.href='index.html'">← Retour</button>
+
+<div class="grid6" id="grid"></div>
+
+<button class="save-all" onclick="saveAll()">🏆 Enregistrer les performances</button>
+
+<script>
+const NIVEAUX_VMA_L3 = [
+    { id: 'vma95', label: '95% VMA', desc: 'Échauffement - Rythme confortable', pourcent: 95 },
+    { id: 'vma100', label: '100% VMA', desc: 'Découverte - Rythme soutenu', pourcent: 100 },
+    { id: 'vma105', label: '105% VMA', desc: 'Progression - Rythme intense', pourcent: 105 },
+    { id: 'vma110', label: '110% VMA', desc: 'Challenge - Rythme très intense', pourcent: 110 }
+];
+
+function getFeedbackCourse(tempsSecEleve, tempsCibleSec) {
+    const ecart = Math.abs(tempsSecEleve - tempsCibleSec);
+    
+    if(ecart <= 2) {
+        return { message: "🔥 PARFAIT ! Rythme de champion !", type: "success" };
+    } else if(ecart <= 5) {
+        if(tempsSecEleve > tempsCibleSec) {
+            return { message: "👍 Presque ! Accélère un peu au suivant", type: "warning" };
+        } else {
+            return { message: "👍 Presque ! Économise-toi un peu", type: "warning" };
+        }
+    } else {
+        if(tempsSecEleve > tempsCibleSec + 8) {
+            return { message: "💪 Tu peux y arriver ! Pousse plus fort", type: "danger" };
+        } else if(tempsSecEleve < tempsCibleSec - 8) {
+            return { message: "⚠️ Trop rapide ! Garde tes forces", type: "danger" };
+        } else if(tempsSecEleve > tempsCibleSec) {
+            return { message: "💪 Bien ! Trouve ton rythme idéal", type: "warning" };
+        } else {
+            return { message: "⚠️ Ralentis ! Garde ton énergie", type: "warning" };
+        }
+    }
+}
+
+let ELEVES = [];
+const cardState = [{},{},{},{},{},{}];
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        alert('⚠️ Aucun élève trouvé. Ajoutez des élèves depuis l\'accueil.');
+        window.location.href = 'index.html';
+        return;
+    }
+    ELEVES = JSON.parse(stored);
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    for(let i = 0; i < 6; i++) {
+        grid.innerHTML += buildCard(i);
+    }
+};
+
+function buildCard(i) {
+    let opts = '<option value="">-- Choisir élève --</option>';
+    ELEVES.forEach(e => { opts += `<option value="${e.id}">${e.nomPrenom}</option>`; });
+
+    return `
+    <div class="card" id="card-${i}">
+        <div class="card-header">🎯 STATION ${i+1}</div>
+        <div class="card-body">
+            <select class="student-select" onchange="selectEleve(${i}, this.value)">
+                ${opts}
+            </select>
+            <div class="student-info" id="info-${i}"></div>
             
-            <div class="atelier-choice">
-                <button onclick="selectAtelier('saut')" class="atelier-btn" id="btn-saut">🦘 SAUT</button>
-                <button onclick="selectAtelier('lancer')" class="atelier-btn" id="btn-lancer">🎯 LANCER</button>
+            <div class="niveau-box" id="niveau-${i}">
+                <div class="niveau-title">🎯 Choisis ton objectif :</div>
+                <div class="niveau-options">
+                    ${NIVEAUX_VMA_L3.map(n => `
+                        <button class="niveau-btn" id="btn-${n.id}-${i}" onclick="selectNiveau(${i}, '${n.id}')">
+                            ${n.label} - ${n.desc}
+                        </button>
+                    `).join('')}
+                </div>
             </div>
-            
-            <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;" id="atelier-instruction">
-                Sélectionnez l'atelier technique effectué
-            </p>
-            <textarea id="atelier-commun" placeholder="Décrivez le travail technique effectué pour tout le groupe..."></textarea>
+
+            <div class="section" id="sec-course-${i}" style="display:none">
+                <div class="section-header course-h" onclick="toggleSection('course',${i})">
+                    <span>🏃‍♂️ COURSE 6×200m</span><span class="arrow" id="arr-course-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-course-${i}">
+                    <div class="objectif-box" id="objectif-${i}"></div>
+                    <div class="cible-box" id="cible-${i}"></div>
+
+                    <div style="margin: 10px 0;">
+                        <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px;">Progression :</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="course-progress-${i}" style="width: 0%"></div>
+                        </div>
+                        <div style="text-align: center; font-size: 0.75rem; color: #94a3b8;" id="course-progress-text-${i}">0/6 tours</div>
+                    </div>
+
+                    <div class="tours-container">
+                        <div class="tour-input-box">
+                            <div class="tour-label">200m #1</div>
+                            <input type="text" class="tour-input" id="t1-${i}" placeholder="0:45" oninput="updateTours(${i})">
+                            <div class="tour-result" id="t1r-${i}"></div>
+                        </div>
+                        <div class="tour-input-box">
+                            <div class="tour-label">200m #2</div>
+                            <input type="text" class="tour-input" id="t2-${i}" placeholder="0:46" oninput="updateTours(${i})">
+                            <div class="tour-result" id="t2r-${i}"></div>
+                        </div>
+                        <div class="tour-input-box">
+                            <div class="tour-label">200m #3</div>
+                            <input type="text" class="tour-input" id="t3-${i}" placeholder="0:45" oninput="updateTours(${i})">
+                            <div class="tour-result" id="t3r-${i}"></div>
+                        </div>
+                        <div class="tour-input-box">
+                            <div class="tour-label">200m #4</div>
+                            <input type="text" class="tour-input" id="t4-${i}" placeholder="0:47" oninput="updateTours(${i})">
+                            <div class="tour-result" id="t4r-${i}"></div>
+                        </div>
+                        <div class="tour-input-box">
+                            <div class="tour-label">200m #5</div>
+                            <input type="text" class="tour-input" id="t5-${i}" placeholder="0:46" oninput="updateTours(${i})">
+                            <div class="tour-result" id="t5r-${i}"></div>
+                        </div>
+                        <div class="tour-input-box">
+                            <div class="tour-label">200m #6</div>
+                            <input type="text" class="tour-input" id="t6-${i}" placeholder="0:45" oninput="updateTours(${i})">
+                            <div class="tour-result" id="t6r-${i}"></div>
+                        </div>
+                    </div>
+
+                    <div id="moy-course-${i}" style="font-size:0.8rem;margin-top:10px;color:var(--success);font-weight:700;text-align:center"></div>
+                </div>
+            </div>
+
+            <div class="section" id="sec-saut-${i}" style="display:none">
+                <div class="section-header saut-h" onclick="toggleSection('saut',${i})">
+                    <span>🦘 SAUT - TECHNIQUE L3</span><span class="arrow" id="arr-saut-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-saut-${i}">
+                    <div class="technique-box">
+                        <div class="technique-title">🎯 Objectifs L3 (2/4)</div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut1-${i}">
+                            <label>✅ Course d'élan régulière (6-8 foulées)</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut2-${i}">
+                            <label>✅ Pied d'appel précis sur la ligne</label>
+                        </div>
+                    </div>
+                    <label>Distance sautée (m) :</label>
+                    <input type="number" step="0.01" id="saut-distance-${i}" placeholder="2.80" style="width:100px">
+                </div>
+            </div>
+
+            <div class="section" id="sec-lancer-${i}" style="display:none">
+                <div class="section-header lancer-h" onclick="toggleSection('lancer',${i})">
+                    <span>🎯 LANCER - TECHNIQUE L3</span><span class="arrow" id="arr-lancer-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-lancer-${i}">
+                    <div class="technique-box">
+                        <div class="technique-title">🎯 Objectifs L3 (2/4)</div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer1-${i}">
+                            <label>✅ Position de profil correcte</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer2-${i}">
+                            <label>✅ Prise et placement de l'engin</label>
+                        </div>
+                    </div>
+                    <label>Distance lancée (m) :</label>
+                    <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="9.50" style="width:100px">
+                </div>
+            </div>
         </div>
-        
-        <button onclick="saveAll()" class="save-btn">💾 ENREGISTRER</button>
-    </div>
+    </div>`;
+}
+
+function selectEleve(i, id) {
+    const s = ELEVES.find(e => e.id === id);
+    if(s) {
+        const existant = s.seances?.find(seance => seance.lecon === 'L3') || {};
+        cardState[i] = {
+            student: s,
+            niveau: existant.niveau || null,
+            tours: existant.tours || [null,null,null,null,null,null],
+            sautDistance: existant.sautDistance || null,
+            sautTech1: existant.sautTech1 || false,
+            sautTech2: existant.sautTech2 || false,
+            lancerDistance: existant.lancerDistance || null,
+            lancerTech1: existant.lancerTech1 || false,
+            lancerTech2: existant.lancerTech2 || false
+        };
+    } else {
+        cardState[i] = {};
+    }
+
+    const info = document.getElementById(`info-${i}`);
+    const niveau = document.getElementById(`niveau-${i}`);
     
-    <div id="modal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="color: var(--warning); margin-bottom: 15px;">📈 ANALYSE</h2>
-            <div id="modal-content"></div>
-            <button onclick="closeModal()" class="btn" style="background: var(--accent); color: black; width: 100%; margin-top: 15px;">Fermer</button>
-        </div>
-    </div>
-    
-    <script>
-    let allStudents = [];
-    let cardData = [{},{},{},{},{},{}];
-    let atelierType = null;
-    let atelierTexte = '';
-    
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        allStudents = JSON.parse(stored);
+    if(s) {
+        info.style.display = 'block';
+        const vmaInfo = s.vma ? ` | VMA: <strong style="color:var(--success)">${s.vma} km/h</strong>` : '';
+        info.innerHTML = `<strong>${s.sexe==='F'?'👧':'🧑'} ${s.nomPrenom}</strong> | ${s.age} ans${vmaInfo}`;
         
-        const leconData = JSON.parse(localStorage.getItem('lecon3_data') || '{}');
-        if(leconData.atelierType) {
-            selectAtelier(leconData.atelierType);
-            document.getElementById('atelier-commun').value = leconData.atelierTexte || '';
-        }
-        
-        for(let i=0; i<6; i++) renderCard(i);
-    };
-    
-    function selectAtelier(type) {
-        atelierType = type;
-        document.getElementById('btn-saut').classList.toggle('active', type === 'saut');
-        document.getElementById('btn-lancer').classList.toggle('active', type === 'lancer');
-        
-        const textarea = document.getElementById('atelier-commun');
-        const instruction = document.getElementById('atelier-instruction');
-        
-        if(type === 'saut') {
-            instruction.textContent = '🦘 Décrivez le travail technique sur le SAUT';
-            textarea.placeholder = 'Ex: Travail sur l\'élan et l\'impulsion : course d\'élan (6 foulées), placement du pied d\'appel, gainage en l\'air. Exercices : sauts sans élan, avec élan court...';
+        if(s.vma) {
+            niveau.style.display = 'block';
+            if(cardState[i].niveau) {
+                selectNiveau(i, cardState[i].niveau);
+            }
         } else {
-            instruction.textContent = '🎯 Décrivez le travail technique sur le LANCER';
-            textarea.placeholder = 'Ex: Travail technique sur le lancer poids : position de départ, rotation du bassin, accompagnement du geste. Exercices : lancer à genoux, debout, avec rotation...';
+            niveau.style.display = 'none';
+            alert('⚠️ Cet élève n\'a pas de VMA. Fais d\'abord le diagnostic !');
+        }
+    } else {
+        info.style.display = 'none';
+        niveau.style.display = 'none';
+        document.getElementById(`sec-course-${i}`).style.display = 'none';
+        document.getElementById(`sec-saut-${i}`).style.display = 'none';
+        document.getElementById(`sec-lancer-${i}`).style.display = 'none';
+    }
+}
+
+function selectNiveau(i, niveauId) {
+    const niveau = NIVEAUX_VMA_L3.find(n => n.id === niveauId);
+    if(!niveau || !cardState[i].student?.vma) return;
+
+    NIVEAUX_VMA_L3.forEach(n => {
+        document.getElementById(`btn-${n.id}-${i}`).classList.remove('selected');
+    });
+    document.getElementById(`btn-${niveauId}-${i}`).classList.add('selected');
+
+    cardState[i].niveau = niveauId;
+
+    const vma = parseFloat(cardState[i].student.vma);
+    const vitesseCible = vma * (niveau.pourcent / 100);
+    const tempsCible200m = (0.2 / vitesseCible) * 3600;
+
+    document.getElementById(`objectif-${i}`).innerHTML = `
+        🎯 <strong>OBJECTIF L3 :</strong> ${niveau.label} - ${niveau.desc}
+    `;
+    document.getElementById(`objectif-${i}`).style.display = 'block';
+    
+    document.getElementById(`cible-${i}`).innerHTML = `
+        <div style="font-size:0.7rem;color:#fbbf24;margin-bottom:4px">Temps cible par 200m :</div>
+        <div class="cible-temps">${fmtSec(tempsCible200m)}</div>
+        <div style="font-size:0.7rem;color:#fbbf24;margin-top:4px">${niveau.pourcent}% de ta VMA</div>
+    `;
+    document.getElementById(`cible-${i}`).style.display = 'block';
+
+    document.getElementById(`sec-course-${i}`).style.display = 'block';
+    document.getElementById(`sec-saut-${i}`).style.display = 'block';
+    document.getElementById(`sec-lancer-${i}`).style.display = 'block';
+}
+
+function toggleSection(sec, i) {
+    const body = document.getElementById(`body-${sec}-${i}`);
+    const arr = document.getElementById(`arr-${sec}-${i}`);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arr.classList.toggle('open', !isOpen);
+}
+
+function updateTours(i) {
+    const cardData = cardState[i];
+    if(!cardData?.student?.vma || !cardData.niveau) return;
+
+    const niveau = NIVEAUX_VMA_L3.find(n => n.id === cardData.niveau);
+    const vma = parseFloat(cardData.student.vma);
+    const vitesseCible = vma * (niveau.pourcent / 100);
+    const tempsCible = (0.2 / vitesseCible) * 3600;
+
+    let moy = null, valid = 0, total = 0;
+    const temps = [];
+
+    [1,2,3,4,5,6].forEach(n => {
+        const val = parseTime(document.getElementById(`t${n}-${i}`).value);
+        const el = document.getElementById(`t${n}r-${i}`);
+        if(val) { 
+            el.textContent = fmtSec(val); 
+            el.style.color = 'var(--success)'; 
+            total += val; 
+            valid++;
+            temps.push(val);
+
+            const feedback = getFeedbackCourse(val, tempsCible);
+
+            let feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
+            if(!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = `feedback-t${n}-${i}`;
+                el.parentNode.appendChild(feedbackEl);
+            }
+            
+            feedbackEl.className = `feedback-box`;
+            if(feedback.type === 'warning') feedbackEl.className += ' feedback-warning';
+            if(feedback.type === 'danger') feedbackEl.className += ' feedback-danger';
+            
+            feedbackEl.textContent = feedback.message;
+
+        } else { 
+            el.textContent = '';
+            const feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
+            if(feedbackEl) feedbackEl.remove();
+        }
+    });
+
+    const progressBar = document.getElementById(`course-progress-${i}`);
+    const progressText = document.getElementById(`course-progress-text-${i}`);
+    if(progressBar) {
+        const percent = (valid / 6) * 100;
+        progressBar.style.width = percent + '%';
+        progressText.textContent = `${valid}/6 tours`;
+
+        if(valid === 6) {
+            progressText.innerHTML = `🏆 <strong>SÉRIE TERMINÉE !</strong>`;
+            progressText.style.color = 'var(--success)';
         }
     }
-    
-    function renderCard(cardIndex) {
-        const card = document.getElementById('card-'+cardIndex);
-        const data = cardData[cardIndex];
+
+    const moyEl = document.getElementById(`moy-course-${i}`);
+    if(valid === 6) {
+        moy = total / 6;
+        const ecartMax = Math.max(...temps.map((t, idx) => 
+            idx > 0 ? Math.abs(t - temps[idx-1]) : 0
+        ));
         
-        let content = '<select id="sel-'+cardIndex+'" onchange="selectStudent('+cardIndex+')" style="font-size: 0.85rem;">';
-        content += '<option value="">-- Choisir --</option>';
-        allStudents.forEach((s,i) => {
-            content += '<option value="'+i+'" '+(data.studentIndex===i?'selected':'')+'>'+s.nomPrenom+'</option>';
-        });
-        content += '</select>';
+        const ecartMoyenne = Math.abs(moy - tempsCible);
+        let moyFeedback = `Moyenne : ${fmtSec(moy)} `;
         
-        if(data.student) {
-            const s = data.student;
-            const vma = parseFloat(s.vma);
-            const pct = data.pctVMA || 100;
-            const cible = formatTime((0.4 / (vma * (pct/100))) * 3600 * 1000);
-            
-            content += '<div class="student-header">'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+' | VMA: '+vma+'</div>';
-            content += '<div class="pct-group">';
-            [90,95,100,105,110,115,120,125,130].forEach(p => {
-                content += '<button onclick="setPct('+cardIndex+','+p+')" class="btn-pct '+(pct===p?'active':'')+'" id="pct-'+cardIndex+'-'+p+'">'+p+'%</button>';
+        if(ecartMoyenne <= 2) {
+            moyFeedback += `🎯 OBJECTIF PARFAIT !`;
+            moyEl.style.color = 'var(--success)';
+        } else if(ecartMoyenne <= 5) {
+            moyFeedback += `👍 Très proche de l'objectif !`;
+            moyEl.style.color = 'var(--warning)';
+        } else {
+            moyFeedback += `💪 Continue, tu progresses !`;
+            moyEl.style.color = 'var(--warning)';
+        }
+        
+        if(ecartMax <= 3) {
+            moyFeedback += ` 🤖 RÉGULARITÉ TOP !`;
+        }
+
+        moyEl.textContent = moyFeedback;
+        cardState[i].tours = temps;
+    } else {
+        moyEl.textContent = '';
+    }
+}
+
+function saveAll() {
+    let count = 0;
+    let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+
+    cardState.forEach((d, i) => {
+        if(!d.student) return;
+
+        const t1 = parseTime(document.getElementById(`t1-${i}`)?.value);
+        const t2 = parseTime(document.getElementById(`t2-${i}`)?.value);
+        const t3 = parseTime(document.getElementById(`t3-${i}`)?.value);
+        const t4 = parseTime(document.getElementById(`t4-${i}`)?.value);
+        const t5 = parseTime(document.getElementById(`t5-${i}`)?.value);
+        const t6 = parseTime(document.getElementById(`t6-${i}`)?.value);
+
+        const sautDistance = parseFloat(document.getElementById(`saut-distance-${i}`)?.value) || null;
+        const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
+        const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
+
+        const lancerDistance = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value) || null;
+        const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
+        const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
+
+        const idx = allStudents.findIndex(s => s.id === d.student.id);
+        if(idx === -1) return;
+
+        if(!allStudents[idx].seances) allStudents[idx].seances = [];
+
+        let seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L3');
+        if(seanceIdx === -1) {
+            allStudents[idx].seances.push({
+                lecon: 'L3',
+                date: new Date().toISOString()
             });
-            content += '</div><p style="color:var(--success);font-weight:700;font-size:0.85rem;margin:5px 0">Cible: '+cible+'</p>';
-            
-            const t1m = data.tour1 ? Math.floor(data.tour1/60) : '';
-            const t1s = data.tour1 ? data.tour1%60 : '';
-            const t2m = data.tour2 ? Math.floor(data.tour2/60) : '';
-            const t2s = data.tour2 ? data.tour2%60 : '';
-            const t3m = data.tour3 ? Math.floor(data.tour3/60) : '';
-            const t3s = data.tour3 ? data.tour3%60 : '';
-            
-            content += '<label>T1:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<label>T2:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<label>T3:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<div id="results-'+cardIndex+'"></div>';
-            
-            content += '<label>💓 BPM:</label><input type="number" inputmode="numeric" id="bpm-'+cardIndex+'" value="'+(data.bpm||'')+'" placeholder="180" style="width:70px">';
-            content += '<label>⏱️ Récup:</label><input type="number" inputmode="numeric" id="recup-'+cardIndex+'" value="'+(data.tempsRecup||'')+'" placeholder="3" style="width:70px">';
-            content += '<label>💬 Notes:</label><textarea id="comment-'+cardIndex+'" placeholder="Points forts, à améliorer..." style="min-height:50px">'+(data.commentaire||'')+'</textarea>';
+            seanceIdx = allStudents[idx].seances.length - 1;
         }
-        
-        card.innerHTML = content;
-        updateResults(cardIndex);
+
+        allStudents[idx].seances[seanceIdx] = {
+            ...allStudents[idx].seances[seanceIdx],
+            niveau: d.niveau,
+            tours: [t1, t2, t3, t4, t5, t6],
+            moyenne200m: (t1 && t2 && t3 && t4 && t5 && t6) ? (t1+t2+t3+t4+t5+t6)/6 : null,
+            sautDistance: sautDistance,
+            sautTech1: sautTech1,
+            sautTech2: sautTech2,
+            lancerDistance: lancerDistance,
+            lancerTech1: lancerTech1,
+            lancerTech2: lancerTech2,
+            date: new Date().toISOString()
+        };
+
+        count++;
+    });
+
+    if(count === 0) { 
+        alert('⚠️ Aucun élève sélectionné !'); 
+        return; 
     }
-    
-    function selectStudent(cardIndex) {
-        const sel = document.getElementById('sel-'+cardIndex);
-        const studentIndex = parseInt(sel.value);
-        
-        if(isNaN(studentIndex)) {
-            cardData[cardIndex] = {};
-        } else {
-            const s = allStudents[studentIndex];
-            cardData[cardIndex] = s.lecon3 || {
-                studentIndex: studentIndex,
-                student: s,
-                pctVMA: 100,
-                tour1: null, tour2: null, tour3: null,
-                bpm: null, tempsRecup: null,
-                commentaire: ''
-            };
-            cardData[cardIndex].studentIndex = studentIndex;
-            cardData[cardIndex].student = s;
-        }
-        renderCard(cardIndex);
+
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    alert(`🏆 Données L3 sauvegardées pour ${count} élève(s) !`);
+}
+
+function parseTime(str) {
+    if(!str) return null;
+    const parts = str.replace(',',':').split(':');
+    if(parts.length === 2) {
+        const m = parseInt(parts[0]), s = parseInt(parts[1]);
+        if(!isNaN(m) && !isNaN(s)) return m*60 + s;
     }
-    
-    function setPct(cardIndex, pct) {
-        cardData[cardIndex].pctVMA = pct;
-        renderCard(cardIndex);
-    }
-    
-    function updateTime(cardIndex) {
-        const d = cardData[cardIndex];
-        const t1m = parseInt(document.getElementById('t1m-'+cardIndex).value)||0;
-        const t1s = parseInt(document.getElementById('t1s-'+cardIndex).value)||0;
-        const t2m = parseInt(document.getElementById('t2m-'+cardIndex).value)||0;
-        const t2s = parseInt(document.getElementById('t2s-'+cardIndex).value)||0;
-        const t3m = parseInt(document.getElementById('t3m-'+cardIndex).value)||0;
-        const t3s = parseInt(document.getElementById('t3s-'+cardIndex).value)||0;
-        
-        d.tour1 = t1m*60+t1s||null;
-        d.tour2 = t2m*60+t2s||null;
-        d.tour3 = t3m*60+t3s||null;
-        
-        updateResults(cardIndex);
-    }
-    
-    function updateResults(cardIndex) {
-        const d = cardData[cardIndex];
-        const resultsDiv = document.getElementById('results-'+cardIndex);
-        if(!resultsDiv) return;
-        
-        if(d.tour1 && d.tour2 && d.tour3 && d.student) {
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const vma = parseFloat(d.student.vma);
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            resultsDiv.innerHTML = '<div class="results-box"><strong>Moy:</strong> '+formatTime(moy*1000)+' | <strong>VMA:</strong> '+pctRealise.toFixed(1)+'%</div><button onclick="showAnalysis('+cardIndex+')" class="btn-analyse">📈 VOIR ANALYSE</button>';
-        } else {
-            resultsDiv.innerHTML = '';
-        }
-    }
-    
-    function showAnalysis(cardIndex) {
-        const d = cardData[cardIndex];
-        const vma = parseFloat(d.student.vma);
-        const pct = d.pctVMA;
-        const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-        const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-        
-        const ecart1_2 = d.tour2 - d.tour1;
-        const ecart2_3 = d.tour3 - d.tour2;
-        const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-        
-        let txt = '<p style="line-height:1.6">';
-        txt += '<strong>Profil de course:</strong><br>';
-        
-        if(ecartMax <= 5) {
-            txt += '➡️ <strong>RÉGULIÈRE</strong><br>Excellent ! Rythme constant, très bonne gestion.<br><br>';
-        } else {
-            txt += '⚠️ <strong>IRRÉGULIÈRE</strong><br>';
-            if(Math.abs(ecart1_2) > 10 || Math.abs(ecart2_3) > 10) {
-                txt += 'Gros écarts détectés :<br>';
-                if(ecart1_2 > 10) txt += '• T1→T2 : <strong style="color:var(--danger)">+'+ecart1_2+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart1_2 > 5) txt += '• T1→T2 : +'+ecart1_2+'s<br>';
-                else if(ecart1_2 < -10) txt += '• T1→T2 : '+ecart1_2+'s (grosse accélération) 📈<br>';
-                else if(ecart1_2 < -5) txt += '• T1→T2 : '+ecart1_2+'s<br>';
-                
-                if(ecart2_3 > 10) txt += '• T2→T3 : <strong style="color:var(--danger)">+'+ecart2_3+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart2_3 > 5) txt += '• T2→T3 : +'+ecart2_3+'s<br>';
-                else if(ecart2_3 < -10) txt += '• T2→T3 : '+ecart2_3+'s (grosse accélération) 📈<br>';
-                else if(ecart2_3 < -5) txt += '• T2→T3 : '+ecart2_3+'s<br>';
-            }
-            txt += '<br>';
-        }
-        
-        txt += '<strong>Objectif '+pct+'% VMA:</strong><br>';
-        if(pctRealise >= pct) {
-            txt += '✅ <span style="color:var(--success)">ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        } else if(pctRealise >= pct - 5) {
-            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        } else {
-            txt += '❌ <span style="color:var(--danger)">NON ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        }
-        
-        txt += '<strong>Conseil:</strong><br>';
-        if(ecartMax <= 5) {
-            txt += 'Parfait ! Continue, la régularité est la clé.';
-        } else if(ecart1_2 > 10) {
-            txt += 'Grosse baisse au T2. Travailler l\'endurance. Partir moins vite.';
-        } else if(ecart2_3 > 10) {
-            txt += 'Grosse baisse au T3. Travailler la résistance.';
-        } else {
-            txt += 'Travailler la régularité. Viser écarts < 5s.';
-        }
-        
-        txt += '</p>';
-        
-        document.getElementById('modal-content').innerHTML = txt;
-        document.getElementById('modal').style.display = 'flex';
-    }
-    
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-    }
-    
-    function saveAll() {
-        if(!atelierType) {
-            alert('⚠️ Sélectionnez l\'atelier technique (Saut ou Lancer)');
-            return;
-        }
-        
-        for(let i=0; i<6; i++) {
-            const d = cardData[i];
-            if(d.student) {
-                const bpm = document.getElementById('bpm-'+i);
-                const recup = document.getElementById('recup-'+i);
-                const comment = document.getElementById('comment-'+i);
-                
-                if(bpm) d.bpm = parseInt(bpm.value)||null;
-                if(recup) d.tempsRecup = parseInt(recup.value)||null;
-                if(comment) d.commentaire = comment.value;
-            }
-        }
-        
-        const atelierTexte = document.getElementById('atelier-commun').value;
-        
-        let err = 0;
-        cardData.forEach(d => {
-            if(d.student && (!d.tour1 || !d.tour2 || !d.tour3)) err++;
-        });
-        
-        if(err > 0 && !confirm(err+' élève(s) sans temps. Continuer ?')) return;
-        
-        cardData.forEach(d => {
-            if(d.student) {
-                const i = allStudents.findIndex(s => s.id === d.student.id);
-                if(i !== -1) {
-                    allStudents[i].lecon3 = {
-                        pctVMA: d.pctVMA,
-                        tour1: d.tour1,
-                        tour2: d.tour2,
-                        tour3: d.tour3,
-                        bpm: d.bpm,
-                        tempsRecup: d.tempsRecup,
-                        commentaire: d.commentaire,
-                        date: new Date().toISOString()
-                    };
-                }
-            }
-        });
-        
-        localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-        localStorage.setItem('lecon3_data', JSON.stringify({
-            atelierType: atelierType,
-            atelierTexte: atelierTexte
-        }));
-        
-        alert('✅ Leçon 3 enregistrée !');
-    }
-    
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
-    }
-    </script>
+    return null;
+}
+
+function fmtSec(sec) {
+    const m = Math.floor(sec/60);
+    const s = Math.round(sec%60);
+    return `${m}:${s.toString().padStart(2,'0')}`;
+}
+</script>
 </body>
 </html>

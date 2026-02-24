@@ -475,26 +475,48 @@ const NIVEAUX_VMA_L3 = [
     { id: 'vma110', label: '110% VMA', desc: 'Challenge - Rythme très intense', pourcent: 110 }
 ];
 
-function getFeedbackCourse(tempsSecEleve, tempsCibleSec) {
+function getFeedbackCourse(tempsSecEleve, tempsCibleSec, tourNum) {
     const ecart = Math.abs(tempsSecEleve - tempsCibleSec);
+    const isDernierTour = (tourNum === 6);
     
     if(ecart <= 2) {
-        return { message: "🔥 PARFAIT ! Rythme de champion !", type: "success" };
+        return { 
+            message: isDernierTour ? "🔥 PARFAIT ! Série terminée comme un chef !" : "🔥 PARFAIT ! Rythme de champion !", 
+            type: "success" 
+        };
     } else if(ecart <= 5) {
         if(tempsSecEleve > tempsCibleSec) {
-            return { message: "👍 Presque ! Accélère un peu au suivant", type: "warning" };
+            return { 
+                message: isDernierTour ? "👍 Bien ! Tu progresses à chaque séance" : "👍 Presque ! Accélère un peu au suivant", 
+                type: "warning" 
+            };
         } else {
-            return { message: "👍 Presque ! Économise-toi un peu", type: "warning" };
+            return { 
+                message: isDernierTour ? "👍 Bien ! Garde ce rythme la prochaine fois" : "👍 Presque ! Économise-toi un peu", 
+                type: "warning" 
+            };
         }
     } else {
         if(tempsSecEleve > tempsCibleSec + 8) {
-            return { message: "💪 Tu peux y arriver ! Pousse plus fort", type: "danger" };
+            return { 
+                message: isDernierTour ? "💪 Bonne série ! Tu vas progresser" : "💪 Tu peux y arriver ! Pousse plus fort", 
+                type: "danger" 
+            };
         } else if(tempsSecEleve < tempsCibleSec - 8) {
-            return { message: "⚠️ Trop rapide ! Garde tes forces", type: "danger" };
+            return { 
+                message: isDernierTour ? "⚠️ Série intense ! Dose tes efforts la prochaine fois" : "⚠️ Trop rapide ! Garde tes forces", 
+                type: "danger" 
+            };
         } else if(tempsSecEleve > tempsCibleSec) {
-            return { message: "💪 Bien ! Trouve ton rythme idéal", type: "warning" };
+            return { 
+                message: isDernierTour ? "💪 Bon travail ! Continue tes efforts" : "💪 Bien ! Trouve ton rythme idéal", 
+                type: "warning" 
+            };
         } else {
-            return { message: "⚠️ Ralentis ! Garde ton énergie", type: "warning" };
+            return { 
+                message: isDernierTour ? "⚠️ Rythme soutenu ! Pense à la régularité" : "⚠️ Ralentis ! Garde ton énergie", 
+                type: "warning" 
+            };
         }
     }
 }
@@ -747,7 +769,7 @@ function updateTours(i) {
             valid++;
             temps.push(val);
 
-            const feedback = getFeedbackCourse(val, tempsCible);
+            const feedback = getFeedbackCourse(val, tempsCible, n);
 
             let feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
             if(!feedbackEl) {

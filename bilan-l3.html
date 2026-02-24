@@ -3,181 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan Leçon 3 - EPS PRO</title>
+    <title>Bilan L3 - EPS PRO</title>
     <style>
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #00d9ff;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
-            line-height: 1.6;
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .btn-back { 
+            padding: 10px 20px; 
+            background: linear-gradient(135deg, #374151, #4b5563); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
             background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: 16px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
         }
-        th {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 12px;
+
+        .card-title {
+            font-size: 1.1rem;
             font-weight: 700;
-            text-align: left;
+            margin-bottom: 12px;
+            color: var(--accent);
         }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        tr:hover {
-            background: rgba(0,210,255,0.05);
-        }
-        .stat-box {
-            background: var(--card);
-            padding: 15px;
+
+        .student-card {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: rgba(139,92,246,0.1);
             border-radius: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--accent);
+            border: 1px solid rgba(139,92,246,0.3);
+        }
+
+        .student-name {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .course-stats {
+            background: rgba(74,222,128,0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .technique-stats {
+            background: rgba(251,191,36,0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .percentage {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .perf-excellent { background: var(--success); color: black; }
+        .perf-good { background: var(--warning); color: black; }
+        .perf-progress { background: var(--danger); color: white; }
+
+        .summary-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(0,217,255,0.1));
+            border: 1px solid var(--purple);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .summary-box {
+            text-align: center;
+            padding: 16px;
+            background: rgba(0,217,255,0.1);
+            border-radius: 10px;
+        }
+
+        .summary-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .export-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(74,222,128,0.4);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #94a3b8;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.3rem; font-weight: 700;">📊 BILAN LEÇON 3</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
-        
-        <div id="stats"></div>
-        <div id="table-container"></div>
-    </div>
-    
-    <script>
-    let students = [];
-    
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        students = JSON.parse(stored);
-        displayBilan();
-    };
-    
-    function displayBilan() {
-        const withL3 = students.filter(s => s.lecon3);
-        
-        if(withL3.length === 0) {
-            document.getElementById('stats').innerHTML = '<div class="stat-box"><p>Aucune donnée Leçon 3 enregistrée.</p></div>';
-            return;
-        }
-        
-        // Stats globales
-        let totalPct = 0;
-        let totalReguliers = 0;
-        
-        withL3.forEach(s => {
-            const d = s.lecon3;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            totalPct += pctRealise;
-            
-            const ecart1_2 = Math.abs(d.tour2 - d.tour1);
-            const ecart2_3 = Math.abs(d.tour3 - d.tour2);
-            if(Math.max(ecart1_2, ecart2_3) <= 5) totalReguliers++;
-        });
-        
-        const moyPct = totalPct / withL3.length;
-        
-        // Récupérer l'atelier de la lecon3
-        const lecon3Data = JSON.parse(localStorage.getItem('lecon3_data') || '{}');
-        const atelierHTML = lecon3Data.atelierType ? `
-            <div class="stat-box" style="border-color: var(--purple);">
-                <h3 style="color: var(--purple); margin-bottom: 10px;">
-                    ${lecon3Data.atelierType === 'saut' ? '🦘 Atelier SAUT' : '🎯 Atelier LANCER'}
-                </h3>
-                <p style="white-space: pre-wrap;">${lecon3Data.atelierTexte || 'Aucune description'}</p>
+
+<h1>EPS<span style="color: var(--accent);">PRO</span></h1>
+<p class="subtitle">📊 BILAN L3 - DÉCOUVERTE & TECHNIQUE</p>
+
+<div class="container">
+    <button class="btn-back" onclick="window.location.href='index.html'">← Retour accueil</button>
+
+    <div id="content"></div>
+
+    <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
+        📄 Exporter le bilan
+    </button>
+</div>
+
+<script>
+let ELEVES = [];
+let bilanData = null;
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        document.getElementById('content').innerHTML = `
+            <div class="no-data">
+                ⚠️ Aucun élève trouvé. Ajoutez des élèves depuis l'accueil.
             </div>
-        ` : '';
-        
-        document.getElementById('stats').innerHTML = `
-            <div class="stat-box">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
-                <p><strong>Élèves ayant fait la lecon :</strong> ${withL3.length} / ${students.length}</p>
-                <p><strong>% VMA moyen réalisé :</strong> ${moyPct.toFixed(1)}%</p>
-                <p><strong>Courses régulières (écarts ≤5s) :</strong> ${totalReguliers} / ${withL3.length} (${((totalReguliers/withL3.length)*100).toFixed(0)}%)</p>
-            </div>
-            ${atelierHTML}
         `;
-        
-        // Tableau
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>Classe</th><th>VMA</th><th>% Objectif</th><th>T1</th><th>T2</th><th>T3</th><th>Moyenne</th><th>% Réalisé</th><th>Profil</th></tr></thead><tbody>';
-        
-        withL3.forEach(s => {
-            const d = s.lecon3;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            const ecart1_2 = d.tour2 - d.tour1;
-            const ecart2_3 = d.tour3 - d.tour2;
-            const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-            
-            let profil = '';
-            if(ecartMax <= 5) {
-                profil = '➡️ Régulière';
-            } else if(ecart1_2 > 10 || ecart2_3 > 10) {
-                profil = '⚠️ Grosse baisse';
-            } else {
-                profil = '⚠️ Irrégulière';
-            }
-            
-            const objectif = pctRealise >= d.pctVMA ? '✅' : '❌';
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+s.classe+'</td>';
-            html += '<td>'+vma+' km/h</td>';
-            html += '<td>'+d.pctVMA+'%</td>';
-            html += '<td>'+formatTime(d.tour1*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour2*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour3*1000)+'</td>';
-            html += '<td>'+formatTime(moy*1000)+'</td>';
-            html += '<td>'+pctRealise.toFixed(1)+'% '+objectif+'</td>';
-            html += '<td>'+profil+'</td>';
-            html += '</tr>';
-        });
-        
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
+        return;
     }
     
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
+    ELEVES = JSON.parse(stored);
+    generateBilan();
+};
+
+function generateBilan() {
+    const elevesL3 = ELEVES.filter(e => e.seances && e.seances.find(s => s.lecon === 'L3'));
+    
+    if(elevesL3.length === 0) {
+        document.getElementById('content').innerHTML = `
+            <div class="no-data">
+                📚 Aucune donnée L3 trouvée. Effectuez d'abord la leçon 3.
+            </div>
+        `;
+        return;
     }
-    </script>
+
+    bilanData = {
+        eleves: [],
+        stats: {
+            totalEleves: elevesL3.length,
+            moyenneObjectifAtteint: 0,
+            repartitionNiveaux: { vma95: 0, vma100: 0, vma105: 0, vma110: 0 },
+            moyenneTechniqueSaut: 0,
+            moyenneTechniqueLancer: 0
+        }
+    };
+
+    let totalObjectifsAtteints = 0;
+    let totalTechSaut = 0, totalTechLancer = 0;
+
+    elevesL3.forEach(eleve => {
+        const seanceL3 = eleve.seances.find(s => s.lecon === 'L3');
+        if(!seanceL3) return;
+
+        // Analyse course
+        let courseAnalyse = null;
+        if(seanceL3.tours && seanceL3.tours.filter(t => t).length === 6 && seanceL3.niveau && eleve.vma) {
+            const temps = seanceL3.tours.filter(t => t);
+            const moyenne = temps.reduce((a, b) => a + b, 0) / temps.length;
+            
+            const niveauData = getNiveauData(seanceL3.niveau);
+            if(niveauData) {
+                const vma = parseFloat(eleve.vma);
+                const vitesseCible = vma * (niveauData.pourcent / 100);
+                const tempsCible = (0.2 / vitesseCible) * 3600;
+                
+                const ecartMoyenne = Math.abs(moyenne - tempsCible);
+                const pourcentageEcart = (ecartMoyenne / tempsCible) * 100;
+                
+                let evaluation = 'progress';
+                if(pourcentageEcart <= 5) evaluation = 'excellent';
+                else if(pourcentageEcart <= 10) evaluation = 'good';
+                
+                courseAnalyse = {
+                    niveau: niveauData.label,
+                    moyenne: moyenne,
+                    cible: tempsCible,
+                    ecart: ecartMoyenne,
+                    evaluation: evaluation,
+                    regularite: Math.max(...temps.map((t, idx) => idx > 0 ? Math.abs(t - temps[idx-1]) : 0))
+                };
+                
+                if(evaluation === 'excellent') totalObjectifsAtteints++;
+            }
+        }
+
+        // Analyse technique saut
+        let techSaut = 0;
+        if(seanceL3.sautTech1) techSaut++;
+        if(seanceL3.sautTech2) techSaut++;
+        totalTechSaut += techSaut;
+
+        // Analyse technique lancer
+        let techLancer = 0;
+        if(seanceL3.lancerTech1) techLancer++;
+        if(seanceL3.lancerTech2) techLancer++;
+        totalTechLancer += techLancer;
+
+        // Ajouter élève au bilan
+        bilanData.eleves.push({
+            nom: eleve.nomPrenom,
+            sexe: eleve.sexe,
+            age: eleve.age,
+            vma: eleve.vma,
+            course: courseAnalyse,
+            saut: {
+                distance: seanceL3.sautDistance,
+                techniques: techSaut,
+                tech1: seanceL3.sautTech1,
+                tech2: seanceL3.sautTech2
+            },
+            lancer: {
+                distance: seanceL3.lancerDistance,
+                techniques: techLancer,
+                tech1: seanceL3.lancerTech1,
+                tech2: seanceL3.lancerTech2
+            }
+        });
+
+        // Stats niveaux
+        if(seanceL3.niveau) {
+            bilanData.stats.repartitionNiveaux[seanceL3.niveau]++;
+        }
+    });
+
+    // Calculs finaux
+    bilanData.stats.moyenneObjectifAtteint = Math.round((totalObjectifsAtteints / elevesL3.length) * 100);
+    bilanData.stats.moyenneTechniqueSaut = Math.round((totalTechSaut / elevesL3.length) * 10) / 10;
+    bilanData.stats.moyenneTechniqueLancer = Math.round((totalTechLancer / elevesL3.length) * 10) / 10;
+
+    renderBilan();
+}
+
+function getNiveauData(niveauId) {
+    const niveaux = {
+        'vma95': { label: '95% VMA', pourcent: 95 },
+        'vma100': { label: '100% VMA', pourcent: 100 },
+        'vma105': { label: '105% VMA', pourcent: 105 },
+        'vma110': { label: '110% VMA', pourcent: 110 }
+    };
+    return niveaux[niveauId] || null;
+}
+
+function renderBilan() {
+    const content = document.getElementById('content');
+    
+    let html = `
+        <div class="grid">
+            <div class="card summary-card">
+                <div class="card-title">📊 RÉSUMÉ CLASSE L3</div>
+                <div class="summary-stats">
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.totalEleves}</div>
+                        <div class="summary-label">Élèves évalués</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.moyenneObjectifAtteint}%</div>
+                        <div class="summary-label">Objectif course atteint</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.moyenneTechniqueSaut}/2</div>
+                        <div class="summary-label">Moyenne tech. saut</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.moyenneTechniqueLancer}/2</div>
+                        <div class="summary-label">Moyenne tech. lancer</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <strong>Répartition niveaux choisis :</strong><br>
+                    95% VMA: ${bilanData.stats.repartitionNiveaux.vma95} élèves | 
+                    100% VMA: ${bilanData.stats.repartitionNiveaux.vma100} élèves | 
+                    105% VMA: ${bilanData.stats.repartitionNiveaux.vma105} élèves | 
+                    110% VMA: ${bilanData.stats.repartitionNiveaux.vma110} élèves
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🏃‍♂️ TOP COURSES</div>
+                <div id="coursePerfs"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🦘 TOP SAUTS</div>
+                <div id="sautPerfs"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 TOP LANCERS</div>
+                <div id="lancerPerfs"></div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-title">👥 DÉTAIL PAR ÉLÈVE</div>
+                <div id="eleveDetails"></div>
+            </div>
+        </div>
+    `;
+
+    content.innerHTML = html;
+
+    renderCoursePerfs();
+    renderSautPerfs();
+    renderLancerPerfs();
+    renderEleveDetails();
+
+    document.getElementById('exportBtn').style.display = 'block';
+}
+
+function renderCoursePerfs() {
+    const courseEleves = bilanData.eleves.filter(e => e.course);
+    let html = '';
+
+    if(courseEleves.length === 0) {
+        html = '<div style="text-align: center; color: #94a3b8;">Aucune donnée course</div>';
+    } else {
+        courseEleves
+            .sort((a, b) => a.course.ecart - b.course.ecart)
+            .slice(0, 5)
+            .forEach(eleve => {
+                const perfClass = eleve.course.evaluation === 'excellent' ? 'perf-excellent' : 
+                                 eleve.course.evaluation === 'good' ? 'perf-good' : 'perf-progress';
+                
+                html += `
+                    <div class="student-card">
+                        <div class="student-name">${eleve.nom}</div>
+                        <div class="stat-line">
+                            <span>Objectif:</span>
+                            <span class="stat-value">${eleve.course.niveau}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Moyenne:</span>
+                            <span class="stat-value">${fmtSec(eleve.course.moyenne)}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Écart cible:</span>
+                            <span class="percentage ${perfClass}">±${fmtSec(eleve.course.ecart)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+    }
+
+    document.getElementById('coursePerfs').innerHTML = html;
+}
+
+function renderSautPerfs() {
+    const sautEleves = bilanData.eleves.filter(e => e.saut.distance || e.saut.techniques > 0);
+    let html = '';
+
+    if(sautEleves.length === 0) {
+        html = '<div style="text-align: center; color: #94a3b8;">Aucune donnée saut</div>';
+    } else {
+        sautEleves
+            .sort((a, b) => (b.saut.distance || 0) - (a.saut.distance || 0))
+            .slice(0, 5)
+            .forEach(eleve => {
+                html += `
+                    <div class="student-card">
+                        <div class="student-name">${eleve.nom}</div>
+                        <div class="stat-line">
+                            <span>Distance:</span>
+                            <span class="stat-value">${eleve.saut.distance || '-'} m</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Techniques:</span>
+                            <span class="stat-value">${eleve.saut.techniques}/2</span>
+                        </div>
+                        <div style="font-size: 0.8rem; margin-top: 4px;">
+                            ${eleve.saut.tech1 ? '✅' : '❌'} Course d'élan | 
+                            ${eleve.saut.tech2 ? '✅' : '❌'} Pied d'appel
+                        </div>
+                    </div>
+                `;
+            });
+    }
+
+    document.getElementById('sautPerfs').innerHTML = html;
+}
+
+function renderLancerPerfs() {
+    const lancerEleves = bilanData.eleves.filter(e => e.lancer.distance || e.lancer.techniques > 0);
+    let html = '';
+
+    if(lancerEleves.length === 0) {
+        html = '<div style="text-align: center; color: #94a3b8;">Aucune donnée lancer</div>';
+    } else {
+        lancerEleves
+            .sort((a, b) => (b.lancer.distance || 0) - (a.lancer.distance || 0))
+            .slice(0, 5)
+            .forEach(eleve => {
+                html += `
+                    <div class="student-card">
+                        <div class="student-name">${eleve.nom}</div>
+                        <div class="stat-line">
+                            <span>Distance:</span>
+                            <span class="stat-value">${eleve.lancer.distance || '-'} m</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Techniques:</span>
+                            <span class="stat-value">${eleve.lancer.techniques}/2</span>
+                        </div>
+                        <div style="font-size: 0.8rem; margin-top: 4px;">
+                            ${eleve.lancer.tech1 ? '✅' : '❌'} Position profil | 
+                            ${eleve.lancer.tech2 ? '✅' : '❌'} Prise engin
+                        </div>
+                    </div>
+                `;
+            });
+    }
+
+    document.getElementById('lancerPerfs').innerHTML = html;
+}
+
+function renderEleveDetails() {
+    let html = '';
+
+    bilanData.eleves.forEach(eleve => {
+        html += `
+            <div class="student-card">
+                <div class="student-name">${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nom} (${eleve.age} ans)</div>
+                
+                ${eleve.course ? `
+                    <div class="course-stats">
+                        <strong>🏃‍♂️ Course 6×200m :</strong>
+                        <div class="stat-line">
+                            <span>Objectif choisi:</span>
+                            <span>${eleve.course.niveau}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Moyenne réalisée:</span>
+                            <span>${fmtSec(eleve.course.moyenne)}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Temps cible:</span>
+                            <span>${fmtSec(eleve.course.cible)}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Évaluation:</span>
+                            <span class="percentage ${eleve.course.evaluation === 'excellent' ? 'perf-excellent' : 
+                                                     eleve.course.evaluation === 'good' ? 'perf-good' : 'perf-progress'}">
+                                ${eleve.course.evaluation === 'excellent' ? 'Objectif atteint' : 
+                                  eleve.course.evaluation === 'good' ? 'Proche objectif' : 'En progression'}
+                            </span>
+                        </div>
+                    </div>
+                ` : '<div style="color: #94a3b8; font-style: italic;">Pas de données course</div>'}
+                
+                <div class="technique-stats">
+                    <strong>🦘 Saut :</strong> ${eleve.saut.distance || '-'} m | Techniques: ${eleve.saut.techniques}/2<br>
+                    <strong>🎯 Lancer :</strong> ${eleve.lancer.distance || '-'} m | Techniques: ${eleve.lancer.techniques}/2
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('eleveDetails').innerHTML = html;
+}
+
+function fmtSec(sec) {
+    if(!sec) return '-';
+    const m = Math.floor(sec / 60);
+    const s = Math.round(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function exportBilan() {
+    let contenu = `BILAN L3 - DÉCOUVERTE & TECHNIQUE\n`;
+    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
+    
+    contenu += `RÉSUMÉ CLASSE:\n`;
+    contenu += `- Élèves évalués: ${bilanData.stats.totalEleves}\n`;
+    contenu += `- Objectif course atteint: ${bilanData.stats.moyenneObjectifAtteint}%\n`;
+    contenu += `- Moyenne technique saut: ${bilanData.stats.moyenneTechniqueSaut}/2\n`;
+    contenu += `- Moyenne technique lancer: ${bilanData.stats.moyenneTechniqueLancer}/2\n\n`;
+    
+    contenu += `DÉTAIL PAR ÉLÈVE:\n`;
+    bilanData.eleves.forEach(eleve => {
+        contenu += `\n${eleve.nom} (${eleve.age} ans):\n`;
+        if(eleve.course) {
+            contenu += `  Course: ${eleve.course.niveau} - Moyenne ${fmtSec(eleve.course.moyenne)}\n`;
+        }
+        contenu += `  Saut: ${eleve.saut.distance || '-'}m - ${eleve.saut.techniques}/2 techniques\n`;
+        contenu += `  Lancer: ${eleve.lancer.distance || '-'}m - ${eleve.lancer.techniques}/2 techniques\n`;
+    });
+
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bilan_L3_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
 </body>
 </html>

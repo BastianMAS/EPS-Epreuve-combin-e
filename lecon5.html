@@ -3,499 +3,1576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leçon 5 - EPS PRO</title>
+    <title>L5 - Relais Olympique - EPS PRO</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap');
+        
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --olympic-blue: #0085c3;
+            --olympic-yellow: #fcb131;
+            --olympic-black: #000000;
+            --olympic-green: #00a651;
+            --olympic-red: #ee334e;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
+        
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #e2e8f0 100%);
+            color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 5px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 15px; font-size: 0.9rem; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        .student-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 15px;
-        }
-        .student-card {
-            background: var(--card);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 12px;
-        }
-        .student-header {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-weight: 700;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        select, input, textarea {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            font-size: 0.85rem;
-        }
-        textarea { font-family: Arial; resize: vertical; min-height: 100px; }
-        label { display: block; margin: 6px 0 3px 0; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
-        .btn-pct {
-            padding: 5px 8px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.75rem;
-            margin: 2px;
-        }
-        .btn-pct.active { background: var(--accent); color: black; }
-        .pct-group { display: flex; gap: 3px; flex-wrap: wrap; margin: 8px 0; }
-        .time-input-group { display: flex; gap: 5px; align-items: center; margin: 8px 0; }
-        .time-input-group input {
-            width: 50px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            text-align: center;
-            font-size: 1rem;
-        }
-        .time-input-group span { font-size: 0.8rem; color: #aaa; }
-        .results-box {
-            background: rgba(0,255,136,0.1);
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid var(--success);
-            margin: 8px 0;
-            font-size: 0.8rem;
-        }
-        .btn-analyse {
-            background: var(--warning);
-            color: black;
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .atelier-section {
-            background: rgba(155,89,182,0.1);
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
             padding: 20px;
-            border-radius: 12px;
-            border: 2px solid var(--purple);
-            margin-top: 20px;
         }
-        .atelier-choice {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
-        }
-        .atelier-btn {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--purple);
-            background: rgba(155,89,182,0.2);
+        
+        /* HEADER OLYMPIQUE */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--olympic-blue), var(--olympic-green));
+            border-radius: 20px;
             color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,133,195,0.2);
+            position: relative;
+            overflow: hidden;
         }
-        .atelier-btn.active {
-            background: var(--purple);
-            color: black;
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            opacity: 0.3;
+            pointer-events: none;
         }
-        .save-btn {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background: var(--success);
-            color: black;
-            font-size: 1.1rem;
-            border: none;
+        
+        header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header h1 span {
+            color: var(--olympic-yellow);
+        }
+        
+        header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            opacity: 0.95;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        header button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 10px;
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: 700;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+        
+        header button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* SÉLECTEUR DE PHASES */
+        .phase-selector {
+            display: flex;
             justify-content: center;
+            gap: 16px;
+            margin-bottom: 30px;
+            padding: 8px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+        
+        .phase-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .phase-btn:hover {
+            background: var(--olympic-blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .phase-btn.active {
+            background: var(--olympic-blue);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,133,195,0.3);
+        }
+        
+        /* CONTENUS DES PHASES */
+        .phase-content {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .phase-content.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .section-header h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--olympic-blue);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        /* PHASE SETUP */
+        .setup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .students-panel, .team-panel {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 2px solid var(--border);
+        }
+        
+        .students-panel h4, .team-panel h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--olympic-blue);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .student-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .student-item {
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
-        .modal-content {
+        
+        .student-item:hover {
+            border-color: var(--olympic-blue);
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(0,133,195,0.1);
+        }
+        
+        .student-item.selected {
+            background: var(--olympic-blue);
+            color: white;
+            border-color: var(--olympic-blue);
+            transform: translateX(4px);
+        }
+        
+        .student-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .student-info {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .selected-team {
+            min-height: 200px;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--bg);
+        }
+        
+        .selected-team.has-members {
+            border-color: var(--olympic-green);
+            background: rgba(0,166,81,0.05);
+        }
+        
+        .empty-team {
+            text-align: center;
+            color: var(--text-light);
+            font-style: italic;
+            padding: 60px 20px;
+        }
+        
+        .team-member {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: var(--olympic-green);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .remove-member {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .remove-member:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .team-stats {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0,133,195,0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--olympic-blue);
+        }
+        
+        /* OBJECTIF PANEL */
+        .objective-panel {
+            background: linear-gradient(135deg, var(--gold) 0%, #ffa500 100%);
+            color: black;
+            padding: 24px;
+            border-radius: 16px;
+            margin: 24px 0;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255,215,0,0.3);
+        }
+        
+        .objective-panel h4 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .objective-distance {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .objective-details {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .objective-explanation {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        /* RULES PANEL */
+        .rules-panel {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            margin: 24px 0;
+            border-left: 6px solid var(--olympic-red);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .rules-panel h4 {
+            color: var(--olympic-red);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+        
+        .rule-item {
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: var(--bg);
+            border-radius: 8px;
+            border-left: 3px solid var(--olympic-blue);
+        }
+        
+        .rule-item strong {
+            color: var(--olympic-blue);
+            font-weight: 700;
+        }
+        
+        /* BOUTONS */
+        .start-race-btn, .validate-btn, .next-round-btn, .finish-btn, .save-btn {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .start-race-btn {
+            background: linear-gradient(135deg, var(--olympic-green), #22c55e);
+            color: white;
+        }
+        
+        .start-race-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,166,81,0.3);
+        }
+        
+        .start-race-btn:disabled {
+            background: var(--border);
+            color: var(--text-light);
+            cursor: not-allowed;
+        }
+        
+        /* PHASE RACE */
+        .race-dashboard {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+        
+        .timer-display {
+            text-align: center;
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .timer {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--olympic-red);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .timer-status {
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .objective-reminder {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .objective-target, .current-distance {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .objective-target {
+            color: var(--gold);
+        }
+        
+        .current-distance {
+            color: var(--olympic-blue);
+        }
+        
+        .progress-bar {
+            background: var(--border);
+            border-radius: 10px;
+            height: 12px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, var(--olympic-blue), var(--olympic-green));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        .race-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn.start {
+            background: var(--olympic-green);
+            color: white;
+        }
+        
+        .control-btn.pause {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .control-btn.stop {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        /* ENCOURAGEMENTS */
+        .encouragements {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--olympic-yellow), #fbbf24);
+            border-radius: 16px;
+            margin-top: 24px;
+            color: black;
+            box-shadow: 0 8px 25px rgba(251,191,36,0.3);
+        }
+        
+        .encouragement-message {
+            font-size: 1.3rem;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* RESULTS PHASE */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .member-result {
             background: var(--card);
             padding: 20px;
             border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 2px solid var(--warning);
+            border: 2px solid var(--border);
+            text-align: center;
         }
-        @media (max-width: 900px) { .student-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .student-grid { grid-template-columns: 1fr; } }
+        
+        .member-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--olympic-blue);
+            margin-bottom: 12px;
+        }
+        
+        .plots-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .plots-input:focus {
+            outline: none;
+            border-color: var(--olympic-blue);
+        }
+        
+        .distance-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--olympic-green);
+        }
+        
+        .team-result {
+            text-align: center;
+            padding: 24px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .total-distance {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--olympic-blue);
+            margin-bottom: 8px;
+        }
+        
+        .performance-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-top: 12px;
+        }
+        
+        .performance-badge.excellent {
+            background: var(--gold);
+            color: black;
+        }
+        
+        .performance-badge.good {
+            background: var(--silver);
+            color: black;
+        }
+        
+        .performance-badge.progress {
+            background: var(--bronze);
+            color: white;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .setup-grid, .race-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .phase-selector {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 LEÇON 5</p>
-        <p class="subtitle">3×400m</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 15px;">← Retour</button>
-        
-        <div id="student-grid" class="student-grid">
-            <div class="student-card" id="card-0"></div>
-            <div class="student-card" id="card-1"></div>
-            <div class="student-card" id="card-2"></div>
-            <div class="student-card" id="card-3"></div>
-            <div class="student-card" id="card-4"></div>
-            <div class="student-card" id="card-5"></div>
+
+<div class="container">
+    <header>
+        <h1>EPS<span>PRO</span></h1>
+        <h2>🏅 L5 - RELAIS OLYMPIQUE PAR ÉQUIPES</h2>
+        <button onclick="window.location.href='index.html'">← Retour</button>
+    </header>
+
+    <!-- SÉLECTION PHASE -->
+    <div class="phase-selector">
+        <button class="phase-btn active" data-phase="setup">🎯 Formation Équipe</button>
+        <button class="phase-btn" data-phase="race">🏃‍♂️ Course 6min</button>
+        <button class="phase-btn" data-phase="results">📊 Résultats</button>
+        <button class="phase-btn" data-phase="strategy">💭 Stratégie</button>
+    </div>
+
+    <!-- PHASE SETUP : Formation équipe -->
+    <div id="setup-phase" class="phase-content active">
+        <div class="section-header">
+            <h3>👥 FORMATION DE L'ÉQUIPE OLYMPIQUE</h3>
+            <p>Sélectionnez 4 à 6 élèves pour former votre équipe</p>
         </div>
-        
-        <div class="atelier-section">
-            <h3 style="color: var(--purple); margin-bottom: 15px;">🏋️ ATELIER TECHNIQUE (COMMUN)</h3>
-            
-            <div class="atelier-choice">
-                <button onclick="selectAtelier('saut')" class="atelier-btn" id="btn-saut">🦘 SAUT</button>
-                <button onclick="selectAtelier('lancer')" class="atelier-btn" id="btn-lancer">🎯 LANCER</button>
+
+        <div class="setup-grid">
+            <div class="students-panel">
+                <h4>📋 Liste des élèves disponibles</h4>
+                <div class="student-list" id="available-students"></div>
             </div>
-            
-            <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;" id="atelier-instruction">
-                Sélectionnez l'atelier technique effectué
-            </p>
-            <textarea id="atelier-commun" placeholder="Décrivez le travail technique effectué pour tout le groupe..."></textarea>
+
+            <div class="team-panel">
+                <h4>🏅 Votre équipe olympique</h4>
+                <div class="selected-team" id="selected-team">
+                    <p class="empty-team">Sélectionnez vos coéquipiers !</p>
+                </div>
+                <div class="team-stats" id="team-stats"></div>
+            </div>
         </div>
+
+        <div class="objective-panel" id="objective-panel" style="display: none;">
+            <h4>🎯 OBJECTIF OLYMPIQUE DE VOTRE ÉQUIPE</h4>
+            <div class="objective-display">
+                <div class="objective-distance" id="objective-distance">0m</div>
+                <div class="objective-details" id="objective-details">En 6 minutes</div>
+                <div class="objective-explanation" id="objective-explanation"></div>
+            </div>
+        </div>
+
+        <div class="rules-panel">
+            <h4>📖 RÈGLES DU RELAIS OLYMPIQUE</h4>
+            <div class="rules-content">
+                <div class="rule-item">
+                    <strong>⏱️ Durée :</strong> 6 minutes non-stop par tour
+                </div>
+                <div class="rule-item">
+                    <strong>🏃‍♂️ Principe :</strong> Relais libre - changez quand vous voulez
+                </div>
+                <div class="rule-item">
+                    <strong>📍 Comptage :</strong> 1 plot = 50m (8 plots sur piste 400m)
+                </div>
+                <div class="rule-item">
+                    <strong>🎯 Objectif :</strong> Distance maximale selon votre niveau
+                </div>
+                <div class="rule-item">
+                    <strong>🤝 Responsabilité :</strong> Chacun compte ses plots
+                </div>
+            </div>
+        </div>
+
+        <div class="start-button-container">
+            <button class="start-race-btn" id="start-race-btn" onclick="goToRace()" disabled>
+                🏁 Commencer la course olympique !
+            </button>
+        </div>
+    </div>
+
+    <!-- PHASE RACE : Course 6min -->
+    <div id="race-phase" class="phase-content">
+        <div class="section-header">
+            <h3>🏃‍♂️ COURSE OLYMPIQUE EN COURS</h3>
+            <p>6 minutes pour atteindre votre objectif !</p>
+        </div>
+
+        <div class="race-dashboard">
+            <div class="timer-display">
+                <div class="timer" id="timer">6:00</div>
+                <div class="timer-status" id="timer-status">En attente</div>
+            </div>
+
+            <div class="objective-reminder">
+                <div class="objective-target" id="objective-target">Objectif: 0m</div>
+                <div class="current-distance" id="current-distance">Distance: 0m</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="race-controls">
+            <button class="control-btn start" id="start-timer-btn" onclick="startTimer()">▶️ Démarrer</button>
+            <button class="control-btn pause" id="pause-timer-btn" onclick="pauseTimer()">⏸️ Pause</button>
+            <button class="control-btn stop" id="stop-timer-btn" onclick="stopTimer()">⏹️ Arrêter</button>
+        </div>
+
+        <div class="team-running" id="team-running">
+            <!-- Affichage équipe pendant la course -->
+        </div>
+
+        <div class="encouragements" id="encouragements">
+            <div class="encouragement-message">💪 Allez-y les champions olympiques !</div>
+        </div>
+    </div>
+
+    <!-- PHASE RESULTS : Saisie résultats -->
+    <div id="results-phase" class="phase-content">
+        <div class="section-header">
+            <h3>📊 COMPTABILISATION OLYMPIQUE</h3>
+            <p>Chaque membre saisit ses plots parcourus</p>
+        </div>
+
+        <div class="results-grid" id="results-grid">
+            <!-- Inputs pour chaque membre -->
+        </div>
+
+        <div class="team-result">
+            <div class="total-distance" id="total-distance">Distance totale: 0m</div>
+            <div class="vs-objective" id="vs-objective">Objectif: 0m</div>
+            <div class="performance-badge" id="performance-badge"></div>
+        </div>
+
+        <div class="validation-controls">
+            <button class="validate-btn" id="validate-btn" onclick="validateResults()">
+                ✅ Valider cette manche
+            </button>
+        </div>
+    </div>
+
+    <!-- PHASE STRATEGY : Stratégie + Récupération -->
+    <div id="strategy-phase" class="phase-content">
+        <div class="section-header">
+            <h3>💭 STRATÉGIE & RÉCUPÉRATION</h3>
+            <p>Analysez et préparez la prochaine manche</p>
+        </div>
+
+        <div class="performance-analysis" id="performance-analysis">
+            <!-- Analyse des performances -->
+        </div>
+
+        <div class="strategy-tools">
+            <div class="strategy-suggestions" id="strategy-suggestions">
+                <h4>💡 Suggestions tactiques</h4>
+                <!-- Conseils stratégiques -->
+            </div>
+
+            <div class="recovery-timer">
+                <h4>⏱️ Temps de récupération</h4>
+                <div class="recovery-countdown" id="recovery-countdown">5:00</div>
+            </div>
+        </div>
+
+        <div class="next-round">
+            <div class="round-info" id="round-info">Manche 1/3</div>
+            <button class="next-round-btn" id="next-round-btn" onclick="nextRound()">
+                🏃‍♂️ Manche suivante
+            </button>
+            <button class="finish-btn" id="finish-btn" onclick="finishActivity()" style="display: none;">
+                🏆 Terminer l'activité
+            </button>
+        </div>
+    </div>
+
+    <!-- FINAL RESULTS -->
+    <div id="final-phase" class="phase-content">
+        <div class="section-header">
+            <h3>🏆 RÉSULTATS OLYMPIQUES FINAUX</h3>
+        </div>
+
+        <div class="final-summary" id="final-summary">
+            <!-- Résumé final des performances -->
+        </div>
+
+        <div class="save-section">
+            <button class="save-btn" onclick="saveResults()">
+                💾 Sauvegarder les résultats
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// VARIABLES GLOBALES
+let ELEVES = [];
+let currentTeam = [];
+let currentPhase = 'setup';
+let raceTimer = null;
+let timerSeconds = 360; // 6 minutes
+let isRunning = false;
+let currentRound = 1;
+let maxRounds = 3;
+let roundResults = [];
+let teamObjective = 0;
+let recoveryTimer = null;
+
+// ENCOURAGEMENTS DYNAMIQUES
+const ENCOURAGEMENTS = {
+    start: [
+        "💪 Allez-y les champions olympiques !",
+        "🏅 Montrez votre esprit d'équipe !",
+        "🔥 6 minutes pour briller !",
+        "⚡ Ensemble vers la victoire !"
+    ],
+    midrace: [
+        "🚀 Excellent rythme d'équipe !",
+        "💫 Continuez cette stratégie !",
+        "🎯 L'objectif approche !",
+        "🏃‍♂️ Régularité parfaite !"
+    ],
+    nearend: [
+        "🔥 Dernière minute ! Donnez tout !",
+        "💥 Sprint final olympique !",
+        "🏆 La médaille est à portée !",
+        "⚡ Finissez en beauté !"
+    ]
+};
+
+// INITIALISATION
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        alert('⚠️ Aucun élève trouvé. Ajoutez des élèves depuis l\'accueil.');
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    ELEVES = JSON.parse(stored);
+    setupPhaseEventListeners();
+    renderAvailableStudents();
+    updateUI();
+};
+
+// EVENT LISTENERS
+function setupPhaseEventListeners() {
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const phase = btn.getAttribute('data-phase');
+            if(canAccessPhase(phase)) {
+                switchPhase(phase);
+            }
+        });
+    });
+}
+
+function canAccessPhase(phase) {
+    switch(phase) {
+        case 'setup': return true;
+        case 'race': return currentTeam.length >= 4;
+        case 'results': return isRunning === false && timerSeconds < 360;
+        case 'strategy': return roundResults.length > 0;
+        default: return false;
+    }
+}
+
+function switchPhase(phase) {
+    // Mise à jour boutons
+    document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-phase="${phase}"]`).classList.add('active');
+    
+    // Mise à jour contenus
+    document.querySelectorAll('.phase-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${phase}-phase`).classList.add('active');
+    
+    currentPhase = phase;
+    
+    // Actions spécifiques par phase
+    switch(phase) {
+        case 'race':
+            setupRacePhase();
+            break;
+        case 'results':
+            setupResultsPhase();
+            break;
+        case 'strategy':
+            setupStrategyPhase();
+            break;
+    }
+    
+    updateUI();
+}
+
+// PHASE SETUP : FORMATION ÉQUIPE
+function renderAvailableStudents() {
+    const container = document.getElementById('available-students');
+    let html = '';
+    
+    ELEVES.forEach(eleve => {
+        const isSelected = currentTeam.find(member => member.id === eleve.id);
+        const hasL4 = eleve.seances && eleve.seances.find(s => s.lecon === 'L4');
         
-        <button onclick="saveAll()" class="save-btn">💾 ENREGISTRER</button>
-    </div>
+        html += `
+            <div class="student-item ${isSelected ? 'selected' : ''}" onclick="toggleStudentSelection('${eleve.id}')">
+                <div>
+                    <div class="student-name">${eleve.nomPrenom}</div>
+                    <div class="student-info">${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.age} ans - VMA: ${eleve.vma || 'N/A'}</div>
+                </div>
+                <div>
+                    ${hasL4 ? '<span style="color: var(--success);">✅ L4</span>' : '<span style="color: var(--warning);">⚠️ Pas L4</span>'}
+                </div>
+            </div>
+        `;
+    });
     
-    <div id="modal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="color: var(--warning); margin-bottom: 15px;">📈 ANALYSE</h2>
-            <div id="modal-content"></div>
-            <button onclick="closeModal()" class="btn" style="background: var(--accent); color: black; width: 100%; margin-top: 15px;">Fermer</button>
-        </div>
-    </div>
+    container.innerHTML = html;
+}
+
+function toggleStudentSelection(studentId) {
+    const student = ELEVES.find(e => e.id === studentId);
+    if(!student) return;
     
-    <script>
-    let allStudents = [];
-    let cardData = [{},{},{},{},{},{}];
-    let atelierType = null;
-    let atelierTexte = '';
+    const existingIndex = currentTeam.findIndex(member => member.id === studentId);
     
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
+    if(existingIndex !== -1) {
+        // Retirer de l'équipe
+        currentTeam.splice(existingIndex, 1);
+    } else {
+        // Ajouter à l'équipe (max 6)
+        if(currentTeam.length < 6) {
+            currentTeam.push(student);
+        } else {
+            alert('⚠️ Maximum 6 élèves par équipe !');
             return;
         }
-        allStudents = JSON.parse(stored);
-        
-        const leconData = JSON.parse(localStorage.getItem('lecon5_data') || '{}');
-        if(leconData.atelierType) {
-            selectAtelier(leconData.atelierType);
-            document.getElementById('atelier-commun').value = leconData.atelierTexte || '';
+    }
+    
+    renderAvailableStudents();
+    renderSelectedTeam();
+    calculateObjective();
+    updateStartButton();
+}
+
+function renderSelectedTeam() {
+    const container = document.getElementById('selected-team');
+    const teamPanel = container.parentElement;
+    
+    if(currentTeam.length === 0) {
+        container.innerHTML = '<p class="empty-team">Sélectionnez vos coéquipiers !</p>';
+        container.classList.remove('has-members');
+    } else {
+        let html = '';
+        currentTeam.forEach(member => {
+            html += `
+                <div class="team-member">
+                    <span>${member.nomPrenom} (VMA: ${member.vma || 'N/A'})</span>
+                    <button class="remove-member" onclick="toggleStudentSelection('${member.id}')">✕</button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        container.classList.add('has-members');
+    }
+    
+    // Mise à jour des stats équipe
+    const statsContainer = document.getElementById('team-stats');
+    if(currentTeam.length > 0) {
+        const avgVMA = calculateTeamAverageVMA();
+        const teamSize = currentTeam.length;
+        statsContainer.innerHTML = `
+            <strong>📊 Statistiques équipe :</strong><br>
+            Membres: ${teamSize}/6 | VMA moyenne: ${avgVMA.toFixed(1)} km/h
+        `;
+    } else {
+        statsContainer.innerHTML = '';
+    }
+}
+
+function calculateTeamAverageVMA() {
+    if(currentTeam.length === 0) return 0;
+    
+    const totalVMA = currentTeam.reduce((sum, member) => {
+        return sum + (parseFloat(member.vma) || 10); // Défaut 10 km/h
+    }, 0);
+    
+    return totalVMA / currentTeam.length;
+}
+
+function calculateObjective() {
+    if(currentTeam.length < 4) {
+        document.getElementById('objective-panel').style.display = 'none';
+        teamObjective = 0;
+        return;
+    }
+    
+    const avgVMA = calculateTeamAverageVMA();
+    const teamSize = currentTeam.length;
+    
+    // Calculer niveau moyen L4 de l'équipe
+    let avgL4Performance = 1.0; // Neutre par défaut
+    let hasL4Data = false;
+    
+    currentTeam.forEach(member => {
+        const seanceL4 = member.seances?.find(s => s.lecon === 'L4');
+        if(seanceL4 && seanceL4.moyenne200m && member.vma) {
+            hasL4Data = true;
+            // Calculer performance relative L4
+            const vma = parseFloat(member.vma);
+            const vitesseBase = vma * 1.05; // 105% VMA base
+            const tempsBase = (0.2 / vitesseBase) * 3600;
+            const ecart = Math.abs(seanceL4.moyenne200m - tempsBase);
+            const pourcentageEcart = (ecart / tempsBase) * 100;
+            
+            if(pourcentageEcart <= 5) avgL4Performance += 0.05; // +5% si excellent
+            else if(pourcentageEcart > 15) avgL4Performance -= 0.05; // -5% si difficile
         }
+    });
+    
+    // Calcul objectif : VMA * intensité * 6 minutes
+    let intensite = avgL4Performance; // Entre 0.95 et 1.1 selon niveau L4
+    intensite = Math.max(0.95, Math.min(1.1, intensite)); // Borner entre 95% et 110%
+    
+    // Distance en 6 minutes
+    const vitesseKmH = avgVMA * intensite;
+    const vitesseMS = vitesseKmH / 3.6;
+    const distanceObjectif = Math.round(vitesseMS * 360); // 6 minutes = 360 secondes
+    
+    teamObjective = distanceObjectif;
+    
+    // Affichage
+    document.getElementById('objective-panel').style.display = 'block';
+    document.getElementById('objective-distance').textContent = `${distanceObjectif}m`;
+    document.getElementById('objective-details').textContent = `En 6 minutes - ${teamSize} coureurs`;
+    
+    let explanation = `Calculé sur VMA moyenne ${avgVMA.toFixed(1)} km/h à ${Math.round(intensite*100)}% d'intensité`;
+    if(hasL4Data) {
+        explanation += ` (ajusté selon vos performances L4)`;
+    }
+    document.getElementById('objective-explanation').textContent = explanation;
+}
+
+function updateStartButton() {
+    const btn = document.getElementById('start-race-btn');
+    if(currentTeam.length >= 4) {
+        btn.disabled = false;
+        btn.textContent = `🏁 Commencer la course olympique ! (${currentTeam.length} coureurs)`;
+    } else {
+        btn.disabled = true;
+        btn.textContent = `Sélectionnez au moins 4 élèves (${currentTeam.length}/4)`;
+    }
+}
+
+// PHASE RACE
+function goToRace() {
+    if(currentTeam.length < 4) {
+        alert('⚠️ Sélectionnez au moins 4 élèves !');
+        return;
+    }
+    switchPhase('race');
+}
+
+function setupRacePhase() {
+    document.getElementById('objective-target').textContent = `Objectif: ${teamObjective}m`;
+    document.getElementById('current-distance').textContent = `Distance: 0m`;
+    document.getElementById('timer').textContent = '6:00';
+    document.getElementById('timer-status').textContent = 'Prêt à démarrer';
+    document.getElementById('progress-fill').style.width = '0%';
+    
+    // Affichage équipe
+    const teamContainer = document.getElementById('team-running');
+    let html = '<h4>🏃‍♂️ Votre équipe olympique :</h4>';
+    currentTeam.forEach(member => {
+        html += `<div style="display: inline-block; margin: 8px; padding: 8px 12px; background: var(--olympic-blue); color: white; border-radius: 8px; font-weight: 600;">${member.nomPrenom}</div>`;
+    });
+    teamContainer.innerHTML = html;
+    
+    showRandomEncouragement('start');
+}
+
+function startTimer() {
+    if(isRunning) return;
+    
+    isRunning = true;
+    document.getElementById('timer-status').textContent = 'Course en cours !';
+    document.getElementById('start-timer-btn').disabled = true;
+    
+    showRandomEncouragement('start');
+    
+    raceTimer = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
         
-        for(let i=0; i<6; i++) renderCard(i);
+        // Encouragements dynamiques
+        if(timerSeconds === 240) showRandomEncouragement('midrace'); // 4min restantes
+        if(timerSeconds === 60) showRandomEncouragement('nearend'); // 1min restante
+        
+        if(timerSeconds <= 0) {
+            stopTimer();
+            setTimeout(() => {
+                alert('🏁 Temps écoulé ! Direction les résultats !');
+                switchPhase('results');
+            }, 1000);
+        }
+    }, 1000);
+}
+
+function pauseTimer() {
+    if(!isRunning) return;
+    
+    isRunning = false;
+    clearInterval(raceTimer);
+    document.getElementById('timer-status').textContent = 'En pause';
+    document.getElementById('start-timer-btn').disabled = false;
+}
+
+function stopTimer() {
+    isRunning = false;
+    if(raceTimer) clearInterval(raceTimer);
+    document.getElementById('timer-status').textContent = 'Arrêtée';
+    document.getElementById('start-timer-btn').disabled = false;
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function showRandomEncouragement(type) {
+    const messages = ENCOURAGEMENTS[type] || ENCOURAGEMENTS.start;
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    document.getElementById('encouragements').innerHTML = `<div class="encouragement-message">${message}</div>`;
+}
+
+// PHASE RESULTS
+function setupResultsPhase() {
+    const container = document.getElementById('results-grid');
+    let html = '';
+    
+    currentTeam.forEach(member => {
+        html += `
+            <div class="member-result">
+                <div class="member-name">${member.nomPrenom}</div>
+                <input type="number" class="plots-input" id="plots-${member.id}" 
+                       placeholder="Nombre de plots" min="0" max="50" 
+                       oninput="updateMemberDistance('${member.id}')">
+                <div class="distance-display" id="distance-${member.id}">0m</div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    updateTeamTotal();
+}
+
+function updateMemberDistance(memberId) {
+    const plotsInput = document.getElementById(`plots-${memberId}`);
+    const plots = parseInt(plotsInput.value) || 0;
+    const distance = plots * 50; // 1 plot = 50m
+    
+    document.getElementById(`distance-${memberId}`).textContent = `${distance}m`;
+    updateTeamTotal();
+}
+
+function updateTeamTotal() {
+    let totalDistance = 0;
+    
+    currentTeam.forEach(member => {
+        const plots = parseInt(document.getElementById(`plots-${member.id}`)?.value) || 0;
+        totalDistance += plots * 50;
+    });
+    
+    document.getElementById('total-distance').textContent = `Distance totale: ${totalDistance}m`;
+    document.getElementById('vs-objective').textContent = `Objectif: ${teamObjective}m`;
+    
+    // Badge de performance
+    const badge = document.getElementById('performance-badge');
+    const percentage = (totalDistance / teamObjective) * 100;
+    
+    if(percentage >= 95) {
+        badge.textContent = '🥇 OBJECTIF ATTEINT !';
+        badge.className = 'performance-badge excellent';
+    } else if(percentage >= 85) {
+        badge.textContent = '🥈 TRÈS PROCHE !';
+        badge.className = 'performance-badge good';
+    } else {
+        badge.textContent = '🥉 EN PROGRESSION';
+        badge.className = 'performance-badge progress';
+    }
+    
+    // Mise à jour progress bar
+    document.getElementById('progress-fill').style.width = `${Math.min(100, percentage)}%`;
+}
+
+function validateResults() {
+    // Vérifier que tous ont saisi
+    let allFilled = true;
+    let totalDistance = 0;
+    const roundData = {
+        round: currentRound,
+        members: [],
+        totalDistance: 0,
+        objective: teamObjective,
+        percentage: 0
     };
     
-    function selectAtelier(type) {
-        atelierType = type;
-        document.getElementById('btn-saut').classList.toggle('active', type === 'saut');
-        document.getElementById('btn-lancer').classList.toggle('active', type === 'lancer');
+    currentTeam.forEach(member => {
+        const plotsInput = document.getElementById(`plots-${member.id}`);
+        const plots = parseInt(plotsInput.value);
         
-        const textarea = document.getElementById('atelier-commun');
-        const instruction = document.getElementById('atelier-instruction');
-        
-        if(type === 'saut') {
-            instruction.textContent = '🦘 Décrivez le travail technique sur le SAUT';
-            textarea.placeholder = 'Ex: Travail sur l\'élan et l\'impulsion : course d\'élan (6 foulées), placement du pied d\'appel, gainage en l\'air. Exercices : sauts sans élan, avec élan court...';
-        } else {
-            instruction.textContent = '🎯 Décrivez le travail technique sur le LANCER';
-            textarea.placeholder = 'Ex: Travail technique sur le lancer poids : position de départ, rotation du bassin, accompagnement du geste. Exercices : lancer à genoux, debout, avec rotation...';
-        }
-    }
-    
-    function renderCard(cardIndex) {
-        const card = document.getElementById('card-'+cardIndex);
-        const data = cardData[cardIndex];
-        
-        let content = '<select id="sel-'+cardIndex+'" onchange="selectStudent('+cardIndex+')" style="font-size: 0.85rem;">';
-        content += '<option value="">-- Choisir --</option>';
-        allStudents.forEach((s,i) => {
-            content += '<option value="'+i+'" '+(data.studentIndex===i?'selected':'')+'>'+s.nomPrenom+'</option>';
-        });
-        content += '</select>';
-        
-        if(data.student) {
-            const s = data.student;
-            const vma = parseFloat(s.vma);
-            const pct = data.pctVMA || 100;
-            const cible = formatTime((0.4 / (vma * (pct/100))) * 3600 * 1000);
-            
-            content += '<div class="student-header">'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+' | VMA: '+vma+'</div>';
-            content += '<div class="pct-group">';
-            [90,95,100,105,110,115,120,125,130].forEach(p => {
-                content += '<button onclick="setPct('+cardIndex+','+p+')" class="btn-pct '+(pct===p?'active':'')+'" id="pct-'+cardIndex+'-'+p+'">'+p+'%</button>';
-            });
-            content += '</div><p style="color:var(--success);font-weight:700;font-size:0.85rem;margin:5px 0">Cible: '+cible+'</p>';
-            
-            const t1m = data.tour1 ? Math.floor(data.tour1/60) : '';
-            const t1s = data.tour1 ? data.tour1%60 : '';
-            const t2m = data.tour2 ? Math.floor(data.tour2/60) : '';
-            const t2s = data.tour2 ? data.tour2%60 : '';
-            const t3m = data.tour3 ? Math.floor(data.tour3/60) : '';
-            const t3s = data.tour3 ? data.tour3%60 : '';
-            
-            content += '<label>T1:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<label>T2:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<label>T3:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<div id="results-'+cardIndex+'"></div>';
-            
-            content += '<label>💓 BPM:</label><input type="number" inputmode="numeric" id="bpm-'+cardIndex+'" value="'+(data.bpm||'')+'" placeholder="180" style="width:70px">';
-            content += '<label>⏱️ Récup:</label><input type="number" inputmode="numeric" id="recup-'+cardIndex+'" value="'+(data.tempsRecup||'')+'" placeholder="3" style="width:70px">';
-            content += '<label>💬 Notes:</label><textarea id="comment-'+cardIndex+'" placeholder="Points forts, à améliorer..." style="min-height:50px">'+(data.commentaire||'')+'</textarea>';
-        }
-        
-        card.innerHTML = content;
-        updateResults(cardIndex);
-    }
-    
-    function selectStudent(cardIndex) {
-        const sel = document.getElementById('sel-'+cardIndex);
-        const studentIndex = parseInt(sel.value);
-        
-        if(isNaN(studentIndex)) {
-            cardData[cardIndex] = {};
-        } else {
-            const s = allStudents[studentIndex];
-            cardData[cardIndex] = s.lecon5 || {
-                studentIndex: studentIndex,
-                student: s,
-                pctVMA: 100,
-                tour1: null, tour2: null, tour3: null,
-                bpm: null, tempsRecup: null,
-                commentaire: ''
-            };
-            cardData[cardIndex].studentIndex = studentIndex;
-            cardData[cardIndex].student = s;
-        }
-        renderCard(cardIndex);
-    }
-    
-    function setPct(cardIndex, pct) {
-        cardData[cardIndex].pctVMA = pct;
-        renderCard(cardIndex);
-    }
-    
-    function updateTime(cardIndex) {
-        const d = cardData[cardIndex];
-        const t1m = parseInt(document.getElementById('t1m-'+cardIndex).value)||0;
-        const t1s = parseInt(document.getElementById('t1s-'+cardIndex).value)||0;
-        const t2m = parseInt(document.getElementById('t2m-'+cardIndex).value)||0;
-        const t2s = parseInt(document.getElementById('t2s-'+cardIndex).value)||0;
-        const t3m = parseInt(document.getElementById('t3m-'+cardIndex).value)||0;
-        const t3s = parseInt(document.getElementById('t3s-'+cardIndex).value)||0;
-        
-        d.tour1 = t1m*60+t1s||null;
-        d.tour2 = t2m*60+t2s||null;
-        d.tour3 = t3m*60+t3s||null;
-        
-        updateResults(cardIndex);
-    }
-    
-    function updateResults(cardIndex) {
-        const d = cardData[cardIndex];
-        const resultsDiv = document.getElementById('results-'+cardIndex);
-        if(!resultsDiv) return;
-        
-        if(d.tour1 && d.tour2 && d.tour3 && d.student) {
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const vma = parseFloat(d.student.vma);
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            resultsDiv.innerHTML = '<div class="results-box"><strong>Moy:</strong> '+formatTime(moy*1000)+' | <strong>VMA:</strong> '+pctRealise.toFixed(1)+'%</div><button onclick="showAnalysis('+cardIndex+')" class="btn-analyse">📈 VOIR ANALYSE</button>';
-        } else {
-            resultsDiv.innerHTML = '';
-        }
-    }
-    
-    function showAnalysis(cardIndex) {
-        const d = cardData[cardIndex];
-        const vma = parseFloat(d.student.vma);
-        const pct = d.pctVMA;
-        const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-        const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-        
-        const ecart1_2 = d.tour2 - d.tour1;
-        const ecart2_3 = d.tour3 - d.tour2;
-        const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-        
-        let txt = '<p style="line-height:1.6">';
-        txt += '<strong>Profil de course:</strong><br>';
-        
-        if(ecartMax <= 5) {
-            txt += '➡️ <strong>RÉGULIÈRE</strong><br>Excellent ! Rythme constant, très bonne gestion.<br><br>';
-        } else {
-            txt += '⚠️ <strong>IRRÉGULIÈRE</strong><br>';
-            if(Math.abs(ecart1_2) > 10 || Math.abs(ecart2_3) > 10) {
-                txt += 'Gros écarts détectés :<br>';
-                if(ecart1_2 > 10) txt += '• T1→T2 : <strong style="color:var(--danger)">+'+ecart1_2+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart1_2 > 5) txt += '• T1→T2 : +'+ecart1_2+'s<br>';
-                else if(ecart1_2 < -10) txt += '• T1→T2 : '+ecart1_2+'s (grosse accélération) 📈<br>';
-                else if(ecart1_2 < -5) txt += '• T1→T2 : '+ecart1_2+'s<br>';
-                
-                if(ecart2_3 > 10) txt += '• T2→T3 : <strong style="color:var(--danger)">+'+ecart2_3+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart2_3 > 5) txt += '• T2→T3 : +'+ecart2_3+'s<br>';
-                else if(ecart2_3 < -10) txt += '• T2→T3 : '+ecart2_3+'s (grosse accélération) 📈<br>';
-                else if(ecart2_3 < -5) txt += '• T2→T3 : '+ecart2_3+'s<br>';
-            }
-            txt += '<br>';
-        }
-        
-        txt += '<strong>Objectif '+pct+'% VMA:</strong><br>';
-        if(pctRealise >= pct) {
-            txt += '✅ <span style="color:var(--success)">ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        } else if(pctRealise >= pct - 5) {
-            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        } else {
-            txt += '❌ <span style="color:var(--danger)">NON ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        }
-        
-        txt += '<strong>Conseil:</strong><br>';
-        if(ecartMax <= 5) {
-            txt += 'Parfait ! Continue, la régularité est la clé.';
-        } else if(ecart1_2 > 10) {
-            txt += 'Grosse baisse au T2. Travailler l\'endurance. Partir moins vite.';
-        } else if(ecart2_3 > 10) {
-            txt += 'Grosse baisse au T3. Travailler la résistance.';
-        } else {
-            txt += 'Travailler la régularité. Viser écarts < 5s.';
-        }
-        
-        txt += '</p>';
-        
-        document.getElementById('modal-content').innerHTML = txt;
-        document.getElementById('modal').style.display = 'flex';
-    }
-    
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-    }
-    
-    function saveAll() {
-        if(!atelierType) {
-            alert('⚠️ Sélectionnez l\'atelier technique (Saut ou Lancer)');
+        if(isNaN(plots) || plots < 0) {
+            allFilled = false;
             return;
         }
         
-        for(let i=0; i<6; i++) {
-            const d = cardData[i];
-            if(d.student) {
-                const bpm = document.getElementById('bpm-'+i);
-                const recup = document.getElementById('recup-'+i);
-                const comment = document.getElementById('comment-'+i);
-                
-                if(bpm) d.bpm = parseInt(bpm.value)||null;
-                if(recup) d.tempsRecup = parseInt(recup.value)||null;
-                if(comment) d.commentaire = comment.value;
-            }
-        }
+        const distance = plots * 50;
+        totalDistance += distance;
         
-        const atelierTexte = document.getElementById('atelier-commun').value;
-        
-        let err = 0;
-        cardData.forEach(d => {
-            if(d.student && (!d.tour1 || !d.tour2 || !d.tour3)) err++;
+        roundData.members.push({
+            id: member.id,
+            name: member.nomPrenom,
+            plots: plots,
+            distance: distance
         });
-        
-        if(err > 0 && !confirm(err+' élève(s) sans temps. Continuer ?')) return;
-        
-        cardData.forEach(d => {
-            if(d.student) {
-                const i = allStudents.findIndex(s => s.id === d.student.id);
-                if(i !== -1) {
-                    allStudents[i].lecon5 = {
-                        pctVMA: d.pctVMA,
-                        tour1: d.tour1,
-                        tour2: d.tour2,
-                        tour3: d.tour3,
-                        bpm: d.bpm,
-                        tempsRecup: d.tempsRecup,
-                        commentaire: d.commentaire,
-                        date: new Date().toISOString()
-                    };
-                }
-            }
-        });
-        
-        localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-        localStorage.setItem('lecon5_data', JSON.stringify({
-            atelierType: atelierType,
-            atelierTexte: atelierTexte
-        }));
-        
-        alert('✅ Leçon 5 enregistrée !');
+    });
+    
+    if(!allFilled) {
+        alert('⚠️ Tous les membres doivent saisir leur nombre de plots !');
+        return;
     }
     
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
+    roundData.totalDistance = totalDistance;
+    roundData.percentage = (totalDistance / teamObjective) * 100;
+    
+    roundResults.push(roundData);
+    
+    alert(`✅ Manche ${currentRound} validée ! Distance: ${totalDistance}m`);
+    
+    if(currentRound < maxRounds) {
+        switchPhase('strategy');
+    } else {
+        switchPhase('final');
+        setupFinalPhase();
     }
-    </script>
+}
+
+// PHASE STRATEGY
+function setupStrategyPhase() {
+    const lastRound = roundResults[roundResults.length - 1];
+    
+    // Analyse performance
+    const analysisContainer = document.getElementById('performance-analysis');
+    let html = `
+        <div style="background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h4>📈 Analyse Manche ${lastRound.round}</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0;">
+                <div style="text-align: center; padding: 16px; background: var(--bg); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: 900; color: var(--olympic-blue);">${lastRound.totalDistance}m</div>
+                    <div>Distance réalisée</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: 900; color: var(--gold);">${lastRound.objective}m</div>
+                    <div>Objectif</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: var(--bg); border-radius: 8px;">
+                    <div style="font-size: 2rem; font-weight: 900; color: var(--olympic-green);">${Math.round(lastRound.percentage)}%</div>
+                    <div>Performance</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: var(--card); padding: 20px; border-radius: 12px;">
+            <h5>👥 Détail par membre :</h5>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px;">
+                ${lastRound.members.map(member => `
+                    <div style="text-align: center; padding: 12px; background: var(--bg); border-radius: 8px;">
+                        <strong>${member.name}</strong><br>
+                        ${member.plots} plots = ${member.distance}m
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    analysisContainer.innerHTML = html;
+    
+    // Suggestions stratégiques
+    const suggestionsContainer = document.getElementById('strategy-suggestions');
+    let suggestions = generateStrategySuggestions(lastRound);
+    suggestionsContainer.innerHTML = `
+        <div style="background: var(--card); padding: 20px; border-radius: 12px;">
+            ${suggestions}
+        </div>
+    `;
+    
+    // Mise à jour infos manche
+    document.getElementById('round-info').textContent = `Manche ${currentRound}/${maxRounds}`;
+    
+    // Boutons
+    if(currentRound < maxRounds) {
+        document.getElementById('next-round-btn').style.display = 'block';
+        document.getElementById('finish-btn').style.display = 'none';
+    } else {
+        document.getElementById('next-round-btn').style.display = 'none';
+        document.getElementById('finish-btn').style.display = 'block';
+    }
+    
+    // Timer récupération (5 minutes)
+    startRecoveryTimer();
+}
+
+function generateStrategySuggestions(roundData) {
+    const performance = roundData.percentage;
+    let suggestions = [];
+    
+    if(performance >= 95) {
+        suggestions = [
+            "🏆 Performance excellente ! Gardez cette stratégie",
+            "⚡ Répartition optimale des efforts",
+            "🎯 Vous maîtrisez parfaitement le rythme"
+        ];
+    } else if(performance >= 85) {
+        suggestions = [
+            "👍 Très bon niveau ! Quelques ajustements possibles",
+            "🔄 Optimisez les changements de relais",
+            "💪 Poussez un peu plus les membres les plus forts"
+        ];
+    } else if(performance >= 70) {
+        suggestions = [
+            "📈 Bonne base ! Place aux améliorations",
+            "⚡ Accélérez légèrement le rythme général",
+            "🎯 Répartissez mieux les distances entre membres"
+        ];
+    } else {
+        suggestions = [
+            "💪 Courage ! Revoyez votre stratégie",
+            "🏃‍♂️ Rythme trop conservateur, osez plus !",
+            "🤝 Optimisez la communication d'équipe"
+        ];
+    }
+    
+    // Analyses individuelles
+    const minDistance = Math.min(...roundData.members.map(m => m.distance));
+    const maxDistance = Math.max(...roundData.members.map(m => m.distance));
+    
+    if(maxDistance - minDistance > 400) {
+        suggestions.push("⚖️ Équilibrez mieux les efforts individuels");
+    }
+    
+    return suggestions.map(s => `<div style="padding: 8px 12px; margin: 8px 0; background: rgba(0,166,81,0.1); border-left: 3px solid var(--olympic-green); border-radius: 4px;">${s}</div>`).join('');
+}
+
+function startRecoveryTimer() {
+    let recoverySeconds = 300; // 5 minutes
+    const countdownEl = document.getElementById('recovery-countdown');
+    
+    if(recoveryTimer) clearInterval(recoveryTimer);
+    
+    recoveryTimer = setInterval(() => {
+        const minutes = Math.floor(recoverySeconds / 60);
+        const seconds = recoverySeconds % 60;
+        countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        recoverySeconds--;
+        
+        if(recoverySeconds < 0) {
+            clearInterval(recoveryTimer);
+            countdownEl.textContent = "Récupération terminée !";
+            countdownEl.style.color = 'var(--olympic-green)';
+        }
+    }, 1000);
+}
+
+function nextRound() {
+    currentRound++;
+    timerSeconds = 360; // Reset timer
+    switchPhase('race');
+}
+
+function finishActivity() {
+    setupFinalPhase();
+    switchPhase('final');
+}
+
+// PHASE FINAL
+function setupFinalPhase() {
+    const container = document.getElementById('final-summary');
+    
+    if(roundResults.length === 0) {
+        container.innerHTML = '<p>Aucune donnée à afficher.</p>';
+        return;
+    }
+    
+    // Calculs finaux
+    const totalDistance = roundResults.reduce((sum, round) => sum + round.totalDistance, 0);
+    const avgDistance = Math.round(totalDistance / roundResults.length);
+    const bestRound = roundResults.reduce((best, round) => 
+        round.totalDistance > best.totalDistance ? round : best
+    );
+    const avgPerformance = roundResults.reduce((sum, round) => sum + round.percentage, 0) / roundResults.length;
+    
+    let html = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h3>🏆 BILAN OLYMPIQUE DE VOTRE ÉQUIPE</h3>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div style="text-align: center; padding: 20px; background: var(--gold); color: black; border-radius: 12px;">
+                <div style="font-size: 2.5rem; font-weight: 900;">${totalDistance}m</div>
+                <div>Distance totale</div>
+            </div>
+            <div style="text-align: center; padding: 20px; background: var(--silver); color: black; border-radius: 12px;">
+                <div style="font-size: 2.5rem; font-weight: 900;">${avgDistance}m</div>
+                <div>Moyenne par manche</div>
+            </div>
+            <div style="text-align: center; padding: 20px; background: var(--bronze); color: white; border-radius: 12px;">
+                <div style="font-size: 2.5rem; font-weight: 900;">${Math.round(avgPerformance)}%</div>
+                <div>Performance moyenne</div>
+            </div>
+        </div>
+        
+        <div style="background: var(--card); padding: 24px; border-radius: 12px; margin-bottom: 20px;">
+            <h4>📊 Détail des manches :</h4>
+            <div style="margin-top: 16px;">
+                ${roundResults.map(round => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin: 8px 0; background: var(--bg); border-radius: 8px;">
+                        <strong>Manche ${round.round}</strong>
+                        <span>${round.totalDistance}m (${Math.round(round.percentage)}% objectif)</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, var(--olympic-blue), var(--olympic-green)); color: white; padding: 24px; border-radius: 12px; text-align: center;">
+            <h4>🥇 Meilleure performance :</h4>
+            <div style="font-size: 1.5rem; font-weight: 900; margin-top: 8px;">
+                Manche ${bestRound.round} - ${bestRound.totalDistance}m
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function saveResults() {
+    if(roundResults.length === 0) {
+        alert('⚠️ Aucun résultat à sauvegarder !');
+        return;
+    }
+    
+    // Sauvegarder dans les données élèves
+    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    
+    currentTeam.forEach(member => {
+        const studentIndex = allStudents.findIndex(s => s.id === member.id);
+        if(studentIndex === -1) return;
+        
+        if(!allStudents[studentIndex].seances) allStudents[studentIndex].seances = [];
+        
+        let seanceIndex = allStudents[studentIndex].seances.findIndex(s => s.lecon === 'L5');
+        if(seanceIndex === -1) {
+            allStudents[studentIndex].seances.push({
+                lecon: 'L5',
+                date: new Date().toISOString()
+            });
+            seanceIndex = allStudents[studentIndex].seances.length - 1;
+        }
+        
+        // Calculer données individuelles
+        const memberTotalDistance = roundResults.reduce((sum, round) => {
+            const memberData = round.members.find(m => m.id === member.id);
+            return sum + (memberData ? memberData.distance : 0);
+        }, 0);
+        
+        const memberAvgDistance = Math.round(memberTotalDistance / roundResults.length);
+        
+        allStudents[studentIndex].seances[seanceIndex] = {
+            ...allStudents[studentIndex].seances[seanceIndex],
+            type: 'relais_olympique',
+            equipe: currentTeam.map(m => m.nomPrenom).join(', '),
+            objectifEquipe: teamObjective,
+            manches: roundResults.length,
+            distanceTotaleIndividuelle: memberTotalDistance,
+            distanceMoyenneIndividuelle: memberAvgDistance,
+            distanceTotaleEquipe: roundResults.reduce((sum, r) => sum + r.totalDistance, 0),
+            performanceMoyenne: Math.round(roundResults.reduce((sum, r) => sum + r.percentage, 0) / roundResults.length),
+            detailManches: roundResults.map(round => {
+                const memberData = round.members.find(m => m.id === member.id);
+                return {
+                    manche: round.round,
+                    plots: memberData ? memberData.plots : 0,
+                    distance: memberData ? memberData.distance : 0
+                };
+            }),
+            date: new Date().toISOString()
+        };
+    });
+    
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    alert(`🏆 Résultats olympiques sauvegardés pour ${currentTeam.length} élèves !`);
+}
+
+// UTILITAIRES
+function updateUI() {
+    // Mettre à jour l'accessibilité des phases
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+        const phase = btn.getAttribute('data-phase');
+        if(canAccessPhase(phase)) {
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        } else {
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+        }
+    });
+}
+
+// Gestion flexible du nombre de manches
+function adjustMaxRounds(newMax) {
+    if(newMax >= 2 && newMax <= 3) {
+        maxRounds = newMax;
+        console.log(`Nombre de manches ajusté à ${maxRounds}`);
+    }
+}
+
+// Exposer fonction pour ajuster les manches depuis l'extérieur
+window.adjustMaxRounds = adjustMaxRounds;
+
+console.log('🏅 L5 - Relais Olympique initialisé !');
+</script>
+
 </body>
 </html>

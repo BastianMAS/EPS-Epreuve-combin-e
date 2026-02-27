@@ -1,5 +1,5 @@
 // Service Worker pour EPS PRO - Mode hors ligne
-const CACHE_NAME = 'eps-pro-v5';
+const CACHE_NAME = 'eps-pro-v7';
 const urlsToCache = [
   './',
   './index.html',

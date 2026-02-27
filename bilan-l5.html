@@ -3,181 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan Leçon 5 - EPS PRO</title>
+    <title>Bilan L5 - EPS PRO</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap');
+        
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --olympic-blue: #0085c3;
+            --olympic-yellow: #fcb131;
+            --olympic-green: #00a651;
+            --olympic-red: #ee334e;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #e2e8f0 100%);
+            color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: var(--card);
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        h1 { 
+            font-family: 'Orbitron', monospace;
+            text-align: center; 
+            font-size: 2.5rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--olympic-blue), var(--olympic-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--olympic-blue); 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn-back { 
+            padding: 12px 24px; 
+            background: linear-gradient(135deg, #374151, #4b5563); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-bottom: 30px; 
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--olympic-blue), var(--olympic-green));
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,133,195,0.2);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
             border-radius: 12px;
-            overflow: hidden;
+            text-align: center;
+            backdrop-filter: blur(10px);
         }
-        th {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 12px;
-            font-weight: 700;
-            text-align: left;
+
+        .summary-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 8px;
         }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+
+        .summary-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        tr:hover {
-            background: rgba(0,210,255,0.05);
-        }
-        .stat-box {
+
+        .card {
             background: var(--card);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--olympic-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .team-card {
+            margin-bottom: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            border-left: 4px solid var(--olympic-blue);
+        }
+
+        .team-header {
+            font-weight: 700;
+            color: var(--olympic-blue);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .performance-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .badge-excellent { background: var(--gold); color: black; }
+        .badge-good { background: var(--silver); color: black; }
+        .badge-progress { background: var(--bronze); color: white; }
+
+        .team-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .detail-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--olympic-blue);
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            gap: 20px;
+            margin: 30px 0;
+            perspective: 1000px;
+        }
+
+        .podium-place {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.5s ease;
+        }
+
+        .podium-place.first {
+            border: 3px solid var(--gold);
+            transform: scale(1.1);
+            order: 2;
+        }
+
+        .podium-place.second {
+            border: 3px solid var(--silver);
+            order: 1;
+        }
+
+        .podium-place.third {
+            border: 3px solid var(--bronze);
+            order: 3;
+        }
+
+        .podium-medal {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .podium-team {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .podium-distance {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .podium-place.first .podium-distance { color: var(--gold); }
+        .podium-place.second .podium-distance { color: var(--silver); }
+        .podium-place.third .podium-distance { color: var(--bronze); }
+
+        .export-btn {
+            width: 100%;
+            max-width: 400px;
+            margin: 30px auto;
+            display: block;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--olympic-blue), var(--olympic-green));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(0,133,195,0.3);
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-light);
+            font-style: italic;
+            padding: 60px;
+            background: var(--card);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .podium { flex-direction: column; align-items: center; }
+            .podium-place { order: unset !important; }
+            h1 { font-size: 2rem; }
+            .team-header { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.3rem; font-weight: 700;">📊 BILAN LEÇON 5</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
-        
-        <div id="stats"></div>
-        <div id="table-container"></div>
-    </div>
-    
-    <script>
-    let students = [];
-    
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        students = JSON.parse(stored);
-        displayBilan();
-    };
-    
-    function displayBilan() {
-        const withL5 = students.filter(s => s.lecon5);
-        
-        if(withL5.length === 0) {
-            document.getElementById('stats').innerHTML = '<div class="stat-box"><p>Aucune donnée Leçon 5 enregistrée.</p></div>';
-            return;
-        }
-        
-        // Stats globales
-        let totalPct = 0;
-        let totalReguliers = 0;
-        
-        withL5.forEach(s => {
-            const d = s.lecon5;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            totalPct += pctRealise;
-            
-            const ecart1_2 = Math.abs(d.tour2 - d.tour1);
-            const ecart2_3 = Math.abs(d.tour3 - d.tour2);
-            if(Math.max(ecart1_2, ecart2_3) <= 5) totalReguliers++;
-        });
-        
-        const moyPct = totalPct / withL5.length;
-        
-        // Récupérer l'atelier de la lecon5
-        const lecon5Data = JSON.parse(localStorage.getItem('lecon5_data') || '{}');
-        const atelierHTML = lecon5Data.atelierType ? `
-            <div class="stat-box" style="border-color: var(--purple);">
-                <h3 style="color: var(--purple); margin-bottom: 10px;">
-                    ${lecon5Data.atelierType === 'saut' ? '🦘 Atelier SAUT' : '🎯 Atelier LANCER'}
-                </h3>
-                <p style="white-space: pre-wrap;">${lecon5Data.atelierTexte || 'Aucune description'}</p>
+
+<div class="container">
+    <h1>EPS<span style="color: var(--olympic-yellow);">PRO</span></h1>
+    <p class="subtitle">🏅 BILAN L5 - RELAIS OLYMPIQUE</p>
+
+    <button class="btn-back" onclick="window.location.href='index.html'">← Retour accueil</button>
+
+    <div id="content"></div>
+
+    <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
+        📊 Exporter le bilan olympique
+    </button>
+</div>
+
+<script>
+let ELEVES = [];
+let bilanData = null;
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        document.getElementById('content').innerHTML = `
+            <div class="no-data">
+                ⚠️ Aucun élève trouvé. Ajoutez des élèves depuis l'accueil.
             </div>
-        ` : '';
-        
-        document.getElementById('stats').innerHTML = `
-            <div class="stat-box">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
-                <p><strong>Élèves ayant fait la lecon :</strong> ${withL5.length} / ${students.length}</p>
-                <p><strong>% VMA moyen réalisé :</strong> ${moyPct.toFixed(1)}%</p>
-                <p><strong>Courses régulières (écarts ≤5s) :</strong> ${totalReguliers} / ${withL5.length} (${((totalReguliers/withL5.length)*100).toFixed(0)}%)</p>
-            </div>
-            ${atelierHTML}
         `;
-        
-        // Tableau
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>Classe</th><th>VMA</th><th>% Objectif</th><th>T1</th><th>T2</th><th>T3</th><th>Moyenne</th><th>% Réalisé</th><th>Profil</th></tr></thead><tbody>';
-        
-        withL5.forEach(s => {
-            const d = s.lecon5;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            const ecart1_2 = d.tour2 - d.tour1;
-            const ecart2_3 = d.tour3 - d.tour2;
-            const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-            
-            let profil = '';
-            if(ecartMax <= 5) {
-                profil = '➡️ Régulière';
-            } else if(ecart1_2 > 10 || ecart2_3 > 10) {
-                profil = '⚠️ Grosse baisse';
-            } else {
-                profil = '⚠️ Irrégulière';
-            }
-            
-            const objectif = pctRealise >= d.pctVMA ? '✅' : '❌';
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+s.classe+'</td>';
-            html += '<td>'+vma+' km/h</td>';
-            html += '<td>'+d.pctVMA+'%</td>';
-            html += '<td>'+formatTime(d.tour1*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour2*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour3*1000)+'</td>';
-            html += '<td>'+formatTime(moy*1000)+'</td>';
-            html += '<td>'+pctRealise.toFixed(1)+'% '+objectif+'</td>';
-            html += '<td>'+profil+'</td>';
-            html += '</tr>';
-        });
-        
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
+        return;
     }
     
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
+    ELEVES = JSON.parse(stored);
+    generateBilan();
+};
+
+function generateBilan() {
+    const elevesL5 = ELEVES.filter(e => e.seances && e.seances.find(s => s.lecon === 'L5'));
+    
+    if(elevesL5.length === 0) {
+        document.getElementById('content').innerHTML = `
+            <div class="no-data">
+                🏅 Aucune donnée L5 trouvée. Effectuez d'abord la leçon 5 olympique.
+            </div>
+        `;
+        return;
     }
-    </script>
+
+    // Grouper par équipes
+    const equipes = {};
+    
+    elevesL5.forEach(eleve => {
+        const seanceL5 = eleve.seances.find(s => s.lecon === 'L5');
+        if(!seanceL5 || !seanceL5.equipe) return;
+        
+        const equipeNom = seanceL5.equipe;
+        if(!equipes[equipeNom]) {
+            equipes[equipeNom] = {
+                nom: equipeNom,
+                membres: [],
+                distanceTotale: 0,
+                objectif: seanceL5.objectifEquipe || 0,
+                manches: seanceL5.manches || 0,
+                performanceMoyenne: 0
+            };
+        }
+        
+        equipes[equipeNom].membres.push({
+            nom: eleve.nomPrenom,
+            distanceIndividuelle: seanceL5.distanceTotaleIndividuelle || 0,
+            distanceMoyenne: seanceL5.distanceMoyenneIndividuelle || 0,
+            detailManches: seanceL5.detailManches || []
+        });
+        
+        equipes[equipeNom].distanceTotale = seanceL5.distanceTotaleEquipe || 0;
+        equipes[equipeNom].performanceMoyenne = seanceL5.performanceMoyenne || 0;
+    });
+
+    bilanData = {
+        equipes: Object.values(equipes),
+        stats: {
+            totalEquipes: Object.keys(equipes).length,
+            totalEleves: elevesL5.length,
+            distanceTotaleClasse: 0,
+            performanceMoyenneClasse: 0,
+            equipesObjectifAtteint: 0
+        }
+    };
+
+    // Calculs statistiques
+    bilanData.stats.distanceTotaleClasse = bilanData.equipes.reduce((sum, eq) => sum + eq.distanceTotale, 0);
+    bilanData.stats.performanceMoyenneClasse = Math.round(
+        bilanData.equipes.reduce((sum, eq) => sum + eq.performanceMoyenne, 0) / bilanData.equipes.length
+    );
+    bilanData.stats.equipesObjectifAtteint = bilanData.equipes.filter(eq => eq.performanceMoyenne >= 95).length;
+
+    renderBilan();
+}
+
+function renderBilan() {
+    const content = document.getElementById('content');
+    
+    let html = `
+        <div class="summary-card">
+            <h2>🏆 RÉSUMÉ GÉNÉRAL DES JEUX OLYMPIQUES</h2>
+            <div class="summary-stats">
+                <div class="summary-box">
+                    <div class="summary-number">${bilanData.stats.totalEquipes}</div>
+                    <div class="summary-label">Équipes participantes</div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-number">${bilanData.stats.totalEleves}</div>
+                    <div class="summary-label">Athlètes olympiques</div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-number">${Math.round(bilanData.stats.distanceTotaleClasse/1000*10)/10}km</div>
+                    <div class="summary-label">Distance totale</div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-number">${bilanData.stats.performanceMoyenneClasse}%</div>
+                    <div class="summary-label">Performance moyenne</div>
+                </div>
+            </div>
+            <div style="font-size: 1.1rem; margin-top: 20px;">
+                🏅 <strong>${bilanData.stats.equipesObjectifAtteint}</strong> équipe(s) ont atteint leur objectif olympique !
+            </div>
+        </div>
+    `;
+
+    if(bilanData.equipes.length > 0) {
+        html += renderPodium();
+        html += renderEquipesDetails();
+    }
+    
+    content.innerHTML = html;
+    document.getElementById('exportBtn').style.display = 'block';
+}
+
+function renderPodium() {
+    const equipesTriees = [...bilanData.equipes].sort((a, b) => b.distanceTotale - a.distanceTotale);
+    
+    let html = `
+        <div style="text-align: center; margin: 40px 0;">
+            <h3 style="font-family: 'Orbitron', monospace; font-size: 1.8rem; color: var(--olympic-blue); margin-bottom: 30px;">
+                🏆 PODIUM OLYMPIQUE
+            </h3>
+            <div class="podium">
+    `;
+    
+    if(equipesTriees.length >= 1) {
+        html += `
+            <div class="podium-place first">
+                <div class="podium-medal">🥇</div>
+                <div class="podium-team">${equipesTriees[0].nom}</div>
+                <div class="podium-distance">${equipesTriees[0].distanceTotale}m</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    ${equipesTriees[0].performanceMoyenne}% objectif
+                </div>
+            </div>
+        `;
+    }
+    
+    if(equipesTriees.length >= 2) {
+        html += `
+            <div class="podium-place second">
+                <div class="podium-medal">🥈</div>
+                <div class="podium-team">${equipesTriees[1].nom}</div>
+                <div class="podium-distance">${equipesTriees[1].distanceTotale}m</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    ${equipesTriees[1].performanceMoyenne}% objectif
+                </div>
+            </div>
+        `;
+    }
+    
+    if(equipesTriees.length >= 3) {
+        html += `
+            <div class="podium-place third">
+                <div class="podium-medal">🥉</div>
+                <div class="podium-team">${equipesTriees[2].nom}</div>
+                <div class="podium-distance">${equipesTriees[2].distanceTotale}m</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    ${equipesTriees[2].performanceMoyenne}% objectif
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+function renderEquipesDetails() {
+    let html = `
+        <div class="card">
+            <div class="card-title">👥 DÉTAIL DES ÉQUIPES OLYMPIQUES</div>
+    `;
+    
+    bilanData.equipes.forEach(equipe => {
+        const badgeClass = equipe.performanceMoyenne >= 95 ? 'badge-excellent' : 
+                          equipe.performanceMoyenne >= 85 ? 'badge-good' : 'badge-progress';
+        
+        const badgeText = equipe.performanceMoyenne >= 95 ? 'OBJECTIF ATTEINT' : 
+                         equipe.performanceMoyenne >= 85 ? 'TRÈS PROCHE' : 'EN PROGRESSION';
+        
+        html += `
+            <div class="team-card">
+                <div class="team-header">
+                    <span>🏃‍♂️ ${equipe.nom}</span>
+                    <span class="performance-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                
+                <div class="team-details">
+                    <div class="detail-item">
+                        <div class="detail-number">${equipe.distanceTotale}m</div>
+                        <div>Distance totale</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-number">${equipe.objectif}m</div>
+                        <div>Objectif</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-number">${equipe.performanceMoyenne}%</div>
+                        <div>Performance</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-number">${equipe.manches}</div>
+                        <div>Manches</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <strong>Membres :</strong>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 8px;">
+                        ${equipe.membres.map(membre => `
+                            <div style="font-size: 0.85rem; padding: 6px 8px; background: white; border-radius: 6px;">
+                                <strong>${membre.nom}</strong><br>
+                                Total: ${membre.distanceIndividuelle}m<br>
+                                Moyenne: ${membre.distanceMoyenne}m/manche
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    return html;
+}
+
+function exportBilan() {
+    if(!bilanData) return;
+    
+    let contenu = `BILAN L5 - RELAIS OLYMPIQUE\n`;
+    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
+    
+    contenu += `RÉSUMÉ GÉNÉRAL:\n`;
+    contenu += `- Équipes participantes: ${bilanData.stats.totalEquipes}\n`;
+    contenu += `- Athlètes olympiques: ${bilanData.stats.totalEleves}\n`;
+    contenu += `- Distance totale parcourue: ${Math.round(bilanData.stats.distanceTotaleClasse/1000*10)/10}km\n`;
+    contenu += `- Performance moyenne: ${bilanData.stats.performanceMoyenneClasse}%\n`;
+    contenu += `- Équipes objectif atteint: ${bilanData.stats.equipesObjectifAtteint}\n\n`;
+    
+    contenu += `CLASSEMENT OLYMPIQUE:\n`;
+    const equipesTriees = [...bilanData.equipes].sort((a, b) => b.distanceTotale - a.distanceTotale);
+    equipesTriees.forEach((equipe, index) => {
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+        contenu += `${medal} ${equipe.nom}: ${equipe.distanceTotale}m (${equipe.performanceMoyenne}% objectif)\n`;
+    });
+    contenu += `\n`;
+    
+    contenu += `DÉTAIL PAR ÉQUIPE:\n`;
+    bilanData.equipes.forEach(equipe => {
+        contenu += `\n${equipe.nom}:\n`;
+        contenu += `  Distance totale: ${equipe.distanceTotale}m\n`;
+        contenu += `  Objectif: ${equipe.objectif}m\n`;
+        contenu += `  Performance: ${equipe.performanceMoyenne}%\n`;
+        contenu += `  Manches: ${equipe.manches}\n`;
+        contenu += `  Membres:\n`;
+        equipe.membres.forEach(membre => {
+            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (${membre.distanceMoyenne}m/manche)\n`;
+        });
+    });
+
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bilan_L5_olympique_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
+
 </body>
 </html>

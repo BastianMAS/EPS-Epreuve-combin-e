@@ -3,181 +3,606 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan Leçon 4 - EPS PRO</title>
+    <title>Bilan L4 - EPS PRO</title>
     <style>
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #ff6b35;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --orange: #ff8800;
+            --blue: #3b82f6;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
-            line-height: 1.6;
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #2d1810 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .btn-back { 
+            padding: 10px 20px; 
+            background: linear-gradient(135deg, #374151, #4b5563); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
             background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
+            border: 1px solid rgba(255,107,53,0.2);
+            border-radius: 16px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
         }
-        th {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 12px;
+
+        .card-title {
+            font-size: 1.1rem;
             font-weight: 700;
-            text-align: left;
+            margin-bottom: 12px;
+            color: var(--accent);
         }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        tr:hover {
-            background: rgba(0,210,255,0.05);
-        }
-        .stat-box {
-            background: var(--card);
-            padding: 15px;
+
+        .student-card {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: rgba(255,107,53,0.1);
             border-radius: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--accent);
+            border: 1px solid rgba(255,107,53,0.3);
+        }
+
+        .student-name {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .progression-stats {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid var(--blue);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .course-stats {
+            background: rgba(74,222,128,0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .technique-stats {
+            background: rgba(251,191,36,0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .progression-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .prog-excellent { background: var(--success); color: black; }
+        .prog-good { background: var(--warning); color: black; }
+        .prog-moyen { background: var(--orange); color: white; }
+        .prog-difficile { background: var(--danger); color: white; }
+
+        .summary-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,136,0,0.1));
+            border: 1px solid var(--accent);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .summary-box {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255,107,53,0.1);
+            border-radius: 10px;
+        }
+
+        .summary-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .export-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(74,222,128,0.4);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #94a3b8;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .evolution-indicator {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .evolution-up { background: var(--success); color: black; }
+        .evolution-same { background: var(--warning); color: black; }
+        .evolution-down { background: var(--danger); color: white; }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.3rem; font-weight: 700;">📊 BILAN LEÇON 4</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
-        
-        <div id="stats"></div>
-        <div id="table-container"></div>
-    </div>
-    
-    <script>
-    let students = [];
-    
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        students = JSON.parse(stored);
-        displayBilan();
-    };
-    
-    function displayBilan() {
-        const withL4 = students.filter(s => s.lecon4);
-        
-        if(withL4.length === 0) {
-            document.getElementById('stats').innerHTML = '<div class="stat-box"><p>Aucune donnée Leçon 4 enregistrée.</p></div>';
-            return;
-        }
-        
-        // Stats globales
-        let totalPct = 0;
-        let totalReguliers = 0;
-        
-        withL4.forEach(s => {
-            const d = s.lecon4;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            totalPct += pctRealise;
-            
-            const ecart1_2 = Math.abs(d.tour2 - d.tour1);
-            const ecart2_3 = Math.abs(d.tour3 - d.tour2);
-            if(Math.max(ecart1_2, ecart2_3) <= 5) totalReguliers++;
-        });
-        
-        const moyPct = totalPct / withL4.length;
-        
-        // Récupérer l'atelier de la lecon4
-        const lecon4Data = JSON.parse(localStorage.getItem('lecon4_data') || '{}');
-        const atelierHTML = lecon4Data.atelierType ? `
-            <div class="stat-box" style="border-color: var(--purple);">
-                <h3 style="color: var(--purple); margin-bottom: 10px;">
-                    ${lecon4Data.atelierType === 'saut' ? '🦘 Atelier SAUT' : '🎯 Atelier LANCER'}
-                </h3>
-                <p style="white-space: pre-wrap;">${lecon4Data.atelierTexte || 'Aucune description'}</p>
+
+<h1>EPS<span style="color: var(--accent);">PRO</span></h1>
+<p class="subtitle">🧠 BILAN L4 - PROGRESSION INTELLIGENTE</p>
+
+<div class="container">
+    <button class="btn-back" onclick="window.location.href='index.html'">← Retour accueil</button>
+
+    <div id="content"></div>
+
+    <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
+        📊 Exporter le bilan
+    </button>
+</div>
+
+<script>
+let ELEVES = [];
+let bilanData = null;
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        document.getElementById('content').innerHTML = `
+            <div class="no-data">
+                ⚠️ Aucun élève trouvé. Ajoutez des élèves depuis l'accueil.
             </div>
-        ` : '';
-        
-        document.getElementById('stats').innerHTML = `
-            <div class="stat-box">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
-                <p><strong>Élèves ayant fait la lecon :</strong> ${withL4.length} / ${students.length}</p>
-                <p><strong>% VMA moyen réalisé :</strong> ${moyPct.toFixed(1)}%</p>
-                <p><strong>Courses régulières (écarts ≤5s) :</strong> ${totalReguliers} / ${withL4.length} (${((totalReguliers/withL4.length)*100).toFixed(0)}%)</p>
-            </div>
-            ${atelierHTML}
         `;
-        
-        // Tableau
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>Classe</th><th>VMA</th><th>% Objectif</th><th>T1</th><th>T2</th><th>T3</th><th>Moyenne</th><th>% Réalisé</th><th>Profil</th></tr></thead><tbody>';
-        
-        withL4.forEach(s => {
-            const d = s.lecon4;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            const ecart1_2 = d.tour2 - d.tour1;
-            const ecart2_3 = d.tour3 - d.tour2;
-            const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-            
-            let profil = '';
-            if(ecartMax <= 5) {
-                profil = '➡️ Régulière';
-            } else if(ecart1_2 > 10 || ecart2_3 > 10) {
-                profil = '⚠️ Grosse baisse';
-            } else {
-                profil = '⚠️ Irrégulière';
-            }
-            
-            const objectif = pctRealise >= d.pctVMA ? '✅' : '❌';
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+s.classe+'</td>';
-            html += '<td>'+vma+' km/h</td>';
-            html += '<td>'+d.pctVMA+'%</td>';
-            html += '<td>'+formatTime(d.tour1*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour2*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour3*1000)+'</td>';
-            html += '<td>'+formatTime(moy*1000)+'</td>';
-            html += '<td>'+pctRealise.toFixed(1)+'% '+objectif+'</td>';
-            html += '<td>'+profil+'</td>';
-            html += '</tr>';
-        });
-        
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
+        return;
     }
     
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
+    ELEVES = JSON.parse(stored);
+    generateBilan();
+};
+
+function generateBilan() {
+    const elevesL4 = ELEVES.filter(e => e.seances && e.seances.find(s => s.lecon === 'L4'));
+    
+    if(elevesL4.length === 0) {
+        document.getElementById('content').innerHTML = `
+            <div class="no-data">
+                📚 Aucune donnée L4 trouvée. Effectuez d'abord la leçon 4.
+            </div>
+        `;
+        return;
     }
-    </script>
+
+    bilanData = {
+        eleves: [],
+        stats: {
+            totalEleves: elevesL4.length,
+            repartitionProgressions: { refaire: 0, meme: 0, plus5: 0, plus10: 0, plus15: 0 },
+            moyenneObjectifAtteint: 0,
+            moyenneTechniqueSaut: 0,
+            moyenneTechniqueLancer: 0,
+            evolutionVsL3: { ameliore: 0, stable: 0, degrade: 0 }
+        }
+    };
+
+    let totalObjectifsAtteints = 0;
+    let totalTechSaut = 0, totalTechLancer = 0;
+
+    elevesL4.forEach(eleve => {
+        const seanceL4 = eleve.seances.find(s => s.lecon === 'L4');
+        const seanceL3 = eleve.seances?.find(s => s.lecon === 'L3');
+        if(!seanceL4) return;
+
+        // Analyse progression choisie
+        const progression = getProgressionData(seanceL4.progression);
+        if(progression && seanceL4.progression) {
+            bilanData.stats.repartitionProgressions[seanceL4.progression]++;
+        }
+
+        // Analyse course
+        let courseAnalyse = null;
+        if(seanceL4.tours && seanceL4.tours.filter(t => t).length === 6 && seanceL4.progression && eleve.vma) {
+            const temps = seanceL4.tours.filter(t => t);
+            const moyenne = temps.reduce((a, b) => a + b, 0) / temps.length;
+            
+            // Calculer cible L4
+            const niveauVMA = calculerNiveauVMA(eleve, seanceL4.progression);
+            if(niveauVMA) {
+                const vma = parseFloat(eleve.vma);
+                const vitesseCible = vma * (niveauVMA / 100);
+                const tempsCible = (0.2 / vitesseCible) * 3600;
+                
+                const ecartMoyenne = Math.abs(moyenne - tempsCible);
+                const pourcentageEcart = (ecartMoyenne / tempsCible) * 100;
+                
+                let evaluation = 'progress';
+                if(pourcentageEcart <= 5) evaluation = 'excellent';
+                else if(pourcentageEcart <= 10) evaluation = 'good';
+                
+                // Comparaison avec L3
+                let evolutionVsL3 = 'stable';
+                if(seanceL3 && seanceL3.moyenne200m) {
+                    const diffAvecL3 = seanceL3.moyenne200m - moyenne;
+                    if(diffAvecL3 > 2) evolutionVsL3 = 'ameliore';
+                    else if(diffAvecL3 < -2) evolutionVsL3 = 'degrade';
+                }
+                bilanData.stats.evolutionVsL3[evolutionVsL3]++;
+                
+                courseAnalyse = {
+                    niveauVMA: niveauVMA,
+                    moyenne: moyenne,
+                    cible: tempsCible,
+                    ecart: ecartMoyenne,
+                    evaluation: evaluation,
+                    evolutionVsL3: evolutionVsL3,
+                    moyenneL3: seanceL3?.moyenne200m || null,
+                    regularite: Math.max(...temps.map((t, idx) => idx > 0 ? Math.abs(t - temps[idx-1]) : 0))
+                };
+                
+                if(evaluation === 'excellent') totalObjectifsAtteints++;
+            }
+        }
+
+        // Analyse technique saut
+        let techSaut = 0;
+        ['sautTech1', 'sautTech2', 'sautTech3', 'sautTech4'].forEach(tech => {
+            if(seanceL4[tech]) techSaut++;
+        });
+        totalTechSaut += techSaut;
+
+        // Analyse technique lancer
+        let techLancer = 0;
+        ['lancerTech1', 'lancerTech2', 'lancerTech3', 'lancerTech4'].forEach(tech => {
+            if(seanceL4[tech]) techLancer++;
+        });
+        totalTechLancer += techLancer;
+
+        // Ajouter élève au bilan
+        bilanData.eleves.push({
+            nom: eleve.nomPrenom,
+            sexe: eleve.sexe,
+            age: eleve.age,
+            vma: eleve.vma,
+            progression: progression,
+            course: courseAnalyse,
+            saut: {
+                distance: seanceL4.sautDistance,
+                techniques: techSaut,
+                tech1: seanceL4.sautTech1,
+                tech2: seanceL4.sautTech2,
+                tech3: seanceL4.sautTech3,
+                tech4: seanceL4.sautTech4
+            },
+            lancer: {
+                distance: seanceL4.lancerDistance,
+                techniques: techLancer,
+                tech1: seanceL4.lancerTech1,
+                tech2: seanceL4.lancerTech2,
+                tech3: seanceL4.lancerTech3,
+                tech4: seanceL4.lancerTech4
+            }
+        });
+    });
+
+    // Calculs finaux
+    bilanData.stats.moyenneObjectifAtteint = Math.round((totalObjectifsAtteints / elevesL4.length) * 100);
+    bilanData.stats.moyenneTechniqueSaut = Math.round((totalTechSaut / elevesL4.length) * 10) / 10;
+    bilanData.stats.moyenneTechniqueLancer = Math.round((totalTechLancer / elevesL4.length) * 10) / 10;
+
+    renderBilan();
+}
+
+function getProgressionData(progressionId) {
+    const progressions = {
+        'refaire': { label: 'Refaire L3', desc: 'Rattrapage' },
+        'meme': { label: 'Même niveau', desc: 'Consolidation' },
+        'plus5': { label: '+5% VMA', desc: 'Progression standard' },
+        'plus10': { label: '+10% VMA', desc: 'Saut de niveau' },
+        'plus15': { label: '+15% VMA', desc: 'Challenge expert' }
+    };
+    return progressions[progressionId] || null;
+}
+
+function calculerNiveauVMA(eleve, progression) {
+    const seanceL3 = eleve.seances?.find(s => s.lecon === 'L3');
+    if(!seanceL3 || !seanceL3.niveau) return 100; // Défaut
+    
+    const niveauL3 = getNiveauL3Pourcent(seanceL3.niveau);
+    
+    switch(progression) {
+        case 'refaire': return niveauL3;
+        case 'meme': return niveauL3;
+        case 'plus5': return niveauL3 + 5;
+        case 'plus10': return niveauL3 + 10;
+        case 'plus15': return niveauL3 + 15;
+        default: return niveauL3 + 5;
+    }
+}
+
+function getNiveauL3Pourcent(niveauId) {
+    const niveaux = {
+        'vma95': 95, 'vma100': 100, 'vma105': 105, 'vma110': 110
+    };
+    return niveaux[niveauId] || 100;
+}
+
+function renderBilan() {
+    const content = document.getElementById('content');
+    
+    let html = `
+        <div class="grid">
+            <div class="card summary-card">
+                <div class="card-title">🧠 RÉSUMÉ CLASSE L4 - INTELLIGENCE ADAPTATIVE</div>
+                <div class="summary-stats">
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.totalEleves}</div>
+                        <div class="summary-label">Élèves évalués</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.moyenneObjectifAtteint}%</div>
+                        <div class="summary-label">Objectif course atteint</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.moyenneTechniqueSaut}/4</div>
+                        <div class="summary-label">Moyenne tech. saut</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="summary-number">${bilanData.stats.moyenneTechniqueLancer}/4</div>
+                        <div class="summary-label">Moyenne tech. lancer</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <strong>🔥 Progressions choisies :</strong><br>
+                    +5% VMA: ${bilanData.stats.repartitionProgressions.plus5} élèves | 
+                    +10% VMA: ${bilanData.stats.repartitionProgressions.plus10} élèves | 
+                    +15% VMA: ${bilanData.stats.repartitionProgressions.plus15} élèves<br>
+                    Même niveau: ${bilanData.stats.repartitionProgressions.meme} élèves | 
+                    Refaire L3: ${bilanData.stats.repartitionProgressions.refaire} élèves
+                </div>
+
+                <div style="margin-top: 12px;">
+                    <strong>📈 Évolution vs L3 :</strong><br>
+                    <span class="evolution-indicator evolution-up">↗ Amélioré: ${bilanData.stats.evolutionVsL3.ameliore}</span>
+                    <span class="evolution-indicator evolution-same">→ Stable: ${bilanData.stats.evolutionVsL3.stable}</span>
+                    <span class="evolution-indicator evolution-down">↘ Dégradé: ${bilanData.stats.evolutionVsL3.degrade}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-title">👥 PROGRESSIONS PAR ÉLÈVE</div>
+                <div id="eleveDetails"></div>
+            </div>
+        </div>
+    `;
+
+    content.innerHTML = html;
+    renderEleveDetails();
+    document.getElementById('exportBtn').style.display = 'block';
+}
+
+function renderEleveDetails() {
+    let html = '';
+
+    bilanData.eleves.forEach(eleve => {
+        const evolutionIcon = eleve.course?.evolutionVsL3 === 'ameliore' ? '📈' :
+                             eleve.course?.evolutionVsL3 === 'degrade' ? '📉' : '➡️';
+        
+        html += `
+            <div class="student-card">
+                <div class="student-name">${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nom} (${eleve.age} ans) ${evolutionIcon}</div>
+                
+                <div class="progression-stats">
+                    <strong>🧠 Progression intelligente :</strong>
+                    <div class="stat-line">
+                        <span>Choix adaptatif:</span>
+                        <span>${eleve.progression?.label || 'Non définie'}</span>
+                    </div>
+                </div>
+                
+                ${eleve.course ? `
+                    <div class="course-stats">
+                        <strong>🏃‍♂️ Course 6×200m :</strong>
+                        <div class="stat-line">
+                            <span>Niveau L4:</span>
+                            <span>${eleve.course.niveauVMA}% VMA</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Moyenne réalisée:</span>
+                            <span>${fmtSec(eleve.course.moyenne)}</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>Temps cible:</span>
+                            <span>${fmtSec(eleve.course.cible)}</span>
+                        </div>
+                        ${eleve.course.moyenneL3 ? `
+                        <div class="stat-line">
+                            <span>Évolution vs L3:</span>
+                            <span>${fmtSec(eleve.course.moyenneL3)} → ${fmtSec(eleve.course.moyenne)} 
+                            (${eleve.course.evolutionVsL3 === 'ameliore' ? 'Amélioré' : 
+                               eleve.course.evolutionVsL3 === 'degrade' ? 'Dégradé' : 'Stable'})</span>
+                        </div>
+                        ` : ''}
+                        <div class="stat-line">
+                            <span>Évaluation:</span>
+                            <span class="progression-badge ${eleve.course.evaluation === 'excellent' ? 'prog-excellent' : 
+                                                              eleve.course.evaluation === 'good' ? 'prog-good' : 'prog-difficile'}">
+                                ${eleve.course.evaluation === 'excellent' ? 'Objectif atteint' : 
+                                  eleve.course.evaluation === 'good' ? 'Proche objectif' : 'En progression'}
+                            </span>
+                        </div>
+                    </div>
+                ` : '<div style="color: #94a3b8; font-style: italic;">Pas de données course</div>'}
+                
+                <div class="technique-stats">
+                    <strong>🦘 Saut :</strong> ${eleve.saut.distance || '-'} m | Techniques: ${eleve.saut.techniques}/4<br>
+                    <strong>🎯 Lancer :</strong> ${eleve.lancer.distance || '-'} m | Techniques: ${eleve.lancer.techniques}/4
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('eleveDetails').innerHTML = html;
+}
+
+function fmtSec(sec) {
+    if(!sec) return '-';
+    const m = Math.floor(sec / 60);
+    const s = Math.round(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function exportBilan() {
+    let contenu = `BILAN L4 - PROGRESSION INTELLIGENTE\n`;
+    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
+    
+    contenu += `RÉSUMÉ CLASSE:\n`;
+    contenu += `- Élèves évalués: ${bilanData.stats.totalEleves}\n`;
+    contenu += `- Objectif course atteint: ${bilanData.stats.moyenneObjectifAtteint}%\n`;
+    contenu += `- Moyenne technique saut: ${bilanData.stats.moyenneTechniqueSaut}/4\n`;
+    contenu += `- Moyenne technique lancer: ${bilanData.stats.moyenneTechniqueLancer}/4\n\n`;
+    
+    contenu += `PROGRESSIONS CHOISIES:\n`;
+    contenu += `- +5% VMA: ${bilanData.stats.repartitionProgressions.plus5} élèves\n`;
+    contenu += `- +10% VMA: ${bilanData.stats.repartitionProgressions.plus10} élèves\n`;
+    contenu += `- +15% VMA: ${bilanData.stats.repartitionProgressions.plus15} élèves\n`;
+    contenu += `- Même niveau: ${bilanData.stats.repartitionProgressions.meme} élèves\n`;
+    contenu += `- Refaire L3: ${bilanData.stats.repartitionProgressions.refaire} élèves\n\n`;
+    
+    contenu += `ÉVOLUTION VS L3:\n`;
+    contenu += `- Amélioré: ${bilanData.stats.evolutionVsL3.ameliore} élèves\n`;
+    contenu += `- Stable: ${bilanData.stats.evolutionVsL3.stable} élèves\n`;
+    contenu += `- Dégradé: ${bilanData.stats.evolutionVsL3.degrade} élèves\n\n`;
+    
+    contenu += `DÉTAIL PAR ÉLÈVE:\n`;
+    bilanData.eleves.forEach(eleve => {
+        contenu += `\n${eleve.nom} (${eleve.age} ans):\n`;
+        contenu += `  Progression: ${eleve.progression?.label || 'Non définie'}\n`;
+        if(eleve.course) {
+            contenu += `  Course: ${eleve.course.niveauVMA}% VMA - Moyenne ${fmtSec(eleve.course.moyenne)}\n`;
+            if(eleve.course.moyenneL3) {
+                contenu += `  Évolution vs L3: ${fmtSec(eleve.course.moyenneL3)} → ${fmtSec(eleve.course.moyenne)}\n`;
+            }
+        }
+        contenu += `  Saut: ${eleve.saut.distance || '-'}m - ${eleve.saut.techniques}/4 techniques\n`;
+        contenu += `  Lancer: ${eleve.lancer.distance || '-'}m - ${eleve.lancer.techniques}/4 techniques\n`;
+    });
+
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bilan_L4_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
 </body>
 </html>

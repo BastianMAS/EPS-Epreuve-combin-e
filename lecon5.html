@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L5 - Relais Olympique - EPS PRO</title>
+    <title>L5 - Relais Olympique - EPS: épreuve Combinée</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap');
         
@@ -651,7 +651,7 @@
 
 <div class="container">
     <header>
-        <h1>EPS<span>PRO</span></h1>
+        <h1>EPS<span>: épreuve Combinée</span></h1>
         <h2>🏅 L5 - RELAIS OLYMPIQUE PAR ÉQUIPES</h2>
         <button onclick="window.location.href='index.html'">← Retour</button>
     </header>
@@ -659,8 +659,7 @@
     <!-- SÉLECTION PHASE -->
     <div class="phase-selector">
         <button class="phase-btn active" data-phase="setup">🎯 Formation Équipe</button>
-        <button class="phase-btn" data-phase="race">🏃‍♂️ Course 6min</button>
-        <button class="phase-btn" data-phase="results">📊 Résultats</button>
+        <button class="phase-btn" data-phase="results">📊 Saisie Distances</button>
         <button class="phase-btn" data-phase="strategy">💭 Stratégie</button>
     </div>
 
@@ -717,54 +716,17 @@
         </div>
 
         <div class="start-button-container">
-            <button class="start-race-btn" id="start-race-btn" onclick="goToRace()" disabled>
-                🏁 Commencer la course olympique !
+            <button class="start-race-btn" id="start-race-btn" onclick="goToResults()" disabled>
+                📊 Commencer la saisie des distances !
             </button>
-        </div>
-    </div>
-
-    <!-- PHASE RACE : Course 6min -->
-    <div id="race-phase" class="phase-content">
-        <div class="section-header">
-            <h3>🏃‍♂️ COURSE OLYMPIQUE EN COURS</h3>
-            <p>6 minutes pour atteindre votre objectif !</p>
-        </div>
-
-        <div class="race-dashboard">
-            <div class="timer-display">
-                <div class="timer" id="timer">6:00</div>
-                <div class="timer-status" id="timer-status">En attente</div>
-            </div>
-
-            <div class="objective-reminder">
-                <div class="objective-target" id="objective-target">Objectif: 0m</div>
-                <div class="current-distance" id="current-distance">Distance: 0m</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="race-controls">
-            <button class="control-btn start" id="start-timer-btn" onclick="startTimer()">▶️ Démarrer</button>
-            <button class="control-btn pause" id="pause-timer-btn" onclick="pauseTimer()">⏸️ Pause</button>
-            <button class="control-btn stop" id="stop-timer-btn" onclick="stopTimer()">⏹️ Arrêter</button>
-        </div>
-
-        <div class="team-running" id="team-running">
-            <!-- Affichage équipe pendant la course -->
-        </div>
-
-        <div class="encouragements" id="encouragements">
-            <div class="encouragement-message">💪 Allez-y les champions olympiques !</div>
         </div>
     </div>
 
     <!-- PHASE RESULTS : Saisie résultats -->
     <div id="results-phase" class="phase-content">
         <div class="section-header">
-            <h3>📊 COMPTABILISATION OLYMPIQUE</h3>
-            <p>Chaque membre saisit ses plots parcourus</p>
+            <h3>📊 SAISIE DES DISTANCES OLYMPIQUES</h3>
+            <p>Chaque membre saisit le nombre de plots parcourus (1 plot = 50m)</p>
         </div>
 
         <div class="results-grid" id="results-grid">
@@ -841,36 +803,11 @@
 let ELEVES = [];
 let currentTeam = [];
 let currentPhase = 'setup';
-let raceTimer = null;
-let timerSeconds = 360; // 6 minutes
-let isRunning = false;
 let currentRound = 1;
 let maxRounds = 3;
 let roundResults = [];
 let teamObjective = 0;
 let recoveryTimer = null;
-
-// ENCOURAGEMENTS DYNAMIQUES
-const ENCOURAGEMENTS = {
-    start: [
-        "💪 Allez-y les champions olympiques !",
-        "🏅 Montrez votre esprit d'équipe !",
-        "🔥 6 minutes pour briller !",
-        "⚡ Ensemble vers la victoire !"
-    ],
-    midrace: [
-        "🚀 Excellent rythme d'équipe !",
-        "💫 Continuez cette stratégie !",
-        "🎯 L'objectif approche !",
-        "🏃‍♂️ Régularité parfaite !"
-    ],
-    nearend: [
-        "🔥 Dernière minute ! Donnez tout !",
-        "💥 Sprint final olympique !",
-        "🏆 La médaille est à portée !",
-        "⚡ Finissez en beauté !"
-    ]
-};
 
 // INITIALISATION
 window.onload = function() {
@@ -902,8 +839,7 @@ function setupPhaseEventListeners() {
 function canAccessPhase(phase) {
     switch(phase) {
         case 'setup': return true;
-        case 'race': return currentTeam.length >= 4;
-        case 'results': return isRunning === false && timerSeconds < 360;
+        case 'results': return currentTeam.length >= 4;
         case 'strategy': return roundResults.length > 0;
         default: return false;
     }
@@ -922,9 +858,6 @@ function switchPhase(phase) {
     
     // Actions spécifiques par phase
     switch(phase) {
-        case 'race':
-            setupRacePhase();
-            break;
         case 'results':
             setupResultsPhase();
             break;
@@ -1088,96 +1021,21 @@ function updateStartButton() {
     const btn = document.getElementById('start-race-btn');
     if(currentTeam.length >= 4) {
         btn.disabled = false;
-        btn.textContent = `🏁 Commencer la course olympique ! (${currentTeam.length} coureurs)`;
+        btn.textContent = `📊 Commencer la saisie ! (${currentTeam.length} coureurs)`;
     } else {
         btn.disabled = true;
         btn.textContent = `Sélectionnez au moins 4 élèves (${currentTeam.length}/4)`;
     }
 }
 
-// PHASE RACE
-function goToRace() {
+// PHASE RESULTS
+function goToResults() {
     if(currentTeam.length < 4) {
         alert('⚠️ Sélectionnez au moins 4 élèves !');
         return;
     }
-    switchPhase('race');
+    switchPhase('results');
 }
-
-function setupRacePhase() {
-    document.getElementById('objective-target').textContent = `Objectif: ${teamObjective}m`;
-    document.getElementById('current-distance').textContent = `Distance: 0m`;
-    document.getElementById('timer').textContent = '6:00';
-    document.getElementById('timer-status').textContent = 'Prêt à démarrer';
-    document.getElementById('progress-fill').style.width = '0%';
-    
-    // Affichage équipe
-    const teamContainer = document.getElementById('team-running');
-    let html = '<h4>🏃‍♂️ Votre équipe olympique :</h4>';
-    currentTeam.forEach(member => {
-        html += `<div style="display: inline-block; margin: 8px; padding: 8px 12px; background: var(--olympic-blue); color: white; border-radius: 8px; font-weight: 600;">${member.nomPrenom}</div>`;
-    });
-    teamContainer.innerHTML = html;
-    
-    showRandomEncouragement('start');
-}
-
-function startTimer() {
-    if(isRunning) return;
-    
-    isRunning = true;
-    document.getElementById('timer-status').textContent = 'Course en cours !';
-    document.getElementById('start-timer-btn').disabled = true;
-    
-    showRandomEncouragement('start');
-    
-    raceTimer = setInterval(() => {
-        timerSeconds--;
-        updateTimerDisplay();
-        
-        // Encouragements dynamiques
-        if(timerSeconds === 240) showRandomEncouragement('midrace'); // 4min restantes
-        if(timerSeconds === 60) showRandomEncouragement('nearend'); // 1min restante
-        
-        if(timerSeconds <= 0) {
-            stopTimer();
-            setTimeout(() => {
-                alert('🏁 Temps écoulé ! Direction les résultats !');
-                switchPhase('results');
-            }, 1000);
-        }
-    }, 1000);
-}
-
-function pauseTimer() {
-    if(!isRunning) return;
-    
-    isRunning = false;
-    clearInterval(raceTimer);
-    document.getElementById('timer-status').textContent = 'En pause';
-    document.getElementById('start-timer-btn').disabled = false;
-}
-
-function stopTimer() {
-    isRunning = false;
-    if(raceTimer) clearInterval(raceTimer);
-    document.getElementById('timer-status').textContent = 'Arrêtée';
-    document.getElementById('start-timer-btn').disabled = false;
-}
-
-function updateTimerDisplay() {
-    const minutes = Math.floor(timerSeconds / 60);
-    const seconds = timerSeconds % 60;
-    document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function showRandomEncouragement(type) {
-    const messages = ENCOURAGEMENTS[type] || ENCOURAGEMENTS.start;
-    const message = messages[Math.floor(Math.random() * messages.length)];
-    document.getElementById('encouragements').innerHTML = `<div class="encouragement-message">${message}</div>`;
-}
-
-// PHASE RESULTS
 function setupResultsPhase() {
     const container = document.getElementById('results-grid');
     let html = '';
@@ -1233,8 +1091,9 @@ function updateTeamTotal() {
         badge.className = 'performance-badge progress';
     }
     
-    // Mise à jour progress bar
-    document.getElementById('progress-fill').style.width = `${Math.min(100, percentage)}%`;
+    // Mise à jour progress bar (basé sur objectif)
+    const progressPercent = Math.min(100, (totalDistance / teamObjective) * 100);
+    // document.getElementById('progress-fill').style.width = `${progressPercent}%`;
 }
 
 function validateResults() {

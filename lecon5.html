@@ -763,9 +763,14 @@
                 <!-- Conseils stratégiques -->
             </div>
 
-            <div class="recovery-timer">
+            <div class="recovery-info">
                 <h4>⏱️ Temps de récupération</h4>
-                <div class="recovery-countdown" id="recovery-countdown">5:00</div>
+                <div style="padding: 16px; background: rgba(0,166,81,0.1); border-radius: 8px; margin-top: 12px;">
+                    <p>⚡ <strong>Récupération libre</strong></p>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 8px;">
+                        Prenez le temps nécessaire selon l'organisation de la classe et l'état de récupération des élèves.
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -994,14 +999,21 @@ function calculateObjective() {
         }
     });
     
-    // Calcul objectif : VMA * intensité * 6 minutes
+    // Calcul objectif : VMA * intensité * 6 minutes * facteur équipe
     let intensite = avgL4Performance; // Entre 0.95 et 1.1 selon niveau L4
     intensite = Math.max(0.95, Math.min(1.1, intensite)); // Borner entre 95% et 110%
+    
+    // Facteur selon nombre de coureurs (plus il y en a, plus l'objectif augmente)
+    let facteurEquipe = 1.0;
+    if(teamSize === 4) facteurEquipe = 1.0;      // Base
+    else if(teamSize === 5) facteurEquipe = 1.15; // +15% car plus de relais
+    else if(teamSize === 6) facteurEquipe = 1.25; // +25% car encore plus de relais
     
     // Distance en 6 minutes
     const vitesseKmH = avgVMA * intensite;
     const vitesseMS = vitesseKmH / 3.6;
-    const distanceObjectif = Math.round(vitesseMS * 360); // 6 minutes = 360 secondes
+    const distanceBase = vitesseMS * 360; // 6 minutes = 360 secondes
+    const distanceObjectif = Math.round(distanceBase * facteurEquipe);
     
     teamObjective = distanceObjectif;
     
@@ -1011,6 +1023,9 @@ function calculateObjective() {
     document.getElementById('objective-details').textContent = `En 6 minutes - ${teamSize} coureurs`;
     
     let explanation = `Calculé sur VMA moyenne ${avgVMA.toFixed(1)} km/h à ${Math.round(intensite*100)}% d'intensité`;
+    if(teamSize > 4) {
+        explanation += ` (+${Math.round((facteurEquipe-1)*100)}% car ${teamSize} coureurs)`;
+    }
     if(hasL4Data) {
         explanation += ` (ajusté selon vos performances L4)`;
     }
@@ -1208,9 +1223,6 @@ function setupStrategyPhase() {
         document.getElementById('next-round-btn').style.display = 'none';
         document.getElementById('finish-btn').style.display = 'block';
     }
-    
-    // Timer récupération (5 minutes)
-    startRecoveryTimer();
 }
 
 function generateStrategySuggestions(roundData) {
@@ -1252,27 +1264,6 @@ function generateStrategySuggestions(roundData) {
     }
     
     return suggestions.map(s => `<div style="padding: 8px 12px; margin: 8px 0; background: rgba(0,166,81,0.1); border-left: 3px solid var(--olympic-green); border-radius: 4px;">${s}</div>`).join('');
-}
-
-function startRecoveryTimer() {
-    let recoverySeconds = 300; // 5 minutes
-    const countdownEl = document.getElementById('recovery-countdown');
-    
-    if(recoveryTimer) clearInterval(recoveryTimer);
-    
-    recoveryTimer = setInterval(() => {
-        const minutes = Math.floor(recoverySeconds / 60);
-        const seconds = recoverySeconds % 60;
-        countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
-        recoverySeconds--;
-        
-        if(recoverySeconds < 0) {
-            clearInterval(recoveryTimer);
-            countdownEl.textContent = "Récupération terminée !";
-            countdownEl.style.color = 'var(--olympic-green)';
-        }
-    }, 1000);
 }
 
 function nextRound() {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan L5 - EPS PRO</title>
+    <title>Bilan L5 - EPS: épreuve Combinée</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap');
         
@@ -288,7 +288,7 @@
 <body>
 
 <div class="container">
-    <h1>EPS<span style="color: var(--olympic-yellow);">PRO</span></h1>
+    <h1>EPS<span style="color: var(--olympic-yellow);">: épreuve Combinée</span></h1>
     <p class="subtitle">🏅 BILAN L5 - RELAIS OLYMPIQUE</p>
 
     <button class="btn-back" onclick="window.location.href='index.html'">← Retour accueil</button>
@@ -520,14 +520,43 @@ function renderEquipesDetails() {
                 
                 <div style="margin-top: 16px;">
                     <strong>Membres :</strong>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 8px;">
-                        ${equipe.membres.map(membre => `
-                            <div style="font-size: 0.85rem; padding: 6px 8px; background: white; border-radius: 6px;">
-                                <strong>${membre.nom}</strong><br>
-                                Total: ${membre.distanceIndividuelle}m<br>
-                                Moyenne: ${membre.distanceMoyenne}m/manche
-                            </div>
-                        `).join('')}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
+                        ${equipe.membres.map(membre => {
+                            const distanceMoyenne = membre.distanceMoyenne;
+                            const distanceTotale = membre.distanceIndividuelle;
+                            
+                            // Calcul % VMA individuel (estimation)
+                            const tempsTotal = equipe.manches * 6; // 6min par manche
+                            const vitesseReelle = (distanceTotale / 1000) / (tempsTotal / 60); // km/h
+                            const vmaEstimee = 12; // Valeur par défaut, idéalement récupérer vraie VMA
+                            const pourcentVMA = Math.round((vitesseReelle / vmaEstimee) * 100);
+                            
+                            // Objectif individuel (1/4 à 1/6 de l'objectif équipe selon taille)
+                            const objectifIndividuel = Math.round(equipe.objectif / equipe.membres.length);
+                            const objectifAtteint = distanceMoyenne >= (objectifIndividuel * 0.9); // 90% tolérance
+                            
+                            // Régularité (si détails manches disponibles)
+                            let regularite = "N/A";
+                            if(membre.detailManches && membre.detailManches.length > 1) {
+                                const distances = membre.detailManches.map(m => m.distance);
+                                const moyenne = distances.reduce((a,b) => a+b, 0) / distances.length;
+                                const ecartType = Math.sqrt(distances.map(d => Math.pow(d - moyenne, 2)).reduce((a,b) => a+b, 0) / distances.length);
+                                regularite = ecartType < 50 ? "Excellent" : ecartType < 100 ? "Bon" : "Variable";
+                            }
+                            
+                            return `
+                                <div style="font-size: 0.85rem; padding: 8px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <div style="font-weight: 700; color: var(--olympic-blue); margin-bottom: 6px;">${membre.nom}</div>
+                                    <div><strong>Distance:</strong> ${membre.distanceIndividuelle}m</div>
+                                    <div><strong>% VMA:</strong> ~${pourcentVMA}%</div>
+                                    <div><strong>Objectif:</strong> ${objectifAtteint ? '✅ Atteint' : '⏳ En cours'} (${objectifIndividuel}m)</div>
+                                    <div><strong>Régularité:</strong> ${regularite}</div>
+                                    <div style="margin-top: 4px; padding: 4px; background: rgba(0,166,81,0.1); border-radius: 4px; font-size: 0.8rem;">
+                                        <strong>🤝 Contribution équipe:</strong> ${Math.round((membre.distanceIndividuelle/equipe.distanceTotale)*100)}%
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             </div>
@@ -568,7 +597,15 @@ function exportBilan() {
         contenu += `  Manches: ${equipe.manches}\n`;
         contenu += `  Membres:\n`;
         equipe.membres.forEach(membre => {
-            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (${membre.distanceMoyenne}m/manche)\n`;
+            const objectifIndiv = Math.round(equipe.objectif / equipe.membres.length);
+            const contributionPct = Math.round((membre.distanceIndividuelle/equipe.distanceTotale)*100);
+            const tempsTotal = equipe.manches * 6;
+            const vitesseReelle = (membre.distanceIndividuelle / 1000) / (tempsTotal / 60);
+            const pourcentVMA = Math.round((vitesseReelle / 12) * 100); // VMA estimée 12 km/h
+            
+            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (~${pourcentVMA}% VMA)\n`;
+            contenu += `      Objectif individuel: ${objectifIndiv}m (${membre.distanceIndividuelle >= objectifIndiv*0.9 ? 'Atteint' : 'En cours'})\n`;
+            contenu += `      Contribution équipe: ${contributionPct}%\n`;
         });
     });
 

@@ -1015,21 +1015,49 @@ function calculateObjective() {
     const distanceBase = vitesseMS * 360; // 6 minutes = 360 secondes
     const distanceObjectif = Math.round(distanceBase * facteurEquipe);
     
-    teamObjective = distanceObjectif;
+    // Si ce n'est pas la première manche, ajuster l'objectif selon performance précédente
+    if(currentRound > 1) {
+        const derniereManche = roundResults[roundResults.length - 1];
+        const performancePrecedente = derniereManche.percentage;
+        
+        if(performancePrecedente >= 95) {
+            // Objectif atteint ! On augmente de 10%
+            teamObjective = Math.round(teamObjective * 1.10);
+            alert(`🔥 Objectif précédent atteint ! Nouveau défi : +10% → ${teamObjective}m !`);
+        } else if(performancePrecedente < 80) {
+            // Performance faible, on garde le même objectif
+            alert(`💪 On reste sur le même objectif pour consolider : ${teamObjective}m`);
+        } else {
+            // Performance correcte, légère augmentation
+            teamObjective = Math.round(teamObjective * 1.05);
+            alert(`⚡ Bonne progression ! Objectif ajusté : +5% → ${teamObjective}m`);
+        }
+        
+        // Mettre à jour l'affichage
+        document.getElementById('objective-distance').textContent = `${teamObjective}m`;
+        document.getElementById('objective-details').textContent = `Manche ${currentRound} - Objectif adaptatif`;
+        document.getElementById('objective-explanation').textContent = `Ajusté selon votre performance manche précédente (${Math.round(performancePrecedente)}%)`;
+    }
+    } else {
+        // Première manche - objectif initial
+        teamObjective = distanceObjectif;
+    }
     
-    // Affichage
+    // Affichage (pour première manche ou mise à jour)
     document.getElementById('objective-panel').style.display = 'block';
-    document.getElementById('objective-distance').textContent = `${distanceObjectif}m`;
-    document.getElementById('objective-details').textContent = `En 6 minutes - ${teamSize} coureurs`;
+    document.getElementById('objective-distance').textContent = `${teamObjective}m`;
     
-    let explanation = `Calculé sur VMA moyenne ${avgVMA.toFixed(1)} km/h à ${Math.round(intensite*100)}% d'intensité`;
-    if(teamSize > 4) {
-        explanation += ` (+${Math.round((facteurEquipe-1)*100)}% car ${teamSize} coureurs)`;
+    if(currentRound === 1) {
+        document.getElementById('objective-details').textContent = `En 6 minutes - ${teamSize} coureurs`;
+        let explanation = `Calculé sur VMA moyenne ${avgVMA.toFixed(1)} km/h à ${Math.round(intensite*100)}% d'intensité`;
+        if(teamSize > 4) {
+            explanation += ` (+${Math.round((facteurEquipe-1)*100)}% car ${teamSize} coureurs)`;
+        }
+        if(hasL4Data) {
+            explanation += ` (ajusté selon vos performances L4)`;
+        }
+        document.getElementById('objective-explanation').textContent = explanation;
     }
-    if(hasL4Data) {
-        explanation += ` (ajusté selon vos performances L4)`;
-    }
-    document.getElementById('objective-explanation').textContent = explanation;
 }
 
 function updateStartButton() {
@@ -1171,7 +1199,7 @@ function setupStrategyPhase() {
     const analysisContainer = document.getElementById('performance-analysis');
     let html = `
         <div style="background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-            <h4>📈 Analyse Manche ${lastRound.round}</h4>
+            <h4>📈 Analyse Globale (${roundResults.length} manches)</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0;">
                 <div style="text-align: center; padding: 16px; background: var(--bg); border-radius: 8px;">
                     <div style="font-size: 2rem; font-weight: 900; color: var(--olympic-blue);">${lastRound.totalDistance}m</div>
@@ -1268,8 +1296,8 @@ function generateStrategySuggestions(roundData) {
 
 function nextRound() {
     currentRound++;
-    timerSeconds = 360; // Reset timer
-    switchPhase('race');
+    // Ne pas reset le timer, on va directement aux résultats
+    switchPhase('results');
 }
 
 function finishActivity() {

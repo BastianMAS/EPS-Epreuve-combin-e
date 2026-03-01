@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L1/L2 - Évaluation diagnostique - EPS PRO</title>
+    <title>L1/L2 - Évaluation diagnostique - EPS: épreuve Combinée</title>
     <style>
         :root {
             --bg: #0b101d;
@@ -643,11 +643,42 @@ function updateHistorique(i) {
     const el = document.getElementById(`histo-${i}`);
     if(!histo || histo.length === 0) { el.style.display = 'none'; return; }
     el.style.display = 'block';
-    document.getElementById(`histo-list-${i}`).innerHTML = histo.map(t =>
-        `<div class="historique-item"><span style="color:#aaa">${t.date} - ${t.label}</span><span style="font-weight:700">${t.vma} km/h</span></div>`
+    document.getElementById(`histo-list-${i}`).innerHTML = histo.map((t, idx) =>
+        `<div class="historique-item">
+            <span style="color:#aaa">${t.date} - ${t.label}</span>
+            <div>
+                <span style="font-weight:700">${t.vma} km/h</span>
+                <button onclick="supprimerVMA(${i}, ${idx})" style="margin-left: 8px; padding: 2px 6px; background: var(--danger); color: white; border: none; border-radius: 3px; font-size: 0.6rem; cursor: pointer;">✕</button>
+            </div>
+        </div>`
     ).join('');
     const moy = histo.reduce((s,t) => s+t.vma, 0) / histo.length;
     document.getElementById(`moy-vma-${i}`).textContent = `Moyenne : ${Math.round(moy*10)/10} km/h`;
+}
+
+function supprimerVMA(cardIndex, histoIndex) {
+    if(!confirm('Supprimer cette valeur VMA ?')) return;
+    
+    cardState[cardIndex].vmaHistorique.splice(histoIndex, 1);
+    
+    // Recalculer moyenne
+    if(cardState[cardIndex].vmaHistorique.length > 0) {
+        const moy = cardState[cardIndex].vmaHistorique.reduce((s,t) => s+t.vma, 0) / cardState[cardIndex].vmaHistorique.length;
+        cardState[cardIndex].vma = Math.round(moy * 10) / 10;
+    } else {
+        cardState[cardIndex].vma = null;
+    }
+    
+    updateHistorique(cardIndex);
+    updateCibles(cardIndex);
+    
+    // Mettre à jour l'affichage info élève
+    const info = document.getElementById(`info-${cardIndex}`);
+    if(info && cardState[cardIndex].student) {
+        const s = cardState[cardIndex].student;
+        const vmaInfo = cardState[cardIndex].vma ? ` | VMA: <strong style="color:var(--success)">${cardState[cardIndex].vma} km/h</strong>` : '';
+        info.innerHTML = `<strong>${s.sexe==='F'?'👧':'🧑'} ${s.sexe==='F'?'Fille':'Garçon'}</strong> | ${s.age} ans${vmaInfo}`;
+    }
 }
 
 // =============================================

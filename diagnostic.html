@@ -690,6 +690,23 @@ function updateCibles(i) {
     if(el) el.style.display = 'none';
 }
 
+function supprimerSaut(cardIndex, type, resultIndex) {
+    if(!confirm('Supprimer cette valeur de saut ?')) return;
+    
+    const key = type === 'sans' ? 'sautSans' : 'sautAvec';
+    cardState[cardIndex][key].splice(resultIndex, 1);
+    
+    renderSaut(cardIndex, type);
+}
+
+function supprimerLancer(cardIndex, resultIndex) {
+    if(!confirm('Supprimer cette valeur de lancer ?')) return;
+    
+    cardState[cardIndex].lancerResults.splice(resultIndex, 1);
+    
+    renderLancer(cardIndex);
+}
+
 function updateTours(i) {
     let moy = null, valid = 0, total = 0;
     const temps = [];
@@ -786,8 +803,10 @@ function renderSaut(i, type) {
     const results = cardState[i][key] || [];
     const best = results.length ? Math.max(...results) : null;
 
-    document.getElementById(`saut-${type}-pills-${i}`).innerHTML = results.map(v =>
-        `<span class="pill${v===best?' best':''}">${v.toFixed(2)}m</span>`
+    document.getElementById(`saut-${type}-pills-${i}`).innerHTML = results.map((v, idx) =>
+        `<span class="pill${v===best?' best':''}">${v.toFixed(2)}m 
+         <button onclick="supprimerSaut(${i}, '${type}', ${idx})" style="margin-left: 4px; padding: 1px 4px; background: var(--danger); color: white; border: none; border-radius: 2px; font-size: 0.6rem; cursor: pointer;">✕</button>
+         </span>`
     ).join('');
     document.getElementById(`saut-${type}-best-${i}`).textContent = best ? `✅ Meilleur : ${best.toFixed(2)}m` : '';
 }
@@ -820,8 +839,10 @@ function addLancer(i) {
 function renderLancer(i) {
     const results = cardState[i].lancerResults || [];
     const best = results.length ? Math.max(...results) : null;
-    document.getElementById(`lancer-pills-${i}`).innerHTML = results.map(v =>
-        `<span class="pill${v===best?' best':''}">${v.toFixed(2)}m</span>`
+    document.getElementById(`lancer-pills-${i}`).innerHTML = results.map((v, idx) =>
+        `<span class="pill${v===best?' best':''}">${v.toFixed(2)}m 
+         <button onclick="supprimerLancer(${i}, ${idx})" style="margin-left: 4px; padding: 1px 4px; background: var(--danger); color: white; border: none; border-radius: 2px; font-size: 0.6rem; cursor: pointer;">✕</button>
+         </span>`
     ).join('');
     document.getElementById(`lancer-best-${i}`).textContent = best ? `✅ Meilleur : ${best.toFixed(2)}m` : '';
 }

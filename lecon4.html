@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L4 - Progression Intelligente - EPS PRO</title>
+    <title>L4 - Technique de Base Atelier 2 - EPS: épreuve Combinée</title>
     <style>
         :root {
             --bg: #0f1419;
@@ -507,7 +507,7 @@
 <body>
 
 <h1>EPS<span style="color: var(--accent);">PRO</span></h1>
-<p class="subtitle">🧠 L4 - PROGRESSION INTELLIGENTE</p>
+<p class="subtitle">🔧 L4 - TECHNIQUE DE BASE ATELIER 2</p>
 <button class="btn-back" onclick="window.location.href='index.html'">← Retour</button>
 
 <div class="grid6" id="grid"></div>
@@ -516,11 +516,11 @@
 
 <script>
 const PROGRESSIONS_L4 = [
-    { id: 'refaire', label: 'Refaire L3', desc: 'Rattrapage absence ou consolidation', delta: 'L3' },
-    { id: 'meme', label: 'Même niveau', desc: 'Consolidation du niveau L3', delta: 0 },
-    { id: 'plus5', label: 'Progression +5%', desc: 'Évolution standard recommandée', delta: 5 },
-    { id: 'plus10', label: 'Progression +10%', desc: 'Saut de niveau pour les forts', delta: 10 },
-    { id: 'plus15', label: 'Challenge +15%', desc: 'Défi pour les experts', delta: 15 }
+    { id: 'refaire', label: 'Refaire L3', desc: 'Rattrapage absence ou révision technique', delta: 'L3' },
+    { id: 'meme', label: 'Même niveau', desc: 'Apprentissage technique de base', delta: 0 },
+    { id: 'plus5', label: 'Progression +5%', desc: 'Technique de base + amélioration', delta: 5 },
+    { id: 'plus10', label: 'Progression +10%', desc: 'Technique de base + performance', delta: 10 },
+    { id: 'plus15', label: 'Challenge +15%', desc: 'Technique de base + défi', delta: 15 }
 ];
 
 function analysePerformanceL3(eleve) {
@@ -737,7 +737,7 @@ function buildCard(i) {
 
             <div class="section" id="sec-saut-${i}" style="display:none">
                 <div class="section-header saut-h" onclick="toggleSection('saut',${i})">
-                    <span>🦘 SAUT - TECHNIQUE L3/L4</span><span class="arrow" id="arr-saut-${i}">▼</span>
+                    <span>🦘 SAUT - APPRENTISSAGE TECHNIQUE DE BASE</span><span class="arrow" id="arr-saut-${i}">▼</span>
                 </div>
                 <div class="section-body" id="body-saut-${i}">
                     <div class="technique-box">
@@ -766,7 +766,7 @@ function buildCard(i) {
 
             <div class="section" id="sec-lancer-${i}" style="display:none">
                 <div class="section-header lancer-h" onclick="toggleSection('lancer',${i})">
-                    <span>🎯 LANCER - TECHNIQUE L3/L4</span><span class="arrow" id="arr-lancer-${i}">▼</span>
+                    <span>🎯 LANCER - APPRENTISSAGE TECHNIQUE DE BASE</span><span class="arrow" id="arr-lancer-${i}">▼</span>
                 </div>
                 <div class="section-body" id="body-lancer-${i}">
                     <div class="technique-box">
@@ -955,7 +955,7 @@ function selectProgression(i, progressionId) {
 
     // Afficher objectif
     document.getElementById(`objectif-${i}`).innerHTML = `
-        🔥 <strong>OBJECTIF L4 :</strong> ${nouveauPourcent}% VMA - ${progression.desc}
+        🔧 <strong>OBJECTIF L4 :</strong> ${nouveauPourcent}% VMA - ${progression.desc}
     `;
     document.getElementById(`objectif-${i}`).style.display = 'block';
     
@@ -1159,7 +1159,7 @@ function saveAll() {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    alert(`🧠 Données L4 intelligentes sauvegardées pour ${count} élève(s) !`);
+    alert(`🔧 Données L4 techniques sauvegardées pour ${count} élève(s) !`);
 }
 
 function parseTime(str) {

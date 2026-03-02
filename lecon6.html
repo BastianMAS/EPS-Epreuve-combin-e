@@ -3,499 +3,565 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leçon 6 - EPS PRO</title>
+    <title>L6 - Perfectionnement Technique - EPS: épreuve Combinée</title>
     <style>
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #00d9ff;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
-            line-height: 1.6;
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 5px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 15px; font-size: 0.9rem; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        .student-grid {
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .grid6 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            margin-top: 15px;
+            margin-bottom: 20px;
         }
-        .student-card {
+        @media (max-width: 900px) { .grid6 { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 600px) { .grid6 { grid-template-columns: 1fr; } }
+
+        .card {
             background: var(--card);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 12px;
+            border: 1px solid rgba(0,217,255,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
-        .student-header {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+        
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px rgba(0,217,255,0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            padding: 12px 16px;
             font-weight: 700;
-            text-align: center;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-body { 
+            padding: 16px; 
+        }
+        
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: rgba(0,217,255,0.05);
+            border-radius: 8px;
             font-size: 0.9rem;
         }
-        select, input, textarea {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            font-size: 0.85rem;
+
+        .section {
+            margin-bottom: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
         }
-        textarea { font-family: Arial; resize: vertical; min-height: 100px; }
-        label { display: block; margin: 6px 0 3px 0; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
-        .btn-pct {
-            padding: 5px 8px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            border-radius: 5px;
+        
+        .section-header {
+            background: rgba(0,217,255,0.15);
+            padding: 10px 12px;
             cursor: pointer;
-            font-weight: 700;
-            font-size: 0.75rem;
-            margin: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
         }
-        .btn-pct.active { background: var(--accent); color: black; }
-        .pct-group { display: flex; gap: 3px; flex-wrap: wrap; margin: 8px 0; }
-        .time-input-group { display: flex; gap: 5px; align-items: center; margin: 8px 0; }
-        .time-input-group input {
-            width: 50px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid var(--accent);
-            background: #0f0f23;
-            color: white;
-            text-align: center;
-            font-size: 1rem;
+        
+        .section-header:hover {
+            background: rgba(0,217,255,0.25);
         }
-        .time-input-group span { font-size: 0.8rem; color: #aaa; }
-        .results-box {
-            background: rgba(0,255,136,0.1);
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid var(--success);
-            margin: 8px 0;
+        
+        .arrow {
+            transition: transform 0.3s ease;
             font-size: 0.8rem;
         }
-        .btn-analyse {
-            background: var(--warning);
-            color: black;
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: none;
+        
+        .arrow.open {
+            transform: rotate(180deg);
+        }
+        
+        .section-body {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .section-body.open {
+            padding: 12px;
+            max-height: 500px;
+        }
+        
+        .pyramide-info {
+            background: rgba(0,217,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .temps-cibles {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .temps-cible {
+            background: rgba(123,92,246,0.2);
+            padding: 8px 6px;
             border-radius: 6px;
-            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .temps-cible .distance {
             font-weight: 700;
+            color: var(--purple);
             font-size: 0.85rem;
         }
-        .atelier-section {
-            background: rgba(155,89,182,0.1);
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid var(--purple);
-            margin-top: 20px;
+        
+        .temps-cible .temps {
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--accent);
+            font-weight: 600;
         }
-        .atelier-choice {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
-        }
-        .atelier-btn {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid var(--purple);
-            background: rgba(155,89,182,0.2);
-            color: white;
+        
+        .technique-box {
+            background: rgba(75,222,128,0.1);
+            padding: 12px;
             border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .technique-title {
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+            font-size: 0.8rem;
+        }
+        
+        .checkbox-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--success);
+        }
+        
+        .checkbox-row label {
+            flex: 1;
             cursor: pointer;
+        }
+        
+        .distance-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .distance-input input {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            border: none;
+            border-radius: 25px;
+            color: white;
             font-weight: 700;
             font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .atelier-btn.active {
-            background: var(--purple);
-            color: black;
-        }
-        .save-btn {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background: var(--success);
-            color: black;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 10px;
             cursor: pointer;
-            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(75,222,128,0.3);
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+        
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(75,222,128,0.4);
         }
-        .modal-content {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 2px solid var(--warning);
+        
+        @media (max-width: 768px) {
+            .temps-cibles { grid-template-columns: repeat(3, 1fr); }
         }
-        @media (max-width: 900px) { .student-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .student-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.2rem; font-weight: 700;">📅 LEÇON 6</p>
-        <p class="subtitle">3×400m</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 15px;">← Retour</button>
-        
-        <div id="student-grid" class="student-grid">
-            <div class="student-card" id="card-0"></div>
-            <div class="student-card" id="card-1"></div>
-            <div class="student-card" id="card-2"></div>
-            <div class="student-card" id="card-3"></div>
-            <div class="student-card" id="card-4"></div>
-            <div class="student-card" id="card-5"></div>
+
+<a href="index.html" class="btn-back">← Retour</a>
+
+<h1>EPS: épreuve Combinée</h1>
+<p class="subtitle">⚡ L6 - PERFECTIONNEMENT TECHNIQUE</p>
+
+<div class="grid6" id="grid"></div>
+
+<button class="save-btn" onclick="saveAll()">💾 Sauvegarder</button>
+
+<script>
+let ELEVES = [];
+const cardState = [{},{},{},{},{},{}];
+
+const TEMPS_PYRAMIDE = {
+    8: { 60: 27.0, 80: 36.0, 100: 45.0 },
+    9: { 60: 24.0, 80: 32.0, 100: 40.0 },
+    10: { 60: 21.6, 80: 28.8, 100: 36.0 },
+    11: { 60: 19.6, 80: 26.2, 100: 32.7 },
+    12: { 60: 18.0, 80: 24.0, 100: 30.0 },
+    13: { 60: 16.6, 80: 22.1, 100: 27.7 },
+    14: { 60: 15.4, 80: 20.6, 100: 25.7 },
+    15: { 60: 14.4, 80: 19.2, 100: 24.0 },
+    16: { 60: 13.5, 80: 18.0, 100: 22.5 },
+    17: { 60: 12.7, 80: 16.9, 100: 21.2 },
+    18: { 60: 12.0, 80: 16.0, 100: 20.0 }
+};
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        alert('⚠️ Aucun élève trouvé.');
+        window.location.href = 'index.html';
+        return;
+    }
+    ELEVES = JSON.parse(stored);
+
+    const grid = document.getElementById('grid');
+    for(let i = 0; i < 6; i++) {
+        grid.appendChild(createCard(i));
+    }
+};
+
+function createCard(i) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+        <div class="card-header">
+            <span>⚡ ÉLÈVE ${i+1}</span>
         </div>
-        
-        <div class="atelier-section">
-            <h3 style="color: var(--purple); margin-bottom: 15px;">🏋️ ATELIER TECHNIQUE (COMMUN)</h3>
+        <div class="card-body">
+            <select onchange="selectStudent(${i}, this.value)" style="width:100%; padding:8px; background:var(--card); color:white; border:1px solid rgba(255,255,255,0.3); border-radius:6px; margin-bottom:12px;">
+                <option value="">Sélectionner un élève</option>
+                ${ELEVES.map(eleve => `<option value="${eleve.id}">${eleve.nomPrenom}</option>`).join('')}
+            </select>
             
-            <div class="atelier-choice">
-                <button onclick="selectAtelier('saut')" class="atelier-btn" id="btn-saut">🦘 SAUT</button>
-                <button onclick="selectAtelier('lancer')" class="atelier-btn" id="btn-lancer">🎯 LANCER</button>
+            <div id="info-${i}" class="student-info" style="display:none;"></div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('course', ${i})">
+                    <span>🏃‍♂️ COURSE - PYRAMIDE DOUCE</span><span class="arrow" id="arr-course-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-course-${i}">
+                    <div class="pyramide-info">
+                        <strong>📊 Pyramide Autonome :</strong><br>
+                        60m → 80m → 100m → 80m → 60m<br>
+                        <small>⏱️ Récup 60s | Chrono de groupe</small>
+                    </div>
+                    <div class="temps-cibles" id="temps-cibles-${i}"></div>
+                </div>
             </div>
             
-            <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;" id="atelier-instruction">
-                Sélectionnez l'atelier technique effectué
-            </p>
-            <textarea id="atelier-commun" placeholder="Décrivez le travail technique effectué pour tout le groupe..."></textarea>
-        </div>
-        
-        <button onclick="saveAll()" class="save-btn">💾 ENREGISTRER</button>
-    </div>
-    
-    <div id="modal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="color: var(--warning); margin-bottom: 15px;">📈 ANALYSE</h2>
-            <div id="modal-content"></div>
-            <button onclick="closeModal()" class="btn" style="background: var(--accent); color: black; width: 100%; margin-top: 15px;">Fermer</button>
-        </div>
-    </div>
-    
-    <script>
-    let allStudents = [];
-    let cardData = [{},{},{},{},{},{}];
-    let atelierType = null;
-    let atelierTexte = '';
-    
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        allStudents = JSON.parse(stored);
-        
-        const leconData = JSON.parse(localStorage.getItem('lecon6_data') || '{}');
-        if(leconData.atelierType) {
-            selectAtelier(leconData.atelierType);
-            document.getElementById('atelier-commun').value = leconData.atelierTexte || '';
-        }
-        
-        for(let i=0; i<6; i++) renderCard(i);
-    };
-    
-    function selectAtelier(type) {
-        atelierType = type;
-        document.getElementById('btn-saut').classList.toggle('active', type === 'saut');
-        document.getElementById('btn-lancer').classList.toggle('active', type === 'lancer');
-        
-        const textarea = document.getElementById('atelier-commun');
-        const instruction = document.getElementById('atelier-instruction');
-        
-        if(type === 'saut') {
-            instruction.textContent = '🦘 Décrivez le travail technique sur le SAUT';
-            textarea.placeholder = 'Ex: Travail sur l\'élan et l\'impulsion : course d\'élan (6 foulées), placement du pied d\'appel, gainage en l\'air. Exercices : sauts sans élan, avec élan court...';
-        } else {
-            instruction.textContent = '🎯 Décrivez le travail technique sur le LANCER';
-            textarea.placeholder = 'Ex: Travail technique sur le lancer poids : position de départ, rotation du bassin, accompagnement du geste. Exercices : lancer à genoux, debout, avec rotation...';
-        }
-    }
-    
-    function renderCard(cardIndex) {
-        const card = document.getElementById('card-'+cardIndex);
-        const data = cardData[cardIndex];
-        
-        let content = '<select id="sel-'+cardIndex+'" onchange="selectStudent('+cardIndex+')" style="font-size: 0.85rem;">';
-        content += '<option value="">-- Choisir --</option>';
-        allStudents.forEach((s,i) => {
-            content += '<option value="'+i+'" '+(data.studentIndex===i?'selected':'')+'>'+s.nomPrenom+'</option>';
-        });
-        content += '</select>';
-        
-        if(data.student) {
-            const s = data.student;
-            const vma = parseFloat(s.vma);
-            const pct = data.pctVMA || 100;
-            const cible = formatTime((0.4 / (vma * (pct/100))) * 3600 * 1000);
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('saut', ${i})">
+                    <span>🦘 SAUT - PERFECTIONNEMENT</span><span class="arrow" id="arr-saut-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-saut-${i}">
+                    <div class="technique-box">
+                        <div class="technique-title">🎯 Maîtrise avancée (5/5)</div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut1-${i}">
+                            <label>✅ Course d'élan fluide</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut2-${i}">
+                            <label>✅ Placement précis</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut3-${i}">
+                            <label>✅ Impulsion maximale</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut4-${i}">
+                            <label>✅ Vol et réception</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="saut5-${i}">
+                            <label>⭐ Geste harmonieux</label>
+                        </div>
+                    </div>
+                    <div class="distance-input">
+                        <label>Distance (m):</label>
+                        <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.50">
+                    </div>
+                </div>
+            </div>
             
-            content += '<div class="student-header">'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+' | VMA: '+vma+'</div>';
-            content += '<div class="pct-group">';
-            [90,95,100,105,110,115,120,125,130].forEach(p => {
-                content += '<button onclick="setPct('+cardIndex+','+p+')" class="btn-pct '+(pct===p?'active':'')+'" id="pct-'+cardIndex+'-'+p+'">'+p+'%</button>';
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('lancer', ${i})">
+                    <span>🎯 LANCER - PERFECTIONNEMENT</span><span class="arrow" id="arr-lancer-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-lancer-${i}">
+                    <div class="technique-box">
+                        <div class="technique-title">🎯 Maîtrise avancée (5/5)</div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer1-${i}">
+                            <label>✅ Placement optimal</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer2-${i}">
+                            <label>✅ Chaîne cinétique</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer3-${i}">
+                            <label>✅ Transfert poids</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer4-${i}">
+                            <label>✅ Accompagnement</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="lancer5-${i}">
+                            <label>⭐ Coordination globale</label>
+                        </div>
+                    </div>
+                    <div class="distance-input">
+                        <label>Distance (m):</label>
+                        <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="12.00">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+function selectStudent(i, studentId) {
+    const student = ELEVES.find(s => s.id === studentId);
+    
+    if(student) {
+        const existantL6 = student.seances?.find(seance => seance.lecon === 'L6') || {};
+        
+        cardState[i] = {
+            student: student,
+            sautTech1: existantL6.sautTech1 || false,
+            sautTech2: existantL6.sautTech2 || false,
+            sautTech3: existantL6.sautTech3 || false,
+            sautTech4: existantL6.sautTech4 || false,
+            sautTech5: existantL6.sautTech5 || false,
+            sautDistance: existantL6.sautDistance || null,
+            lancerTech1: existantL6.lancerTech1 || false,
+            lancerTech2: existantL6.lancerTech2 || false,
+            lancerTech3: existantL6.lancerTech3 || false,
+            lancerTech4: existantL6.lancerTech4 || false,
+            lancerTech5: existantL6.lancerTech5 || false,
+            lancerDistance: existantL6.lancerDistance || null
+        };
+        
+        setTimeout(() => {
+            ['saut1', 'saut2', 'saut3', 'saut4', 'saut5', 'lancer1', 'lancer2', 'lancer3', 'lancer4', 'lancer5'].forEach(tech => {
+                const el = document.getElementById(`${tech}-${i}`);
+                const techKey = tech.replace(/(\\d)/, 'Tech$1');
+                if(el && cardState[i][techKey]) el.checked = true;
             });
-            content += '</div><p style="color:var(--success);font-weight:700;font-size:0.85rem;margin:5px 0">Cible: '+cible+'</p>';
             
-            const t1m = data.tour1 ? Math.floor(data.tour1/60) : '';
-            const t1s = data.tour1 ? data.tour1%60 : '';
-            const t2m = data.tour2 ? Math.floor(data.tour2/60) : '';
-            const t2s = data.tour2 ? data.tour2%60 : '';
-            const t3m = data.tour3 ? Math.floor(data.tour3/60) : '';
-            const t3s = data.tour3 ? data.tour3%60 : '';
-            
-            content += '<label>T1:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t1m-'+cardIndex+'" min="0" max="10" value="'+t1m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t1s-'+cardIndex+'" min="0" max="59" value="'+t1s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<label>T2:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t2m-'+cardIndex+'" min="0" max="10" value="'+t2m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t2s-'+cardIndex+'" min="0" max="59" value="'+t2s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<label>T3:</label><div class="time-input-group">';
-            content += '<input type="number" inputmode="numeric" id="t3m-'+cardIndex+'" min="0" max="10" value="'+t3m+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>min</span>';
-            content += '<input type="number" inputmode="numeric" id="t3s-'+cardIndex+'" min="0" max="59" value="'+t3s+'" oninput="updateTime('+cardIndex+')">';
-            content += '<span>sec</span></div>';
-            
-            content += '<div id="results-'+cardIndex+'"></div>';
-            
-            content += '<label>💓 BPM:</label><input type="number" inputmode="numeric" id="bpm-'+cardIndex+'" value="'+(data.bpm||'')+'" placeholder="180" style="width:70px">';
-            content += '<label>⏱️ Récup:</label><input type="number" inputmode="numeric" id="recup-'+cardIndex+'" value="'+(data.tempsRecup||'')+'" placeholder="3" style="width:70px">';
-            content += '<label>💬 Notes:</label><textarea id="comment-'+cardIndex+'" placeholder="Points forts, à améliorer..." style="min-height:50px">'+(data.commentaire||'')+'</textarea>';
-        }
-        
-        card.innerHTML = content;
-        updateResults(cardIndex);
-    }
-    
-    function selectStudent(cardIndex) {
-        const sel = document.getElementById('sel-'+cardIndex);
-        const studentIndex = parseInt(sel.value);
-        
-        if(isNaN(studentIndex)) {
-            cardData[cardIndex] = {};
-        } else {
-            const s = allStudents[studentIndex];
-            cardData[cardIndex] = s.lecon6 || {
-                studentIndex: studentIndex,
-                student: s,
-                pctVMA: 100,
-                tour1: null, tour2: null, tour3: null,
-                bpm: null, tempsRecup: null,
-                commentaire: ''
-            };
-            cardData[cardIndex].studentIndex = studentIndex;
-            cardData[cardIndex].student = s;
-        }
-        renderCard(cardIndex);
-    }
-    
-    function setPct(cardIndex, pct) {
-        cardData[cardIndex].pctVMA = pct;
-        renderCard(cardIndex);
-    }
-    
-    function updateTime(cardIndex) {
-        const d = cardData[cardIndex];
-        const t1m = parseInt(document.getElementById('t1m-'+cardIndex).value)||0;
-        const t1s = parseInt(document.getElementById('t1s-'+cardIndex).value)||0;
-        const t2m = parseInt(document.getElementById('t2m-'+cardIndex).value)||0;
-        const t2s = parseInt(document.getElementById('t2s-'+cardIndex).value)||0;
-        const t3m = parseInt(document.getElementById('t3m-'+cardIndex).value)||0;
-        const t3s = parseInt(document.getElementById('t3s-'+cardIndex).value)||0;
-        
-        d.tour1 = t1m*60+t1s||null;
-        d.tour2 = t2m*60+t2s||null;
-        d.tour3 = t3m*60+t3s||null;
-        
-        updateResults(cardIndex);
-    }
-    
-    function updateResults(cardIndex) {
-        const d = cardData[cardIndex];
-        const resultsDiv = document.getElementById('results-'+cardIndex);
-        if(!resultsDiv) return;
-        
-        if(d.tour1 && d.tour2 && d.tour3 && d.student) {
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const vma = parseFloat(d.student.vma);
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            resultsDiv.innerHTML = '<div class="results-box"><strong>Moy:</strong> '+formatTime(moy*1000)+' | <strong>VMA:</strong> '+pctRealise.toFixed(1)+'%</div><button onclick="showAnalysis('+cardIndex+')" class="btn-analyse">📈 VOIR ANALYSE</button>';
-        } else {
-            resultsDiv.innerHTML = '';
-        }
-    }
-    
-    function showAnalysis(cardIndex) {
-        const d = cardData[cardIndex];
-        const vma = parseFloat(d.student.vma);
-        const pct = d.pctVMA;
-        const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-        const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-        
-        const ecart1_2 = d.tour2 - d.tour1;
-        const ecart2_3 = d.tour3 - d.tour2;
-        const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-        
-        let txt = '<p style="line-height:1.6">';
-        txt += '<strong>Profil de course:</strong><br>';
-        
-        if(ecartMax <= 5) {
-            txt += '➡️ <strong>RÉGULIÈRE</strong><br>Excellent ! Rythme constant, très bonne gestion.<br><br>';
-        } else {
-            txt += '⚠️ <strong>IRRÉGULIÈRE</strong><br>';
-            if(Math.abs(ecart1_2) > 10 || Math.abs(ecart2_3) > 10) {
-                txt += 'Gros écarts détectés :<br>';
-                if(ecart1_2 > 10) txt += '• T1→T2 : <strong style="color:var(--danger)">+'+ecart1_2+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart1_2 > 5) txt += '• T1→T2 : +'+ecart1_2+'s<br>';
-                else if(ecart1_2 < -10) txt += '• T1→T2 : '+ecart1_2+'s (grosse accélération) 📈<br>';
-                else if(ecart1_2 < -5) txt += '• T1→T2 : '+ecart1_2+'s<br>';
-                
-                if(ecart2_3 > 10) txt += '• T2→T3 : <strong style="color:var(--danger)">+'+ecart2_3+'s</strong> (grosse baisse) 📉<br>';
-                else if(ecart2_3 > 5) txt += '• T2→T3 : +'+ecart2_3+'s<br>';
-                else if(ecart2_3 < -10) txt += '• T2→T3 : '+ecart2_3+'s (grosse accélération) 📈<br>';
-                else if(ecart2_3 < -5) txt += '• T2→T3 : '+ecart2_3+'s<br>';
+            if(existantL6.sautDistance) {
+                document.getElementById(`saut-distance-${i}`).value = existantL6.sautDistance;
             }
-            txt += '<br>';
-        }
-        
-        txt += '<strong>Objectif '+pct+'% VMA:</strong><br>';
-        if(pctRealise >= pct) {
-            txt += '✅ <span style="color:var(--success)">ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        } else if(pctRealise >= pct - 5) {
-            txt += '⚠️ <span style="color:var(--warning)">PRESQUE</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        } else {
-            txt += '❌ <span style="color:var(--danger)">NON ATTEINT</span> ('+pctRealise.toFixed(1)+'%)<br><br>';
-        }
-        
-        txt += '<strong>Conseil:</strong><br>';
-        if(ecartMax <= 5) {
-            txt += 'Parfait ! Continue, la régularité est la clé.';
-        } else if(ecart1_2 > 10) {
-            txt += 'Grosse baisse au T2. Travailler l\'endurance. Partir moins vite.';
-        } else if(ecart2_3 > 10) {
-            txt += 'Grosse baisse au T3. Travailler la résistance.';
-        } else {
-            txt += 'Travailler la régularité. Viser écarts < 5s.';
-        }
-        
-        txt += '</p>';
-        
-        document.getElementById('modal-content').innerHTML = txt;
-        document.getElementById('modal').style.display = 'flex';
-    }
-    
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-    }
-    
-    function saveAll() {
-        if(!atelierType) {
-            alert('⚠️ Sélectionnez l\'atelier technique (Saut ou Lancer)');
-            return;
-        }
-        
-        for(let i=0; i<6; i++) {
-            const d = cardData[i];
-            if(d.student) {
-                const bpm = document.getElementById('bpm-'+i);
-                const recup = document.getElementById('recup-'+i);
-                const comment = document.getElementById('comment-'+i);
-                
-                if(bpm) d.bpm = parseInt(bpm.value)||null;
-                if(recup) d.tempsRecup = parseInt(recup.value)||null;
-                if(comment) d.commentaire = comment.value;
+            if(existantL6.lancerDistance) {
+                document.getElementById(`lancer-distance-${i}`).value = existantL6.lancerDistance;
             }
-        }
-        
-        const atelierTexte = document.getElementById('atelier-commun').value;
-        
-        let err = 0;
-        cardData.forEach(d => {
-            if(d.student && (!d.tour1 || !d.tour2 || !d.tour3)) err++;
-        });
-        
-        if(err > 0 && !confirm(err+' élève(s) sans temps. Continuer ?')) return;
-        
-        cardData.forEach(d => {
-            if(d.student) {
-                const i = allStudents.findIndex(s => s.id === d.student.id);
-                if(i !== -1) {
-                    allStudents[i].lecon6 = {
-                        pctVMA: d.pctVMA,
-                        tour1: d.tour1,
-                        tour2: d.tour2,
-                        tour3: d.tour3,
-                        bpm: d.bpm,
-                        tempsRecup: d.tempsRecup,
-                        commentaire: d.commentaire,
-                        date: new Date().toISOString()
-                    };
-                }
-            }
-        });
-        
-        localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-        localStorage.setItem('lecon6_data', JSON.stringify({
-            atelierType: atelierType,
-            atelierTexte: atelierTexte
-        }));
-        
-        alert('✅ Leçon 6 enregistrée !');
+        }, 100);
+    } else {
+        cardState[i] = {};
     }
     
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
+    const info = document.getElementById(`info-${i}`);
+    if(student) {
+        info.style.display = 'block';
+        const vmaInfo = student.vma ? ` | VMA: <strong style="color:var(--success)">${student.vma} km/h</strong>` : '';
+        info.innerHTML = `<strong>${student.sexe==='F'?'👧':'🧑'} ${student.sexe==='F'?'Fille':'Garçon'}</strong> | ${student.age} ans${vmaInfo}`;
+        generateTempsCibles(i, student.vma);
+    } else {
+        info.style.display = 'none';
+        document.getElementById(`temps-cibles-${i}`).innerHTML = '';
     }
-    </script>
+}
+
+function generateTempsCibles(i, vma) {
+    const container = document.getElementById(`temps-cibles-${i}`);
+    if(!vma) {
+        container.innerHTML = '<div style="text-align:center; color:var(--warning); font-size:0.8rem;">⚠️ VMA nécessaire</div>';
+        return;
+    }
+    
+    const vmaNum = Math.round(parseFloat(vma));
+    const temps = TEMPS_PYRAMIDE[vmaNum] || TEMPS_PYRAMIDE[12];
+    
+    const distances = [60, 80, 100, 80, 60];
+    let html = '';
+    
+    distances.forEach((dist, idx) => {
+        const tempsCible = temps[dist];
+        html += `
+            <div class="temps-cible">
+                <div class="distance">${dist}m</div>
+                <div class="temps">${tempsCible}"</div>
+                <div style="font-size: 0.7rem;">T${idx+1}</div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function toggleSection(sec, i) {
+    const body = document.getElementById(`body-${sec}-${i}`);
+    const arr = document.getElementById(`arr-${sec}-${i}`);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arr.classList.toggle('open', !isOpen);
+}
+
+function saveAll() {
+    let count = 0;
+    let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+
+    cardState.forEach((d, i) => {
+        if(!d.student) return;
+
+        const sautDistance = parseFloat(document.getElementById(`saut-distance-${i}`)?.value) || null;
+        const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
+        const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
+        const sautTech3 = document.getElementById(`saut3-${i}`)?.checked || false;
+        const sautTech4 = document.getElementById(`saut4-${i}`)?.checked || false;
+        const sautTech5 = document.getElementById(`saut5-${i}`)?.checked || false;
+
+        const lancerDistance = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value) || null;
+        const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
+        const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
+        const lancerTech3 = document.getElementById(`lancer3-${i}`)?.checked || false;
+        const lancerTech4 = document.getElementById(`lancer4-${i}`)?.checked || false;
+        const lancerTech5 = document.getElementById(`lancer5-${i}`)?.checked || false;
+
+        const idx = allStudents.findIndex(s => s.id === d.student.id);
+        if(idx === -1) return;
+
+        if(!allStudents[idx].seances) allStudents[idx].seances = [];
+
+        let seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L6');
+        if(seanceIdx === -1) {
+            allStudents[idx].seances.push({
+                lecon: 'L6',
+                date: new Date().toISOString()
+            });
+            seanceIdx = allStudents[idx].seances.length - 1;
+        }
+
+        const scoreSaut = [sautTech1, sautTech2, sautTech3, sautTech4, sautTech5].filter(Boolean).length;
+        const scoreLancer = [lancerTech1, lancerTech2, lancerTech3, lancerTech4, lancerTech5].filter(Boolean).length;
+
+        allStudents[idx].seances[seanceIdx] = {
+            ...allStudents[idx].seances[seanceIdx],
+            type: 'perfectionnement_technique',
+            sautDistance: sautDistance,
+            sautTech1, sautTech2, sautTech3, sautTech4, sautTech5,
+            scoreTechniqueSaut: scoreSaut,
+            lancerDistance: lancerDistance,
+            lancerTech1, lancerTech2, lancerTech3, lancerTech4, lancerTech5,
+            scoreTechniqueLancer: scoreLancer,
+            date: new Date().toISOString()
+        };
+
+        count++;
+    });
+
+    if(count === 0) { 
+        alert('⚠️ Aucun élève sélectionné !'); 
+        return; 
+    }
+
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
+}
+</script>
 </body>
 </html>

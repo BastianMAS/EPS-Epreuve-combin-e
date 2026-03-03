@@ -3,181 +3,443 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan Leçon 6 - EPS PRO</title>
+    <title>Bilan L6 - Perfectionnement Technique - EPS: épreuve Combinée</title>
     <style>
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #00d9ff;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
-            line-height: 1.6;
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2.5rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            margin-bottom: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
             background: var(--card);
+            border: 1px solid rgba(0,217,255,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px rgba(0,217,255,0.15);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        
+        .eleves-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .eleve-card {
+            background: var(--card);
+            border: 1px solid rgba(0,217,255,0.2);
             border-radius: 12px;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
-        th {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 12px;
+        
+        .eleve-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .eleve-header {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            padding: 12px 16px;
             font-weight: 700;
-            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        
+        .eleve-body {
+            padding: 16px;
         }
-        tr:hover {
-            background: rgba(0,210,255,0.05);
+        
+        .performance-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
-        .stat-box {
-            background: var(--card);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--accent);
+        
+        .score-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        
+        .score-excellent { background: rgba(75,222,128,0.3); color: var(--success); }
+        .score-bon { background: rgba(251,191,36,0.3); color: var(--warning); }
+        .score-moyen { background: rgba(239,68,68,0.3); color: var(--danger); }
+        
+        .pyramide-status {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 8px 0;
+            text-align: center;
+        }
+        
+        .pyramide-reussie {
+            background: rgba(75,222,128,0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+        
+        .pyramide-echouee {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+        
+        .excellence-badge {
+            background: linear-gradient(135deg, var(--gold), #ffa500);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: 700;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+            padding: 40px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .export-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(75,222,128,0.4);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.3rem; font-weight: 700;">📊 BILAN LEÇON 6</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
-        
-        <div id="stats"></div>
-        <div id="table-container"></div>
-    </div>
+
+<a href="index.html" class="btn-back">← Retour</a>
+
+<h1>EPS: épreuve Combinée</h1>
+<p class="subtitle">⚡ BILAN L6 - PERFECTIONNEMENT TECHNIQUE</p>
+
+<div class="stats-grid" id="stats-grid">
+    <!-- Stats générales générées par JS -->
+</div>
+
+<div class="eleves-list" id="eleves-list">
+    <!-- Liste élèves générée par JS -->
+</div>
+
+<button class="export-btn" onclick="exportResults()">📄 Exporter</button>
+
+<script>
+let bilanData = {
+    elevesAvecL6: [],
+    stats: {
+        totalEleves: 0,
+        moyenneSaut: 0,
+        moyenneLancer: 0,
+        pyramideReussie: 0,
+        excellenceTechnique: 0,
+        tauxReussitePyramide: 0
+    }
+};
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        document.getElementById('eleves-list').innerHTML = '<div class="no-data">⚠️ Aucune donnée trouvée</div>';
+        return;
+    }
     
-    <script>
-    let students = [];
+    const eleves = JSON.parse(stored);
+    analyzerL6(eleves);
+    renderStats();
+    renderEleves();
+};
+
+function analyzerL6(eleves) {
+    bilanData.elevesAvecL6 = [];
     
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        students = JSON.parse(stored);
-        displayBilan();
-    };
+    eleves.forEach(eleve => {
+        const seanceL6 = eleve.seances?.find(s => s.lecon === 'L6');
+        if(!seanceL6) return;
+        
+        const eleveData = {
+            id: eleve.id,
+            nomPrenom: eleve.nomPrenom,
+            sexe: eleve.sexe,
+            age: eleve.age,
+            vma: eleve.vma,
+            seanceL6: seanceL6,
+            scoreTotalTech: (seanceL6.scoreTechniqueSaut || 0) + (seanceL6.scoreTechniqueLancer || 0),
+            excellenceTech: (seanceL6.scoreTechniqueSaut === 5 && seanceL6.scoreTechniqueLancer === 5),
+            pyramideOK: seanceL6.pyramideReussie || false
+        };
+        
+        bilanData.elevesAvecL6.push(eleveData);
+    });
     
-    function displayBilan() {
-        const withL6 = students.filter(s => s.lecon6);
+    // Stats globales
+    bilanData.stats.totalEleves = bilanData.elevesAvecL6.length;
+    
+    if(bilanData.stats.totalEleves > 0) {
+        const sautScores = bilanData.elevesAvecL6.map(e => e.seanceL6.scoreTechniqueSaut || 0);
+        const lancerScores = bilanData.elevesAvecL6.map(e => e.seanceL6.scoreTechniqueLancer || 0);
         
-        if(withL6.length === 0) {
-            document.getElementById('stats').innerHTML = '<div class="stat-box"><p>Aucune donnée Leçon 6 enregistrée.</p></div>';
-            return;
-        }
+        bilanData.stats.moyenneSaut = sautScores.reduce((a,b) => a+b, 0) / sautScores.length;
+        bilanData.stats.moyenneLancer = lancerScores.reduce((a,b) => a+b, 0) / lancerScores.length;
+        bilanData.stats.pyramideReussie = bilanData.elevesAvecL6.filter(e => e.pyramideOK).length;
+        bilanData.stats.excellenceTechnique = bilanData.elevesAvecL6.filter(e => e.excellenceTech).length;
+        bilanData.stats.tauxReussitePyramide = Math.round((bilanData.stats.pyramideReussie / bilanData.stats.totalEleves) * 100);
+    }
+}
+
+function renderStats() {
+    const container = document.getElementById('stats-grid');
+    
+    if(bilanData.stats.totalEleves === 0) {
+        container.innerHTML = '<div class="no-data">⚠️ Aucune séance L6 trouvée</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="stat-card">
+            <div class="stat-value">${bilanData.stats.totalEleves}</div>
+            <div class="stat-label">Élèves évalués</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${bilanData.stats.moyenneSaut.toFixed(1)}/5</div>
+            <div class="stat-label">Score technique saut</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${bilanData.stats.moyenneLancer.toFixed(1)}/5</div>
+            <div class="stat-label">Score technique lancer</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${bilanData.stats.pyramideReussie}/${bilanData.stats.totalEleves}</div>
+            <div class="stat-label">Pyramides réussies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${bilanData.stats.excellenceTechnique}</div>
+            <div class="stat-label">Excellence (10/10)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${bilanData.stats.tauxReussitePyramide}%</div>
+            <div class="stat-label">Taux réussite pyramide</div>
+        </div>
+    `;
+}
+
+function renderEleves() {
+    const container = document.getElementById('eleves-list');
+    
+    if(bilanData.elevesAvecL6.length === 0) {
+        container.innerHTML = '<div class="no-data">⚠️ Aucun élève avec séance L6</div>';
+        return;
+    }
+    
+    let html = '';
+    
+    bilanData.elevesAvecL6.forEach(eleve => {
+        const seance = eleve.seanceL6;
         
-        // Stats globales
-        let totalPct = 0;
-        let totalReguliers = 0;
+        // Badges scores
+        const sautBadge = getScoreBadge(seance.scoreTechniqueSaut || 0);
+        const lancerBadge = getScoreBadge(seance.scoreTechniqueLancer || 0);
         
-        withL6.forEach(s => {
-            const d = s.lecon6;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            totalPct += pctRealise;
-            
-            const ecart1_2 = Math.abs(d.tour2 - d.tour1);
-            const ecart2_3 = Math.abs(d.tour3 - d.tour2);
-            if(Math.max(ecart1_2, ecart2_3) <= 5) totalReguliers++;
-        });
+        // Statut pyramide
+        const pyramideHtml = eleve.pyramideOK ? 
+            '<div class="pyramide-status pyramide-reussie">✅ Pyramide validée</div>' :
+            `<div class="pyramide-status pyramide-echouee">❌ Échec: ${seance.pyramideEchec || 'Non précisé'}</div>`;
         
-        const moyPct = totalPct / withL6.length;
-        
-        // Récupérer l'atelier de la lecon6
-        const lecon6Data = JSON.parse(localStorage.getItem('lecon6_data') || '{}');
-        const atelierHTML = lecon6Data.atelierType ? `
-            <div class="stat-box" style="border-color: var(--purple);">
-                <h3 style="color: var(--purple); margin-bottom: 10px;">
-                    ${lecon6Data.atelierType === 'saut' ? '🦘 Atelier SAUT' : '🎯 Atelier LANCER'}
-                </h3>
-                <p style="white-space: pre-wrap;">${lecon6Data.atelierTexte || 'Aucune description'}</p>
+        html += `
+            <div class="eleve-card">
+                <div class="eleve-header">
+                    <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
+                    <span>${eleve.nomPrenom}</span>
+                </div>
+                <div class="eleve-body">
+                    <div class="performance-row">
+                        <span>🦘 Technique saut</span>
+                        <span class="score-badge ${sautBadge.class}">${seance.scoreTechniqueSaut || 0}/5</span>
+                    </div>
+                    <div class="performance-row">
+                        <span>🎯 Technique lancer</span>
+                        <span class="score-badge ${lancerBadge.class}">${seance.scoreTechniqueLancer || 0}/5</span>
+                    </div>
+                    <div class="performance-row">
+                        <span>📏 Distance saut</span>
+                        <span>${seance.sautDistance ? seance.sautDistance + 'm' : 'N/A'}</span>
+                    </div>
+                    <div class="performance-row">
+                        <span>📏 Distance lancer</span>
+                        <span>${seance.lancerDistance ? seance.lancerDistance + 'm' : 'N/A'}</span>
+                    </div>
+                    <div class="performance-row">
+                        <span>🔢 Tentatives saut</span>
+                        <span>${seance.sautTentatives || 'N/A'}</span>
+                    </div>
+                    <div class="performance-row">
+                        <span>🔢 Tentatives lancer</span>
+                        <span>${seance.lancerTentatives || 'N/A'}</span>
+                    </div>
+                    ${pyramideHtml}
+                    ${eleve.excellenceTech ? '<div class="excellence-badge">⭐ EXCELLENCE TECHNIQUE 10/10 ⭐</div>' : ''}
+                </div>
             </div>
-        ` : '';
-        
-        document.getElementById('stats').innerHTML = `
-            <div class="stat-box">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
-                <p><strong>Élèves ayant fait la lecon :</strong> ${withL6.length} / ${students.length}</p>
-                <p><strong>% VMA moyen réalisé :</strong> ${moyPct.toFixed(1)}%</p>
-                <p><strong>Courses régulières (écarts ≤5s) :</strong> ${totalReguliers} / ${withL6.length} (${((totalReguliers/withL6.length)*100).toFixed(0)}%)</p>
-            </div>
-            ${atelierHTML}
         `;
-        
-        // Tableau
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>Classe</th><th>VMA</th><th>% Objectif</th><th>T1</th><th>T2</th><th>T3</th><th>Moyenne</th><th>% Réalisé</th><th>Profil</th></tr></thead><tbody>';
-        
-        withL6.forEach(s => {
-            const d = s.lecon6;
-            const vma = parseFloat(s.vma);
-            const moy = (d.tour1 + d.tour2 + d.tour3) / 3;
-            const pctRealise = ((0.4 / (moy/3600)) / vma) * 100;
-            
-            const ecart1_2 = d.tour2 - d.tour1;
-            const ecart2_3 = d.tour3 - d.tour2;
-            const ecartMax = Math.max(Math.abs(ecart1_2), Math.abs(ecart2_3));
-            
-            let profil = '';
-            if(ecartMax <= 5) {
-                profil = '➡️ Régulière';
-            } else if(ecart1_2 > 10 || ecart2_3 > 10) {
-                profil = '⚠️ Grosse baisse';
-            } else {
-                profil = '⚠️ Irrégulière';
-            }
-            
-            const objectif = pctRealise >= d.pctVMA ? '✅' : '❌';
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+s.classe+'</td>';
-            html += '<td>'+vma+' km/h</td>';
-            html += '<td>'+d.pctVMA+'%</td>';
-            html += '<td>'+formatTime(d.tour1*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour2*1000)+'</td>';
-            html += '<td>'+formatTime(d.tour3*1000)+'</td>';
-            html += '<td>'+formatTime(moy*1000)+'</td>';
-            html += '<td>'+pctRealise.toFixed(1)+'% '+objectif+'</td>';
-            html += '<td>'+profil+'</td>';
-            html += '</tr>';
-        });
-        
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
-    }
+    });
     
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
-    }
-    </script>
+    container.innerHTML = html;
+}
+
+function getScoreBadge(score) {
+    if(score >= 4) return { class: 'score-excellent', label: 'Excellent' };
+    if(score >= 3) return { class: 'score-bon', label: 'Bon' };
+    return { class: 'score-moyen', label: 'À améliorer' };
+}
+
+function exportResults() {
+    let contenu = `BILAN L6 - PERFECTIONNEMENT TECHNIQUE\\n`;
+    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\\n\\n`;
+    
+    // Stats
+    contenu += `📊 STATISTIQUES GLOBALES:\\n`;
+    contenu += `- Élèves évalués: ${bilanData.stats.totalEleves}\\n`;
+    contenu += `- Score technique saut moyen: ${bilanData.stats.moyenneSaut.toFixed(1)}/5\\n`;
+    contenu += `- Score technique lancer moyen: ${bilanData.stats.moyenneLancer.toFixed(1)}/5\\n`;
+    contenu += `- Pyramides réussies: ${bilanData.stats.pyramideReussie}/${bilanData.stats.totalEleves} (${bilanData.stats.tauxReussitePyramide}%)\\n`;
+    contenu += `- Excellence technique (10/10): ${bilanData.stats.excellenceTechnique} élèves\\n\\n`;
+    
+    // Détail élèves
+    contenu += `👥 DÉTAIL PAR ÉLÈVE:\\n`;
+    bilanData.elevesAvecL6.forEach(eleve => {
+        const seance = eleve.seanceL6;
+        contenu += `\\n📋 ${eleve.nomPrenom} (${eleve.sexe}, ${eleve.age} ans):\\n`;
+        contenu += `  🦘 Saut: ${seance.scoreTechniqueSaut || 0}/5 technique, ${seance.sautDistance || 'N/A'}m, ${seance.sautTentatives || 'N/A'} essais\\n`;
+        contenu += `  🎯 Lancer: ${seance.scoreTechniqueLancer || 0}/5 technique, ${seance.lancerDistance || 'N/A'}m, ${seance.lancerTentatives || 'N/A'} essais\\n`;
+        contenu += `  🏃‍♂️ Pyramide: ${eleve.pyramideOK ? 'Réussie ✅' : 'Échouée ❌' + (seance.pyramideEchec ? ' (' + seance.pyramideEchec + ')' : '')}\\n`;
+        if(eleve.excellenceTech) contenu += `  ⭐ EXCELLENCE TECHNIQUE 10/10\\n`;
+    });
+    
+    // Téléchargement
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bilan-l6-perfectionnement-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+console.log('⚡ Bilan L6 - Perfectionnement Technique chargé !');
+</script>
 </body>
 </html>

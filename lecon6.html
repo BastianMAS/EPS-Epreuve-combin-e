@@ -63,11 +63,6 @@
             transition: all 0.3s ease;
         }
         
-        .card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 8px 25px rgba(0,217,255,0.15);
-        }
-        
         .card-header {
             background: linear-gradient(135deg, var(--accent), var(--purple));
             color: white;
@@ -113,10 +108,6 @@
             transition: all 0.3s ease;
         }
         
-        .section-header:hover {
-            background: rgba(0,217,255,0.25);
-        }
-        
         .arrow {
             transition: transform 0.3s ease;
             font-size: 0.8rem;
@@ -135,7 +126,7 @@
         
         .section-body.open {
             padding: 12px;
-            max-height: 500px;
+            max-height: 600px;
         }
         
         .pyramide-info {
@@ -173,6 +164,25 @@
             font-weight: 600;
         }
         
+        .pyramide-validation {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin: 12px 0;
+        }
+        
+        .pyramide-check {
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .pyramide-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--success);
+            margin-bottom: 4px;
+        }
+        
         .technique-box {
             background: rgba(75,222,128,0.1);
             padding: 12px;
@@ -203,26 +213,24 @@
             accent-color: var(--success);
         }
         
-        .checkbox-row label {
-            flex: 1;
-            cursor: pointer;
-        }
-        
         .distance-input {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         
         .distance-input input {
-            width: 80px;
             padding: 6px 8px;
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 4px;
             background: rgba(255,255,255,0.05);
             color: white;
             font-size: 0.9rem;
+        }
+        
+        .distance-input input[type="number"] {
+            width: 80px;
         }
         
         .btn-back {
@@ -241,6 +249,10 @@
             transition: all 0.3s ease;
         }
         
+        .btn-back:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
         .save-btn {
             position: fixed;
             bottom: 30px;
@@ -254,7 +266,7 @@
             font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(75,222,128,0.3);
+            transition: all 0.3s ease;
         }
         
         .save-btn:hover {
@@ -263,7 +275,7 @@
         }
         
         @media (max-width: 768px) {
-            .temps-cibles { grid-template-columns: repeat(3, 1fr); }
+            .temps-cibles, .pyramide-validation { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
@@ -328,7 +340,7 @@ function createCard(i) {
             
             <div class="section">
                 <div class="section-header" onclick="toggleSection('course', ${i})">
-                    <span>🏃‍♂️ COURSE - PYRAMIDE DOUCE</span><span class="arrow" id="arr-course-${i}">▼</span>
+                    <span>🏃‍♂️ PYRAMIDE DOUCE</span><span class="arrow" id="arr-course-${i}">▼</span>
                 </div>
                 <div class="section-body" id="body-course-${i}">
                     <div class="pyramide-info">
@@ -337,6 +349,31 @@ function createCard(i) {
                         <small>⏱️ Récup 60s | Chrono de groupe</small>
                     </div>
                     <div class="temps-cibles" id="temps-cibles-${i}"></div>
+                    <div style="font-size: 0.85rem; color: var(--warning); margin: 10px 0;">
+                        <strong>✅ Validation des distances :</strong>
+                    </div>
+                    <div class="pyramide-validation">
+                        <div class="pyramide-check">
+                            <input type="checkbox" id="pyramide-60-1-${i}">
+                            <div>60m T1</div>
+                        </div>
+                        <div class="pyramide-check">
+                            <input type="checkbox" id="pyramide-80-1-${i}">
+                            <div>80m T2</div>
+                        </div>
+                        <div class="pyramide-check">
+                            <input type="checkbox" id="pyramide-100-${i}">
+                            <div>100m T3</div>
+                        </div>
+                        <div class="pyramide-check">
+                            <input type="checkbox" id="pyramide-80-2-${i}">
+                            <div>80m T4</div>
+                        </div>
+                        <div class="pyramide-check">
+                            <input type="checkbox" id="pyramide-60-2-${i}">
+                            <div>60m T5</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -371,6 +408,10 @@ function createCard(i) {
                     <div class="distance-input">
                         <label>Distance (m):</label>
                         <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.50">
+                    </div>
+                    <div class="distance-input">
+                        <label>Tentatives:</label>
+                        <input type="number" min="1" max="6" id="saut-tentatives-${i}" placeholder="3" style="width: 60px;">
                     </div>
                 </div>
             </div>
@@ -407,6 +448,10 @@ function createCard(i) {
                         <label>Distance (m):</label>
                         <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="12.00">
                     </div>
+                    <div class="distance-input">
+                        <label>Tentatives:</label>
+                        <input type="number" min="1" max="6" id="lancer-tentatives-${i}" placeholder="3" style="width: 60px;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -428,27 +473,38 @@ function selectStudent(i, studentId) {
             sautTech4: existantL6.sautTech4 || false,
             sautTech5: existantL6.sautTech5 || false,
             sautDistance: existantL6.sautDistance || null,
+            sautTentatives: existantL6.sautTentatives || null,
             lancerTech1: existantL6.lancerTech1 || false,
             lancerTech2: existantL6.lancerTech2 || false,
             lancerTech3: existantL6.lancerTech3 || false,
             lancerTech4: existantL6.lancerTech4 || false,
             lancerTech5: existantL6.lancerTech5 || false,
-            lancerDistance: existantL6.lancerDistance || null
+            lancerDistance: existantL6.lancerDistance || null,
+            lancerTentatives: existantL6.lancerTentatives || null,
+            pyramide60_1: existantL6.pyramide60_1 || false,
+            pyramide80_1: existantL6.pyramide80_1 || false,
+            pyramide100: existantL6.pyramide100 || false,
+            pyramide80_2: existantL6.pyramide80_2 || false,
+            pyramide60_2: existantL6.pyramide60_2 || false
         };
         
         setTimeout(() => {
             ['saut1', 'saut2', 'saut3', 'saut4', 'saut5', 'lancer1', 'lancer2', 'lancer3', 'lancer4', 'lancer5'].forEach(tech => {
                 const el = document.getElementById(`${tech}-${i}`);
-                const techKey = tech.replace(/(\\d)/, 'Tech$1');
+                const techKey = tech.replace(/(\d)/, 'Tech$1');
                 if(el && cardState[i][techKey]) el.checked = true;
             });
             
-            if(existantL6.sautDistance) {
-                document.getElementById(`saut-distance-${i}`).value = existantL6.sautDistance;
-            }
-            if(existantL6.lancerDistance) {
-                document.getElementById(`lancer-distance-${i}`).value = existantL6.lancerDistance;
-            }
+            if(existantL6.sautDistance) document.getElementById(`saut-distance-${i}`).value = existantL6.sautDistance;
+            if(existantL6.sautTentatives) document.getElementById(`saut-tentatives-${i}`).value = existantL6.sautTentatives;
+            if(existantL6.lancerDistance) document.getElementById(`lancer-distance-${i}`).value = existantL6.lancerDistance;
+            if(existantL6.lancerTentatives) document.getElementById(`lancer-tentatives-${i}`).value = existantL6.lancerTentatives;
+            
+            ['pyramide-60-1', 'pyramide-80-1', 'pyramide-100', 'pyramide-80-2', 'pyramide-60-2'].forEach(pyra => {
+                const el = document.getElementById(`${pyra}-${i}`);
+                const pyraKey = pyra.replace(/-/g, '');
+                if(el && cardState[i][pyraKey]) el.checked = true;
+            });
         }, 100);
     } else {
         cardState[i] = {};
@@ -509,6 +565,7 @@ function saveAll() {
         if(!d.student) return;
 
         const sautDistance = parseFloat(document.getElementById(`saut-distance-${i}`)?.value) || null;
+        const sautTentatives = parseInt(document.getElementById(`saut-tentatives-${i}`)?.value) || null;
         const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
         const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
         const sautTech3 = document.getElementById(`saut3-${i}`)?.checked || false;
@@ -516,11 +573,18 @@ function saveAll() {
         const sautTech5 = document.getElementById(`saut5-${i}`)?.checked || false;
 
         const lancerDistance = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value) || null;
+        const lancerTentatives = parseInt(document.getElementById(`lancer-tentatives-${i}`)?.value) || null;
         const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
         const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
         const lancerTech3 = document.getElementById(`lancer3-${i}`)?.checked || false;
         const lancerTech4 = document.getElementById(`lancer4-${i}`)?.checked || false;
         const lancerTech5 = document.getElementById(`lancer5-${i}`)?.checked || false;
+
+        const pyramide60_1 = document.getElementById(`pyramide-60-1-${i}`)?.checked || false;
+        const pyramide80_1 = document.getElementById(`pyramide-80-1-${i}`)?.checked || false;
+        const pyramide100 = document.getElementById(`pyramide-100-${i}`)?.checked || false;
+        const pyramide80_2 = document.getElementById(`pyramide-80-2-${i}`)?.checked || false;
+        const pyramide60_2 = document.getElementById(`pyramide-60-2-${i}`)?.checked || false;
 
         const idx = allStudents.findIndex(s => s.id === d.student.id);
         if(idx === -1) return;
@@ -538,16 +602,29 @@ function saveAll() {
 
         const scoreSaut = [sautTech1, sautTech2, sautTech3, sautTech4, sautTech5].filter(Boolean).length;
         const scoreLancer = [lancerTech1, lancerTech2, lancerTech3, lancerTech4, lancerTech5].filter(Boolean).length;
+        
+        const pyramideReussites = [pyramide60_1, pyramide80_1, pyramide100, pyramide80_2, pyramide60_2];
+        const pyramideReussie = pyramideReussites.every(Boolean);
+        
+        let pyramideEchec = null;
+        if(!pyramideReussie) {
+            const distances = ['60m T1', '80m T2', '100m T3', '80m T4', '60m T5'];
+            const index = pyramideReussites.findIndex(r => !r);
+            if(index !== -1) pyramideEchec = distances[index];
+        }
 
         allStudents[idx].seances[seanceIdx] = {
             ...allStudents[idx].seances[seanceIdx],
             type: 'perfectionnement_technique',
-            sautDistance: sautDistance,
+            sautDistance, sautTentatives,
             sautTech1, sautTech2, sautTech3, sautTech4, sautTech5,
             scoreTechniqueSaut: scoreSaut,
-            lancerDistance: lancerDistance,
+            lancerDistance, lancerTentatives,
             lancerTech1, lancerTech2, lancerTech3, lancerTech4, lancerTech5,
             scoreTechniqueLancer: scoreLancer,
+            pyramide60_1, pyramide80_1, pyramide100, pyramide80_2, pyramide60_2,
+            pyramideReussie: pyramideReussie,
+            pyramideEchec: pyramideEchec,
             date: new Date().toISOString()
         };
 
@@ -562,6 +639,8 @@ function saveAll() {
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
     alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
 }
+
+console.log('⚡ L6 - Perfectionnement Technique chargé !');
 </script>
 </body>
 </html>

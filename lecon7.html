@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L7 - Mise en Situation Adaptative - EPS: épreuve Combinée</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #ff6b35;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
+            --orange: #ff8800;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #2d1810 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
+        }
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .grid6 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 900px) { .grid6 { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 600px) { .grid6 { grid-template-columns: 1fr; } }
+
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(255,107,53,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--accent), var(--orange));
+            color: white;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-body { 
+            padding: 16px; 
+        }
+        
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: rgba(255,107,53,0.05);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .section {
+            margin-bottom: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .section-header {
+            background: rgba(255,107,53,0.15);
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .arrow {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+        
+        .arrow.open {
+            transform: rotate(180deg);
+        }
+        
+        .section-body {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .section-body.open {
+            padding: 12px;
+            max-height: 800px;
+        }
+        
+        .historique-box {
+            background: rgba(255,107,53,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .tour-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        
+        .tour-header {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .choix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .choix-btn {
+            padding: 12px 8px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .choix-btn:hover {
+            border-color: var(--accent);
+            background: rgba(255,107,53,0.2);
+        }
+        
+        .choix-btn.selected {
+            border-color: var(--success);
+            background: rgba(75,222,128,0.2);
+            color: var(--success);
+        }
+        
+        .temps-saisie {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        
+        .temps-input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .temps-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .ressenti-box {
+            background: rgba(75,222,128,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0;
+            font-size: 0.85rem;
+        }
+        
+        .checkbox-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--success);
+        }
+        
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<a href="index.html" class="btn-back">← Retour</a>
+
+<h1>EPS: épreuve Combinée</h1>
+<p class="subtitle">🎯 L7 - MISE EN SITUATION ADAPTATIVE</p>
+
+<div class="grid6" id="grid"></div>
+
+<button class="save-btn" onclick="saveAll()">💾 Sauvegarder</button>
+
+<script>
+let ELEVES = [];
+const cardState = [{},{},{},{},{},{}];
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        alert('⚠️ Aucun élève trouvé.');
+        window.location.href = 'index.html';
+        return;
+    }
+    ELEVES = JSON.parse(stored);
+
+    const grid = document.getElementById('grid');
+    for(let i = 0; i < 6; i++) {
+        grid.appendChild(createCard(i));
+    }
+};
+
+function createCard(i) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+        <div class="card-header">
+            <span>🎯 ÉLÈVE ${i+1}</span>
+        </div>
+        <div class="card-body">
+            <select onchange="selectStudent(${i}, this.value)" style="width:100%; padding:8px; background:var(--card); color:white; border:1px solid rgba(255,255,255,0.3); border-radius:6px; margin-bottom:12px;">
+                <option value="">Sélectionner un élève</option>
+                ${ELEVES.map(eleve => `<option value="${eleve.id}">${eleve.nomPrenom}</option>`).join('')}
+            </select>
+            
+            <div id="info-${i}" class="student-info" style="display:none;"></div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('historique', ${i})">
+                    <span>📊 TON HISTORIQUE</span><span class="arrow" id="arr-historique-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-historique-${i}">
+                    <div id="historique-data-${i}">
+                        <!-- Généré selon historique L3/L4/L5/L6 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('tour1', ${i})">
+                    <span>🏃‍♂️ 400M #1 - TON CHOIX</span><span class="arrow" id="arr-tour1-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-tour1-${i}">
+                    <div class="tour-container">
+                        <div class="tour-header">Comment veux-tu aborder ce 1er 400m ?</div>
+                        <div class="choix-grid">
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'prudent')">
+                                🐌<br>Prudent<br><small>En sécurité</small>
+                            </div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'regulier')">
+                                ⚖️<br>Régulier<br><small>Comme L3/L4</small>
+                            </div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'ambitieux')">
+                                ⚡<br>Ambitieux<br><small>Je me lance</small>
+                            </div>
+                        </div>
+                        <div class="temps-saisie">
+                            <label style="min-width: 60px;">Temps :</label>
+                            <input type="text" class="temps-input" id="temps1-${i}" placeholder="1:25.0" onchange="checkTour2(${i})">
+                        </div>
+                        <div class="ressenti-box">
+                            <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="ressenti1-facile-${i}">
+                                <label>😊 C'était facile</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="ressenti1-bien-${i}">
+                                <label>👍 C'était bien</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="ressenti1-dur-${i}">
+                                <label>😮‍💨 C'était dur</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('tour2', ${i})">
+                    <span>🏃‍♂️ 400M #2 - ADAPTATION</span><span class="arrow" id="arr-tour2-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-tour2-${i}">
+                    <div class="tour-container disabled" id="tour2-container-${i}">
+                        <div class="tour-header">Après ton 1er tour, que veux-tu faire ?</div>
+                        <div class="choix-grid">
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'plus-lent')">
+                                🐌<br>Plus lent<br><small>Je me calme</small>
+                            </div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'meme')">
+                                ⚖️<br>Même rythme<br><small>Ça me va</small>
+                            </div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'plus-vite')">
+                                ⚡<br>Plus vite<br><small>J'accélère</small>
+                            </div>
+                        </div>
+                        <div class="temps-saisie">
+                            <label style="min-width: 60px;">Temps :</label>
+                            <input type="text" class="temps-input" id="temps2-${i}" placeholder="1:25.0" onchange="checkTour3(${i})">
+                        </div>
+                        <div class="ressenti-box">
+                            <div style="font-weight: 700; margin-bottom: 8px;">Ressenti 2ème tour :</div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="ressenti2-facile-${i}">
+                                <label>😊 Encore facile</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="ressenti2-bien-${i}">
+                                <label>👍 Toujours bien</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="ressenti2-fatigue-${i}">
+                                <label>😮‍💨 Je commence à fatiguer</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('tour3', ${i})">
+                    <span>🏃‍♂️ 400M #3 - TON PROJET</span><span class="arrow" id="arr-tour3-${i}">▼</span>
+                </div>
+                <div class="section-body" id="body-tour3-${i}">
+                    <div class="tour-container disabled" id="tour3-container-${i}">
+                        <div class="tour-header">Pour ce dernier tour, quel est TON projet ?</div>
+                        <div class="choix-grid">
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'tenir')">
+                                🛡️<br>Tenir<br><small>Finir proprement</small>
+                            </div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'maintenir')">
+                                ⚖️<br>Maintenir<br><small>Même allure</small>
+                            </div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'sprint')">
+                                🚀<br>Sprint<br><small>Tout donner</small>
+                            </div>
+                        </div>
+                        <div class="temps-saisie">
+                            <label style="min-width: 60px;">Temps :</label>
+                            <input type="text" class="temps-input" id="temps3-${i}" placeholder="1:25.0">
+                        </div>
+                        <div class="ressenti-box">
+                            <div style="font-weight: 700; margin-bottom: 8px;">Ressenti final :</div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="projet-reussi-${i}">
+                                <label>✅ Mon projet était réussi</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="confiant-l8-${i}">
+                                <label>💪 Je suis confiant pour L8</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="strategie-trouvee-${i}">
+                                <label>🎯 J'ai trouvé ma stratégie</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+function selectStudent(i, studentId) {
+    const student = ELEVES.find(s => s.id === studentId);
+    
+    if(student) {
+        cardState[i] = { student: student };
+        
+        const info = document.getElementById(`info-${i}`);
+        info.style.display = 'block';
+        const vmaInfo = student.vma ? ` | VMA: <strong style="color:var(--success)">${student.vma} km/h</strong>` : '';
+        info.innerHTML = `<strong>${student.sexe==='F'?'👧':'🧑'} ${student.sexe==='F'?'Fille':'Garçon'}</strong> | ${student.age} ans${vmaInfo}`;
+        
+        generateHistorique(i, student);
+        
+        // Désactiver tour2 et tour3 par défaut
+        document.getElementById(`tour2-container-${i}`).classList.add('disabled');
+        document.getElementById(`tour3-container-${i}`).classList.add('disabled');
+    } else {
+        cardState[i] = {};
+        document.getElementById(`info-${i}`).style.display = 'none';
+        document.getElementById(`historique-data-${i}`).innerHTML = '';
+    }
+}
+
+function generateHistorique(i, student) {
+    const container = document.getElementById(`historique-data-${i}`);
+    let html = '<div class="historique-box">';
+    
+    // Analyser L3/L4
+    const seanceL3 = student.seances?.find(s => s.lecon === 'L3');
+    const seanceL4 = student.seances?.find(s => s.lecon === 'L4');
+    
+    if(seanceL3 && seanceL3.moyenne200m) {
+        html += `<div>📊 <strong>Tes 200m L3/L4 :</strong> Moyenne ${seanceL3.moyenne200m}"</div>`;
+    }
+    
+    // Analyser L5
+    const seanceL5 = student.seances?.find(s => s.lecon === 'L5');
+    if(seanceL5 && seanceL5.distanceMoyenneIndividuelle) {
+        html += `<div>🏅 <strong>Relais L5 :</strong> ${seanceL5.distanceMoyenneIndividuelle}m par manche</div>`;
+    }
+    
+    // Analyser L6
+    const seanceL6 = student.seances?.find(s => s.lecon === 'L6');
+    if(seanceL6) {
+        const pyramideText = seanceL6.pyramideReussie ? 'Pyramide réussie ✅' : 'Pyramide échouée ❌';
+        html += `<div>⚡ <strong>Perfectionnement L6 :</strong> ${pyramideText}</div>`;
+    }
+    
+    html += '<div style="margin-top: 12px; font-style: italic; color: var(--warning);">';
+    html += '💡 <strong>À toi de choisir :</strong> Comment veux-tu aborder tes 3×400m ?';
+    html += '</div>';
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function selectChoix(i, tour, choix) {
+    // Retirer sélection précédente
+    document.querySelectorAll(`#body-${tour}-${i} .choix-btn`).forEach(btn => btn.classList.remove('selected'));
+    // Ajouter nouvelle sélection
+    event.target.classList.add('selected');
+    
+    // Stocker le choix
+    if(!cardState[i].choix) cardState[i].choix = {};
+    cardState[i].choix[tour] = choix;
+}
+
+function checkTour2(i) {
+    if(document.getElementById(`temps1-${i}`).value.trim()) {
+        document.getElementById(`tour2-container-${i}`).classList.remove('disabled');
+    }
+}
+
+function checkTour3(i) {
+    if(document.getElementById(`temps2-${i}`).value.trim()) {
+        document.getElementById(`tour3-container-${i}`).classList.remove('disabled');
+    }
+}
+
+function toggleSection(sec, i) {
+    const body = document.getElementById(`body-${sec}-${i}`);
+    const arr = document.getElementById(`arr-${sec}-${i}`);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arr.classList.toggle('open', !isOpen);
+}
+
+function saveAll() {
+    let count = 0;
+    let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+
+    cardState.forEach((d, i) => {
+        if(!d.student) return;
+
+        const temps1 = document.getElementById(`temps1-${i}`)?.value || null;
+        const temps2 = document.getElementById(`temps2-${i}`)?.value || null;
+        const temps3 = document.getElementById(`temps3-${i}`)?.value || null;
+
+        const idx = allStudents.findIndex(s => s.id === d.student.id);
+        if(idx === -1) return;
+
+        if(!allStudents[idx].seances) allStudents[idx].seances = [];
+
+        let seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L7');
+        if(seanceIdx === -1) {
+            allStudents[idx].seances.push({
+                lecon: 'L7',
+                date: new Date().toISOString()
+            });
+            seanceIdx = allStudents[idx].seances.length - 1;
+        }
+
+        allStudents[idx].seances[seanceIdx] = {
+            ...allStudents[idx].seances[seanceIdx],
+            type: 'mise_en_situation_adaptative',
+            temps1, temps2, temps3,
+            choixTour1: d.choix?.tour1 || null,
+            choixTour2: d.choix?.tour2 || null,
+            choixTour3: d.choix?.tour3 || null,
+            ressenti1Facile: document.getElementById(`ressenti1-facile-${i}`)?.checked || false,
+            ressenti1Bien: document.getElementById(`ressenti1-bien-${i}`)?.checked || false,
+            ressenti1Dur: document.getElementById(`ressenti1-dur-${i}`)?.checked || false,
+            ressenti2Facile: document.getElementById(`ressenti2-facile-${i}`)?.checked || false,
+            ressenti2Bien: document.getElementById(`ressenti2-bien-${i}`)?.checked || false,
+            ressenti2Fatigue: document.getElementById(`ressenti2-fatigue-${i}`)?.checked || false,
+            projetReussi: document.getElementById(`projet-reussi-${i}`)?.checked || false,
+            confiantL8: document.getElementById(`confiant-l8-${i}`)?.checked || false,
+            strategieTrouvee: document.getElementById(`strategie-trouvee-${i}`)?.checked || false,
+            date: new Date().toISOString()
+        };
+
+        count++;
+    });
+
+    if(count === 0) { 
+        alert('⚠️ Aucun élève sélectionné !'); 
+        return; 
+    }
+
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    alert(`🎯 L7 mise en situation sauvegardée pour ${count} élève(s) !`);
+}
+</script>
+</body>
+</html>

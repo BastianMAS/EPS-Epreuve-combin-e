@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan Projet L8 - EPS: épreuve Combinée</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #00d9ff;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
+        }
+        
+        h1 { 
+            text-align: center; 
+            font-size: 2.5rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            margin-bottom: 30px;
+        }
+        
+        .eleves-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .eleve-card {
+            background: var(--card);
+            border: 1px solid rgba(0,217,255,0.3);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .eleve-header {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            padding: 16px 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .eleve-body {
+            padding: 20px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.02);
+            padding: 16px;
+            border-radius: 12px;
+        }
+        
+        .section-title {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-row:hover {
+            background: rgba(0,217,255,0.1);
+        }
+        
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+        
+        .projet-result {
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+            color: white;
+            font-weight: 600;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+            padding: 40px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .performance-summary {
+            background: rgba(0,217,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<a href="index.html" class="btn-back">← Retour</a>
+
+<h1>EPS: épreuve Combinée</h1>
+<p class="subtitle">🎯 MON PROJET POUR L8 - 3×400M</p>
+
+<div class="eleves-grid" id="eleves-grid"></div>
+
+<script>
+let elevesData = [];
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        document.getElementById('eleves-grid').innerHTML = '<div class="no-data">⚠️ Aucune donnée trouvée</div>';
+        return;
+    }
+    
+    elevesData = JSON.parse(stored);
+    renderEleves();
+};
+
+function renderEleves() {
+    const container = document.getElementById('eleves-grid');
+    
+    if(elevesData.length === 0) {
+        container.innerHTML = '<div class="no-data">⚠️ Aucun élève trouvé</div>';
+        return;
+    }
+    
+    let html = '';
+    
+    elevesData.forEach((eleve, index) => {
+        const summary = generateSummary(eleve);
+        
+        html += `
+            <div class="eleve-card">
+                <div class="eleve-header">
+                    <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
+                    <span>${eleve.nomPrenom}</span>
+                    <span style="margin-left: auto; font-size: 0.9rem;">${eleve.age} ans</span>
+                </div>
+                <div class="eleve-body">
+                    
+                    <div class="performance-summary">
+                        <strong>📊 Ton parcours en résumé :</strong><br>
+                        ${summary}
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">🏃‍♂️ COURSE - Comment te sens-tu ?</div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course1')">
+                                <input type="checkbox" id="course1-${index}">
+                                <label>Mes 200m L3/L4 étaient faciles</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course2')">
+                                <input type="checkbox" id="course2-${index}">
+                                <label>J'ai réussi la pyramide L6 (fractionné intense)</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course3')">
+                                <input type="checkbox" id="course3-${index}">
+                                <label>Je fatigue vite sur les efforts longs</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course4')">
+                                <input type="checkbox" id="course4-${index}">
+                                <label>J'aime garder des forces pour sprinter à la fin</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">💪 MENTAL - Quel est ton profil ?</div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental1')">
+                                <input type="checkbox" id="mental1-${index}">
+                                <label>Je préfère prendre des risques</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental2')">
+                                <input type="checkbox" id="mental2-${index}">
+                                <label>Je préfère jouer la sécurité</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental3')">
+                                <input type="checkbox" id="mental3-${index}">
+                                <label>Je suis confiant après L7</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental4')">
+                                <input type="checkbox" id="mental4-${index}">
+                                <label>J'ai besoin de me rassurer</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">🦘 SAUT - Comment te sens-tu ?</div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut1')">
+                                <input type="checkbox" id="saut1-${index}">
+                                <label>Ma course d'élan est devenue régulière</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut2')">
+                                <input type="checkbox" id="saut2-${index}">
+                                <label>J'ai bien progressé entre L3/L4 et L6</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut3')">
+                                <input type="checkbox" id="saut3-${index}">
+                                <label>J'ai encore du mal avec la précision d'appel</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut4')">
+                                <input type="checkbox" id="saut4-${index}">
+                                <label>J'aime les défis techniques</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">🎯 LANCER - Comment te sens-tu ?</div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer1')">
+                                <input type="checkbox" id="lancer1-${index}">
+                                <label>Ma technique s'améliore séance après séance</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer2')">
+                                <input type="checkbox" id="lancer2-${index}">
+                                <label>J'ai une bonne coordination globale</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer3')">
+                                <input type="checkbox" id="lancer3-${index}">
+                                <label>Je n'arrive pas à être régulier dans mes lancers</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer4')">
+                                <input type="checkbox" id="lancer4-${index}">
+                                <label>Je veux surtout réussir une belle distance</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">🎯 OBJECTIF - Que veux-tu ?</div>
+                        <div class="checkbox-group">
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif1')">
+                                <input type="checkbox" id="objectif1-${index}">
+                                <label>Réussir sans prendre de risque</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif2')">
+                                <input type="checkbox" id="objectif2-${index}">
+                                <label>Me dépasser et viser une belle performance</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif3')">
+                                <input type="checkbox" id="objectif3-${index}">
+                                <label>Faire mieux qu'en L7</label>
+                            </div>
+                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif4')">
+                                <input type="checkbox" id="objectif4-${index}">
+                                <label>Montrer ce que je sais faire</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="projet-result" id="projet-${index}">
+                        🤔 Coche les cases qui te correspondent pour découvrir ton projet personnalisé !
+                    </div>
+                    
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function generateSummary(eleve) {
+    const seances = eleve.seances || [];
+    const seanceL3 = seances.find(s => s.lecon === 'L3');
+    const seanceL4 = seances.find(s => s.lecon === 'L4');
+    const seanceL6 = seances.find(s => s.lecon === 'L6');
+    const seanceL7 = seances.find(s => s.lecon === 'L7');
+    
+    let summary = '';
+    
+    // Analyse 200m
+    if(seanceL3?.moyenne200m && eleve.vma) {
+        const moyenne = parseFloat(seanceL3.moyenne200m);
+        const vma = parseFloat(eleve.vma);
+        const vitesse = 200 / moyenne;
+        const pctVMA = Math.round((vitesse / (vma / 3.6)) * 100);
+        summary += `Course 200m à ${pctVMA}% VMA. `;
+    }
+    
+    // Analyse saut
+    const sautL3 = seanceL3 ? [seanceL3.sautTech1, seanceL3.sautTech2, seanceL3.sautTech3, seanceL3.sautTech4].filter(Boolean).length : 0;
+    const sautL6 = seanceL6 ? [seanceL6.sautTech1, seanceL6.sautTech2, seanceL6.sautTech3, seanceL6.sautTech4, seanceL6.sautTech5].filter(Boolean).length : 0;
+    if(sautL3 > 0 || sautL6 > 0) {
+        const progression = sautL6 > sautL3 ? 'progression saut' : 'saut stable';
+        summary += `${progression}. `;
+    }
+    
+    // Analyse lancer
+    const lancerL4 = seanceL4 ? [seanceL4.lancerTech1, seanceL4.lancerTech2, seanceL4.lancerTech3, seanceL4.lancerTech4].filter(Boolean).length : 0;
+    const lancerL6 = seanceL6 ? [seanceL6.lancerTech1, seanceL6.lancerTech2, seanceL6.lancerTech3, seanceL6.lancerTech4, seanceL6.lancerTech5].filter(Boolean).length : 0;
+    if(lancerL4 > 0 || lancerL6 > 0) {
+        const progression = lancerL6 > lancerL4 ? 'progression lancer' : 'lancer stable';
+        summary += `${progression}. `;
+    }
+    
+    // Analyse pyramide
+    if(seanceL6?.pyramideReussie) {
+        summary += `Pyramide L6 réussie. `;
+    } else if(seanceL6?.pyramideEchec) {
+        summary += `Pyramide L6 échouée. `;
+    }
+    
+    // Analyse L7
+    if(seanceL7?.confiantL8) {
+        summary += `Confiant après L7.`;
+    } else if(seanceL7?.temps1) {
+        summary += `Test L7 réalisé.`;
+    }
+    
+    return summary || 'Parcours en cours...';
+}
+
+function toggleCheckbox(eleveIndex, checkboxId) {
+    const checkbox = document.getElementById(`${checkboxId}-${eleveIndex}`);
+    checkbox.checked = !checkbox.checked;
+    generateProjet(eleveIndex);
+}
+
+function generateProjet(eleveIndex) {
+    const eleve = elevesData[eleveIndex];
+    const container = document.getElementById(`projet-${eleveIndex}`);
+    
+    // Lire toutes les cases cochées
+    const reponses = {
+        course: [],
+        saut: [],
+        lancer: [],
+        mental: [],
+        objectif: []
+    };
+    
+    ['course1', 'course2', 'course3', 'course4'].forEach(id => {
+        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
+            reponses.course.push(id);
+        }
+    });
+    
+    ['saut1', 'saut2', 'saut3', 'saut4'].forEach(id => {
+        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
+            reponses.saut.push(id);
+        }
+    });
+    
+    ['lancer1', 'lancer2', 'lancer3', 'lancer4'].forEach(id => {
+        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
+            reponses.lancer.push(id);
+        }
+    });
+    
+    ['mental1', 'mental2', 'mental3', 'mental4'].forEach(id => {
+        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
+            reponses.mental.push(id);
+        }
+    });
+    
+    ['objectif1', 'objectif2', 'objectif3', 'objectif4'].forEach(id => {
+        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
+            reponses.objectif.push(id);
+        }
+    });
+    
+    // Analyser le profil et générer le projet
+    const projet = analyserProfil(reponses, eleve);
+    container.innerHTML = projet;
+}
+
+function analyserProfil(reponses, eleve) {
+    const { course, saut, lancer, mental, objectif } = reponses;
+    
+    if(course.length === 0 && saut.length === 0 && lancer.length === 0 && mental.length === 0 && objectif.length === 0) {
+        return '🤔 Coche les cases qui te correspondent pour découvrir ton projet !';
+    }
+    
+    let strategieCourse = '';
+    let intensite = '';
+    let conseilSaut = '';
+    let conseilLancer = '';
+    let gestion = '';
+    
+    // STRATÉGIE COURSE
+    if(course.includes('course1') || course.includes('course2')) {
+        // Fort en course
+        if(mental.includes('mental1') || objectif.includes('objectif2')) {
+            strategieCourse = '🚀 <strong>DÉPART DYNAMIQUE</strong> : Tu peux te permettre de partir vite !';
+            intensite = 'Premier 400m à 110-115% VMA';
+        } else {
+            strategieCourse = '⚖️ <strong>DÉPART MAÎTRISÉ</strong> : Utilise tes capacités intelligemment';
+            intensite = 'Premier 400m à 105% VMA';
+        }
+    } else if(course.includes('course3') || mental.includes('mental4')) {
+        // Profil prudent
+        strategieCourse = '🛡️ <strong>DÉPART SÉCURISÉ</strong> : Commence tranquille pour finir fort';
+        intensite = 'Premier 400m à 95-100% VMA';
+    } else {
+        // Profil équilibré
+        strategieCourse = '⚖️ <strong>DÉPART ÉQUILIBRÉ</strong> : Régularité et progression';
+        intensite = 'Premier 400m à 100-105% VMA';
+    }
+    
+    // CONSEIL SAUT
+    if(saut.includes('saut1') && saut.includes('saut2')) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Tu maîtrises ! Vise la performance';
+    } else if(saut.includes('saut3')) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Concentre-toi sur la régularité d\'élan';
+    } else if(saut.includes('saut4')) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Relève le défi technique !';
+    } else if(saut.length > 0) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Continue tes progrès techniques';
+    }
+    
+    // CONSEIL LANCER
+    if(lancer.includes('lancer1') && lancer.includes('lancer2')) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Tu progresses bien ! Vise plus loin';
+    } else if(lancer.includes('lancer3')) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Focus sur la régularité du geste';
+    } else if(lancer.includes('lancer4')) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Va chercher ta meilleure distance !';
+    } else if(lancer.length > 0) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Peaufine ta technique';
+    }
+    
+    // GESTION GLOBALE
+    if(course.includes('course4') || objectif.includes('objectif4')) {
+        gestion = 'Garde des forces pour un beau finish ! 💥';
+    } else if(objectif.includes('objectif1') || mental.includes('mental2')) {
+        gestion = 'Reste régulier, la sécurité avant tout ✅';
+    } else {
+        gestion = 'Donne le maximum sur chaque épreuve 🔥';
+    }
+    
+    let projetHTML = `<div style="font-size: 0.9rem;">`;
+    
+    if(strategieCourse) {
+        projetHTML += `<div style="margin-bottom: 8px;">${strategieCourse}</div>`;
+        projetHTML += `<div style="margin-bottom: 8px; font-size: 0.85rem;"><strong>Intensité :</strong> ${intensite}</div>`;
+    }
+    
+    if(conseilSaut) {
+        projetHTML += `<div style="margin-bottom: 6px;">${conseilSaut}</div>`;
+    }
+    
+    if(conseilLancer) {
+        projetHTML += `<div style="margin-bottom: 6px;">${conseilLancer}</div>`;
+    }
+    
+    projetHTML += `<div style="margin-top: 8px; font-weight: 600;"><strong>Conseil :</strong> ${gestion}</div>`;
+    projetHTML += `</div>`;
+    
+    return projetHTML;
+}
+</script>
+</body>
+</html>

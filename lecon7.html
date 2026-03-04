@@ -475,29 +475,61 @@ function generateHistorique(i, student) {
     const container = document.getElementById(`historique-data-${i}`);
     let html = '<div class="historique-box">';
     
-    // Analyser L3/L4
+    // Analyser L3/L4 avec conversion 400m
     const seanceL3 = student.seances?.find(s => s.lecon === 'L3');
     const seanceL4 = student.seances?.find(s => s.lecon === 'L4');
     
-    if(seanceL3 && seanceL3.moyenne200m) {
-        html += `<div>📊 <strong>Tes 200m L3/L4 :</strong> Moyenne ${seanceL3.moyenne200m}"</div>`;
+    if(seanceL3 && seanceL3.moyenne200m && student.vma) {
+        const moyenne200 = parseFloat(seanceL3.moyenne200m);
+        const vma = parseFloat(student.vma);
+        
+        // Calcul % VMA sur 200m
+        const vitesse200 = 200 / moyenne200; // m/s
+        const vitesseVMA = vma / 3.6; // m/s
+        const pourcentageVMA = Math.round((vitesse200 / vitesseVMA) * 100);
+        
+        // Estimation 400m (dégradation ~8-12% selon profil)
+        const estimation400 = moyenne200 * 2.1; // Facteur empirique
+        const minutes = Math.floor(estimation400 / 60);
+        const secondes = Math.floor(estimation400 % 60);
+        const dixiemes = Math.round((estimation400 % 1) * 10);
+        const temps400Str = `${minutes}:${secondes.toString().padStart(2, '0')}.${dixiemes}`;
+        
+        html += `
+            <div><strong>📊 Tes 200m L3/L4 :</strong> ${moyenne200.toFixed(1)}" (${pourcentageVMA}% VMA)</div>
+            <div><strong>🎯 Estimation 400m :</strong> ${temps400Str} si tu cours au même %VMA</div>
+        `;
+        
+        // Propositions avec %VMA
+        html += `
+            <div style="margin-top: 8px; font-size: 0.85rem; color: var(--gold);">
+                <strong>💡 Choix possibles 1er 400m :</strong><br>
+                • <strong>Prudent</strong> : ${pourcentageVMA - 10}% VMA (plus facile)<br>
+                • <strong>Régulier</strong> : ${pourcentageVMA}% VMA (comme L3/L4)<br>  
+                • <strong>Ambitieux</strong> : ${pourcentageVMA + 10}% VMA (plus dur)
+            </div>
+        `;
+    } else if(seanceL3 && seanceL3.moyenne200m) {
+        html += `<div>📊 <strong>Tes 200m L3/L4 :</strong> ${parseFloat(seanceL3.moyenne200m).toFixed(1)}" (VMA non renseignée)</div>`;
     }
     
     // Analyser L5
     const seanceL5 = student.seances?.find(s => s.lecon === 'L5');
     if(seanceL5 && seanceL5.distanceMoyenneIndividuelle) {
-        html += `<div>🏅 <strong>Relais L5 :</strong> ${seanceL5.distanceMoyenneIndividuelle}m par manche</div>`;
+        html += `<div>🏅 <strong>Relais L5 :</strong> ${seanceL5.distanceMoyenneIndividuelle}m par manche (travail en équipe)</div>`;
     }
     
     // Analyser L6
     const seanceL6 = student.seances?.find(s => s.lecon === 'L6');
     if(seanceL6) {
-        const pyramideText = seanceL6.pyramideReussie ? 'Pyramide réussie ✅' : 'Pyramide échouée ❌';
+        const pyramideText = seanceL6.pyramideReussie ? 
+            'Pyramide réussie ✅ (tu gères les efforts intenses)' : 
+            `Pyramide échouée ❌ sur ${seanceL6.pyramideEchec || 'une distance'} (normal, c'est très intense)`;
         html += `<div>⚡ <strong>Perfectionnement L6 :</strong> ${pyramideText}</div>`;
     }
     
     html += '<div style="margin-top: 12px; font-style: italic; color: var(--warning);">';
-    html += '💡 <strong>À toi de choisir :</strong> Comment veux-tu aborder tes 3×400m ?';
+    html += '💡 <strong>À toi de choisir :</strong> Avec ces informations, comment veux-tu aborder tes 3×400m ?';
     html += '</div>';
     
     html += '</div>';

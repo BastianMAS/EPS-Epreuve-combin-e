@@ -3,161 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan Général - EPS PRO</title>
+    <title>Bilan Général L1-L7 - EPS: épreuve Combinée</title>
     <style>
         :root {
-            --bg: #0b101d;
-            --card: #1c2333;
-            --accent: #00d2ff;
-            --success: #00ff88;
-            --warning: #ffcc00;
-            --purple: #9b59b6;
+            --bg: #0f1419;
+            --card: #1a2332;
+            --accent: #00d9ff;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gold: #f59e0b;
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: white;
-            padding: 20px;
-            line-height: 1.6;
+        
+        body { 
+            font-family: 'SF Pro Display', sans-serif; 
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: white; 
+            padding: 16px; 
+            min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
-        .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        
+        h1 { 
+            text-align: center; 
+            font-size: 3rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--purple), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: var(--accent); 
+            font-size: 1.3rem; 
+            font-weight: 600; 
+            margin-bottom: 40px;
+        }
+        
+        .eleves-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .eleve-card {
             background: var(--card);
-            border-radius: 12px;
+            border: 1px solid rgba(0,217,255,0.3);
+            border-radius: 16px;
             overflow: hidden;
-            font-size: 0.85rem;
         }
-        th {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: black;
-            padding: 10px 8px;
+        
+        .eleve-header {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            padding: 16px 20px;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        
+        .eleve-body {
+            padding: 20px;
+        }
+        
+        .parcours-section {
+            margin: 16px 0;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .section-title {
             font-weight: 700;
-            text-align: left;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .observation {
+            font-style: italic;
+            color: rgba(255,255,255,0.8);
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .question-reflexion {
+            background: rgba(251,191,36,0.15);
+            border: 1px solid var(--warning);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            color: var(--warning);
+            font-weight: 600;
+        }
+        
+        .profil-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 0.8rem;
+            font-weight: 700;
+            margin: 4px;
         }
-        td {
-            padding: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        tr:hover { background: rgba(0,210,255,0.05); }
-        .stat-box {
-            background: var(--card);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--accent);
+        
+        .profil-explosif { background: rgba(239,68,68,0.3); color: var(--danger); }
+        .profil-regulier { background: rgba(251,191,36,0.3); color: var(--warning); }
+        .profil-endurant { background: rgba(75,222,128,0.3); color: var(--success); }
+        .profil-tactique { background: rgba(139,92,246,0.3); color: var(--purple); }
+        
+        .btn-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--purple); font-size: 1.5rem; font-weight: 700;">📈 BILAN GÉNÉRAL</p>
-        <p class="subtitle">Leçons 1 à 6 - Préparation L7 (Évaluation finale)</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
-        
-        <div id="stats"></div>
-        <div id="table-container"></div>
-    </div>
+
+<a href="index.html" class="btn-back">← Retour</a>
+
+<h1>EPS: épreuve Combinée</h1>
+<p class="subtitle">🎯 BILAN GÉNÉRAL L1-L7 - TON PARCOURS</p>
+
+<div class="eleves-list" id="eleves-list"></div>
+
+<script>
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if(!stored) {
+        document.getElementById('eleves-list').innerHTML = '<div style="text-align:center; padding:40px;">⚠️ Aucune donnée trouvée</div>';
+        return;
+    }
     
-    <script>
-    let students = [];
+    const eleves = JSON.parse(stored);
+    renderParcours(eleves);
+};
+
+function renderParcours(eleves) {
+    const container = document.getElementById('eleves-list');
     
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
-        }
-        students = JSON.parse(stored);
-        displayBilan();
-    };
-    
-    function displayBilan() {
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>Classe</th><th>VMA</th>';
-        html += '<th>L1 Diag</th>';
-        html += '<th>L2</th><th>L3</th><th>L4</th><th>L5</th><th>L6</th>';
-        html += '<th>Progression</th></tr></thead><tbody>';
+    let html = '';
+    eleves.forEach(eleve => {
+        const parcours = analyserParcours(eleve);
         
-        students.forEach(s => {
-            const vma = parseFloat(s.vma);
-            
-            // L1 Diagnostic
-            const l1 = s.diagnostique ? '✅' : '❌';
-            
-            // L2-L6
-            const l2 = s.lecon2 ? formatPct(s.lecon2) : '-';
-            const l3 = s.lecon3 ? formatPct(s.lecon3) : '-';
-            const l4 = s.lecon4 ? formatPct(s.lecon4) : '-';
-            const l5 = s.lecon5 ? formatPct(s.lecon5) : '-';
-            const l6 = s.lecon6 ? formatPct(s.lecon6) : '-';
-            
-            // Progression
-            let progression = '-';
-            const pcts = [];
-            [s.lecon2, s.lecon3, s.lecon4, s.lecon5, s.lecon6].forEach(l => {
-                if(l && l.tour1 && l.tour2 && l.tour3) {
-                    const moy = (l.tour1 + l.tour2 + l.tour3) / 3;
-                    const pct = ((0.4 / (moy/3600)) / vma) * 100;
-                    pcts.push(pct);
-                }
-            });
-            
-            if(pcts.length >= 2) {
-                const diff = pcts[pcts.length-1] - pcts[0];
-                if(diff > 5) progression = '📈 +' + diff.toFixed(0) + '%';
-                else if(diff < -5) progression = '📉 ' + diff.toFixed(0) + '%';
-                else progression = '➡️ Stable';
-            }
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+s.classe+'</td>';
-            html += '<td>'+vma+' km/h</td>';
-            html += '<td>'+l1+'</td>';
-            html += '<td>'+l2+'</td>';
-            html += '<td>'+l3+'</td>';
-            html += '<td>'+l4+'</td>';
-            html += '<td>'+l5+'</td>';
-            html += '<td>'+l6+'</td>';
-            html += '<td>'+progression+'</td>';
-            html += '</tr>';
-        });
-        
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = html;
-        
-        // Stats
-        const withDiag = students.filter(s => s.diagnostique).length;
-        const withL2 = students.filter(s => s.lecon2).length;
-        const withL6 = students.filter(s => s.lecon6).length;
-        
-        document.getElementById('stats').innerHTML = `
-            <div class="stat-box">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">Participation</h3>
-                <p><strong>L1 Diagnostic :</strong> ${withDiag} / ${students.length}</p>
-                <p><strong>L2 réalisée :</strong> ${withL2} / ${students.length}</p>
-                <p><strong>L6 réalisée :</strong> ${withL6} / ${students.length}</p>
-                <p><strong>Prêts pour L7 :</strong> ${withL6} élèves</p>
+        html += `
+            <div class="eleve-card">
+                <div class="eleve-header">
+                    ${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nomPrenom} - TON PARCOURS
+                </div>
+                <div class="eleve-body">
+                    
+                    <div class="parcours-section">
+                        <div class="section-title">🏃‍♂️ TON PROFIL COURSE</div>
+                        <div class="observation">${parcours.course.observation}</div>
+                        <div class="question-reflexion">💭 ${parcours.course.question}</div>
+                    </div>
+                    
+                    <div class="parcours-section">
+                        <div class="section-title">🦘🎯 TES TECHNIQUES</div>
+                        <div class="observation">${parcours.technique.observation}</div>
+                        <div class="question-reflexion">💭 ${parcours.technique.question}</div>
+                    </div>
+                    
+                    <div class="parcours-section">
+                        <div class="section-title">🎯 TON PROJET L8</div>
+                        <div class="observation">${parcours.projet.observation}</div>
+                        <div class="question-reflexion">🤔 ${parcours.projet.question}</div>
+                        ${parcours.projet.profils ? `<div>${parcours.projet.profils}</div>` : ''}
+                    </div>
+                    
+                </div>
             </div>
         `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function analyserParcours(eleve) {
+    const seances = eleve.seances || [];
+    const seanceL3 = seances.find(s => s.lecon === 'L3');
+    const seanceL4 = seances.find(s => s.lecon === 'L4');
+    const seanceL5 = seances.find(s => s.lecon === 'L5');
+    const seanceL6 = seances.find(s => s.lecon === 'L6');
+    const seanceL7 = seances.find(s => s.lecon === 'L7');
+    
+    let courseObs = "";
+    let courseQ = "";
+    
+    if(seanceL6?.pyramideReussie) {
+        courseObs = "Tes fractionnés courts L6 montrent une belle explosivité. Tu sembles à l'aise sur les efforts intenses et courts.";
+        courseQ = "Es-tu plutôt du genre à partir vite et tenir, ou préfères-tu accélérer progressivement ?";
+    } else if(seanceL3?.moyenne200m && seanceL4?.moyenne200m) {
+        const progression = seanceL4.moyenne200m < seanceL3.moyenne200m;
+        if(progression) {
+            courseObs = "Tes 200m L3/L4 montrent une progression. Tu sembles bien t'adapter aux allures VMA.";
+            courseQ = "Cette régularité est un atout : comment veux-tu l'utiliser sur 3×400m ?";
+        } else {
+            courseObs = "Tes 200m L3/L4 montrent de la constance. Tu as ton rythme et tu le maintiens.";
+            courseQ = "Cette stabilité peut être une force : veux-tu miser sur la régularité ?";
+        }
+    } else {
+        courseObs = "Tes premières séances révèlent ton potentiel. Chaque cours t'apprend quelque chose sur ton profil.";
+        courseQ = "Quel type de coureur penses-tu être ? Explosif, régulier, endurant ?";
     }
     
-    function formatPct(lecon) {
-        if(!lecon || !lecon.tour1 || !lecon.tour2 || !lecon.tour3) return '-';
-        return lecon.pctVMA + '%';
+    let techObs = "";
+    let techQ = "";
+    
+    const scoreSautTotal = (seanceL6?.scoreTechniqueSaut || 0) + (seanceL4?.sautTech1 ? 1 : 0) + (seanceL4?.sautTech2 ? 1 : 0);
+    const scoreLancerTotal = (seanceL6?.scoreTechniqueLancer || 0) + (seanceL4?.lancerTech1 ? 1 : 0) + (seanceL4?.lancerTech2 ? 1 : 0);
+    
+    if(scoreSautTotal > scoreLancerTotal) {
+        techObs = "Le saut semble plus naturel pour toi. Tes progrès techniques y sont visibles.";
+        techQ = "Cette aisance au saut révèle peut-être une explosivité que tu peux exploiter en course ?";
+    } else if(scoreLancerTotal > scoreSautTotal) {
+        techObs = "Le lancer te correspond bien. Tu développes une belle coordination technique.";
+        techQ = "Cette maîtrise du lancer montre ta capacité à construire un geste : et si tu appliquais ça à ta course ?";
+    } else {
+        techObs = "Tu progresses de façon équilibrée sur saut et lancer. Beau travail technique !";
+        techQ = "Cette polyvalence est un atout : sur quelle qualité veux-tu t'appuyer en course ?";
     }
-    </script>
+    
+    let projetObs = "";
+    let projetQ = "";
+    let profils = "";
+    
+    if(seanceL7?.confiantL8) {
+        projetObs = "Ta mise en situation L7 te donne confiance pour L8. Tu as une idée plus claire de tes capacités.";
+        if(seanceL7?.strategieTrouvee) {
+            projetQ = "Tu as ta stratégie : maintenant, quel est TON objectif personnel pour L8 ?";
+            profils = `
+                <span class="profil-badge profil-explosif">🔥 Performer dès le 1er 400m</span>
+                <span class="profil-badge profil-regulier">⚖️ Maintenir la même allure</span>
+                <span class="profil-badge profil-endurant">💪 Terminer en beauté</span>
+                <span class="profil-badge profil-tactique">🎯 M'adapter selon la situation</span>
+            `;
+        } else {
+            projetQ = "Tu as confiance, mais quelle stratégie veux-tu adopter ? Partir fort, rester régulier, ou finir en sprint ?";
+        }
+    } else {
+        projetObs = "L8 arrive bientôt. C'est normal d'avoir encore des questions, l'important est de définir TON projet.";
+        projetQ = "Qu'est-ce qui te ferait dire 'j'ai réussi' après tes 3×400m ? Une performance, une stratégie maîtrisée, un dépassement de soi ?";
+    }
+    
+    return {
+        course: { observation: courseObs, question: courseQ },
+        technique: { observation: techObs, question: techQ },
+        projet: { observation: projetObs, question: projetQ, profils: profils }
+    };
+}
+</script>
 </body>
 </html>

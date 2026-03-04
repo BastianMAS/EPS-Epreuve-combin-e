@@ -102,7 +102,6 @@
             background: rgba(255,255,255,0.03);
             border-radius: 8px;
             font-size: 0.9rem;
-            cursor: pointer;
             transition: all 0.3s ease;
         }
         
@@ -217,21 +216,21 @@ function renderEleves() {
                     <div class="section">
                         <div class="section-title">🏃‍♂️ COURSE - Comment te sens-tu ?</div>
                         <div class="checkbox-group">
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course1')">
-                                <input type="checkbox" id="course1-${index}">
-                                <label>Mes 200m L3/L4 étaient faciles</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="course1-${index}" onchange="generateProjet(${index})">
+                                <label for="course1-${index}">Mes 200m L3/L4 étaient faciles</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course2')">
-                                <input type="checkbox" id="course2-${index}">
-                                <label>J'ai réussi la pyramide L6 (fractionné intense)</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="course2-${index}" onchange="generateProjet(${index})">
+                                <label for="course2-${index}">J'ai réussi la pyramide L6 (fractionné intense)</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course3')">
-                                <input type="checkbox" id="course3-${index}">
-                                <label>Je fatigue vite sur les efforts longs</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="course3-${index}" onchange="generateProjet(${index})">
+                                <label for="course3-${index}">Je fatigue vite sur les efforts longs</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'course4')">
-                                <input type="checkbox" id="course4-${index}">
-                                <label>J'aime garder des forces pour sprinter à la fin</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="course4-${index}" onchange="generateProjet(${index})">
+                                <label for="course4-${index}">J'aime garder des forces pour sprinter à la fin</label>
                             </div>
                         </div>
                     </div>
@@ -239,21 +238,21 @@ function renderEleves() {
                     <div class="section">
                         <div class="section-title">💪 MENTAL - Quel est ton profil ?</div>
                         <div class="checkbox-group">
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental1')">
-                                <input type="checkbox" id="mental1-${index}">
-                                <label>Je préfère prendre des risques</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="mental1-${index}" onchange="generateProjet(${index})">
+                                <label for="mental1-${index}">Je préfère prendre des risques</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental2')">
-                                <input type="checkbox" id="mental2-${index}">
-                                <label>Je préfère jouer la sécurité</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="mental2-${index}" onchange="generateProjet(${index})">
+                                <label for="mental2-${index}">Je préfère jouer la sécurité</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental3')">
-                                <input type="checkbox" id="mental3-${index}">
-                                <label>Je suis confiant après L7</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="mental3-${index}" onchange="generateProjet(${index})">
+                                <label for="mental3-${index}">Je suis confiant après L7</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'mental4')">
-                                <input type="checkbox" id="mental4-${index}">
-                                <label>J'ai besoin de me rassurer</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="mental4-${index}" onchange="generateProjet(${index})">
+                                <label for="mental4-${index}">J'ai besoin de me rassurer</label>
                             </div>
                         </div>
                     </div>
@@ -261,21 +260,21 @@ function renderEleves() {
                     <div class="section">
                         <div class="section-title">🦘 SAUT - Comment te sens-tu ?</div>
                         <div class="checkbox-group">
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut1')">
-                                <input type="checkbox" id="saut1-${index}">
-                                <label>Ma course d'élan est devenue régulière</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="saut1-${index}" onchange="generateProjet(${index})">
+                                <label for="saut1-${index}">Ma course d'élan est devenue régulière</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut2')">
-                                <input type="checkbox" id="saut2-${index}">
-                                <label>J'ai bien progressé entre L3/L4 et L6</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="saut2-${index}" onchange="generateProjet(${index})">
+                                <label for="saut2-${index}">J'ai bien progressé entre L3/L4 et L6</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut3')">
-                                <input type="checkbox" id="saut3-${index}">
-                                <label>J'ai encore du mal avec la précision d'appel</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="saut3-${index}" onchange="generateProjet(${index})">
+                                <label for="saut3-${index}">J'ai encore du mal avec la précision d'appel</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'saut4')">
-                                <input type="checkbox" id="saut4-${index}">
-                                <label>J'aime les défis techniques</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="saut4-${index}" onchange="generateProjet(${index})">
+                                <label for="saut4-${index}">J'aime les défis techniques</label>
                             </div>
                         </div>
                     </div>
@@ -283,21 +282,21 @@ function renderEleves() {
                     <div class="section">
                         <div class="section-title">🎯 LANCER - Comment te sens-tu ?</div>
                         <div class="checkbox-group">
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer1')">
-                                <input type="checkbox" id="lancer1-${index}">
-                                <label>Ma technique s'améliore séance après séance</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="lancer1-${index}" onchange="generateProjet(${index})">
+                                <label for="lancer1-${index}">Ma technique s'améliore séance après séance</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer2')">
-                                <input type="checkbox" id="lancer2-${index}">
-                                <label>J'ai une bonne coordination globale</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="lancer2-${index}" onchange="generateProjet(${index})">
+                                <label for="lancer2-${index}">J'ai une bonne coordination globale</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer3')">
-                                <input type="checkbox" id="lancer3-${index}">
-                                <label>Je n'arrive pas à être régulier dans mes lancers</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="lancer3-${index}" onchange="generateProjet(${index})">
+                                <label for="lancer3-${index}">Je n'arrive pas à être régulier dans mes lancers</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'lancer4')">
-                                <input type="checkbox" id="lancer4-${index}">
-                                <label>Je veux surtout réussir une belle distance</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="lancer4-${index}" onchange="generateProjet(${index})">
+                                <label for="lancer4-${index}">Je veux surtout réussir une belle distance</label>
                             </div>
                         </div>
                     </div>
@@ -305,21 +304,21 @@ function renderEleves() {
                     <div class="section">
                         <div class="section-title">🎯 OBJECTIF - Que veux-tu ?</div>
                         <div class="checkbox-group">
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif1')">
-                                <input type="checkbox" id="objectif1-${index}">
-                                <label>Réussir sans prendre de risque</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="objectif1-${index}" onchange="generateProjet(${index})">
+                                <label for="objectif1-${index}">Réussir sans prendre de risque</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif2')">
-                                <input type="checkbox" id="objectif2-${index}">
-                                <label>Me dépasser et viser une belle performance</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="objectif2-${index}" onchange="generateProjet(${index})">
+                                <label for="objectif2-${index}">Me dépasser et viser une belle performance</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif3')">
-                                <input type="checkbox" id="objectif3-${index}">
-                                <label>Faire mieux qu'en L7</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="objectif3-${index}" onchange="generateProjet(${index})">
+                                <label for="objectif3-${index}">Faire mieux qu'en L7</label>
                             </div>
-                            <div class="checkbox-row" onclick="toggleCheckbox(${index}, 'objectif4')">
-                                <input type="checkbox" id="objectif4-${index}">
-                                <label>Montrer ce que je sais faire</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="objectif4-${index}" onchange="generateProjet(${index})">
+                                <label for="objectif4-${index}">Montrer ce que je sais faire</label>
                             </div>
                         </div>
                     </div>
@@ -385,12 +384,6 @@ function generateSummary(eleve) {
     }
     
     return summary || 'Parcours en cours...';
-}
-
-function toggleCheckbox(eleveIndex, checkboxId) {
-    const checkbox = document.getElementById(`${checkboxId}-${eleveIndex}`);
-    checkbox.checked = !checkbox.checked;
-    generateProjet(eleveIndex);
 }
 
 function generateProjet(eleveIndex) {

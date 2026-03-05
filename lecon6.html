@@ -198,7 +198,25 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
+        /* CONTINUUM TECHNIQUE */
+        .continuum-panel {
+            background: rgba(0,255,136,0.06);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+        }
+        .continuum-title { font-weight: 800; color: var(--success); margin-bottom: 6px; font-size: 0.78rem; }
+        .continuum-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+        .continuum-badge { border-radius: 4px; padding: 1px 6px; font-weight: 800; font-size: 0.68rem; }
+        .continuum-badge.l3 { background: rgba(139,92,246,0.3); color: #c4b5fd; }
+        .continuum-badge.l4 { background: rgba(251,146,60,0.3); color: #fdba74; }
+        .continuum-badge.perf { background: rgba(0,210,255,0.2); color: var(--accent); }
+        .continuum-item.acquired { color: #86efac; font-size: 0.72rem; }
+        .continuum-new { margin-top: 6px; color: var(--accent); font-size: 0.72rem; font-weight: 700; }
+
         .checkbox-row {
             display: flex;
             align-items: center;
@@ -464,6 +482,8 @@ function selectStudent(i, studentId) {
     
     if(student) {
         const existantL6 = student.seances?.find(seance => seance.lecon === 'L6') || {};
+        const seanceL3 = student.seances?.find(s => s.lecon === 'L3') || {};
+        const seanceL4 = student.seances?.find(s => s.lecon === 'L4') || {};
         
         cardState[i] = {
             student: student,
@@ -487,6 +507,43 @@ function selectStudent(i, studentId) {
             pyramide80_2: existantL6.pyramide80_2 || false,
             pyramide60_2: existantL6.pyramide60_2 || false
         };
+
+        // ── CONTINUUM TECHNIQUE : afficher acquis L3/L4 ──
+        setTimeout(() => {
+            // SAUT : critères acquis aux séances précédentes
+            const sautAcquisL3 = [
+                seanceL3.sautTech1 ? '✅ Course d\'élan régulière' : null,
+                seanceL3.sautTech2 ? '✅ Pied d\'appel précis' : null,
+            ].filter(Boolean);
+            const sautAcquisL4 = [
+                seanceL4.sautTech3 ? '✅ Impulsion verticale' : null,
+                seanceL4.sautTech4 ? '✅ Réception équilibrée' : null,
+            ].filter(Boolean);
+            const sautPrevHtml = buildContinuumHtml(sautAcquisL3, sautAcquisL4, seanceL4.sautDistance, seanceL3.sautDistance, 'm');
+            const sautBodyEl = document.getElementById(`body-saut-${i}`);
+            if(sautBodyEl) {
+                const existing = sautBodyEl.querySelector('.continuum-panel');
+                if(existing) existing.remove();
+                if(sautPrevHtml) sautBodyEl.insertAdjacentHTML('afterbegin', sautPrevHtml);
+            }
+
+            // LANCER : critères acquis aux séances précédentes
+            const lancerAcquisL3 = [
+                seanceL3.lancerTech1 ? '✅ Position de profil' : null,
+                seanceL3.lancerTech2 ? '✅ Prise et placement' : null,
+            ].filter(Boolean);
+            const lancerAcquisL4 = [
+                seanceL4.lancerTech3 ? '✅ Rotation du bassin' : null,
+                seanceL4.lancerTech4 ? '✅ Accompagnement du geste' : null,
+            ].filter(Boolean);
+            const lancerPrevHtml = buildContinuumHtml(lancerAcquisL3, lancerAcquisL4, seanceL4.lancerDistance, seanceL3.lancerDistance, 'm');
+            const lancerBodyEl = document.getElementById(`body-lancer-${i}`);
+            if(lancerBodyEl) {
+                const existing = lancerBodyEl.querySelector('.continuum-panel');
+                if(existing) existing.remove();
+                if(lancerPrevHtml) lancerBodyEl.insertAdjacentHTML('afterbegin', lancerPrevHtml);
+            }
+        }, 150);
         
         setTimeout(() => {
             ['saut1', 'saut2', 'saut3', 'saut4', 'saut5', 'lancer1', 'lancer2', 'lancer3', 'lancer4', 'lancer5'].forEach(tech => {
@@ -547,6 +604,28 @@ function generateTempsCibles(i, vma) {
     });
     
     container.innerHTML = html;
+}
+
+// ── CONTINUUM TECHNIQUE : panneau acquis L3/L4 ──
+function buildContinuumHtml(acquisL3, acquisL4, distL4, distL3, unit) {
+    const hasData = acquisL3.length > 0 || acquisL4.length > 0 || distL4 || distL3;
+    if(!hasData) return '';
+    let html = `<div class="continuum-panel">
+        <div class="continuum-title">📈 Progression technique</div>`;
+    if(acquisL3.length > 0) {
+        html += `<div class="continuum-group"><span class="continuum-badge l3">L3</span>${acquisL3.map(c => `<span class="continuum-item acquired">${c}</span>`).join('')}</div>`;
+    }
+    if(acquisL4.length > 0) {
+        html += `<div class="continuum-group"><span class="continuum-badge l4">L4</span>${acquisL4.map(c => `<span class="continuum-item acquired">${c}</span>`).join('')}</div>`;
+    }
+    if(distL4 || distL3) {
+        const dist3 = distL3 ? `L3: ${distL3}${unit}` : '';
+        const dist4 = distL4 ? `L4: ${distL4}${unit}` : '';
+        const arrow = distL4 && distL3 ? (parseFloat(distL4) > parseFloat(distL3) ? ' 📈' : parseFloat(distL4) < parseFloat(distL3) ? ' 📉' : ' ➡️') : '';
+        html += `<div class="continuum-group"><span class="continuum-badge perf">📏</span><span style="font-size:0.75rem;color:#ccc">${[dist3, dist4].filter(Boolean).join(' → ')}${arrow}</span></div>`;
+    }
+    html += `<div class="continuum-new">🆕 <strong>L6 :</strong> Perfectionnement &amp; critère harmonieux ⭐</div></div>`;
+    return html;
 }
 
 function toggleSection(sec, i) {

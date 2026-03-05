@@ -635,7 +635,16 @@ function saveVMATest(i) {
         info.innerHTML = `<strong>${s.sexe==='F'?'👧':'🧑'} ${s.sexe==='F'?'Fille':'Garçon'}</strong> | ${s.age} ans | VMA: <strong style="color:var(--success)">${cardState[i].vma} km/h</strong>`;
     }
 
-    alert(`✅ Test enregistré ! VMA moyenne : ${cardState[i].vma} km/h`);
+    // Vulgarisation VMA pour l'élève
+    const vmaFinal = cardState[i].vma;
+    const t200 = Math.round((0.2 / (vmaFinal / 3.6)));
+    const m200 = Math.floor(t200 / 60);
+    const s200 = t200 % 60;
+    const t200str = `${m200}:${s200.toString().padStart(2,'0')}`;
+    const classePct = vmaFinal >= 13 ? 'dans les meilleurs de la classe 🏆' :
+                      vmaFinal >= 11 ? 'dans la bonne moyenne 👍' :
+                      vmaFinal >= 9  ? 'en progression 💪' : 'avec du potentiel à développer 🌱';
+    alert(`✅ VMA enregistrée : ${vmaFinal} km/h\n\n🏃 Ce que ça veut dire :\n→ Ta vitesse max sur 12 min est de ${vmaFinal} km/h\n→ Tu peux courir 200m en environ ${t200str}\n→ Tu es ${classePct}`);
 }
 
 function updateHistorique(i) {

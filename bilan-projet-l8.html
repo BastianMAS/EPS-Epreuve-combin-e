@@ -198,6 +198,7 @@ function renderEleves() {
     
     elevesData.forEach((eleve, index) => {
         const summary = generateSummary(eleve);
+        const seances = eleve.seances || [];
         
         html += `
             <div class="eleve-card">
@@ -212,6 +213,44 @@ function renderEleves() {
                         <strong>📊 Ton parcours en résumé :</strong><br>
                         ${summary}
                     </div>
+
+                    <!-- E3 : VUE PROGRÈS CROSS-SÉANCES -->
+                    ${(() => {
+                        const sl3 = seances.find(s => s.lecon === 'L3');
+                        const sl4 = seances.find(s => s.lecon === 'L4');
+                        const sl6 = seances.find(s => s.lecon === 'L6');
+                        const sl7 = seances.find(s => s.lecon === 'L7');
+                        const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=s%60; return `${m}:${sec.toString().padStart(2,'0')}`; };
+                        const courseRows = [
+                            sl3?.moyenne200m ? `<tr><td>L3</td><td>${fmtS(sl3.moyenne200m)}</td><td>200m</td></tr>` : '',
+                            sl4?.moyenne200m ? `<tr><td>L4</td><td>${fmtS(sl4.moyenne200m)}</td><td>200m</td></tr>` : '',
+                            sl7?.temps1 ? `<tr><td>L7 T1</td><td>${sl7.temps1}</td><td>400m</td></tr>` : '',
+                            sl7?.temps2 ? `<tr><td>L7 T2</td><td>${sl7.temps2}</td><td>400m</td></tr>` : '',
+                            sl7?.temps3 ? `<tr><td>L7 T3</td><td>${sl7.temps3}</td><td>400m</td></tr>` : '',
+                        ].filter(Boolean).join('');
+                        const sautRows = [
+                            sl3?.sautDistance ? `<tr><td>L3</td><td>${sl3.sautDistance} m</td></tr>` : '',
+                            sl4?.sautDistance ? `<tr><td>L4</td><td>${sl4.sautDistance} m</td></tr>` : '',
+                            sl6?.sautDistance ? `<tr><td>L6</td><td>${sl6.sautDistance} m</td></tr>` : '',
+                        ].filter(Boolean).join('');
+                        const lancerRows = [
+                            sl3?.lancerDistance ? `<tr><td>L3</td><td>${sl3.lancerDistance} m</td></tr>` : '',
+                            sl4?.lancerDistance ? `<tr><td>L4</td><td>${sl4.lancerDistance} m</td></tr>` : '',
+                            sl6?.lancerDistance ? `<tr><td>L6</td><td>${sl6.lancerDistance} m</td></tr>` : '',
+                        ].filter(Boolean).join('');
+                        if(!courseRows && !sautRows && !lancerRows) return '';
+                        const tStyle = 'width:100%;border-collapse:collapse;font-size:0.75rem;margin-bottom:8px;';
+                        const thStyle = 'text-align:left;color:#aaa;padding:2px 4px;border-bottom:1px solid rgba(255,255,255,0.1);';
+                        const tdStyle = 'padding:2px 4px;';
+                        return `<div style="background:rgba(0,210,255,0.07);border:1px solid rgba(0,210,255,0.2);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:0.8rem;">
+                            <div style="font-weight:800;color:var(--accent);margin-bottom:6px;">📈 Mes performances du cycle</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                                ${courseRows ? `<div><div style="font-weight:700;margin-bottom:4px;">🏃 Course</div><table style="${tStyle}"><tr><th style="${thStyle}">Séance</th><th style="${thStyle}">Temps</th><th style="${thStyle}">Dist.</th></tr>${courseRows}</table></div>` : ''}
+                                ${sautRows ? `<div><div style="font-weight:700;margin-bottom:4px;">🦘 Saut</div><table style="${tStyle}"><tr><th style="${thStyle}">Séance</th><th style="${thStyle}">Distance</th></tr>${sautRows}</table></div>` : ''}
+                                ${lancerRows ? `<div><div style="font-weight:700;margin-bottom:4px;">🎯 Lancer</div><table style="${tStyle}"><tr><th style="${thStyle}">Séance</th><th style="${thStyle}">Distance</th></tr>${lancerRows}</table></div>` : ''}
+                            </div>
+                        </div>`;
+                    })()}
                     
                     <div class="section">
                         <div class="section-title">🏃‍♂️ TON TEST L7 - Comment ça s'est passé ?</div>

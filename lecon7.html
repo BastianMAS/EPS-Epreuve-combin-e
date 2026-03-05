@@ -423,8 +423,11 @@ function createCard(i) {
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
-                            <input type="text" class="temps-input" id="temps3-${i}" placeholder="1:25">
+                            <input type="text" class="temps-input" id="temps3-${i}" placeholder="1:25" onchange="showStrategieFeedback(${i})">
                         </div>
+                        <!-- FEEDBACK STRATÉGIE -->
+                        <div id="strategie-feedback-${i}" style="display:none;background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.3);border-radius:10px;padding:10px 14px;margin:8px 0;font-size:0.8rem;"></div>
+
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Ressenti final :</div>
                             <div class="checkbox-row">
@@ -613,6 +616,55 @@ function checkTour3(i) {
             document.getElementById(`tour3-container-${i}`).classList.remove('disabled');
         }
     }
+}
+
+function showStrategieFeedback(i) {
+    const state = cardState[i];
+    if(!state) return;
+
+    const t1 = convertTempsAvecValidation(document.getElementById(`temps1-${i}`)?.value || '');
+    const t2 = convertTempsAvecValidation(document.getElementById(`temps2-${i}`)?.value || '');
+    const t3 = convertTempsAvecValidation(document.getElementById(`temps3-${i}`)?.value || '');
+
+    const panel = document.getElementById(`strategie-feedback-${i}`);
+    if(!panel || !t1.valide || !t2.valide || !t3.valide) return;
+
+    const temps = [t1.secondes, t2.secondes, t3.secondes];
+    const moy = Math.round(temps.reduce((a,b)=>a+b,0)/3);
+    const ecart12 = t2.secondes - t1.secondes;
+    const ecart23 = t3.secondes - t2.secondes;
+    const ecartMax = Math.max(...temps) - Math.min(...temps);
+    const choix1 = state.choix?.tour1 || '?';
+    const choix3 = state.choix?.tour3 || '?';
+
+    const labels1 = { prudent:'🐌 Prudent', regulier:'⚖️ Régulier', ambitieux:'⚡ Ambitieux' };
+    const labels3 = { tenir:'🛡️ Tenir', maintenir:'⚖️ Maintenir', sprint:'🚀 Sprint' };
+
+    // Analyse régularité
+    let regulariteMsg, regulariteColor;
+    if(ecartMax <= 5) { regulariteMsg = '🏆 Régularité excellente !'; regulariteColor = 'var(--success)'; }
+    else if(ecartMax <= 10) { regulariteMsg = '👍 Bonne régularité'; regulariteColor = '#86efac'; }
+    else if(ecartMax <= 20) { regulariteMsg = '⚠️ Régularité à améliorer'; regulariteColor = '#ffcc00'; }
+    else { regulariteMsg = '❌ Grande variation de rythme'; regulariteColor = 'var(--danger)'; }
+
+    // Cohérence stratégie vs résultat
+    let coherenceMsg = '';
+    if(choix3 === 'sprint' && ecart23 < -3) coherenceMsg = '🚀 Sprint final réussi !';
+    else if(choix3 === 'sprint' && ecart23 >= 0) coherenceMsg = '⚠️ Sprint non déclenché — tu avais dit "Sprint" mais le T3 est plus lent.';
+    else if(choix3 === 'tenir' && Math.abs(ecart23) <= 8) coherenceMsg = '✅ Gestion "Tenir" réussie — tu as tenu !';
+    else if(choix3 === 'maintenir' && Math.abs(ecart23) <= 5) coherenceMsg = '✅ Allure maintenue parfaitement.';
+
+    const fmt = s => { const m=Math.floor(s/60); const sec=s%60; return `${m}:${sec.toString().padStart(2,'0')}`; };
+
+    panel.style.display = 'block';
+    panel.innerHTML = `
+        <div style="font-weight:800;color:var(--accent);margin-bottom:6px;">📊 Bilan de ta stratégie</div>
+        <div style="margin-bottom:4px;">Stratégie : <strong>${labels1[choix1]||choix1}</strong> → <strong>${labels3[choix3]||choix3}</strong></div>
+        <div style="margin-bottom:4px;">Tours : ${fmt(t1.secondes)} · ${fmt(t2.secondes)} · ${fmt(t3.secondes)} &nbsp;|&nbsp; Moy : <strong>${fmt(moy)}</strong></div>
+        <div style="margin-bottom:4px;">Écart T1→T2 : <strong>${ecart12>=0?'+':''}${ecart12}s</strong> &nbsp;|&nbsp; Écart T2→T3 : <strong>${ecart23>=0?'+':''}${ecart23}s</strong></div>
+        <div style="color:${regulariteColor};font-weight:700;margin-bottom:${coherenceMsg?'4px':'0'}">${regulariteMsg} (amplitude : ${ecartMax}s)</div>
+        ${coherenceMsg ? `<div style="color:#fbbf24;font-size:0.75rem;">${coherenceMsg}</div>` : ''}
+    `;
 }
 
 // Fonction validation temps avec alertes intelligentes

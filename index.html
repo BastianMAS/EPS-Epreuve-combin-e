@@ -968,6 +968,19 @@
                         </label>
                     </div>
                 </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Statut particulier <span style="font-weight:400;font-size:0.78rem;color:#aaa">(optionnel)</span></label>
+                    <select id="input-statut" style="background:white;color:black;padding:10px;border-radius:8px;width:100%;border:none;font-weight:600;">
+                        <option value="">— Aucun —</option>
+                        <option value="PAP">📋 PAP (Plan d'Accompagnement Personnalisé)</option>
+                        <option value="PAI">🏥 PAI (Projet d'Accueil Individualisé)</option>
+                        <option value="PPS">📂 PPS (Projet Personnalisé de Scolarisation)</option>
+                        <option value="ULIS">♿ ULIS</option>
+                        <option value="dispense-partiel">⚠️ Dispensé partiel</option>
+                        <option value="dispense-total">🚫 Dispensé total</option>
+                    </select>
+                </div>
                 
                 <div style="display: flex; gap: 10px;">
                     <button onclick="saveStudent()" class="btn-action btn-primary" style="flex: 1;">
@@ -1068,7 +1081,7 @@
                             → L4 : Technique de Base Atelier 2
                         </button>
                         <button onclick="window.open('./lecon5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            → L5 : Relais Olympique
+                            → L5 : Relais Olympique <span style="font-size:0.72rem;opacity:0.7;font-weight:400">· Séance collective — motivation &amp; coopération</span>
                         </button>
                         <button onclick="window.open('./lecon6.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
                             → L6 : Perfectionnement Technique
@@ -1807,6 +1820,7 @@ function saveStudent() {
     const classe = document.getElementById('input-classe').value;
     const age = parseInt(document.getElementById('input-age').value);
     const sexe = document.querySelector('input[name="sexe"]:checked')?.value;
+    const statut = document.getElementById('input-statut')?.value || '';
     
     // Validation
     if (!nom) {
@@ -1838,7 +1852,8 @@ function saveStudent() {
                 nomPrenom: nom,
                 classe: classe,
                 age: age,
-                sexe: sexe
+                sexe: sexe,
+                statut: statut || ''
             };
             editingStudentId = null;
             document.getElementById('btn-cancel').style.display = 'none';
@@ -1860,6 +1875,7 @@ function saveStudent() {
             classe: classe,
             sexe: sexe,
             age: age,
+            statut: statut || '',
             vma: null,
             photo: null,
             dateCreation: new Date().toISOString(),
@@ -1911,6 +1927,8 @@ function editStudent(id) {
     document.getElementById('input-classe').value = student.classe || '';
     document.getElementById('input-age').value = student.age || '';
     document.getElementById(`input-sexe-${student.sexe.toLowerCase()}`).checked = true;
+    const statutEl = document.getElementById('input-statut');
+    if(statutEl) statutEl.value = student.statut || '';
     
     editingStudentId = id;
     document.getElementById('btn-cancel').style.display = 'block';
@@ -1977,7 +1995,15 @@ function renderStudentsList() {
     // Trier par nom
     const sorted = [...filtered].sort((a, b) => a.nomPrenom.localeCompare(b.nomPrenom));
     
-    container.innerHTML = sorted.map(student => `
+    container.innerHTML = sorted.map(student => {
+        // Calcul badges leçons accomplies
+        const leconsBadges = ['L3','L4','L5','L6','L7'].map(lecon => {
+            const done = student.seances?.find(s => s.lecon === lecon);
+            return done
+                ? `<span style="background:rgba(0,255,136,0.2);color:#86efac;border:1px solid rgba(0,255,136,0.3);border-radius:4px;padding:1px 5px;font-size:0.65rem;font-weight:800;">${lecon} ✓</span>`
+                : `<span style="background:rgba(255,255,255,0.05);color:#555;border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:1px 5px;font-size:0.65rem;">${lecon}</span>`;
+        }).join(' ');
+        return `
         <div class="student-item">
             <div class="student-item-info">
                 <div class="student-item-name">
@@ -1987,9 +2013,10 @@ function renderStudentsList() {
                     </span>
                 </div>
                 <div class="student-item-details">
-                    ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | ${student.age || '?'} ans | VMA: ${student.vma} km/h
+                    ${student.sexe === 'F' ? 'Fille' : 'Garçon'} | ${student.age || '?'} ans | VMA: ${student.vma} km/h${student.statut ? ` | <span style="color:#ffcc00;font-size:0.75rem">📋 ${student.statut}</span>` : ''}
                     ${student.diagnostique ? `<span style="color: var(--success); margin-left: 10px; font-weight: 700;">🔬 Diagnostic (${new Date(student.diagnostique.date).toLocaleDateString('fr-FR')})</span>` : ''}
                 </div>
+                <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">${leconsBadges}</div>
             </div>
             <div class="student-item-actions">
                 ${student.diagnostique ? `<button onclick="viewDiagnostic('${student.id}')" class="btn-small" style="background: var(--accent); color: black; margin-right: 8px;">👁️ Diagnostic</button>` : ''}
@@ -2001,7 +2028,7 @@ function renderStudentsList() {
                 </button>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 /**

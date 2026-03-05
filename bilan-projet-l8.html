@@ -346,13 +346,16 @@ function generateSummary(eleve) {
         summary += `VMA ${eleve.vma} km/h. `;
     }
     
-    // Performance L7 (PRIORITÉ)
+    // Performance L7 (PRIORITÉ) avec conversion intelligente
     if(seanceL7 && seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
         const vmaMs = parseFloat(eleve.vma) / 3.6;
         
-        const t1 = convertTemps(seanceL7.temps1);
-        const t2 = convertTemps(seanceL7.temps2);
-        const t3 = convertTemps(seanceL7.temps3);
+        // Conversion intelligente des temps
+        const t1 = convertTempsIntelligent(seanceL7.temps1);
+        const t2 = convertTempsIntelligent(seanceL7.temps2);
+        const t3 = convertTempsIntelligent(seanceL7.temps3);
+        
+        console.log(`Résumé ${eleve.nomPrenom}: VMA ${eleve.vma}, Temps: ${seanceL7.temps1}→${t1}s, ${seanceL7.temps2}→${t2}s, ${seanceL7.temps3}→${t3}s`);
         
         if(t1 > 0 && t2 > 0 && t3 > 0) {
             const pct1 = Math.round(((400/t1) / vmaMs) * 100);
@@ -360,12 +363,18 @@ function generateSummary(eleve) {
             const pct3 = Math.round(((400/t3) / vmaMs) * 100);
             const pctMoy = Math.round((pct1 + pct2 + pct3) / 3);
             
-            summary += `L7: ${pct1}%-${pct2}%-${pct3}% (moy ${pctMoy}%). `;
-            
-            // Évolution
-            if(pct3 > pct1 + 3) summary += 'Finit fort. ';
-            else if(pct3 < pct1 - 5) summary += 'Décroche. ';
-            else summary += 'Régulier. ';
+            // Vérification cohérence (éviter les 5000% VMA)
+            if(pct1 >= 50 && pct1 <= 200 && pct2 >= 50 && pct2 <= 200 && pct3 >= 50 && pct3 <= 200) {
+                summary += `L7: ${pct1}%-${pct2}%-${pct3}% (moy ${pctMoy}%). `;
+                
+                // Évolution
+                if(pct3 > pct1 + 3) summary += 'Finit fort. ';
+                else if(pct3 < pct1 - 5) summary += 'Décroche. ';
+                else summary += 'Régulier. ';
+            } else {
+                console.log(`⚠️ % VMA aberrants ignorés: ${pct1}%, ${pct2}%, ${pct3}%`);
+                summary += `L7: 3×400m réalisé. `;
+            }
         }
     }
     
@@ -393,14 +402,121 @@ function generateSummary(eleve) {
     return summary || 'Parcours en cours...';
 }
 
+// Fonction conversion intelligente pour résumés (sans UI)
+function convertTempsIntelligent(tempsStr) {
+    if(!tempsStr || tempsStr.trim() === '') return 0;
+    
+    const input = tempsStr.trim();
+    console.log(`🔍 Conversion résumé: "${input}"`);
+    
+    // Format standard M:SS ou MM:SS
+    const matchStandard = input.match(/^(\d+):(\d+)$/);
+    if(matchStandard) {
+        const min = parseInt(matchStandard[1]);
+        const sec = parseInt(matchStandard[2]);
+        if(sec < 60) {
+            const total = min * 60 + sec;
+            console.log(`✅ ${min}:${sec.toString().padStart(2,'0')} = ${total}s`);
+            return total;
+        }
+        console.log(`⚠️ Secondes invalides: ${sec}`);
+        return 0;
+    }
+    
+    // Format avec dixièmes M:SS.D
+    const matchDixiemes = input.match(/^(\d+):(\d+)\.(\d+)$/);
+    if(matchDixiemes) {
+        const min = parseInt(matchDixiemes[1]);
+        const sec = parseInt(matchDixiemes[2]);
+        const dixieme = parseInt(matchDixiemes[3]);
+        if(sec < 60) {
+            const total = min * 60 + sec + dixieme / 10;
+            console.log(`✅ ${min}:${sec.toString().padStart(2,'0')}.${dixieme} = ${total}s`);
+            return total;
+        }
+        console.log(`⚠️ Secondes invalides: ${sec}`);
+        return 0;
+    }
+    
+    // Tentative correction automatique pour formats courants
+    
+    // Format décimal 2.30 → 2:30 (interprété comme 2min30s)
+    const matchDecimal = input.replace(',', '.').match(/^(\d+)[.,](\d+)$/);
+    if(matchDecimal) {
+        const min = parseInt(matchDecimal[1]);
+        const sec = parseInt(matchDecimal[2]);
+        if(sec < 60 && min >= 0 && min <= 10) {
+            const total = min * 60 + sec;
+            console.log(`🔄 Auto-corrigé: ${input} → ${min}:${sec.toString().padStart(2,'0')} = ${total}s`);
+            return total;
+        }
+    }
+    
+    // Nombre entier: secondes directes ou format MMSS
+    const nombreEntier = parseInt(input);
+    if(!isNaN(nombreEntier) && nombreEntier.toString() === input) {
+        
+        // Secondes directes logiques (60-300s pour 400m)
+        if(nombreEntier >= 60 && nombreEntier <= 300) {
+            console.log(`🔄 Secondes directes: ${nombreEntier}s`);
+            return nombreEntier;
+        }
+        
+        // Format MMSS → MM:SS (ex: 125 → 1:25)
+        if(nombreEntier >= 100 && nombreEntier <= 999) {
+            const minStr = Math.floor(nombreEntier / 100);
+            const secStr = nombreEntier % 100;
+            if(secStr < 60 && minStr >= 1 && minStr <= 9) {
+                const total = minStr * 60 + secStr;
+                console.log(`🔄 Auto-corrigé: ${nombreEntier} → ${minStr}:${secStr.toString().padStart(2,'0')} = ${total}s`);
+                return total;
+            }
+        }
+    }
+    
+    // Secondes avec décimales
+    const secondes = parseFloat(input.replace(',', '.'));
+    if(!isNaN(secondes) && secondes >= 60 && secondes <= 300) {
+        console.log(`🔄 Secondes décimales: ${secondes}s`);
+        return secondes;
+    }
+    
+    console.log(`❌ Format non reconnu: "${input}"`);
+    return 0;
+}
+
 function convertTemps(tempsStr) {
     if(!tempsStr) return 0;
-    const match = tempsStr.replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
-    if(match) {
-        return parseInt(match[1]) * 60 + parseInt(match[2]) + parseInt(match[3]) / 10;
+    
+    // Format M:SS ou MM:SS (STANDARD)
+    const matchMinSec = tempsStr.replace(',', '.').match(/^(\d+):(\d+)$/);
+    if(matchMinSec) {
+        const min = parseInt(matchMinSec[1]);
+        const sec = parseInt(matchMinSec[2]);
+        if(sec < 60) {
+            return min * 60 + sec;
+        }
     }
+    
+    // Format M:SS.D (avec dixièmes)
+    const matchDixiemes = tempsStr.replace(',', '.').match(/^(\d+):(\d+)\.(\d+)$/);
+    if(matchDixiemes) {
+        const min = parseInt(matchDixiemes[1]);
+        const sec = parseInt(matchDixiemes[2]);
+        const dixieme = parseInt(matchDixiemes[3]);
+        if(sec < 60) {
+            return min * 60 + sec + dixieme / 10;
+        }
+    }
+    
+    // Format secondes directes (si cohérent)
     const sec = parseFloat(tempsStr.replace(',', '.'));
-    return isNaN(sec) ? 0 : sec;
+    if(!isNaN(sec) && sec >= 60 && sec <= 300) {
+        return sec;
+    }
+    
+    console.log(`⚠️ Temps ignoré (format incorrect): "${tempsStr}"`);
+    return 0;
 }
 
 function parseTemps(tempsStr) {

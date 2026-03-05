@@ -192,13 +192,41 @@ function analyzerL7(eleves) {
         const seanceL7 = eleve.seances?.find(s => s.lecon === 'L7');
         if(!seanceL7) return;
         
+        // Calcul % VMA moyen sur 3×400m
+        let pourcentageVMAMoyen = null;
+        let evolutionStrategy = null;
+        
+        if(seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
+            const temps = [
+                parseTemps(seanceL7.temps1),
+                parseTemps(seanceL7.temps2), 
+                parseTemps(seanceL7.temps3)
+            ].filter(t => t !== null);
+            
+            if(temps.length === 3) {
+                const vma = parseFloat(eleve.vma);
+                const vitesseMoyenne = 400 / (temps.reduce((a,b) => a+b, 0) / 3);
+                pourcentageVMAMoyen = Math.round((vitesseMoyenne / (vma / 3.6)) * 100);
+                
+                // Analyse évolution strategy
+                const pct1 = Math.round((400 / temps[0]) / (vma / 3.6) * 100);
+                const pct3 = Math.round((400 / temps[2]) / (vma / 3.6) * 100);
+                
+                if(pct3 > pct1 + 3) evolutionStrategy = "Progression positive";
+                else if(pct3 < pct1 - 5) evolutionStrategy = "Dégradation";
+                else evolutionStrategy = "Régulier";
+            }
+        }
+        
         const eleveData = {
             id: eleve.id,
             nomPrenom: eleve.nomPrenom,
             sexe: eleve.sexe,
             age: eleve.age,
             vma: eleve.vma,
-            seanceL7: seanceL7
+            seanceL7: seanceL7,
+            pourcentageVMAMoyen: pourcentageVMAMoyen,
+            evolutionStrategy: evolutionStrategy
         };
         
         bilanData.elevesAvecL7.push(eleveData);
@@ -208,6 +236,24 @@ function analyzerL7(eleves) {
     bilanData.stats.confiantsL8 = bilanData.elevesAvecL7.filter(e => e.seanceL7.confiantL8).length;
     bilanData.stats.strategiesTrouvees = bilanData.elevesAvecL7.filter(e => e.seanceL7.strategieTrouvee).length;
     bilanData.stats.projetsReussis = bilanData.elevesAvecL7.filter(e => e.seanceL7.projetReussi).length;
+    bilanData.stats.vmaMovennne = Math.round(bilanData.elevesAvecL7
+        .filter(e => e.pourcentageVMAMoyen)
+        .reduce((acc, e) => acc + e.pourcentageVMAMoyen, 0) / 
+        bilanData.elevesAvecL7.filter(e => e.pourcentageVMAMoyen).length) || 0;
+}
+
+function parseTemps(tempsStr) {
+    if(!tempsStr || tempsStr.trim() === '') return null;
+    
+    const parts = tempsStr.trim().replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
+    if(parts) {
+        return parseInt(parts[1]) * 60 + parseInt(parts[2]) + parseInt(parts[3]) / 10;
+    }
+    
+    const secondsOnly = parseFloat(tempsStr);
+    if(!isNaN(secondsOnly)) return secondsOnly;
+    
+    return null;
 }
 
 function renderStats() {
@@ -226,12 +272,12 @@ function renderStats() {
             <div class="stat-label">Élèves évalués</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">${bilanData.stats.confiantsL8}</div>
-            <div class="stat-label">Confiants pour L8</div>
+            <div class="stat-value">${bilanData.stats.vmaMovennne}%</div>
+            <div class="stat-label">% VMA moyen 3×400m</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">${bilanData.stats.strategiesTrouvees}</div>
-            <div class="stat-label">Stratégies trouvées</div>
+            <div class="stat-value">${bilanData.stats.confiantsL8}</div>
+            <div class="stat-label">Confiants pour L8</div>
         </div>
         <div class="stat-card">
             <div class="stat-value">${tauxConfiance}%</div>
@@ -272,6 +318,18 @@ function renderEleves() {
                         <span>🏃‍♂️ 400m #3</span>
                         <span>${seance.temps3 || 'N/A'}</span>
                     </div>
+                    ${eleve.pourcentageVMAMoyen ? `
+                    <div class="performance-row" style="background: rgba(0,217,255,0.1); font-weight: 600;">
+                        <span>📊 % VMA moyen</span>
+                        <span style="color: var(--accent);">${eleve.pourcentageVMAMoyen}%</span>
+                    </div>
+                    ` : ''}
+                    ${eleve.evolutionStrategy ? `
+                    <div class="performance-row">
+                        <span>📈 Évolution</span>
+                        <span>${eleve.evolutionStrategy}</span>
+                    </div>
+                    ` : ''}
                     <div style="margin-top: 12px; padding: 8px; background: rgba(75,222,128,0.1); border-radius: 6px; font-size: 0.85rem;">
                         ${seance.projetReussi ? '✅ Projet réussi<br>' : ''}
                         ${seance.confiantL8 ? '💪 Confiant pour L8<br>' : ''}

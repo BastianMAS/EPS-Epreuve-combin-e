@@ -214,23 +214,23 @@ function renderEleves() {
                     </div>
                     
                     <div class="section">
-                        <div class="section-title">🏃‍♂️ COURSE - Comment te sens-tu ?</div>
+                        <div class="section-title">🏃‍♂️ TON TEST L7 - Comment ça s'est passé ?</div>
                         <div class="checkbox-group">
                             <div class="checkbox-row">
                                 <input type="checkbox" id="course1-${index}" onchange="generateProjet(${index})">
-                                <label for="course1-${index}">Mes 200m L3/L4 étaient faciles</label>
+                                <label for="course1-${index}">Mon % VMA sur 3×400m était élevé (>110%)</label>
                             </div>
                             <div class="checkbox-row">
                                 <input type="checkbox" id="course2-${index}" onchange="generateProjet(${index})">
-                                <label for="course2-${index}">J'ai réussi la pyramide L6 (fractionné intense)</label>
+                                <label for="course2-${index}">J'ai bien géré ma stratégie de course</label>
                             </div>
                             <div class="checkbox-row">
                                 <input type="checkbox" id="course3-${index}" onchange="generateProjet(${index})">
-                                <label for="course3-${index}">Je fatigue vite sur les efforts longs</label>
+                                <label for="course3-${index}">J'ai eu du mal à tenir le rythme</label>
                             </div>
                             <div class="checkbox-row">
                                 <input type="checkbox" id="course4-${index}" onchange="generateProjet(${index})">
-                                <label for="course4-${index}">J'aime garder des forces pour sprinter à la fin</label>
+                                <label for="course4-${index}">J'ai fini plus fort qu'au début</label>
                             </div>
                         </div>
                     </div>
@@ -337,53 +337,67 @@ function renderEleves() {
 
 function generateSummary(eleve) {
     const seances = eleve.seances || [];
-    const seanceL3 = seances.find(s => s.lecon === 'L3');
-    const seanceL4 = seances.find(s => s.lecon === 'L4');
-    const seanceL6 = seances.find(s => s.lecon === 'L6');
     const seanceL7 = seances.find(s => s.lecon === 'L7');
+    const seanceL6 = seances.find(s => s.lecon === 'L6');
     
     let summary = '';
     
-    // Analyse 200m
-    if(seanceL3?.moyenne200m && eleve.vma) {
-        const moyenne = parseFloat(seanceL3.moyenne200m);
-        const vma = parseFloat(eleve.vma);
-        const vitesse = 200 / moyenne;
-        const pctVMA = Math.round((vitesse / (vma / 3.6)) * 100);
-        summary += `Course 200m à ${pctVMA}% VMA. `;
+    // Analyse L7 (priorité absolue)
+    if(seanceL7 && seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
+        const temps = [
+            parseTemps(seanceL7.temps1),
+            parseTemps(seanceL7.temps2),
+            parseTemps(seanceL7.temps3)
+        ].filter(t => t !== null);
+        
+        if(temps.length === 3) {
+            const vma = parseFloat(eleve.vma);
+            const vitesseMoyenne = 400 / (temps.reduce((a,b) => a+b, 0) / 3);
+            const pctVMA = Math.round((vitesseMoyenne / (vma / 3.6)) * 100);
+            summary += `3×400m L7 à ${pctVMA}% VMA. `;
+            
+            // Évolution stratégique
+            const pct1 = Math.round((400 / temps[0]) / (vma / 3.6) * 100);
+            const pct3 = Math.round((400 / temps[2]) / (vma / 3.6) * 100);
+            
+            if(pct3 > pct1 + 3) summary += 'Progression positive. ';
+            else if(pct3 < pct1 - 5) summary += 'Dégradation en cours. ';
+            else summary += 'Stratégie régulière. ';
+        }
     }
     
-    // Analyse saut
-    const sautL3 = seanceL3 ? [seanceL3.sautTech1, seanceL3.sautTech2, seanceL3.sautTech3, seanceL3.sautTech4].filter(Boolean).length : 0;
-    const sautL6 = seanceL6 ? [seanceL6.sautTech1, seanceL6.sautTech2, seanceL6.sautTech3, seanceL6.sautTech4, seanceL6.sautTech5].filter(Boolean).length : 0;
-    if(sautL3 > 0 || sautL6 > 0) {
-        const progression = sautL6 > sautL3 ? 'progression saut' : 'saut stable';
-        summary += `${progression}. `;
-    }
-    
-    // Analyse lancer
-    const lancerL4 = seanceL4 ? [seanceL4.lancerTech1, seanceL4.lancerTech2, seanceL4.lancerTech3, seanceL4.lancerTech4].filter(Boolean).length : 0;
-    const lancerL6 = seanceL6 ? [seanceL6.lancerTech1, seanceL6.lancerTech2, seanceL6.lancerTech3, seanceL6.lancerTech4, seanceL6.lancerTech5].filter(Boolean).length : 0;
-    if(lancerL4 > 0 || lancerL6 > 0) {
-        const progression = lancerL6 > lancerL4 ? 'progression lancer' : 'lancer stable';
-        summary += `${progression}. `;
-    }
-    
-    // Analyse pyramide
-    if(seanceL6?.pyramideReussie) {
-        summary += `Pyramide L6 réussie. `;
-    } else if(seanceL6?.pyramideEchec) {
-        summary += `Pyramide L6 échouée. `;
-    }
-    
-    // Analyse L7
+    // Confiance L7
     if(seanceL7?.confiantL8) {
-        summary += `Confiant après L7.`;
-    } else if(seanceL7?.temps1) {
-        summary += `Test L7 réalisé.`;
+        summary += 'Confiant pour L8. ';
+    } else if(seanceL7?.strategieTrouvee) {
+        summary += 'Stratégie trouvée. ';
     }
     
-    return summary || 'Parcours en cours...';
+    // Analyse technique (saut/lancer - progression L6/L7)
+    const sautL6 = seanceL6 ? [seanceL6.sautTech1, seanceL6.sautTech2, seanceL6.sautTech3, seanceL6.sautTech4, seanceL6.sautTech5].filter(Boolean).length : 0;
+    const lancerL6 = seanceL6 ? [seanceL6.lancerTech1, seanceL6.lancerTech2, seanceL6.lancerTech3, seanceL6.lancerTech4, seanceL6.lancerTech5].filter(Boolean).length : 0;
+    
+    if(sautL6 >= 4) summary += 'Saut maîtrisé. ';
+    else if(sautL6 >= 2) summary += 'Saut en progression. ';
+    
+    if(lancerL6 >= 4) summary += 'Lancer maîtrisé. ';
+    else if(lancerL6 >= 2) summary += 'Lancer en progression. ';
+    
+    // Focus autonome L7
+    if(seanceL7?.focusSaut) summary += `Focus saut: ${seanceL7.focusSaut}. `;
+    if(seanceL7?.focusLancer) summary += `Focus lancer: ${seanceL7.focusLancer}. `;
+    
+    return summary || 'Parcours en cours de construction...';
+}
+
+function parseTemps(tempsStr) {
+    if(!tempsStr || tempsStr.trim() === '') return null;
+    const parts = tempsStr.trim().replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
+    if(parts) {
+        return parseInt(parts[1]) * 60 + parseInt(parts[2]) + parseInt(parts[3]) / 10;
+    }
+    const secondsOnly = parseFloat(tempsStr);
+    return !isNaN(secondsOnly) ? secondsOnly : null;
 }
 
 function generateProjet(eleveIndex) {
@@ -447,55 +461,57 @@ function analyserProfil(reponses, eleve) {
     let conseilLancer = '';
     let gestion = '';
     
-    // STRATÉGIE COURSE
+    // STRATÉGIE COURSE basée sur L7
     if(course.includes('course1') || course.includes('course2')) {
-        // Fort en course
+        // Performance L7 élevée ou bonne gestion
         if(mental.includes('mental1') || objectif.includes('objectif2')) {
-            strategieCourse = '🚀 <strong>DÉPART DYNAMIQUE</strong> : Tu peux te permettre de partir vite !';
-            intensite = 'Premier 400m à 110-115% VMA';
+            strategieCourse = '🚀 <strong>STRATÉGIE AMBITIEUSE</strong> : Ton L7 montre que tu peux viser haut !';
+            intensite = 'Reproduis ton L7 ou mieux : 110-120% VMA';
         } else {
-            strategieCourse = '⚖️ <strong>DÉPART MAÎTRISÉ</strong> : Utilise tes capacités intelligemment';
-            intensite = 'Premier 400m à 105% VMA';
+            strategieCourse = '⚖️ <strong>STRATÉGIE REPRODUCTIBLE</strong> : Ton L7 était réussi, refais pareil !';
+            intensite = 'Même intensité qu\'en L7 : 105-110% VMA';
         }
     } else if(course.includes('course3') || mental.includes('mental4')) {
-        // Profil prudent
-        strategieCourse = '🛡️ <strong>DÉPART SÉCURISÉ</strong> : Commence tranquille pour finir fort';
-        intensite = 'Premier 400m à 95-100% VMA';
+        // Difficultés L7 ou besoin sécurité
+        strategieCourse = '🛡️ <strong>STRATÉGIE SÉCURISÉE</strong> : Après L7, sois plus prudent au départ';
+        intensite = 'Départ plus calme : 95-100% VMA puis progression';
     } else {
-        // Profil équilibré
-        strategieCourse = '⚖️ <strong>DÉPART ÉQUILIBRÉ</strong> : Régularité et progression';
-        intensite = 'Premier 400m à 100-105% VMA';
+        // Pas de retour L7 clair
+        strategieCourse = '⚖️ <strong>STRATÉGIE ÉQUILIBRÉE</strong> : Base-toi sur tes sensations L7';
+        intensite = 'Départ contrôlé : 100-105% VMA';
     }
     
-    // CONSEIL SAUT
+    // CONSEIL SAUT (inchangé mais adapté)
     if(saut.includes('saut1') && saut.includes('saut2')) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Tu maîtrises ! Vise la performance';
+        conseilSaut = '🦘 <strong>SAUT</strong> : Tu progresses ! Vise ta meilleure distance';
     } else if(saut.includes('saut3')) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Concentre-toi sur la régularité d\'élan';
+        conseilSaut = '🦘 <strong>SAUT</strong> : Travaille encore la régularité (comme en L7)';
     } else if(saut.includes('saut4')) {
         conseilSaut = '🦘 <strong>SAUT</strong> : Relève le défi technique !';
     } else if(saut.length > 0) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Continue tes progrès techniques';
+        conseilSaut = '🦘 <strong>SAUT</strong> : Continue sur ta lancée L6/L7';
     }
     
-    // CONSEIL LANCER
+    // CONSEIL LANCER (inchangé mais adapté)
     if(lancer.includes('lancer1') && lancer.includes('lancer2')) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Tu progresses bien ! Vise plus loin';
+        conseilLancer = '🎯 <strong>LANCER</strong> : Tes progrès payent ! Vise encore plus loin';
     } else if(lancer.includes('lancer3')) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Focus sur la régularité du geste';
+        conseilLancer = '🎯 <strong>LANCER</strong> : Focus régularité (applique ton travail L7)';
     } else if(lancer.includes('lancer4')) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Va chercher ta meilleure distance !';
+        conseilLancer = '🎯 <strong>LANCER</strong> : Va chercher ta distance record !';
     } else if(lancer.length > 0) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Peaufine ta technique';
+        conseilLancer = '🎯 <strong>LANCER</strong> : Exploite ton travail technique L6/L7';
     }
     
-    // GESTION GLOBALE
+    // GESTION GLOBALE avec référence L7
     if(course.includes('course4') || objectif.includes('objectif4')) {
-        gestion = 'Garde des forces pour un beau finish ! 💥';
+        gestion = 'Comme en L7 : garde des forces pour un finish puissant ! 💥';
     } else if(objectif.includes('objectif1') || mental.includes('mental2')) {
-        gestion = 'Reste régulier, la sécurité avant tout ✅';
+        gestion = 'Sécurité comme en L7 : reste dans ta zone de confort ✅';
+    } else if(objectif.includes('objectif3')) {
+        gestion = 'Objectif clair : faire mieux qu\'en L7 ! 🎯';
     } else {
-        gestion = 'Donne le maximum sur chaque épreuve 🔥';
+        gestion = 'Reproduis ce qui a marché en L7 🔄';
     }
     
     let projetHTML = `<div style="font-size: 0.9rem;">`;
@@ -513,7 +529,7 @@ function analyserProfil(reponses, eleve) {
         projetHTML += `<div style="margin-bottom: 6px;">${conseilLancer}</div>`;
     }
     
-    projetHTML += `<div style="margin-top: 8px; font-weight: 600;"><strong>Conseil :</strong> ${gestion}</div>`;
+    projetHTML += `<div style="margin-top: 8px; font-weight: 600;"><strong>Conseil final :</strong> ${gestion}</div>`;
     projetHTML += `</div>`;
     
     return projetHTML;

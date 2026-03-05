@@ -440,6 +440,32 @@ function createCard(i) {
                                 <label>🎯 J'ai trouvé ma stratégie</label>
                             </div>
                         </div>
+                        
+                        <div class="ressenti-box">
+                            <div style="font-weight: 700; margin-bottom: 8px;">Travail autonome saut/lancer (15min chacun) :</div>
+                            <div style="display: flex; gap: 12px; margin: 8px 0;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem;">🦘 Focus saut :</label>
+                                    <select id="focus-saut-${i}" style="width: 100%; padding: 4px; font-size: 0.8rem; background: var(--card); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
+                                        <option value="">Choisir</option>
+                                        <option value="course-elan">Course d'élan</option>
+                                        <option value="precision-appel">Précision appel</option>
+                                        <option value="reception">Réception</option>
+                                        <option value="distance">Distance max</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem;">🎯 Focus lancer :</label>
+                                    <select id="focus-lancer-${i}" style="width: 100%; padding: 4px; font-size: 0.8rem; background: var(--card); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
+                                        <option value="">Choisir</option>
+                                        <option value="coordination">Coordination globale</option>
+                                        <option value="transfert-poids">Transfert de poids</option>
+                                        <option value="accompagnement">Accompagnement</option>
+                                        <option value="regularite">Régularité</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -608,6 +634,8 @@ function saveAll() {
             projetReussi: document.getElementById(`projet-reussi-${i}`)?.checked || false,
             confiantL8: document.getElementById(`confiant-l8-${i}`)?.checked || false,
             strategieTrouvee: document.getElementById(`strategie-trouvee-${i}`)?.checked || false,
+            focusSaut: document.getElementById(`focus-saut-${i}`)?.value || null,
+            focusLancer: document.getElementById(`focus-lancer-${i}`)?.value || null,
             date: new Date().toISOString()
         };
 

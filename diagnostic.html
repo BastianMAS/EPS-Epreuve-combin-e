@@ -652,8 +652,31 @@ function updateHistorique(i) {
             </div>
         </div>`
     ).join('');
+
     const moy = histo.reduce((s,t) => s+t.vma, 0) / histo.length;
-    document.getElementById(`moy-vma-${i}`).textContent = `Moyenne : ${Math.round(moy*10)/10} km/h`;
+    const moyArrondi = Math.round(moy * 10) / 10;
+
+    // Calcul écart-type et alertes si plusieurs tests
+    let warningHtml = '';
+    if(histo.length > 1) {
+        const ecartType = Math.sqrt(histo.map(t => Math.pow(t.vma - moy, 2)).reduce((a,b) => a+b, 0) / histo.length);
+        const ecartArrondi = Math.round(ecartType * 10) / 10;
+        const maxVma = Math.max(...histo.map(t => t.vma));
+        const minVma = Math.min(...histo.map(t => t.vma));
+        const amplitude = Math.round((maxVma - minVma) * 10) / 10;
+
+        if(ecartType > 1) {
+            warningHtml = `<div style="color:#ffcc00;font-size:0.7rem;margin-top:4px;padding:4px 6px;background:rgba(255,204,0,0.1);border-radius:4px;">
+                ⚠️ Écart entre tests : ${amplitude} km/h (σ=${ecartArrondi}) — Tests hétérogènes, privilégier le <strong>Luc Léger</strong> comme référence.
+            </div>`;
+        } else {
+            warningHtml = `<div style="color:var(--success);font-size:0.7rem;margin-top:4px;">✅ Tests cohérents (σ=${ecartArrondi} km/h)</div>`;
+        }
+    } else {
+        warningHtml = `<div style="color:#aaa;font-size:0.7rem;margin-top:4px;">💡 Recommandé : effectuer 2 tests pour croiser les résultats.</div>`;
+    }
+
+    document.getElementById(`moy-vma-${i}`).innerHTML = `Moyenne : ${moyArrondi} km/h ${warningHtml}`;
 }
 
 function supprimerVMA(cardIndex, histoIndex) {

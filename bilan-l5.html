@@ -298,6 +298,7 @@
     <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
         📊 Exporter le bilan olympique
     </button>
+    <button class="export-btn" onclick="exportXLSX()" style="background:var(--success);color:black;margin-top:8px;">📥 Exporter .XLSX</button>
 </div>
 
 <script>
@@ -619,6 +620,52 @@ function exportBilan() {
     a.click();
     window.URL.revokeObjectURL(url);
 }
+
+function exportXLSX(event) {
+    if(event) event.stopPropagation();
+    const wb = XLSX.utils.book_new();
+
+    // Feuille résumé équipes
+    const resumeData = [
+        ['BILAN L5 - RELAIS OLYMPIQUE', ''],
+        ['Date', new Date().toLocaleDateString('fr-FR')],
+        ['', ''],
+        ['Équipes objectif atteint', bilanData.stats.equipesObjectifAtteint || 0],
+        ['Total équipes', bilanData.stats.totalEquipes],
+        ['Total élèves', bilanData.stats.totalEleves],
+    ];
+    const wsResume = XLSX.utils.aoa_to_sheet(resumeData);
+    XLSX.utils.book_append_sheet(wb, wsResume, 'Résumé');
+
+    // Feuille détail individuel
+    const header = ['Élève', 'Équipe', 'Manches', 'Distance totale (m)', 'Distance moy/manche (m)', '% VMA (estimé)', 'Objectif individuel (m)', 'Objectif atteint'];
+    const rows = [];
+    bilanData.equipes.forEach(equipe => {
+        const objectifIndiv = Math.round(equipe.objectif / equipe.membres.length);
+        equipe.membres.forEach(membre => {
+            const tempsTotal = equipe.manches * 6;
+            const vitesseReelle = (membre.distanceIndividuelle / 1000) / (tempsTotal / 60);
+            const vmaIndiv = membre.vma || null;
+            const pctVMA = vmaIndiv ? Math.round((vitesseReelle / vmaIndiv) * 100) : '';
+            rows.push([
+                membre.nom,
+                equipe.nom || 'Équipe',
+                equipe.manches,
+                membre.distanceIndividuelle,
+                membre.distanceMoyenne,
+                pctVMA,
+                objectifIndiv,
+                membre.distanceIndividuelle >= objectifIndiv * 0.9 ? 'Oui' : 'Non',
+            ]);
+        });
+    });
+    const wsEleves = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    wsEleves['!cols'] = header.map(() => ({wch: 20}));
+    XLSX.utils.book_append_sheet(wb, wsEleves, 'Détail élèves');
+
+    XLSX.writeFile(wb, `bilan_L5_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`);
+}
+
 </script>
 
 </body>

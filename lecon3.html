@@ -355,6 +355,56 @@
             100% { transform: scale(1); }
         }
 
+        /* MINUTEUR RÉCUPÉRATION */
+        .recup-panel {
+            background: rgba(0,210,255,0.1);
+            border: 1px solid rgba(0,210,255,0.3);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin: 8px 0 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .recup-selector { display: flex; gap: 6px; align-items: center; }
+        .recup-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .recup-btn.active { background: var(--accent); color: black; }
+        .recup-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--accent);
+            min-width: 52px;
+            text-align: center;
+        }
+        .recup-display.urgent { color: var(--danger); animation: urgentPulse 0.5s infinite; }
+        .recup-start {
+            background: var(--success);
+            color: black;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .recup-start.running { background: var(--danger); color: white; }
+        @keyframes urgentPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         .progress-bar {
             background: rgba(255,255,255,0.1);
             border-radius: 10px;
@@ -469,11 +519,83 @@
 
 <script>
 const NIVEAUX_VMA_L3 = [
-    { id: 'vma95', label: '95% VMA', desc: 'Échauffement - Rythme confortable', pourcent: 95 },
+    { id: 'vma95', label: '95% VMA', desc: 'Endurance active - Rythme régulier', pourcent: 95 },
     { id: 'vma100', label: '100% VMA', desc: 'Découverte - Rythme soutenu', pourcent: 100 },
     { id: 'vma105', label: '105% VMA', desc: 'Progression - Rythme intense', pourcent: 105 },
     { id: 'vma110', label: '110% VMA', desc: 'Challenge - Rythme très intense', pourcent: 110 }
 ];
+
+// ═══════════════════════════════════════
+// MINUTEUR RÉCUPÉRATION
+// ═══════════════════════════════════════
+const recupState = {};
+
+function setRecup(i, seconds) {
+    if(recupState[i]?.running) return; // Ne pas changer pendant le compte à rebours
+    recupState[i] = recupState[i] || {};
+    recupState[i].duration = seconds;
+    recupState[i].remaining = seconds;
+    ['60','90','120'].forEach(s => {
+        const btn = document.getElementById(`recup${s}-${i}`);
+        if(btn) btn.classList.toggle('active', parseInt(s) === seconds);
+    });
+    document.getElementById(`recup-display-${i}`).textContent = seconds >= 60 ? `${Math.floor(seconds/60)}:00` : seconds;
+    document.getElementById(`recup-display-${i}`).classList.remove('urgent');
+}
+
+function toggleRecup(i) {
+    recupState[i] = recupState[i] || { duration: 60, remaining: 60 };
+    const state = recupState[i];
+    const btn = document.getElementById(`recup-start-${i}`);
+    const display = document.getElementById(`recup-display-${i}`);
+
+    if(state.running) {
+        clearInterval(state.interval);
+        state.running = false;
+        state.remaining = state.duration;
+        btn.textContent = '▶ GO';
+        btn.classList.remove('running');
+        display.classList.remove('urgent');
+        display.textContent = formatRecupTime(state.duration);
+        return;
+    }
+
+    state.running = true;
+    btn.textContent = '⏹ STOP';
+    btn.classList.add('running');
+
+    state.interval = setInterval(() => {
+        state.remaining--;
+        display.textContent = formatRecupTime(state.remaining);
+        if(state.remaining <= 5) display.classList.add('urgent');
+        if(state.remaining <= 0) {
+            clearInterval(state.interval);
+            state.running = false;
+            state.remaining = state.duration;
+            btn.textContent = '▶ GO';
+            btn.classList.remove('running');
+            display.classList.remove('urgent');
+            display.textContent = formatRecupTime(state.duration);
+            // Vibration + son si disponible
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                osc.connect(ctx.destination);
+                osc.frequency.value = 880;
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+    }, 1000);
+}
+
+function formatRecupTime(sec) {
+    if(sec <= 0) return '✅ GO !';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m > 0 ? `${m}:${s.toString().padStart(2,'0')}` : `${sec}`;
+}
 
 function getFeedbackCourse(tempsSecEleve, tempsCibleSec, tourNum) {
     const ecart = Math.abs(tempsSecEleve - tempsCibleSec);
@@ -581,6 +703,17 @@ function buildCard(i) {
                     </div>
 
                     <div class="tours-container">
+                        <!-- MINUTEUR RÉCUPÉRATION -->
+                        <div class="recup-panel" id="recup-panel-${i}">
+                            <span style="font-size:0.75rem;font-weight:700;color:var(--accent)">⏱️ RÉCUP</span>
+                            <div class="recup-selector">
+                                <button class="recup-btn active" id="recup60-${i}" onclick="setRecup(${i},60)">60s</button>
+                                <button class="recup-btn" id="recup90-${i}" onclick="setRecup(${i},90)">90s</button>
+                                <button class="recup-btn" id="recup120-${i}" onclick="setRecup(${i},120)">2min</button>
+                            </div>
+                            <div class="recup-display" id="recup-display-${i}">60</div>
+                            <button class="recup-start" id="recup-start-${i}" onclick="toggleRecup(${i})">▶ GO</button>
+                        </div>
                         <div class="tour-input-box">
                             <div class="tour-label">200m #1</div>
                             <input type="text" class="tour-input" id="t1-${i}" placeholder="0:45" oninput="updateTours(${i})">

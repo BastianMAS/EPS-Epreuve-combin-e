@@ -231,6 +231,7 @@
             h1 { font-size: 1.6rem; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -243,7 +244,7 @@
     <div id="content"></div>
 
     <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
-        📊 Exporter le bilan
+        📊 Exporter .TXT  &nbsp;|&nbsp; <span onclick="exportXLSX(event)" style="cursor:pointer">📥 Exporter .XLSX</span>
     </button>
 </div>
 
@@ -369,6 +370,7 @@ function generateBilan() {
             age: eleve.age,
             vma: eleve.vma,
             progression: progression,
+            seanceL4: seanceL4,
             course: courseAnalyse,
             saut: {
                 distance: seanceL4.sautDistance,
@@ -503,7 +505,7 @@ function renderEleveDetails() {
                     <strong>🧠 Progression intelligente :</strong>
                     <div class="stat-line">
                         <span>Choix adaptatif:</span>
-                        <span>${eleve.progression?.label || 'Non définie'}</span>
+                        <span>${eleve.progression?.label || 'Non définie'}${eleve.seanceL4?.motifRefaire ? ` <span style="color:#ffcc00;font-size:0.75rem">(${eleve.seanceL4.motifRefaire === 'absence' ? '📋 Absence' : '🔁 Révision volontaire'})</span>` : ''}</span>
                     </div>
                 </div>
                 
@@ -603,6 +605,57 @@ function exportBilan() {
     a.click();
     window.URL.revokeObjectURL(url);
 }
+
+function exportXLSX(event) {
+    if(event) event.stopPropagation();
+    const wb = XLSX.utils.book_new();
+
+    // Feuille résumé classe
+    const resumeData = [
+        ['BILAN L4 - PROGRESSION INTELLIGENTE', '', '', ''],
+        ['Date', new Date().toLocaleDateString('fr-FR'), '', ''],
+        ['', '', '', ''],
+        ['RÉSUMÉ CLASSE', '', '', ''],
+        ['Élèves évalués', bilanData.stats.totalEleves, '', ''],
+        ['Objectif course atteint (%)', bilanData.stats.moyenneObjectifAtteint, '', ''],
+        ['Moyenne technique saut /4', bilanData.stats.moyenneTechniqueSaut, '', ''],
+        ['Moyenne technique lancer /4', bilanData.stats.moyenneTechniqueLancer, '', ''],
+        ['', '', '', ''],
+        ['PROGRESSIONS', 'Nb élèves', '', ''],
+        ['+5% VMA', bilanData.stats.repartitionProgressions.plus5, '', ''],
+        ['+10% VMA', bilanData.stats.repartitionProgressions.plus10, '', ''],
+        ['+15% VMA', bilanData.stats.repartitionProgressions.plus15, '', ''],
+        ['Même niveau', bilanData.stats.repartitionProgressions.meme, '', ''],
+        ['Refaire L3', bilanData.stats.repartitionProgressions.refaire, '', ''],
+    ];
+    const wsResume = XLSX.utils.aoa_to_sheet(resumeData);
+    XLSX.utils.book_append_sheet(wb, wsResume, 'Résumé classe');
+
+    // Feuille détail élèves
+    const header = ['Élève', 'Âge', 'VMA (km/h)', 'Progression', 'Motif Refaire L3', '% VMA L4', 'Moy 200m L4 (s)', 'Moy 200m L3 (s)', 'Évolution', 'Objectif atteint', 'Saut (m)', 'Tech saut /4', 'Lancer (m)', 'Tech lancer /4'];
+    const rows = bilanData.eleves.map(e => [
+        e.nom,
+        e.age,
+        e.vma || '',
+        e.progression?.label || '',
+        e.seanceL4?.motifRefaire || '',
+        e.course?.niveauVMA || '',
+        e.course?.moyenne ? Math.round(e.course.moyenne) : '',
+        e.course?.moyenneL3 ? Math.round(e.course.moyenneL3) : '',
+        e.course?.evolutionVsL3 === 'ameliore' ? 'Amélioré' : e.course?.evolutionVsL3 === 'degrade' ? 'Dégradé' : 'Stable',
+        e.course?.evaluation === 'excellent' ? 'Oui' : e.course?.evaluation === 'good' ? 'Proche' : 'Non',
+        e.saut?.distance || '',
+        e.saut?.techniques || 0,
+        e.lancer?.distance || '',
+        e.lancer?.techniques || 0,
+    ]);
+    const wsEleves = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    wsEleves['!cols'] = header.map(() => ({wch: 18}));
+    XLSX.utils.book_append_sheet(wb, wsEleves, 'Détail élèves');
+
+    XLSX.writeFile(wb, `bilan_L4_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`);
+}
+
 </script>
 </body>
 </html>

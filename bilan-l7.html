@@ -149,6 +149,10 @@
 
 <div class="stats-grid" id="stats-grid"></div>
 <div class="eleves-list" id="eleves-list"></div>
+<div style="text-align:center;margin:20px 0;">
+    <button id="exportBtn" onclick="exportBilan()" style="display:none;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px 24px;font-weight:800;cursor:pointer;font-size:0.9rem;margin-right:10px;">📄 Exporter .TXT</button>
+    <button id="exportXlsxBtn" onclick="exportXLSX()" style="display:none;background:var(--success);color:black;border:none;border-radius:12px;padding:12px 24px;font-weight:800;cursor:pointer;font-size:0.9rem;">📥 Exporter .XLSX</button>
+</div>
 
 <script>
 let bilanData = {
@@ -172,6 +176,10 @@ window.onload = function() {
     analyzerL7(eleves);
     renderStats();
     renderEleves();
+    if(bilanData.elevesAvecL7.length > 0) {
+        document.getElementById('exportBtn').style.display = 'inline-block';
+        document.getElementById('exportXlsxBtn').style.display = 'inline-block';
+    }
 };
 
 function analyzerL7(eleves) {
@@ -582,6 +590,71 @@ function renderEleves() {
     });
     
     container.innerHTML = html;
+}
+
+function exportBilan() {
+    let contenu = `BILAN L7 - MISE EN SITUATION ADAPTATIVE\n`;
+    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
+    contenu += `RÉSUMÉ CLASSE:\n`;
+    contenu += `- Élèves avec données L7: ${bilanData.stats.totalEleves}\n`;
+    contenu += `- % VMA moyen classe: ${bilanData.stats.vmaMoyenne}%\n`;
+    contenu += `- Confiants pour L8: ${bilanData.stats.confiantsL8}\n`;
+    contenu += `- Stratégie trouvée: ${bilanData.stats.strategiesTrouvees}\n\n`;
+    contenu += `DÉTAIL PAR ÉLÈVE:\n`;
+    bilanData.elevesAvecL7.forEach(eleve => {
+        const s = eleve.seanceL7;
+        contenu += `\n${eleve.nomPrenom} (VMA: ${eleve.vma || 'N/A'} km/h):\n`;
+        contenu += `  Tour 1: ${s.temps1 || 'N/A'} ${eleve.pctVMA1 ? `(${eleve.pctVMA1}% VMA)` : ''}\n`;
+        contenu += `  Tour 2: ${s.temps2 || 'N/A'} ${eleve.pctVMA2 ? `(${eleve.pctVMA2}% VMA)` : ''}\n`;
+        contenu += `  Tour 3: ${s.temps3 || 'N/A'} ${eleve.pctVMA3 ? `(${eleve.pctVMA3}% VMA)` : ''}\n`;
+        if(eleve.pctVMAMoyen) contenu += `  % VMA moyen: ${eleve.pctVMAMoyen}%\n`;
+        contenu += `  Stratégie trouvée: ${s.strategieTrouvee ? 'Oui' : 'Non'}\n`;
+        contenu += `  Confiant L8: ${s.confiantL8 ? 'Oui' : 'Non'}\n`;
+    });
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bilan_L7_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function exportXLSX() {
+    const wb = XLSX.utils.book_new();
+
+    // Feuille résumé
+    const resumeData = [
+        ['BILAN L7 - MISE EN SITUATION ADAPTATIVE', ''],
+        ['Date', new Date().toLocaleDateString('fr-FR')],
+        ['', ''],
+        ['Élèves avec données L7', bilanData.stats.totalEleves],
+        ['% VMA moyen classe', bilanData.stats.vmaMoyenne + '%'],
+        ['Confiants pour L8', bilanData.stats.confiantsL8],
+        ['Stratégie trouvée', bilanData.stats.strategiesTrouvees],
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumeData), 'Résumé');
+
+    // Feuille détail
+    const header = ['Élève', 'VMA (km/h)', 'Tour 1', '% VMA T1', 'Tour 2', '% VMA T2', 'Tour 3', '% VMA T3', '% VMA Moyen', 'Stratégie trouvée', 'Confiant L8'];
+    const rows = bilanData.elevesAvecL7.map(e => [
+        e.nomPrenom,
+        e.vma || '',
+        e.seanceL7.temps1 || '',
+        e.pctVMA1 ? e.pctVMA1 + '%' : '',
+        e.seanceL7.temps2 || '',
+        e.pctVMA2 ? e.pctVMA2 + '%' : '',
+        e.seanceL7.temps3 || '',
+        e.pctVMA3 ? e.pctVMA3 + '%' : '',
+        e.pctVMAMoyen ? e.pctVMAMoyen + '%' : '',
+        e.seanceL7.strategieTrouvee ? 'Oui' : 'Non',
+        e.seanceL7.confiantL8 ? 'Oui' : 'Non',
+    ]);
+    const wsEleves = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    wsEleves['!cols'] = header.map(() => ({wch: 16}));
+    XLSX.utils.book_append_sheet(wb, wsEleves, 'Détail élèves');
+
+    XLSX.writeFile(wb, `bilan_L7_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`);
 }
 </script>
 </body>

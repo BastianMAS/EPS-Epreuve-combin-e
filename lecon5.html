@@ -325,6 +325,10 @@
         <button onclick="window.location.href='index.html'">← Retour</button>
         <h1>EPS: épreuve Combinée</h1>
         <h2>🏅 L5 - RELAIS OLYMPIQUE</h2>
+        <div style="background:rgba(255,204,0,0.12);border-left:4px solid #ffcc00;border-radius:8px;padding:10px 14px;margin:10px 20px 0;font-size:0.82rem;color:#ffcc00;line-height:1.5;">
+            📋 <strong>Format séance :</strong> Équipes de 4 à 6 élèves · Chaque manche = 6 min de course en continu · Les coureurs se relaient librement sur la piste · Saisir la distance individuelle de chaque coureur à la fin de la manche · Plusieurs manches possibles.
+            <br>🔗 <strong>Rôle dans le cycle :</strong> Rupture collective volontaire — relancer la motivation, développer la coopération avant le retour au travail individuel en L6/L7.
+        </div>
     </header>
 
     <div class="phase-selector">
@@ -379,6 +383,16 @@
         <div class="team-result">
             <div class="total-distance" id="total-distance">Distance: 0m</div>
             <div id="vs-objective">Objectif: 0m</div>
+            <!-- BARRE PROGRESSION ÉQUIPE -->
+            <div style="margin-top:10px;">
+                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#aaa;margin-bottom:4px;">
+                    <span id="progress-label">0% de l'objectif</span>
+                    <span id="progress-missing"></span>
+                </div>
+                <div style="background:rgba(255,255,255,0.1);border-radius:10px;height:14px;overflow:hidden;">
+                    <div id="team-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:10px;transition:width 0.4s ease;"></div>
+                </div>
+            </div>
         </div>
 
         <button class="validate-btn" onclick="validateResults()">
@@ -584,6 +598,25 @@ function updateTotal() {
     
     document.getElementById('total-distance').textContent = `Distance: ${totalDistance}m`;
     document.getElementById('vs-objective').textContent = `Objectif: ${teamObjective}m`;
+
+    // Mise à jour barre de progression
+    const pct = teamObjective > 0 ? Math.min(Math.round((totalDistance / teamObjective) * 100), 100) : 0;
+    const rawPct = teamObjective > 0 ? Math.round((totalDistance / teamObjective) * 100) : 0;
+    const bar = document.getElementById('team-progress-bar');
+    const label = document.getElementById('progress-label');
+    const missing = document.getElementById('progress-missing');
+    if(bar) {
+        bar.style.width = pct + '%';
+        bar.style.background = rawPct >= 100 ? 'linear-gradient(90deg,#00ff88,#00ffcc)' :
+                               rawPct >= 80  ? 'linear-gradient(90deg,var(--accent),#00ff88)' :
+                                               'linear-gradient(90deg,var(--accent),var(--success))';
+    }
+    if(label) label.textContent = `${rawPct}% de l'objectif`;
+    if(missing) {
+        const diff = teamObjective - totalDistance;
+        missing.textContent = diff > 0 ? `Il manque ${diff}m` : diff === 0 ? '🎯 Objectif atteint !' : `✅ +${Math.abs(diff)}m au-dessus !`;
+        missing.style.color = diff <= 0 ? 'var(--success)' : '#aaa';
+    }
 }
 
 function validateResults() {

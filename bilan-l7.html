@@ -262,21 +262,144 @@ function analyzerL7(eleves) {
     console.log(`Stats finales: ${bilanData.stats.totalEleves} élèves, VMA moy: ${bilanData.stats.vmaMovennne}%`);
 }
 
-function convertTemps(tempsStr) {
-    if(!tempsStr) return 0;
+function convertTempsAvecValidation(tempsStr, inputElement = null) {
+    if(!tempsStr || tempsStr.trim() === '') return { valide: false, secondes: 0 };
     
-    // Format mm:ss.d
-    const match = tempsStr.replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
-    if(match) {
-        const min = parseInt(match[1]);
-        const sec = parseInt(match[2]);
-        const dixieme = parseInt(match[3]);
-        return min * 60 + sec + dixieme / 10;
+    const input = tempsStr.trim();
+    console.log(`🔍 Analyse temps: "${input}"`);
+    
+    // ✅ FORMATS VALIDES ACCEPTÉS
+    
+    // Format standard M:SS ou MM:SS
+    const matchStandard = input.match(/^(\d+):(\d+)$/);
+    if(matchStandard) {
+        const min = parseInt(matchStandard[1]);
+        const sec = parseInt(matchStandard[2]);
+        
+        if(sec >= 60) {
+            showTempsAlert(`❌ Erreur : ${sec} secondes impossible !\n\n✅ Correction : ${min}:${Math.floor(sec/60)+min}${(sec%60).toString().padStart(2,'0')}\n\nFormat attendu : M:SS (ex: 2:30 pour 2min30s)`, inputElement);
+            return { valide: false, secondes: 0 };
+        }
+        
+        const total = min * 60 + sec;
+        console.log(`✅ ${min}:${sec.toString().padStart(2,'0')} = ${total}s`);
+        return { valide: true, secondes: total };
     }
     
-    // Format secondes
-    const sec = parseFloat(tempsStr.replace(',', '.'));
-    return isNaN(sec) ? 0 : sec;
+    // Format avec dixièmes M:SS.D
+    const matchDixiemes = input.match(/^(\d+):(\d+)\.(\d+)$/);
+    if(matchDixiemes) {
+        const min = parseInt(matchDixiemes[1]);
+        const sec = parseInt(matchDixiemes[2]);
+        const dixieme = parseInt(matchDixiemes[3]);
+        
+        if(sec >= 60) {
+            showTempsAlert(`❌ Erreur : ${sec} secondes impossible !\n\nFormat attendu : M:SS (ex: 2:30)`, inputElement);
+            return { valide: false, secondes: 0 };
+        }
+        
+        const total = min * 60 + sec + dixieme / 10;
+        console.log(`✅ ${min}:${sec.toString().padStart(2,'0')}.${dixieme} = ${total}s`);
+        return { valide: true, secondes: total };
+    }
+    
+    // 🔄 CORRECTIONS AUTOMATIQUES INTELLIGENTES
+    
+    // Format décimal avec point/virgule : 2.30 → 2:30
+    const matchDecimal = input.replace(',', '.').match(/^(\d+)[.,](\d+)$/);
+    if(matchDecimal) {
+        const min = parseInt(matchDecimal[1]);
+        const sec = parseInt(matchDecimal[2]);
+        
+        if(sec < 60) {
+            const correction = `${min}:${sec.toString().padStart(2,'0')}`;
+            if(confirm(`⚠️ Tu as écrit "${input}"\n\n✅ Tu veux dire "${correction}" ?\n\n(${min} minutes ${sec} secondes)\n\nCliquer OK pour corriger automatiquement`)) {
+                if(inputElement) inputElement.value = correction;
+                const total = min * 60 + sec;
+                console.log(`🔄 Corrigé: ${correction} = ${total}s`);
+                return { valide: true, secondes: total };
+            }
+        }
+        
+        showTempsAlert(`❌ Format incorrect : "${input}"\n\n✅ Format attendu : M:SS\nExemple : 1:25 pour 1min25s`, inputElement);
+        return { valide: false, secondes: 0 };
+    }
+    
+    // Nombre entier : possible secondes directes ou erreur de format
+    const nombreEntier = parseInt(input);
+    if(!isNaN(nombreEntier) && nombreEntier.toString() === input) {
+        
+        // Secondes directes logiques (60-300s pour 400m)
+        if(nombreEntier >= 60 && nombreEntier <= 300) {
+            const min = Math.floor(nombreEntier / 60);
+            const sec = nombreEntier % 60;
+            const correction = `${min}:${sec.toString().padStart(2,'0')}`;
+            
+            if(confirm(`⚠️ Tu as écrit "${nombreEntier}"\n\n✅ Tu veux dire ${nombreEntier} secondes (${correction}) ?\n\nCliquer OK pour corriger`)) {
+                if(inputElement) inputElement.value = correction;
+                console.log(`🔄 ${nombreEntier}s → ${correction}`);
+                return { valide: true, secondes: nombreEntier };
+            }
+        }
+        
+        // Erreur probable : format MMSS au lieu de MM:SS
+        if(nombreEntier >= 100 && nombreEntier <= 999) {
+            const minStr = Math.floor(nombreEntier / 100).toString();
+            const secStr = (nombreEntier % 100).toString().padStart(2, '0');
+            const sec = parseInt(secStr);
+            
+            if(sec < 60) {
+                const correction = `${minStr}:${secStr}`;
+                if(confirm(`⚠️ Tu as écrit "${nombreEntier}"\n\n✅ Tu veux dire "${correction}" ?\n\n(${minStr} minutes ${sec} secondes)\n\nCliquer OK pour corriger`)) {
+                    if(inputElement) inputElement.value = correction;
+                    const total = parseInt(minStr) * 60 + sec;
+                    console.log(`🔄 Corrigé: ${nombreEntier} → ${correction} = ${total}s`);
+                    return { valide: true, secondes: total };
+                }
+            }
+        }
+        
+        showTempsAlert(`❌ Temps impossible : "${input}"\n\n✅ Format attendu : M:SS\nExemples :\n• 1:25 pour 1min25s\n• 2:00 pour 2min00s`, inputElement);
+        return { valide: false, secondes: 0 };
+    }
+    
+    // Secondes avec décimales
+    const secondes = parseFloat(input.replace(',', '.'));
+    if(!isNaN(secondes) && secondes > 0) {
+        if(secondes >= 60 && secondes <= 300) {
+            const min = Math.floor(secondes / 60);
+            const sec = Math.floor(secondes % 60);
+            const dixieme = Math.round((secondes % 1) * 10);
+            const correction = dixieme > 0 ? `${min}:${sec.toString().padStart(2,'0')}.${dixieme}` : `${min}:${sec.toString().padStart(2,'0')}`;
+            
+            if(confirm(`⚠️ Tu as écrit "${input}"\n\n✅ Tu veux dire ${secondes}s (${correction}) ?\n\nCliquer OK pour corriger`)) {
+                if(inputElement) inputElement.value = correction;
+                console.log(`🔄 ${secondes}s → ${correction}`);
+                return { valide: true, secondes: secondes };
+            }
+        }
+    }
+    
+    // Format non reconnu
+    showTempsAlert(`❌ Format non reconnu : "${input}"\n\n✅ Formats acceptés :\n• 1:25 (1min25s)\n• 2:00 (2min00s)\n• 1:30.5 (1min30s et 5 dixièmes)\n\n📝 Exemple : Pour 1 minute et 25 secondes, écris 1:25`, inputElement);
+    return { valide: false, secondes: 0 };
+}
+
+function showTempsAlert(message, inputElement = null) {
+    alert(message);
+    if(inputElement) {
+        inputElement.focus();
+        inputElement.style.border = '3px solid #ef4444';
+        setTimeout(() => {
+            if(inputElement.style) inputElement.style.border = '';
+        }, 3000);
+    }
+}
+
+// Fonction simplifiée pour les bilans (sans validation UI)
+function convertTemps(tempsStr) {
+    const result = convertTempsAvecValidation(tempsStr);
+    return result.valide ? result.secondes : 0;
 }
 
 function renderStats() {

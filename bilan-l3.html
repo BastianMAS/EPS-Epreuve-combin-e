@@ -3,619 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan L3 - EPS PRO</title>
+    <title>Bilan L3 - EPS: épreuve Combinée</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --bg: #0f1419;
             --card: #1a2332;
-            --accent: #00d9ff;
+            --accent: #ff6b35;
             --success: #4ade80;
             --warning: #fbbf24;
             --danger: #ef4444;
             --purple: #8b5cf6;
-            --gold: #f59e0b;
+            --orange: #ff8800;
+            --blue: #3b82f6;
         }
-        
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
-            color: white; 
-            padding: 16px; 
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1028 100%);
+            color: white;
+            padding: 16px;
             min-height: 100vh;
         }
-        
-        h1 { 
-            text-align: center; 
-            font-size: 2rem; 
-            font-weight: 800;
+
+        h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 4px; }
+        .subtitle { color: var(--accent); font-weight: 700; font-size: 1rem; margin-bottom: 20px; }
+
+        .btn-back {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+        .stat-value { font-size: 2rem; font-weight: 900; color: var(--accent); }
+        .stat-label { font-size: 0.75rem; color: #aaa; margin-top: 4px; }
+
+        /* NIVEAU DISTRIBUTION */
+        .niveau-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 0.82rem;
         }
-        
-        .subtitle { 
-            text-align: center; 
-            color: var(--accent); 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            margin-bottom: 20px;
-            opacity: 0.9;
+        .niveau-label { min-width: 100px; color: #ccc; }
+        .niveau-bar-track {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            height: 20px;
+            overflow: hidden;
         }
+        .niveau-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .niveau-count { min-width: 28px; text-align: right; color: #aaa; font-size: 0.75rem; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .btn-back { 
-            padding: 10px 20px; 
-            background: linear-gradient(135deg, #374151, #4b5563); 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            margin-bottom: 20px; 
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        /* CARDS GRID */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin: 24px 0 12px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
         }
 
-        .card {
+        .eleve-card {
             background: var(--card);
-            border: 1px solid rgba(139,92,246,0.2);
-            border-radius: 16px;
-            padding: 16px;
-            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.06);
         }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--accent);
+        .eleve-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        .student-card {
-            margin-bottom: 12px;
-            padding: 12px;
-            background: rgba(139,92,246,0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(139,92,246,0.3);
+        .niveau-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 5px;
+            margin-left: auto;
         }
-
-        .student-name {
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .course-stats {
-            background: rgba(74,222,128,0.1);
-            border: 1px solid var(--success);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 8px 0;
-        }
-
-        .technique-stats {
-            background: rgba(251,191,36,0.1);
-            border: 1px solid var(--warning);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 8px 0;
-        }
+        .n95 { background: rgba(59,130,246,0.3); color: #93c5fd; }
+        .n100 { background: rgba(74,222,128,0.3); color: #86efac; }
+        .n105 { background: rgba(251,146,60,0.3); color: #fdba74; }
+        .n110 { background: rgba(239,68,68,0.3); color: #fca5a5; }
 
         .stat-line {
             display: flex;
             justify-content: space-between;
-            margin: 4px 0;
-            font-size: 0.9rem;
+            font-size: 0.78rem;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+        .stat-line:last-child { border-bottom: none; }
+        .stat-line span:first-child { color: #888; }
+        .stat-line span:last-child { font-weight: 700; }
 
-        .stat-value {
-            font-weight: 600;
+        .tech-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
         }
-
-        .percentage {
-            padding: 4px 8px;
-            border-radius: 6px;
+        .tech-chip {
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 4px;
             font-weight: 700;
-            font-size: 0.8rem;
         }
+        .tech-ok { background: rgba(74,222,128,0.2); color: #86efac; border: 1px solid rgba(74,222,128,0.3); }
+        .tech-no { background: rgba(255,255,255,0.05); color: #555; border: 1px solid rgba(255,255,255,0.08); }
 
-        .perf-excellent { background: var(--success); color: black; }
-        .perf-good { background: var(--warning); color: black; }
-        .perf-progress { background: var(--danger); color: white; }
-
-        .summary-card {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(0,217,255,0.1));
-            border: 1px solid var(--purple);
+        /* EXPORT */
+        .export-zone {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
         }
-
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin: 16px 0;
-        }
-
-        .summary-box {
-            text-align: center;
-            padding: 16px;
-            background: rgba(0,217,255,0.1);
-            border-radius: 10px;
-        }
-
-        .summary-number {
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .summary-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
         .export-btn {
-            width: 100%;
-            padding: 14px 20px;
-            background: linear-gradient(135deg, var(--success), #16a34a);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 10px;
+            padding: 10px 20px;
             font-weight: 800;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-
-        .export-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 25px -5px rgba(74,222,128,0.4);
-        }
+        .export-btn.xlsx { background: var(--success); color: black; border-color: var(--success); }
 
         .no-data {
             text-align: center;
-            color: #94a3b8;
-            font-style: italic;
+            color: #666;
             padding: 40px;
+            font-size: 0.9rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
             .grid { grid-template-columns: 1fr; }
-            h1 { font-size: 1.6rem; }
+            h1 { font-size: 1.4rem; }
         }
     </style>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
-<h1>EPS<span style="color: var(--accent);">PRO</span></h1>
-<p class="subtitle">📊 BILAN L3 - DÉCOUVERTE & TECHNIQUE</p>
+<a href="index.html" class="btn-back">← Retour</a>
 
-<div class="container">
-    <button class="btn-back" onclick="window.location.href='index.html'">← Retour accueil</button>
+<h1>EPS<span style="color:var(--accent)">: épreuve Combinée</span></h1>
+<p class="subtitle">🔎 BILAN L3 — DÉCOUVERTE ATHLÉTIQUE</p>
 
-    <div id="content"></div>
+<div class="stats-grid" id="stats-grid"></div>
 
-    <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
-        📄 Exporter le bilan
-    </button>
+<div id="niveau-distrib-section" style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:20px;display:none;">
+    <div style="font-weight:800;color:var(--accent);margin-bottom:12px;font-size:0.9rem;">📊 Répartition des niveaux choisis</div>
+    <div id="niveau-distrib"></div>
 </div>
 
+<div class="export-zone" id="export-zone" style="display:none">
+    <button class="export-btn" onclick="exportTXT()">📄 Exporter .TXT</button>
+    <button class="export-btn" onclick="exportPDF()" style="background:#8b5cf6;color:white;border-color:#8b5cf6;">📑 Exporter .PDF</button>
+    <button class="export-btn xlsx" onclick="exportXLSX()">📥 Exporter .XLSX</button>
+</div>
+
+<div class="section-title" id="section-course-title" style="display:none">🏃 Course — 6×200m</div>
+<div class="grid" id="grid-course"></div>
+
+<div class="section-title" id="section-tech-title" style="display:none">🦘 Technique Saut &amp; Lancer</div>
+<div class="grid" id="grid-tech"></div>
+
 <script>
-let ELEVES = [];
-let bilanData = null;
+let bilanData = {
+    totalEleves: 0,
+    elevesAvecL3: [],
+    stats: {
+        niveauxRepartition: { vma95: 0, vma100: 0, vma105: 0, vma110: 0 },
+        moyenneTechSaut: 0,
+        moyenneTechLancer: 0,
+        tauxObjectifAtteint: 0,
+    }
+};
+
+const NIVEAUX = {
+    vma95:  { label: '95% VMA',  desc: 'Endurance active', classe: 'n95',  pourcent: 95,  color: '#93c5fd' },
+    vma100: { label: '100% VMA', desc: 'Découverte',       classe: 'n100', pourcent: 100, color: '#86efac' },
+    vma105: { label: '105% VMA', desc: 'Progression',      classe: 'n105', pourcent: 105, color: '#fdba74' },
+    vma110: { label: '110% VMA', desc: 'Challenge',         classe: 'n110', pourcent: 110, color: '#fca5a5' },
+};
+
+const SAUT_LABELS  = ['Course d\'élan régulière', 'Pied d\'appel précis'];
+const LANCER_LABELS = ['Position de profil', 'Prise et placement'];
 
 window.onload = function() {
     const stored = localStorage.getItem('eps_pro_students');
     if(!stored) {
-        document.getElementById('content').innerHTML = `
-            <div class="no-data">
-                ⚠️ Aucun élève trouvé. Ajoutez des élèves depuis l'accueil.
-            </div>
-        `;
+        document.getElementById('grid-course').innerHTML = '<div class="no-data">⚠️ Aucune donnée trouvée. Effectuez d\'abord une séance L3.</div>';
         return;
     }
-    
-    ELEVES = JSON.parse(stored);
-    generateBilan();
+    const eleves = JSON.parse(stored);
+    analyseL3(eleves);
+    renderStats();
+    renderNiveauDistrib();
+    renderCards();
+    document.getElementById('export-zone').style.display = 'flex';
 };
 
-function generateBilan() {
-    const elevesL3 = ELEVES.filter(e => e.seances && e.seances.find(s => s.lecon === 'L3'));
-    
-    if(elevesL3.length === 0) {
-        document.getElementById('content').innerHTML = `
-            <div class="no-data">
-                📚 Aucune donnée L3 trouvée. Effectuez d'abord la leçon 3.
-            </div>
-        `;
-        return;
-    }
+function analyseL3(eleves) {
+    const elevesL3 = eleves.filter(e => e.seances?.some(s => s.lecon === 'L3'));
+    bilanData.totalEleves = elevesL3.length;
 
-    bilanData = {
-        eleves: [],
-        stats: {
-            totalEleves: elevesL3.length,
-            moyenneObjectifAtteint: 0,
-            repartitionNiveaux: { vma95: 0, vma100: 0, vma105: 0, vma110: 0 },
-            moyenneTechniqueSaut: 0,
-            moyenneTechniqueLancer: 0
-        }
-    };
-
-    let totalObjectifsAtteints = 0;
-    let totalTechSaut = 0, totalTechLancer = 0;
+    let totalTechSaut = 0, totalTechLancer = 0, totalObjAtteint = 0;
 
     elevesL3.forEach(eleve => {
-        const seanceL3 = eleve.seances.find(s => s.lecon === 'L3');
-        if(!seanceL3) return;
+        const s = eleve.seances.find(s => s.lecon === 'L3');
+        const niv = NIVEAUX[s.niveau] || null;
 
-        // Analyse course
-        let courseAnalyse = null;
-        if(seanceL3.tours && seanceL3.tours.filter(t => t).length === 6 && seanceL3.niveau && eleve.vma) {
-            const temps = seanceL3.tours.filter(t => t);
-            const moyenne = temps.reduce((a, b) => a + b, 0) / temps.length;
-            
-            const niveauData = getNiveauData(seanceL3.niveau);
-            if(niveauData) {
-                const vma = parseFloat(eleve.vma);
-                const vitesseCible = vma * (niveauData.pourcent / 100);
-                const tempsCible = (0.2 / vitesseCible) * 3600;
-                
-                const ecartMoyenne = Math.abs(moyenne - tempsCible);
-                const pourcentageEcart = (ecartMoyenne / tempsCible) * 100;
-                
-                let evaluation = 'progress';
-                if(pourcentageEcart <= 5) evaluation = 'excellent';
-                else if(pourcentageEcart <= 10) evaluation = 'good';
-                
-                courseAnalyse = {
-                    niveau: niveauData.label,
-                    moyenne: moyenne,
-                    cible: tempsCible,
-                    ecart: ecartMoyenne,
-                    evaluation: evaluation,
-                    regularite: Math.max(...temps.map((t, idx) => idx > 0 ? Math.abs(t - temps[idx-1]) : 0))
-                };
-                
-                if(evaluation === 'excellent') totalObjectifsAtteints++;
-            }
-        }
+        if(s.niveau && bilanData.stats.niveauxRepartition[s.niveau] !== undefined)
+            bilanData.stats.niveauxRepartition[s.niveau]++;
 
-        // Analyse technique saut
-        let techSaut = 0;
-        if(seanceL3.sautTech1) techSaut++;
-        if(seanceL3.sautTech2) techSaut++;
+        const techSaut = (s.sautTech1 ? 1 : 0) + (s.sautTech2 ? 1 : 0);
+        const techLancer = (s.lancerTech1 ? 1 : 0) + (s.lancerTech2 ? 1 : 0);
         totalTechSaut += techSaut;
-
-        // Analyse technique lancer
-        let techLancer = 0;
-        if(seanceL3.lancerTech1) techLancer++;
-        if(seanceL3.lancerTech2) techLancer++;
         totalTechLancer += techLancer;
 
-        // Ajouter élève au bilan
-        bilanData.eleves.push({
-            nom: eleve.nomPrenom,
+        // Objectif atteint = au moins 4/6 tours saisis ET niveau ≥ 100%
+        const toursValides = s.tours ? s.tours.filter(t => t).length : 0;
+        const objAtteint = toursValides >= 4 && niv && niv.pourcent >= 100;
+        if(objAtteint) totalObjAtteint++;
+
+        // % VMA moyen sur les tours
+        let pctVMAMoyen = null;
+        if(eleve.vma && s.moyenne200m) {
+            const vitesse = (0.2 / (s.moyenne200m / 3600));
+            pctVMAMoyen = Math.round((vitesse / eleve.vma) * 100);
+            if(pctVMAMoyen < 50 || pctVMAMoyen > 200) pctVMAMoyen = null;
+        }
+
+        bilanData.elevesAvecL3.push({
+            nomPrenom: eleve.nomPrenom,
             sexe: eleve.sexe,
             age: eleve.age,
             vma: eleve.vma,
-            course: courseAnalyse,
-            saut: {
-                distance: seanceL3.sautDistance,
-                techniques: techSaut,
-                tech1: seanceL3.sautTech1,
-                tech2: seanceL3.sautTech2
-            },
-            lancer: {
-                distance: seanceL3.lancerDistance,
-                techniques: techLancer,
-                tech1: seanceL3.lancerTech1,
-                tech2: seanceL3.lancerTech2
-            }
+            seanceL3: s,
+            niv,
+            techSaut,
+            techLancer,
+            objAtteint,
+            pctVMAMoyen,
+            toursValides,
         });
-
-        // Stats niveaux
-        if(seanceL3.niveau) {
-            bilanData.stats.repartitionNiveaux[seanceL3.niveau]++;
-        }
     });
 
-    // Calculs finaux
-    bilanData.stats.moyenneObjectifAtteint = Math.round((totalObjectifsAtteints / elevesL3.length) * 100);
-    bilanData.stats.moyenneTechniqueSaut = Math.round((totalTechSaut / elevesL3.length) * 10) / 10;
-    bilanData.stats.moyenneTechniqueLancer = Math.round((totalTechLancer / elevesL3.length) * 10) / 10;
-
-    renderBilan();
+    if(elevesL3.length > 0) {
+        bilanData.stats.moyenneTechSaut   = Math.round((totalTechSaut   / elevesL3.length) * 10) / 10;
+        bilanData.stats.moyenneTechLancer = Math.round((totalTechLancer / elevesL3.length) * 10) / 10;
+        bilanData.stats.tauxObjectifAtteint = Math.round((totalObjAtteint / elevesL3.length) * 100);
+    }
 }
 
-function getNiveauData(niveauId) {
-    const niveaux = {
-        'vma95': { label: '95% VMA', pourcent: 95 },
-        'vma100': { label: '100% VMA', pourcent: 100 },
-        'vma105': { label: '105% VMA', pourcent: 105 },
-        'vma110': { label: '110% VMA', pourcent: 110 }
-    };
-    return niveaux[niveauId] || null;
-}
-
-function renderBilan() {
-    const content = document.getElementById('content');
-    
-    let html = `
-        <div class="grid">
-            <div class="card summary-card">
-                <div class="card-title">📊 RÉSUMÉ CLASSE L3</div>
-                <div class="summary-stats">
-                    <div class="summary-box">
-                        <div class="summary-number">${bilanData.stats.totalEleves}</div>
-                        <div class="summary-label">Élèves évalués</div>
-                    </div>
-                    <div class="summary-box">
-                        <div class="summary-number">${bilanData.stats.moyenneObjectifAtteint}%</div>
-                        <div class="summary-label">Objectif course atteint</div>
-                    </div>
-                    <div class="summary-box">
-                        <div class="summary-number">${bilanData.stats.moyenneTechniqueSaut}/2</div>
-                        <div class="summary-label">Moyenne tech. saut</div>
-                    </div>
-                    <div class="summary-box">
-                        <div class="summary-number">${bilanData.stats.moyenneTechniqueLancer}/2</div>
-                        <div class="summary-label">Moyenne tech. lancer</div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 16px;">
-                    <strong>Répartition niveaux choisis :</strong><br>
-                    95% VMA: ${bilanData.stats.repartitionNiveaux.vma95} élèves | 
-                    100% VMA: ${bilanData.stats.repartitionNiveaux.vma100} élèves | 
-                    105% VMA: ${bilanData.stats.repartitionNiveaux.vma105} élèves | 
-                    110% VMA: ${bilanData.stats.repartitionNiveaux.vma110} élèves
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">🏃‍♂️ TOP COURSES</div>
-                <div id="coursePerfs"></div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">🦘 TOP SAUTS</div>
-                <div id="sautPerfs"></div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">🎯 TOP LANCERS</div>
-                <div id="lancerPerfs"></div>
-            </div>
+function renderStats() {
+    const d = bilanData;
+    if(d.totalEleves === 0) {
+        document.getElementById('stats-grid').innerHTML = '<div class="no-data">Aucun élève avec données L3.</div>';
+        return;
+    }
+    document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card">
+            <div class="stat-value">${d.totalEleves}</div>
+            <div class="stat-label">Élèves évalués</div>
         </div>
-
-        <div class="grid">
-            <div class="card" style="grid-column: 1 / -1;">
-                <div class="card-title">👥 DÉTAIL PAR ÉLÈVE</div>
-                <div id="eleveDetails"></div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:var(--success)">${d.stats.tauxObjectifAtteint}%</div>
+            <div class="stat-label">Objectif ≥100% atteint</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:var(--purple)">${d.stats.moyenneTechSaut}<span style="font-size:1rem">/2</span></div>
+            <div class="stat-label">Moy. technique saut</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:var(--blue)">${d.stats.moyenneTechLancer}<span style="font-size:1rem">/2</span></div>
+            <div class="stat-label">Moy. technique lancer</div>
         </div>
     `;
-
-    content.innerHTML = html;
-
-    renderCoursePerfs();
-    renderSautPerfs();
-    renderLancerPerfs();
-    renderEleveDetails();
-
-    document.getElementById('exportBtn').style.display = 'block';
 }
 
-function renderCoursePerfs() {
-    const courseEleves = bilanData.eleves.filter(e => e.course);
-    let html = '';
-
-    if(courseEleves.length === 0) {
-        html = '<div style="text-align: center; color: #94a3b8;">Aucune donnée course</div>';
-    } else {
-        courseEleves
-            .sort((a, b) => a.course.ecart - b.course.ecart)
-            .slice(0, 5)
-            .forEach(eleve => {
-                const perfClass = eleve.course.evaluation === 'excellent' ? 'perf-excellent' : 
-                                 eleve.course.evaluation === 'good' ? 'perf-good' : 'perf-progress';
-                
-                html += `
-                    <div class="student-card">
-                        <div class="student-name">${eleve.nom}</div>
-                        <div class="stat-line">
-                            <span>Objectif:</span>
-                            <span class="stat-value">${eleve.course.niveau}</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Moyenne:</span>
-                            <span class="stat-value">${fmtSec(eleve.course.moyenne)}</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Écart cible:</span>
-                            <span class="percentage ${perfClass}">±${fmtSec(eleve.course.ecart)}</span>
-                        </div>
-                    </div>
-                `;
-            });
-    }
-
-    document.getElementById('coursePerfs').innerHTML = html;
-}
-
-function renderSautPerfs() {
-    const sautEleves = bilanData.eleves.filter(e => e.saut.distance || e.saut.techniques > 0);
-    let html = '';
-
-    if(sautEleves.length === 0) {
-        html = '<div style="text-align: center; color: #94a3b8;">Aucune donnée saut</div>';
-    } else {
-        sautEleves
-            .sort((a, b) => (b.saut.distance || 0) - (a.saut.distance || 0))
-            .slice(0, 5)
-            .forEach(eleve => {
-                html += `
-                    <div class="student-card">
-                        <div class="student-name">${eleve.nom}</div>
-                        <div class="stat-line">
-                            <span>Distance:</span>
-                            <span class="stat-value">${eleve.saut.distance || '-'} m</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Techniques:</span>
-                            <span class="stat-value">${eleve.saut.techniques}/2</span>
-                        </div>
-                        <div style="font-size: 0.8rem; margin-top: 4px;">
-                            ${eleve.saut.tech1 ? '✅' : '❌'} Course d'élan | 
-                            ${eleve.saut.tech2 ? '✅' : '❌'} Pied d'appel
-                        </div>
-                    </div>
-                `;
-            });
-    }
-
-    document.getElementById('sautPerfs').innerHTML = html;
-}
-
-function renderLancerPerfs() {
-    const lancerEleves = bilanData.eleves.filter(e => e.lancer.distance || e.lancer.techniques > 0);
-    let html = '';
-
-    if(lancerEleves.length === 0) {
-        html = '<div style="text-align: center; color: #94a3b8;">Aucune donnée lancer</div>';
-    } else {
-        lancerEleves
-            .sort((a, b) => (b.lancer.distance || 0) - (a.lancer.distance || 0))
-            .slice(0, 5)
-            .forEach(eleve => {
-                html += `
-                    <div class="student-card">
-                        <div class="student-name">${eleve.nom}</div>
-                        <div class="stat-line">
-                            <span>Distance:</span>
-                            <span class="stat-value">${eleve.lancer.distance || '-'} m</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Techniques:</span>
-                            <span class="stat-value">${eleve.lancer.techniques}/2</span>
-                        </div>
-                        <div style="font-size: 0.8rem; margin-top: 4px;">
-                            ${eleve.lancer.tech1 ? '✅' : '❌'} Position profil | 
-                            ${eleve.lancer.tech2 ? '✅' : '❌'} Prise engin
-                        </div>
-                    </div>
-                `;
-            });
-    }
-
-    document.getElementById('lancerPerfs').innerHTML = html;
-}
-
-function renderEleveDetails() {
-    let html = '';
-
-    bilanData.eleves.forEach(eleve => {
-        html += `
-            <div class="student-card">
-                <div class="student-name">${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nom} (${eleve.age} ans)</div>
-                
-                ${eleve.course ? `
-                    <div class="course-stats">
-                        <strong>🏃‍♂️ Course 6×200m :</strong>
-                        <div class="stat-line">
-                            <span>Objectif choisi:</span>
-                            <span>${eleve.course.niveau}</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Moyenne réalisée:</span>
-                            <span>${fmtSec(eleve.course.moyenne)}</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Temps cible:</span>
-                            <span>${fmtSec(eleve.course.cible)}</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>Évaluation:</span>
-                            <span class="percentage ${eleve.course.evaluation === 'excellent' ? 'perf-excellent' : 
-                                                     eleve.course.evaluation === 'good' ? 'perf-good' : 'perf-progress'}">
-                                ${eleve.course.evaluation === 'excellent' ? 'Objectif atteint' : 
-                                  eleve.course.evaluation === 'good' ? 'Proche objectif' : 'En progression'}
-                            </span>
-                        </div>
-                    </div>
-                ` : '<div style="color: #94a3b8; font-style: italic;">Pas de données course</div>'}
-                
-                <div class="technique-stats">
-                    <strong>🦘 Saut :</strong> ${eleve.saut.distance || '-'} m | Techniques: ${eleve.saut.techniques}/2<br>
-                    <strong>🎯 Lancer :</strong> ${eleve.lancer.distance || '-'} m | Techniques: ${eleve.lancer.techniques}/2
-                </div>
+function renderNiveauDistrib() {
+    const rep = bilanData.stats.niveauxRepartition;
+    const total = bilanData.totalEleves;
+    if(total === 0) return;
+    document.getElementById('niveau-distrib-section').style.display = 'block';
+    const colors = { vma95: '#93c5fd', vma100: '#86efac', vma105: '#fdba74', vma110: '#fca5a5' };
+    document.getElementById('niveau-distrib').innerHTML = Object.entries(NIVEAUX).map(([id, n]) => {
+        const count = rep[id] || 0;
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        return `<div class="niveau-bar-row">
+            <div class="niveau-label">${n.label}</div>
+            <div class="niveau-bar-track">
+                <div class="niveau-bar-fill" style="width:${pct}%;background:${colors[id]};color:black;">${pct > 12 ? pct+'%' : ''}</div>
             </div>
-        `;
-    });
-
-    document.getElementById('eleveDetails').innerHTML = html;
+            <div class="niveau-count">${count} élève${count > 1 ? 's' : ''}</div>
+        </div>`;
+    }).join('');
 }
 
-function fmtSec(sec) {
-    if(!sec) return '-';
-    const m = Math.floor(sec / 60);
-    const s = Math.round(sec % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
+function renderCards() {
+    const eleves = bilanData.elevesAvecL3;
+    if(eleves.length === 0) return;
+
+    document.getElementById('section-course-title').style.display = 'flex';
+    document.getElementById('section-tech-title').style.display = 'flex';
+
+    const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=Math.round(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; };
+
+    document.getElementById('grid-course').innerHTML = eleves.map(e => {
+        const s = e.seanceL3;
+        const tours = s.tours || [];
+        const toursHtml = tours.map((t, i) => t
+            ? `<span style="font-size:0.7rem;background:rgba(255,255,255,0.07);padding:2px 5px;border-radius:4px;">#${i+1} ${fmtS(t)}</span>`
+            : `<span style="font-size:0.7rem;color:#444;padding:2px 5px;">#${i+1} —</span>`
+        ).join('');
+        const objColor = e.objAtteint ? 'var(--success)' : e.toursValides >= 4 ? 'var(--warning)' : 'var(--danger)';
+        const objTxt   = e.objAtteint ? '✅ Objectif atteint' : e.toursValides >= 4 ? '⚠️ Niveau < 100%' : '❌ Tours incomplets';
+
+        return `<div class="eleve-card">
+            <div class="eleve-name">
+                ${e.sexe === 'F' ? '👧' : '🧑'} ${e.nomPrenom}
+                ${e.niv ? `<span class="niveau-badge ${e.niv.classe}">${e.niv.label}</span>` : '<span class="niveau-badge" style="background:rgba(255,255,255,0.1);color:#aaa">N/D</span>'}
+            </div>
+            <div class="stat-line"><span>VMA</span><span>${e.vma || '?'} km/h</span></div>
+            <div class="stat-line"><span>Moy. 200m</span><span>${fmtS(s.moyenne200m)}</span></div>
+            ${e.pctVMAMoyen ? `<div class="stat-line"><span>% VMA réel</span><span>${e.pctVMAMoyen}%</span></div>` : ''}
+            <div class="stat-line"><span>Tours valides</span><span>${e.toursValides}/6</span></div>
+            <div style="font-size:0.72rem;font-weight:800;color:${objColor};margin-top:6px;">${objTxt}</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">${toursHtml}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('grid-tech').innerHTML = eleves.map(e => {
+        const s = e.seanceL3;
+        const sautChips = [
+            `<span class="tech-chip ${s.sautTech1 ? 'tech-ok' : 'tech-no'}">${s.sautTech1 ? '✅' : '○'} Élan</span>`,
+            `<span class="tech-chip ${s.sautTech2 ? 'tech-ok' : 'tech-no'}">${s.sautTech2 ? '✅' : '○'} Appel</span>`,
+        ].join('');
+        const lancerChips = [
+            `<span class="tech-chip ${s.lancerTech1 ? 'tech-ok' : 'tech-no'}">${s.lancerTech1 ? '✅' : '○'} Profil</span>`,
+            `<span class="tech-chip ${s.lancerTech2 ? 'tech-ok' : 'tech-no'}">${s.lancerTech2 ? '✅' : '○'} Prise</span>`,
+        ].join('');
+
+        return `<div class="eleve-card">
+            <div class="eleve-name">${e.sexe === 'F' ? '👧' : '🧑'} ${e.nomPrenom}</div>
+            <div style="font-size:0.78rem;font-weight:700;color:var(--purple);margin-bottom:4px;">🦘 Saut — ${e.techSaut}/2 critères <span style="font-size:0.7rem;color:#aaa">${s.sautDistance ? '· ' + s.sautDistance + ' m' : ''}</span></div>
+            <div class="tech-row">${sautChips}</div>
+            <div style="font-size:0.78rem;font-weight:700;color:var(--blue);margin:10px 0 4px;">🎯 Lancer — ${e.techLancer}/2 critères <span style="font-size:0.7rem;color:#aaa">${s.lancerDistance ? '· ' + s.lancerDistance + ' m' : ''}</span></div>
+            <div class="tech-row">${lancerChips}</div>
+        </div>`;
+    }).join('');
 }
 
-function exportBilan() {
-    let contenu = `BILAN L3 - DÉCOUVERTE & TECHNIQUE\n`;
-    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
-    
-    contenu += `RÉSUMÉ CLASSE:\n`;
-    contenu += `- Élèves évalués: ${bilanData.stats.totalEleves}\n`;
-    contenu += `- Objectif course atteint: ${bilanData.stats.moyenneObjectifAtteint}%\n`;
-    contenu += `- Moyenne technique saut: ${bilanData.stats.moyenneTechniqueSaut}/2\n`;
-    contenu += `- Moyenne technique lancer: ${bilanData.stats.moyenneTechniqueLancer}/2\n\n`;
-    
-    contenu += `DÉTAIL PAR ÉLÈVE:\n`;
-    bilanData.eleves.forEach(eleve => {
-        contenu += `\n${eleve.nom} (${eleve.age} ans):\n`;
-        if(eleve.course) {
-            contenu += `  Course: ${eleve.course.niveau} - Moyenne ${fmtSec(eleve.course.moyenne)}\n`;
-        }
-        contenu += `  Saut: ${eleve.saut.distance || '-'}m - ${eleve.saut.techniques}/2 techniques\n`;
-        contenu += `  Lancer: ${eleve.lancer.distance || '-'}m - ${eleve.lancer.techniques}/2 techniques\n`;
+function exportTXT() {
+    let txt = `BILAN L3 — DÉCOUVERTE ATHLÉTIQUE\nDate : ${new Date().toLocaleDateString('fr-FR')}\n\n`;
+    txt += `RÉSUMÉ CLASSE :\n`;
+    txt += `- Élèves avec données L3 : ${bilanData.totalEleves}\n`;
+    txt += `- Objectif ≥100% atteint : ${bilanData.stats.tauxObjectifAtteint}%\n`;
+    txt += `- Moy. technique saut : ${bilanData.stats.moyenneTechSaut}/2\n`;
+    txt += `- Moy. technique lancer : ${bilanData.stats.moyenneTechLancer}/2\n\n`;
+    txt += `NIVEAUX CHOISIS :\n`;
+    Object.entries(NIVEAUX).forEach(([id, n]) => {
+        txt += `- ${n.label} : ${bilanData.stats.niveauxRepartition[id]} élève(s)\n`;
     });
-
-    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
+    txt += `\nDÉTAIL ÉLÈVES :\n`;
+    bilanData.elevesAvecL3.forEach(e => {
+        const s = e.seanceL3;
+        txt += `\n${e.nomPrenom} (${e.age} ans, VMA ${e.vma} km/h)\n`;
+        txt += `  Niveau choisi : ${e.niv?.label || 'N/D'}\n`;
+        txt += `  Moy 200m : ${s.moyenne200m ? (Math.floor(s.moyenne200m/60)+':'+(Math.round(s.moyenne200m%60)).toString().padStart(2,'0')) : '-'}\n`;
+        if(e.pctVMAMoyen) txt += `  % VMA réel : ${e.pctVMAMoyen}%\n`;
+        txt += `  Tours valides : ${e.toursValides}/6\n`;
+        txt += `  Saut : ${e.techSaut}/2 critères${s.sautDistance ? ' — ' + s.sautDistance + 'm' : ''}\n`;
+        txt += `  Lancer : ${e.techLancer}/2 critères${s.lancerDistance ? ' — ' + s.lancerDistance + 'm' : ''}\n`;
+    });
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `bilan_L3_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.txt`;
+    a.href = URL.createObjectURL(blob);
+    a.download = `bilan_L3_${new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')}.txt`;
     a.click();
-    window.URL.revokeObjectURL(url);
+    URL.revokeObjectURL(a.href);
 }
+
+function exportXLSX() {
+    const wb = XLSX.utils.book_new();
+
+    // Feuille résumé
+    const resume = [
+        ['BILAN L3 — DÉCOUVERTE ATHLÉTIQUE', ''],
+        ['Date', new Date().toLocaleDateString('fr-FR')],
+        ['', ''],
+        ['Élèves avec données L3', bilanData.totalEleves],
+        ['Objectif ≥100% atteint (%)', bilanData.stats.tauxObjectifAtteint],
+        ['Moy. technique saut /2', bilanData.stats.moyenneTechSaut],
+        ['Moy. technique lancer /2', bilanData.stats.moyenneTechLancer],
+        ['', ''],
+        ['NIVEAUX', 'Nb élèves'],
+        ...Object.entries(NIVEAUX).map(([id, n]) => [n.label, bilanData.stats.niveauxRepartition[id]]),
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resume), 'Résumé');
+
+    // Feuille détail
+    const header = ['Élève', 'Sexe', 'Âge', 'VMA (km/h)', 'Niveau choisi', '% VMA', 'Moy 200m (s)', 'Tours valides /6', 'Tech saut /2', 'Saut distance (m)', 'Tech lancer /2', 'Lancer distance (m)', 'Objectif atteint'];
+    const rows = bilanData.elevesAvecL3.map(e => {
+        const s = e.seanceL3;
+        return [
+            e.nomPrenom,
+            e.sexe === 'F' ? 'Fille' : 'Garçon',
+            e.age,
+            e.vma || '',
+            e.niv?.label || '',
+            e.pctVMAMoyen ? e.pctVMAMoyen + '%' : '',
+            s.moyenne200m ? Math.round(s.moyenne200m) : '',
+            e.toursValides,
+            e.techSaut,
+            s.sautDistance || '',
+            e.techLancer,
+            s.lancerDistance || '',
+            e.objAtteint ? 'Oui' : 'Non',
+        ];
+    });
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    ws['!cols'] = header.map(() => ({ wch: 18 }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Détail élèves');
+
+    XLSX.writeFile(wb, `bilan_L3_${new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')}.xlsx`);
+}
+
+function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const d = bilanData;
+    const date = new Date().toLocaleDateString('fr-FR');
+    const W = doc.internal.pageSize.getWidth();
+
+    // Header band
+    doc.setFillColor(139, 92, 246);
+    doc.rect(0, 0, W, 22, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(16); doc.setFont(undefined,'bold');
+    doc.text('EPS : Épreuve Combinée', 14, 10);
+    doc.setFontSize(11); doc.setFont(undefined,'normal');
+    doc.text('BILAN L3 — DÉCOUVERTE ATHLÉTIQUE', 14, 17);
+    doc.setFontSize(9);
+    doc.text(`Date : ${date}`, W - 14, 17, { align: 'right' });
+
+    // Stats boxes
+    doc.setTextColor(30,30,30);
+    const stats = [
+        ['Élèves évalués', d.totalEleves],
+        ['Objectif ≥100% atteint', d.stats.tauxObjectifAtteint + '%'],
+        ['Moy. technique saut', d.stats.moyenneTechSaut + '/2'],
+        ['Moy. technique lancer', d.stats.moyenneTechLancer + '/2'],
+    ];
+    const bw = (W - 28) / stats.length;
+    stats.forEach(([lbl, val], i) => {
+        const x = 14 + i * bw;
+        doc.setFillColor(245, 245, 250);
+        doc.roundedRect(x, 26, bw - 4, 18, 2, 2, 'F');
+        doc.setFontSize(16); doc.setFont(undefined,'bold');
+        doc.setTextColor(139, 92, 246);
+        doc.text(String(val), x + (bw-4)/2, 37, { align: 'center' });
+        doc.setFontSize(7.5); doc.setFont(undefined,'normal');
+        doc.setTextColor(100,100,100);
+        doc.text(lbl, x + (bw-4)/2, 42, { align: 'center' });
+    });
+
+    // Niveau distribution
+    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
+    doc.text('Répartition des niveaux', 14, 56);
+    const niveaux = [
+        ['95% VMA', d.stats.niveauxRepartition.vma95],
+        ['100% VMA', d.stats.niveauxRepartition.vma100],
+        ['105% VMA', d.stats.niveauxRepartition.vma105],
+        ['110% VMA', d.stats.niveauxRepartition.vma110],
+    ];
+    const barY = 60; const barH = 6; const barMaxW = 80;
+    const colors = [[147,197,253],[134,239,172],[253,186,116],[252,165,165]];
+    niveaux.forEach(([lbl, count], i) => {
+        const y = barY + i * 10;
+        const pct = d.totalEleves > 0 ? count / d.totalEleves : 0;
+        doc.setFillColor(230,230,240);
+        doc.rect(50, y, barMaxW, barH, 'F');
+        doc.setFillColor(...colors[i]);
+        doc.rect(50, y, barMaxW * pct, barH, 'F');
+        doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
+        doc.text(lbl, 14, y + 4.5);
+        doc.text(String(count) + ' élève' + (count > 1 ? 's' : ''), 50 + barMaxW + 3, y + 4.5);
+    });
+
+    // Table
+    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
+    doc.text('Détail par élève', 14, 106);
+
+    const headers = [['Élève', 'Niveau', '% VMA', 'Moy 200m', 'Tours', 'Saut/2', 'Dist. saut', 'Lancer/2', 'Dist. lancer', 'Objectif']];
+    const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=Math.round(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; };
+    const rows = d.elevesAvecL3.map(e => [
+        e.nomPrenom,
+        e.niv?.label || '-',
+        e.pctVMAMoyen ? e.pctVMAMoyen + '%' : '-',
+        fmtS(e.seanceL3.moyenne200m),
+        e.toursValides + '/6',
+        e.techSaut + '/2',
+        e.seanceL3.sautDistance ? e.seanceL3.sautDistance + 'm' : '-',
+        e.techLancer + '/2',
+        e.seanceL3.lancerDistance ? e.seanceL3.lancerDistance + 'm' : '-',
+        e.objAtteint ? '✓' : '✗',
+    ]);
+
+    doc.autoTable({
+        startY: 110,
+        head: headers,
+        body: rows,
+        styles: { fontSize: 7.5, cellPadding: 2 },
+        headStyles: { fillColor: [139, 92, 246], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 248, 255] },
+        columnStyles: { 0: { cellWidth: 32 }, 9: { halign: 'center' } },
+        margin: { left: 14, right: 14 },
+    });
+
+    // Footer
+    const pages = doc.internal.getNumberOfPages();
+    for(let p = 1; p <= pages; p++) {
+        doc.setPage(p);
+        doc.setFontSize(7); doc.setTextColor(160,160,160); doc.setFont(undefined,'normal');
+        doc.text(`EPS Épreuve Combinée · Bilan L3 · ${date} · Page ${p}/${pages}`, W/2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
+    }
+
+    doc.save(`bilan_L3_${date.replace(/\//g,'-')}.pdf`);
+}
+
 </script>
 </body>
 </html>

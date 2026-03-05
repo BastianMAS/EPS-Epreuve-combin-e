@@ -317,6 +317,8 @@
             .setup-grid, .results-grid { grid-template-columns: 1fr; }
         }
     </style>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -739,6 +741,8 @@ function saveResults() {
     });
     
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    // Sync Firebase en arrière-plan
+    if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
     alert(`🏆 Sauvé pour ${currentTeam.length} élèves !`);
 }
 </script>

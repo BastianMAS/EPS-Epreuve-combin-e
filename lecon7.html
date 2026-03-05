@@ -264,6 +264,8 @@
             pointer-events: none;
         }
     </style>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -877,6 +879,8 @@ function saveAll() {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    // Sync Firebase en arrière-plan
+    if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
     alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
 }
 </script>

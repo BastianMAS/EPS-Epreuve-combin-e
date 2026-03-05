@@ -553,6 +553,8 @@
             .subtitle { font-size: 1rem; }
         }
     </style>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -1308,6 +1310,8 @@ function saveAll() {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    // Sync Firebase en arrière-plan
+    if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
     alert(`🔧 Données L4 techniques sauvegardées pour ${count} élève(s) !`);
 }
 

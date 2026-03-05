@@ -284,6 +284,8 @@
             .team-header { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
     </style>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -299,6 +301,7 @@
         📊 Exporter le bilan olympique
     </button>
     <button class="export-btn" onclick="exportXLSX()" style="background:var(--success);color:black;margin-top:8px;">📥 Exporter .XLSX</button>
+    <button class="export-btn" onclick="exportPDF()" style="background:#8b5cf6;color:white;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:0.85rem;cursor:pointer;">📑 Exporter .PDF</button>
 </div>
 
 <script>

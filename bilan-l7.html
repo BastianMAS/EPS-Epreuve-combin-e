@@ -205,16 +205,27 @@ function analyzerL7(eleves) {
             
             if(temps.length === 3) {
                 const vma = parseFloat(eleve.vma);
-                const vitesseMoyenne = 400 / (temps.reduce((a,b) => a+b, 0) / 3);
-                pourcentageVMAMoyen = Math.round((vitesseMoyenne / (vma / 3.6)) * 100);
+                const tempsMoyen = temps.reduce((a,b) => a+b, 0) / 3;
+                const vitesseMoyenne = 400 / tempsMoyen; // m/s
+                const vitesseVMA = vma / 3.6; // VMA en m/s
+                pourcentageVMAMoyen = Math.round((vitesseMoyenne / vitesseVMA) * 100);
                 
-                // Analyse évolution strategy
-                const pct1 = Math.round((400 / temps[0]) / (vma / 3.6) * 100);
-                const pct3 = Math.round((400 / temps[2]) / (vma / 3.6) * 100);
+                // Vérification sécurité - si aberrant, on ignore
+                if(pourcentageVMAMoyen > 200 || pourcentageVMAMoyen < 50) {
+                    pourcentageVMAMoyen = null;
+                }
                 
-                if(pct3 > pct1 + 3) evolutionStrategy = "Progression positive";
-                else if(pct3 < pct1 - 5) evolutionStrategy = "Dégradation";
-                else evolutionStrategy = "Régulier";
+                if(pourcentageVMAMoyen) {
+                    // Analyse évolution strategy
+                    const temps1 = temps[0];
+                    const temps3 = temps[2];
+                    const pct1 = Math.round((400 / temps1) / vitesseVMA * 100);
+                    const pct3 = Math.round((400 / temps3) / vitesseVMA * 100);
+                    
+                    if(pct3 > pct1 + 3) evolutionStrategy = "Progression positive";
+                    else if(pct3 < pct1 - 5) evolutionStrategy = "Dégradation";
+                    else evolutionStrategy = "Régulier";
+                }
             }
         }
         

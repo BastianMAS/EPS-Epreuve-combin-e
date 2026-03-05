@@ -352,17 +352,25 @@ function generateSummary(eleve) {
         
         if(temps.length === 3) {
             const vma = parseFloat(eleve.vma);
-            const vitesseMoyenne = 400 / (temps.reduce((a,b) => a+b, 0) / 3);
-            const pctVMA = Math.round((vitesseMoyenne / (vma / 3.6)) * 100);
-            summary += `3×400m L7 à ${pctVMA}% VMA. `;
+            const tempsMoyen = temps.reduce((a,b) => a+b, 0) / 3;
+            const vitesseMoyenne = 400 / tempsMoyen; // m/s
+            const vitesseVMA = vma / 3.6; // VMA en m/s  
+            const pctVMA = Math.round((vitesseMoyenne / vitesseVMA) * 100);
             
-            // Évolution stratégique
-            const pct1 = Math.round((400 / temps[0]) / (vma / 3.6) * 100);
-            const pct3 = Math.round((400 / temps[2]) / (vma / 3.6) * 100);
-            
-            if(pct3 > pct1 + 3) summary += 'Progression positive. ';
-            else if(pct3 < pct1 - 5) summary += 'Dégradation en cours. ';
-            else summary += 'Stratégie régulière. ';
+            // Vérification sécurité
+            if(pctVMA >= 50 && pctVMA <= 200) {
+                summary += `3×400m L7 à ${pctVMA}% VMA. `;
+                
+                // Évolution stratégique
+                const temps1 = temps[0];
+                const temps3 = temps[2];
+                const pct1 = Math.round((400 / temps1) / vitesseVMA * 100);
+                const pct3 = Math.round((400 / temps3) / vitesseVMA * 100);
+                
+                if(pct3 > pct1 + 3) summary += 'Progression positive. ';
+                else if(pct3 < pct1 - 5) summary += 'Dégradation en cours. ';
+                else summary += 'Stratégie régulière. ';
+            }
         }
     }
     

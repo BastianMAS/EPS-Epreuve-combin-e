@@ -354,7 +354,8 @@ function generateBilan() {
             nom: eleve.nomPrenom,
             distanceIndividuelle: seanceL5.distanceTotaleIndividuelle || 0,
             distanceMoyenne: seanceL5.distanceMoyenneIndividuelle || 0,
-            detailManches: seanceL5.detailManches || []
+            detailManches: seanceL5.detailManches || [],
+            vma: parseFloat(eleve.vma) || null
         });
         
         equipes[equipeNom].distanceTotale = seanceL5.distanceTotaleEquipe || 0;
@@ -528,8 +529,8 @@ function renderEquipesDetails() {
                             // Calcul % VMA individuel (estimation)
                             const tempsTotal = equipe.manches * 6; // 6min par manche
                             const vitesseReelle = (distanceTotale / 1000) / (tempsTotal / 60); // km/h
-                            const vmaEstimee = 12; // Valeur par défaut, idéalement récupérer vraie VMA
-                            const pourcentVMA = Math.round((vitesseReelle / vmaEstimee) * 100);
+                            const vmaEstimee = membre.vma || 12; // VMA réelle de l'élève
+                            const pourcentVMA = vmaEstimee ? Math.round((vitesseReelle / vmaEstimee) * 100) : null;
                             
                             // Objectif individuel (1/4 à 1/6 de l'objectif équipe selon taille)
                             const objectifIndividuel = Math.round(equipe.objectif / equipe.membres.length);
@@ -548,7 +549,7 @@ function renderEquipesDetails() {
                                 <div style="font-size: 0.85rem; padding: 8px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
                                     <div style="font-weight: 700; color: var(--olympic-blue); margin-bottom: 6px;">${membre.nom}</div>
                                     <div><strong>Distance:</strong> ${membre.distanceIndividuelle}m</div>
-                                    <div><strong>% VMA:</strong> ~${pourcentVMA}%</div>
+                                    <div><strong>% VMA:</strong> ${pourcentVMA ? `~${pourcentVMA}%` : 'VMA non renseignée'}</div>
                                     <div><strong>Objectif:</strong> ${objectifAtteint ? '✅ Atteint' : '⏳ En cours'} (${objectifIndividuel}m)</div>
                                     <div><strong>Régularité:</strong> ${regularite}</div>
                                     <div style="margin-top: 4px; padding: 4px; background: rgba(0,166,81,0.1); border-radius: 4px; font-size: 0.8rem;">
@@ -601,9 +602,10 @@ function exportBilan() {
             const contributionPct = Math.round((membre.distanceIndividuelle/equipe.distanceTotale)*100);
             const tempsTotal = equipe.manches * 6;
             const vitesseReelle = (membre.distanceIndividuelle / 1000) / (tempsTotal / 60);
-            const pourcentVMA = Math.round((vitesseReelle / 12) * 100); // VMA estimée 12 km/h
+            const vmaIndiv = membre.vma || null;
+            const pourcentVMA = vmaIndiv ? Math.round((vitesseReelle / vmaIndiv) * 100) : null; // VMA réelle de l'élève
             
-            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (~${pourcentVMA}% VMA)\n`;
+            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (${pourcentVMA ? `~${pourcentVMA}% VMA` : 'VMA non renseignée'})\n`;
             contenu += `      Objectif individuel: ${objectifIndiv}m (${membre.distanceIndividuelle >= objectifIndiv*0.9 ? 'Atteint' : 'En cours'})\n`;
             contenu += `      Contribution équipe: ${contributionPct}%\n`;
         });

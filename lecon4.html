@@ -949,6 +949,10 @@ function selectProgression(i, progressionId) {
         nouveauPourcent = perfL3.niveauData.pourcent + progression.delta;
     }
 
+    // 🔒 SÉCURITÉ PHYSIOLOGIQUE : plafond 120% VMA pour élèves 6ème (6×200m)
+    const cappedAt120 = nouveauPourcent > 120;
+    if(cappedAt120) nouveauPourcent = 120;
+
     const vma = parseFloat(cardState[i].student.vma);
     const vitesseCible = vma * (nouveauPourcent / 100);
     const tempsCible200m = (0.2 / vitesseCible) * 3600;
@@ -956,6 +960,7 @@ function selectProgression(i, progressionId) {
     // Afficher objectif
     document.getElementById(`objectif-${i}`).innerHTML = `
         🔧 <strong>OBJECTIF L4 :</strong> ${nouveauPourcent}% VMA - ${progression.desc}
+        ${cappedAt120 ? `<div style="color:#ffcc00;font-size:0.75rem;margin-top:4px">⚠️ Intensité plafonnée à 120% VMA (limite physiologique 6ème)</div>` : ''}
     `;
     document.getElementById(`objectif-${i}`).style.display = 'block';
     
@@ -1007,6 +1012,9 @@ function updateTours(i) {
     } else {
         nouveauPourcent = perfL3.niveauData.pourcent + progression.delta;
     }
+
+    // 🔒 Plafond physiologique 120% VMA
+    if(nouveauPourcent > 120) nouveauPourcent = 120;
 
     const vma = parseFloat(cardData.student.vma);
     const vitesseCible = vma * (nouveauPourcent / 100);

@@ -155,7 +155,7 @@ let bilanData = {
     elevesAvecL7: [],
     stats: {
         totalEleves: 0,
-        vmaMovennne: 0,
+        vmaMoyenne: 0,
         confiantsL8: 0,
         strategiesTrouvees: 0
     }
@@ -261,10 +261,10 @@ function analyzerL7(eleves) {
     
     // VMA moyenne de classe
     const elevesAvecVMA = bilanData.elevesAvecL7.filter(e => e.pctVMAMoyen);
-    bilanData.stats.vmaMovennne = elevesAvecVMA.length > 0 ? 
+    bilanData.stats.vmaMoyenne = elevesAvecVMA.length > 0 ? 
         Math.round(elevesAvecVMA.reduce((acc, e) => acc + e.pctVMAMoyen, 0) / elevesAvecVMA.length) : 0;
     
-    console.log(`Stats finales: ${bilanData.stats.totalEleves} élèves, VMA moy: ${bilanData.stats.vmaMovennne}%`);
+    console.log(`Stats finales: ${bilanData.stats.totalEleves} élèves, VMA moy: ${bilanData.stats.vmaMoyenne}%`);
 }
 
 // Fonction conversion intelligente pour analyses
@@ -505,7 +505,7 @@ function renderStats() {
             <div class="stat-label">Élèves évalués</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">${bilanData.stats.vmaMovennne}%</div>
+            <div class="stat-value">${bilanData.stats.vmaMoyenne}%</div>
             <div class="stat-label">% VMA moyen classe</div>
         </div>
         <div class="stat-card">

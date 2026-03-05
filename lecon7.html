@@ -443,26 +443,44 @@ function createCard(i) {
                         
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Travail autonome saut/lancer (15min chacun) :</div>
-                            <div style="display: flex; gap: 12px; margin: 8px 0;">
-                                <div style="flex: 1;">
-                                    <label style="font-size: 0.8rem;">🦘 Focus saut :</label>
-                                    <select id="focus-saut-${i}" style="width: 100%; padding: 4px; font-size: 0.8rem; background: var(--card); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
-                                        <option value="">Choisir</option>
-                                        <option value="course-elan">Course d'élan</option>
-                                        <option value="precision-appel">Précision appel</option>
-                                        <option value="reception">Réception</option>
-                                        <option value="distance">Distance max</option>
-                                    </select>
+                            
+                            <div style="margin-bottom: 12px;">
+                                <div style="font-weight: 600; color: var(--warning); margin-bottom: 6px;">🦘 SAUT - J'ai travaillé sur :</div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="saut-course-elan-${i}">
+                                    <label>Course d'élan régulière</label>
                                 </div>
-                                <div style="flex: 1;">
-                                    <label style="font-size: 0.8rem;">🎯 Focus lancer :</label>
-                                    <select id="focus-lancer-${i}" style="width: 100%; padding: 4px; font-size: 0.8rem; background: var(--card); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;">
-                                        <option value="">Choisir</option>
-                                        <option value="coordination">Coordination globale</option>
-                                        <option value="transfert-poids">Transfert de poids</option>
-                                        <option value="accompagnement">Accompagnement</option>
-                                        <option value="regularite">Régularité</option>
-                                    </select>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="saut-precision-${i}">
+                                    <label>Précision de l'appel</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="saut-reception-${i}">
+                                    <label>Amélioration réception</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="saut-distance-${i}">
+                                    <label>Recherche distance max</label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div style="font-weight: 600; color: var(--warning); margin-bottom: 6px;">🎯 LANCER - J'ai travaillé sur :</div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="lancer-coordination-${i}">
+                                    <label>Coordination globale</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="lancer-transfert-${i}">
+                                    <label>Transfert de poids</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="lancer-accompagnement-${i}">
+                                    <label>Accompagnement du geste</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="lancer-regularite-${i}">
+                                    <label>Régularité des lancers</label>
                                 </div>
                             </div>
                         </div>
@@ -634,8 +652,16 @@ function saveAll() {
             projetReussi: document.getElementById(`projet-reussi-${i}`)?.checked || false,
             confiantL8: document.getElementById(`confiant-l8-${i}`)?.checked || false,
             strategieTrouvee: document.getElementById(`strategie-trouvee-${i}`)?.checked || false,
-            focusSaut: document.getElementById(`focus-saut-${i}`)?.value || null,
-            focusLancer: document.getElementById(`focus-lancer-${i}`)?.value || null,
+            // Travail autonome saut
+            sautCourseElan: document.getElementById(`saut-course-elan-${i}`)?.checked || false,
+            sautPrecision: document.getElementById(`saut-precision-${i}`)?.checked || false,
+            sautReception: document.getElementById(`saut-reception-${i}`)?.checked || false,
+            sautDistance: document.getElementById(`saut-distance-${i}`)?.checked || false,
+            // Travail autonome lancer
+            lancerCoordination: document.getElementById(`lancer-coordination-${i}`)?.checked || false,
+            lancerTransfert: document.getElementById(`lancer-transfert-${i}`)?.checked || false,
+            lancerAccompagnement: document.getElementById(`lancer-accompagnement-${i}`)?.checked || false,
+            lancerRegularite: document.getElementById(`lancer-regularite-${i}`)?.checked || false,
             date: new Date().toISOString()
         };
 

@@ -78,7 +78,7 @@
         
         .eleves-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 16px;
             margin-bottom: 30px;
         }
@@ -114,17 +114,6 @@
             border-radius: 6px;
             font-size: 0.9rem;
         }
-        
-        .choix-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-        
-        .choix-prudent { background: rgba(75,222,128,0.3); color: var(--success); }
-        .choix-regulier { background: rgba(251,191,36,0.3); color: var(--warning); }
-        .choix-ambitieux { background: rgba(255,107,53,0.3); color: var(--accent); }
         
         .btn-back {
             position: fixed;
@@ -166,9 +155,9 @@ let bilanData = {
     elevesAvecL7: [],
     stats: {
         totalEleves: 0,
+        vmaMovennne: 0,
         confiantsL8: 0,
-        strategiesTrouvees: 0,
-        projetsReussis: 0
+        strategiesTrouvees: 0
     }
 };
 
@@ -186,85 +175,108 @@ window.onload = function() {
 };
 
 function analyzerL7(eleves) {
+    console.log('=== ANALYSE L7 DEBUG ===');
     bilanData.elevesAvecL7 = [];
     
     eleves.forEach(eleve => {
         const seanceL7 = eleve.seances?.find(s => s.lecon === 'L7');
         if(!seanceL7) return;
         
-        // Calcul % VMA moyen sur 3×400m
-        let pourcentageVMAMoyen = null;
-        let evolutionStrategy = null;
+        console.log(`Élève: ${eleve.nomPrenom}, VMA: ${eleve.vma}`);
+        console.log(`Temps: ${seanceL7.temps1}, ${seanceL7.temps2}, ${seanceL7.temps3}`);
+        
+        // Calcul % VMA SIMPLE ET DIRECT
+        let pctVMA1 = null, pctVMA2 = null, pctVMA3 = null, pctVMAMoyen = null;
         
         if(seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
-            const temps = [
-                parseTemps(seanceL7.temps1),
-                parseTemps(seanceL7.temps2), 
-                parseTemps(seanceL7.temps3)
-            ].filter(t => t !== null);
+            const vmaKmh = parseFloat(eleve.vma);
+            const vmaMs = vmaKmh / 3.6; // Conversion m/s
             
-            if(temps.length === 3) {
-                const vma = parseFloat(eleve.vma);
-                const tempsMoyen = temps.reduce((a,b) => a+b, 0) / 3;
-                const vitesseMoyenne = 400 / tempsMoyen; // m/s
-                const vitesseVMA = vma / 3.6; // VMA en m/s
-                pourcentageVMAMoyen = Math.round((vitesseMoyenne / vitesseVMA) * 100);
+            // Conversion temps en secondes
+            const t1 = convertTemps(seanceL7.temps1);
+            const t2 = convertTemps(seanceL7.temps2);
+            const t3 = convertTemps(seanceL7.temps3);
+            
+            console.log(`VMA: ${vmaKmh} km/h = ${vmaMs.toFixed(2)} m/s`);
+            console.log(`Temps convertis: ${t1}s, ${t2}s, ${t3}s`);
+            
+            if(t1 > 0 && t2 > 0 && t3 > 0) {
+                // Vitesse = distance / temps
+                const v1 = 400 / t1;
+                const v2 = 400 / t2;
+                const v3 = 400 / t3;
                 
-                // Vérification sécurité - si aberrant, on ignore
-                if(pourcentageVMAMoyen > 200 || pourcentageVMAMoyen < 50) {
-                    pourcentageVMAMoyen = null;
-                }
+                // % VMA = (vitesse course / VMA) × 100
+                pctVMA1 = Math.round((v1 / vmaMs) * 100);
+                pctVMA2 = Math.round((v2 / vmaMs) * 100);
+                pctVMA3 = Math.round((v3 / vmaMs) * 100);
                 
-                if(pourcentageVMAMoyen) {
-                    // Analyse évolution strategy
-                    const temps1 = temps[0];
-                    const temps3 = temps[2];
-                    const pct1 = Math.round((400 / temps1) / vitesseVMA * 100);
-                    const pct3 = Math.round((400 / temps3) / vitesseVMA * 100);
-                    
-                    if(pct3 > pct1 + 3) evolutionStrategy = "Progression positive";
-                    else if(pct3 < pct1 - 5) evolutionStrategy = "Dégradation";
-                    else evolutionStrategy = "Régulier";
-                }
+                pctVMAMoyen = Math.round((pctVMA1 + pctVMA2 + pctVMA3) / 3);
+                
+                console.log(`Vitesses: ${v1.toFixed(2)}, ${v2.toFixed(2)}, ${v3.toFixed(2)} m/s`);
+                console.log(`% VMA: ${pctVMA1}%, ${pctVMA2}%, ${pctVMA3}% → Moyenne: ${pctVMAMoyen}%`);
             }
         }
+        
+        // Analyse travail autonome
+        const travailSaut = [];
+        const travailLancer = [];
+        
+        if(seanceL7.sautCourseElan) travailSaut.push("Course d'élan");
+        if(seanceL7.sautPrecision) travailSaut.push("Précision");
+        if(seanceL7.sautReception) travailSaut.push("Réception");
+        if(seanceL7.sautDistance) travailSaut.push("Distance");
+        
+        if(seanceL7.lancerCoordination) travailLancer.push("Coordination");
+        if(seanceL7.lancerTransfert) travailLancer.push("Transfert");
+        if(seanceL7.lancerAccompagnement) travailLancer.push("Accompagnement");
+        if(seanceL7.lancerRegularite) travailLancer.push("Régularité");
         
         const eleveData = {
             id: eleve.id,
             nomPrenom: eleve.nomPrenom,
             sexe: eleve.sexe,
-            age: eleve.age,
             vma: eleve.vma,
             seanceL7: seanceL7,
-            pourcentageVMAMoyen: pourcentageVMAMoyen,
-            evolutionStrategy: evolutionStrategy
+            pctVMA1: pctVMA1,
+            pctVMA2: pctVMA2,
+            pctVMA3: pctVMA3,
+            pctVMAMoyen: pctVMAMoyen,
+            travailSaut: travailSaut,
+            travailLancer: travailLancer
         };
         
         bilanData.elevesAvecL7.push(eleveData);
     });
     
+    // Stats globales
     bilanData.stats.totalEleves = bilanData.elevesAvecL7.length;
     bilanData.stats.confiantsL8 = bilanData.elevesAvecL7.filter(e => e.seanceL7.confiantL8).length;
     bilanData.stats.strategiesTrouvees = bilanData.elevesAvecL7.filter(e => e.seanceL7.strategieTrouvee).length;
-    bilanData.stats.projetsReussis = bilanData.elevesAvecL7.filter(e => e.seanceL7.projetReussi).length;
-    bilanData.stats.vmaMovennne = Math.round(bilanData.elevesAvecL7
-        .filter(e => e.pourcentageVMAMoyen)
-        .reduce((acc, e) => acc + e.pourcentageVMAMoyen, 0) / 
-        bilanData.elevesAvecL7.filter(e => e.pourcentageVMAMoyen).length) || 0;
+    
+    // VMA moyenne de classe
+    const elevesAvecVMA = bilanData.elevesAvecL7.filter(e => e.pctVMAMoyen);
+    bilanData.stats.vmaMovennne = elevesAvecVMA.length > 0 ? 
+        Math.round(elevesAvecVMA.reduce((acc, e) => acc + e.pctVMAMoyen, 0) / elevesAvecVMA.length) : 0;
+    
+    console.log(`Stats finales: ${bilanData.stats.totalEleves} élèves, VMA moy: ${bilanData.stats.vmaMovennne}%`);
 }
 
-function parseTemps(tempsStr) {
-    if(!tempsStr || tempsStr.trim() === '') return null;
+function convertTemps(tempsStr) {
+    if(!tempsStr) return 0;
     
-    const parts = tempsStr.trim().replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
-    if(parts) {
-        return parseInt(parts[1]) * 60 + parseInt(parts[2]) + parseInt(parts[3]) / 10;
+    // Format mm:ss.d
+    const match = tempsStr.replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
+    if(match) {
+        const min = parseInt(match[1]);
+        const sec = parseInt(match[2]);
+        const dixieme = parseInt(match[3]);
+        return min * 60 + sec + dixieme / 10;
     }
     
-    const secondsOnly = parseFloat(tempsStr);
-    if(!isNaN(secondsOnly)) return secondsOnly;
-    
-    return null;
+    // Format secondes
+    const sec = parseFloat(tempsStr.replace(',', '.'));
+    return isNaN(sec) ? 0 : sec;
 }
 
 function renderStats() {
@@ -284,7 +296,7 @@ function renderStats() {
         </div>
         <div class="stat-card">
             <div class="stat-value">${bilanData.stats.vmaMovennne}%</div>
-            <div class="stat-label">% VMA moyen 3×400m</div>
+            <div class="stat-label">% VMA moyen classe</div>
         </div>
         <div class="stat-card">
             <div class="stat-value">${bilanData.stats.confiantsL8}</div>
@@ -315,37 +327,44 @@ function renderEleves() {
                 <div class="eleve-header">
                     <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
                     <span>${eleve.nomPrenom}</span>
+                    <span style="margin-left: auto; font-size: 0.8rem;">VMA ${eleve.vma || 'N/A'} km/h</span>
                 </div>
                 <div class="eleve-body">
                     <div class="performance-row">
                         <span>🏃‍♂️ 400m #1</span>
-                        <span>${seance.temps1 || 'N/A'}</span>
+                        <span>${seance.temps1 || 'N/A'} ${eleve.pctVMA1 ? `(${eleve.pctVMA1}% VMA)` : ''}</span>
                     </div>
                     <div class="performance-row">
                         <span>🏃‍♂️ 400m #2</span>
-                        <span>${seance.temps2 || 'N/A'}</span>
+                        <span>${seance.temps2 || 'N/A'} ${eleve.pctVMA2 ? `(${eleve.pctVMA2}% VMA)` : ''}</span>
                     </div>
                     <div class="performance-row">
                         <span>🏃‍♂️ 400m #3</span>
-                        <span>${seance.temps3 || 'N/A'}</span>
+                        <span>${seance.temps3 || 'N/A'} ${eleve.pctVMA3 ? `(${eleve.pctVMA3}% VMA)` : ''}</span>
                     </div>
-                    ${eleve.pourcentageVMAMoyen ? `
-                    <div class="performance-row" style="background: rgba(0,217,255,0.1); font-weight: 600;">
-                        <span>📊 % VMA moyen</span>
-                        <span style="color: var(--accent);">${eleve.pourcentageVMAMoyen}%</span>
+                    ${eleve.pctVMAMoyen ? `
+                    <div class="performance-row" style="background: linear-gradient(45deg, rgba(255,107,53,0.2), rgba(255,136,0,0.2)); font-weight: 700; border: 2px solid rgba(255,107,53,0.5);">
+                        <span>📊 MOYENNE VMA</span>
+                        <span style="color: var(--accent); font-size: 1.2rem; font-weight: 900;">${eleve.pctVMAMoyen}%</span>
                     </div>
                     ` : ''}
-                    ${eleve.evolutionStrategy ? `
+                    ${eleve.travailSaut.length > 0 ? `
                     <div class="performance-row">
-                        <span>📈 Évolution</span>
-                        <span>${eleve.evolutionStrategy}</span>
+                        <span>🦘 Saut travaillé</span>
+                        <span style="font-size: 0.8rem;">${eleve.travailSaut.join(', ')}</span>
+                    </div>
+                    ` : ''}
+                    ${eleve.travailLancer.length > 0 ? `
+                    <div class="performance-row">
+                        <span>🎯 Lancer travaillé</span>
+                        <span style="font-size: 0.8rem;">${eleve.travailLancer.join(', ')}</span>
                     </div>
                     ` : ''}
                     <div style="margin-top: 12px; padding: 8px; background: rgba(75,222,128,0.1); border-radius: 6px; font-size: 0.85rem;">
                         ${seance.projetReussi ? '✅ Projet réussi<br>' : ''}
                         ${seance.confiantL8 ? '💪 Confiant pour L8<br>' : ''}
                         ${seance.strategieTrouvee ? '🎯 Stratégie trouvée<br>' : ''}
-                        ${!seance.projetReussi && !seance.confiantL8 && !seance.strategieTrouvee ? '<em>Aucun ressenti</em>' : ''}
+                        ${!seance.projetReussi && !seance.confiantL8 && !seance.strategieTrouvee ? '<em>Aucun ressenti sélectionné</em>' : ''}
                     </div>
                 </div>
             </div>

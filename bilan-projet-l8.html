@@ -338,64 +338,69 @@ function renderEleves() {
 function generateSummary(eleve) {
     const seances = eleve.seances || [];
     const seanceL7 = seances.find(s => s.lecon === 'L7');
-    const seanceL6 = seances.find(s => s.lecon === 'L6');
     
     let summary = '';
     
-    // Analyse L7 (priorité absolue)
+    // VMA en premier
+    if(eleve.vma) {
+        summary += `VMA ${eleve.vma} km/h. `;
+    }
+    
+    // Performance L7 (PRIORITÉ)
     if(seanceL7 && seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
-        const temps = [
-            parseTemps(seanceL7.temps1),
-            parseTemps(seanceL7.temps2),
-            parseTemps(seanceL7.temps3)
-        ].filter(t => t !== null);
+        const vmaMs = parseFloat(eleve.vma) / 3.6;
         
-        if(temps.length === 3) {
-            const vma = parseFloat(eleve.vma);
-            const tempsMoyen = temps.reduce((a,b) => a+b, 0) / 3;
-            const vitesseMoyenne = 400 / tempsMoyen; // m/s
-            const vitesseVMA = vma / 3.6; // VMA en m/s  
-            const pctVMA = Math.round((vitesseMoyenne / vitesseVMA) * 100);
+        const t1 = convertTemps(seanceL7.temps1);
+        const t2 = convertTemps(seanceL7.temps2);
+        const t3 = convertTemps(seanceL7.temps3);
+        
+        if(t1 > 0 && t2 > 0 && t3 > 0) {
+            const pct1 = Math.round(((400/t1) / vmaMs) * 100);
+            const pct2 = Math.round(((400/t2) / vmaMs) * 100);
+            const pct3 = Math.round(((400/t3) / vmaMs) * 100);
+            const pctMoy = Math.round((pct1 + pct2 + pct3) / 3);
             
-            // Vérification sécurité
-            if(pctVMA >= 50 && pctVMA <= 200) {
-                summary += `3×400m L7 à ${pctVMA}% VMA. `;
-                
-                // Évolution stratégique
-                const temps1 = temps[0];
-                const temps3 = temps[2];
-                const pct1 = Math.round((400 / temps1) / vitesseVMA * 100);
-                const pct3 = Math.round((400 / temps3) / vitesseVMA * 100);
-                
-                if(pct3 > pct1 + 3) summary += 'Progression positive. ';
-                else if(pct3 < pct1 - 5) summary += 'Dégradation en cours. ';
-                else summary += 'Stratégie régulière. ';
-            }
+            summary += `L7: ${pct1}%-${pct2}%-${pct3}% (moy ${pctMoy}%). `;
+            
+            // Évolution
+            if(pct3 > pct1 + 3) summary += 'Finit fort. ';
+            else if(pct3 < pct1 - 5) summary += 'Décroche. ';
+            else summary += 'Régulier. ';
         }
     }
     
-    // Confiance L7
-    if(seanceL7?.confiantL8) {
-        summary += 'Confiant pour L8. ';
-    } else if(seanceL7?.strategieTrouvee) {
-        summary += 'Stratégie trouvée. ';
+    // État mental L7
+    if(seanceL7?.confiantL8) summary += 'Confiant L8. ';
+    if(seanceL7?.strategieTrouvee) summary += 'Stratégie OK. ';
+    
+    // Travail L7
+    const travailSaut = [];
+    const travailLancer = [];
+    
+    if(seanceL7?.sautCourseElan) travailSaut.push("élan");
+    if(seanceL7?.sautPrecision) travailSaut.push("précision");
+    if(seanceL7?.sautReception) travailSaut.push("réception");
+    if(seanceL7?.sautDistance) travailSaut.push("distance");
+    
+    if(seanceL7?.lancerCoordination) travailLancer.push("coordination");
+    if(seanceL7?.lancerTransfert) travailLancer.push("transfert");
+    if(seanceL7?.lancerAccompagnement) travailLancer.push("accompagnement");
+    if(seanceL7?.lancerRegularite) travailLancer.push("régularité");
+    
+    if(travailSaut.length > 0) summary += `Saut: ${travailSaut.join(', ')}. `;
+    if(travailLancer.length > 0) summary += `Lancer: ${travailLancer.join(', ')}. `;
+    
+    return summary || 'Parcours en cours...';
+}
+
+function convertTemps(tempsStr) {
+    if(!tempsStr) return 0;
+    const match = tempsStr.replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
+    if(match) {
+        return parseInt(match[1]) * 60 + parseInt(match[2]) + parseInt(match[3]) / 10;
     }
-    
-    // Analyse technique (saut/lancer - progression L6/L7)
-    const sautL6 = seanceL6 ? [seanceL6.sautTech1, seanceL6.sautTech2, seanceL6.sautTech3, seanceL6.sautTech4, seanceL6.sautTech5].filter(Boolean).length : 0;
-    const lancerL6 = seanceL6 ? [seanceL6.lancerTech1, seanceL6.lancerTech2, seanceL6.lancerTech3, seanceL6.lancerTech4, seanceL6.lancerTech5].filter(Boolean).length : 0;
-    
-    if(sautL6 >= 4) summary += 'Saut maîtrisé. ';
-    else if(sautL6 >= 2) summary += 'Saut en progression. ';
-    
-    if(lancerL6 >= 4) summary += 'Lancer maîtrisé. ';
-    else if(lancerL6 >= 2) summary += 'Lancer en progression. ';
-    
-    // Focus autonome L7
-    if(seanceL7?.focusSaut) summary += `Focus saut: ${seanceL7.focusSaut}. `;
-    if(seanceL7?.focusLancer) summary += `Focus lancer: ${seanceL7.focusLancer}. `;
-    
-    return summary || 'Parcours en cours de construction...';
+    const sec = parseFloat(tempsStr.replace(',', '.'));
+    return isNaN(sec) ? 0 : sec;
 }
 
 function parseTemps(tempsStr) {

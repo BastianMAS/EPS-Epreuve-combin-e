@@ -140,10 +140,9 @@
         }
     </style>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -154,18 +153,13 @@
 
 <div class="stats-grid" id="stats-grid"></div>
 <div class="eleves-list" id="eleves-list"></div>
-<div style="text-align:center;margin:20px 0;">
-    <button id="exportBtn" onclick="exportBilan()" style="display:none;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px 24px;font-weight:800;cursor:pointer;font-size:0.9rem;margin-right:10px;">📄 Exporter .TXT</button>
-    <button id="exportXlsxBtn" onclick="exportXLSX()" style="display:none;background:var(--success);color:black;border:none;border-radius:12px;padding:12px 24px;font-weight:800;cursor:pointer;font-size:0.9rem;">📥 Exporter .XLSX</button>
-    <button id="exportPdfBtn" onclick="exportPDF()" style="display:none;background:#8b5cf6;color:white;border:none;border-radius:12px;padding:12px 24px;font-weight:800;cursor:pointer;font-size:0.9rem;">📑 Exporter .PDF</button>
-</div>
 
 <script>
 let bilanData = {
     elevesAvecL7: [],
     stats: {
         totalEleves: 0,
-        vmaMoyenne: 0,
+        vmaMovennne: 0,
         confiantsL8: 0,
         strategiesTrouvees: 0
     }
@@ -182,11 +176,6 @@ window.onload = function() {
     analyzerL7(eleves);
     renderStats();
     renderEleves();
-    if(bilanData.elevesAvecL7.length > 0) {
-        document.getElementById('exportBtn').style.display = 'inline-block';
-        document.getElementById('exportXlsxBtn').style.display = 'inline-block';
-        document.getElementById('exportPdfBtn').style.display = 'inline-block';
-    }
 };
 
 function analyzerL7(eleves) {
@@ -276,10 +265,10 @@ function analyzerL7(eleves) {
     
     // VMA moyenne de classe
     const elevesAvecVMA = bilanData.elevesAvecL7.filter(e => e.pctVMAMoyen);
-    bilanData.stats.vmaMoyenne = elevesAvecVMA.length > 0 ? 
+    bilanData.stats.vmaMovennne = elevesAvecVMA.length > 0 ? 
         Math.round(elevesAvecVMA.reduce((acc, e) => acc + e.pctVMAMoyen, 0) / elevesAvecVMA.length) : 0;
     
-    console.log(`Stats finales: ${bilanData.stats.totalEleves} élèves, VMA moy: ${bilanData.stats.vmaMoyenne}%`);
+    console.log(`Stats finales: ${bilanData.stats.totalEleves} élèves, VMA moy: ${bilanData.stats.vmaMovennne}%`);
 }
 
 // Fonction conversion intelligente pour analyses
@@ -520,7 +509,7 @@ function renderStats() {
             <div class="stat-label">Élèves évalués</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">${bilanData.stats.vmaMoyenne}%</div>
+            <div class="stat-value">${bilanData.stats.vmaMovennne}%</div>
             <div class="stat-label">% VMA moyen classe</div>
         </div>
         <div class="stat-card">
@@ -597,143 +586,84 @@ function renderEleves() {
     });
     
     container.innerHTML = html;
+    const ez = document.getElementById('export-zone'); if(ez) ez.style.display='block';
 }
-
-function exportBilan() {
-    let contenu = `BILAN L7 - MISE EN SITUATION ADAPTATIVE\n`;
-    contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
-    contenu += `RÉSUMÉ CLASSE:\n`;
-    contenu += `- Élèves avec données L7: ${bilanData.stats.totalEleves}\n`;
-    contenu += `- % VMA moyen classe: ${bilanData.stats.vmaMoyenne}%\n`;
-    contenu += `- Confiants pour L8: ${bilanData.stats.confiantsL8}\n`;
-    contenu += `- Stratégie trouvée: ${bilanData.stats.strategiesTrouvees}\n\n`;
-    contenu += `DÉTAIL PAR ÉLÈVE:\n`;
-    bilanData.elevesAvecL7.forEach(eleve => {
-        const s = eleve.seanceL7;
-        contenu += `\n${eleve.nomPrenom} (VMA: ${eleve.vma || 'N/A'} km/h):\n`;
-        contenu += `  Tour 1: ${s.temps1 || 'N/A'} ${eleve.pctVMA1 ? `(${eleve.pctVMA1}% VMA)` : ''}\n`;
-        contenu += `  Tour 2: ${s.temps2 || 'N/A'} ${eleve.pctVMA2 ? `(${eleve.pctVMA2}% VMA)` : ''}\n`;
-        contenu += `  Tour 3: ${s.temps3 || 'N/A'} ${eleve.pctVMA3 ? `(${eleve.pctVMA3}% VMA)` : ''}\n`;
-        if(eleve.pctVMAMoyen) contenu += `  % VMA moyen: ${eleve.pctVMAMoyen}%\n`;
-        contenu += `  Stratégie trouvée: ${s.strategieTrouvee ? 'Oui' : 'Non'}\n`;
-        contenu += `  Confiant L8: ${s.confiantL8 ? 'Oui' : 'Non'}\n`;
+function exportTXT() {
+    if(!bilanData || !bilanData.elevesAvecL7.length) return;
+    const date = new Date().toLocaleDateString('fr-FR');
+    let txt = 'BILAN L7 — MISE EN SITUATION 3×400M\nDate : ' + date + '\n\n';
+    txt += 'RÉSUMÉ CLASSE :\n';
+    txt += '- Élèves avec L7 : ' + bilanData.stats.totalEleves + '\n';
+    txt += '- % VMA moyen : ' + (bilanData.stats.vmaMovennne||'-') + '%\n';
+    txt += '- Confiants L8 : ' + bilanData.stats.confiantsL8 + '\n';
+    txt += '- Stratégie trouvée : ' + bilanData.stats.strategiesTrouvees + '\n\nDÉTAIL :\n';
+    bilanData.elevesAvecL7.forEach(e => {
+        txt += '\n' + e.nomPrenom + ' (VMA ' + (e.vma||'?') + ' km/h)\n';
+        txt += '  Tour 1 : ' + (e.seanceL7.temps1||'-') + (e.pctVMA1?' ('+e.pctVMA1+'%)':'') + '\n';
+        txt += '  Tour 2 : ' + (e.seanceL7.temps2||'-') + (e.pctVMA2?' ('+e.pctVMA2+'%)':'') + '\n';
+        txt += '  Tour 3 : ' + (e.seanceL7.temps3||'-') + (e.pctVMA3?' ('+e.pctVMA3+'%)':'') + '\n';
+        if(e.pctVMAMoyen) txt += '  Moy VMA : ' + e.pctVMAMoyen + '%\n';
+        txt += '  Confiant L8 : ' + (e.seanceL7.confiantL8?'Oui':'Non') + '\n';
+        txt += '  Stratégie trouvée : ' + (e.seanceL7.strategieTrouvee?'Oui':'Non') + '\n';
     });
-    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bilan_L7_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.txt`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'bilan_L7_' + date.replace(/\//g,'-') + '.txt'; a.click();
 }
 
 function exportXLSX() {
+    if(!bilanData || !bilanData.elevesAvecL7.length) return;
     const wb = XLSX.utils.book_new();
-
-    // Feuille résumé
-    const resumeData = [
-        ['BILAN L7 - MISE EN SITUATION ADAPTATIVE', ''],
-        ['Date', new Date().toLocaleDateString('fr-FR')],
-        ['', ''],
-        ['Élèves avec données L7', bilanData.stats.totalEleves],
-        ['% VMA moyen classe', bilanData.stats.vmaMoyenne + '%'],
-        ['Confiants pour L8', bilanData.stats.confiantsL8],
-        ['Stratégie trouvée', bilanData.stats.strategiesTrouvees],
-    ];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumeData), 'Résumé');
-
-    // Feuille détail
-    const header = ['Élève', 'VMA (km/h)', 'Tour 1', '% VMA T1', 'Tour 2', '% VMA T2', 'Tour 3', '% VMA T3', '% VMA Moyen', 'Stratégie trouvée', 'Confiant L8'];
+    const header = ['Élève','Sexe','VMA (km/h)','Tour 1','% VMA T1','Tour 2','% VMA T2','Tour 3','% VMA T3','% Moy','Confiant L8','Stratégie trouvée'];
     const rows = bilanData.elevesAvecL7.map(e => [
-        e.nomPrenom,
-        e.vma || '',
-        e.seanceL7.temps1 || '',
-        e.pctVMA1 ? e.pctVMA1 + '%' : '',
-        e.seanceL7.temps2 || '',
-        e.pctVMA2 ? e.pctVMA2 + '%' : '',
-        e.seanceL7.temps3 || '',
-        e.pctVMA3 ? e.pctVMA3 + '%' : '',
-        e.pctVMAMoyen ? e.pctVMAMoyen + '%' : '',
-        e.seanceL7.strategieTrouvee ? 'Oui' : 'Non',
-        e.seanceL7.confiantL8 ? 'Oui' : 'Non',
+        e.nomPrenom, e.sexe==='F'?'Fille':'Garçon', e.vma||'',
+        e.seanceL7.temps1||'', e.pctVMA1?e.pctVMA1+'%':'',
+        e.seanceL7.temps2||'', e.pctVMA2?e.pctVMA2+'%':'',
+        e.seanceL7.temps3||'', e.pctVMA3?e.pctVMA3+'%':'',
+        e.pctVMAMoyen?e.pctVMAMoyen+'%':'',
+        e.seanceL7.confiantL8?'Oui':'Non',
+        e.seanceL7.strategieTrouvee?'Oui':'Non'
     ]);
-    const wsEleves = XLSX.utils.aoa_to_sheet([header, ...rows]);
-    wsEleves['!cols'] = header.map(() => ({wch: 16}));
-    XLSX.utils.book_append_sheet(wb, wsEleves, 'Détail élèves');
-
-    XLSX.writeFile(wb, `bilan_L7_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`);
+    const ws = XLSX.utils.aoa_to_sheet([header,...rows]);
+    ws['!cols'] = header.map(()=>({wch:16}));
+    XLSX.utils.book_append_sheet(wb, ws, 'L7 Détail');
+    XLSX.writeFile(wb, 'bilan_L7_' + new Date().toLocaleDateString('fr-FR').replace(/\//g,'-') + '.xlsx');
 }
-function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const d = bilanData;
-    const date = new Date().toLocaleDateString('fr-FR');
-    const W = doc.internal.pageSize.getWidth();
 
-    doc.setFillColor(59, 130, 246);
-    doc.rect(0, 0, W, 22, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(16); doc.setFont(undefined,'bold');
+function exportPDF() {
+    if(!bilanData || !bilanData.elevesAvecL7.length) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+    const W = doc.internal.pageSize.getWidth();
+    const date = new Date().toLocaleDateString('fr-FR');
+    doc.setFillColor(59,130,246); doc.rect(0,0,W,22,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont(undefined,'bold');
     doc.text('EPS : Épreuve Combinée', 14, 10);
     doc.setFontSize(11); doc.setFont(undefined,'normal');
     doc.text('BILAN L7 — MISE EN SITUATION 3×400M', 14, 17);
-    doc.text('Date : ' + date, W - 14, 17, { align: 'right' });
-
+    doc.text('Date : ' + date, W-14, 17, {align:'right'});
     doc.setTextColor(30,30,30);
-    const stats = [
-        ['Élèves avec L7', d.stats.totalEleves],
-        ['% VMA moy classe', (d.stats.vmaMoyenne || '-') + '%'],
-        ['Confiants L8', d.stats.confiantsL8],
-        ['Stratégie trouvée', d.stats.strategiesTrouvees],
-    ];
-    const bw = (W - 28) / stats.length;
-    stats.forEach(([lbl, val], i) => {
-        const x = 14 + i * bw;
-        doc.setFillColor(239, 246, 255);
-        doc.roundedRect(x, 26, bw - 4, 18, 2, 2, 'F');
-        doc.setFontSize(15); doc.setFont(undefined,'bold');
-        doc.setTextColor(59, 130, 246);
-        doc.text(String(val), x + (bw-4)/2, 37, { align: 'center' });
-        doc.setFontSize(7); doc.setFont(undefined,'normal');
-        doc.setTextColor(100,100,100);
-        doc.text(lbl, x + (bw-4)/2, 42, { align: 'center' });
-    });
-
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Détail par élève', 14, 55);
-
-    const headers = [['Élève', 'VMA', 'Tour 1', '% VMA T1', 'Tour 2', '% VMA T2', 'Tour 3', '% VMA T3', '% Moy', 'Stratégie', 'Confiant L8']];
-    const rows = d.elevesAvecL7.map(e => [
-        e.nomPrenom,
-        e.vma ? e.vma + ' km/h' : '-',
-        e.seanceL7.temps1 || '-',
-        e.pctVMA1 ? e.pctVMA1 + '%' : '-',
-        e.seanceL7.temps2 || '-',
-        e.pctVMA2 ? e.pctVMA2 + '%' : '-',
-        e.seanceL7.temps3 || '-',
-        e.pctVMA3 ? e.pctVMA3 + '%' : '-',
-        e.pctVMAMoyen ? e.pctVMAMoyen + '%' : '-',
-        e.seanceL7.strategieTrouvee ? '✓' : '-',
-        e.seanceL7.confiantL8 ? '✓' : '-',
+    const headers = [['Élève','VMA','Tour 1','% T1','Tour 2','% T2','Tour 3','% T3','% Moy','Confiant L8','Stratégie']];
+    const rows = bilanData.elevesAvecL7.map(e => [
+        e.nomPrenom, e.vma?e.vma+' km/h':'-',
+        e.seanceL7.temps1||'-', e.pctVMA1?e.pctVMA1+'%':'-',
+        e.seanceL7.temps2||'-', e.pctVMA2?e.pctVMA2+'%':'-',
+        e.seanceL7.temps3||'-', e.pctVMA3?e.pctVMA3+'%':'-',
+        e.pctVMAMoyen?e.pctVMAMoyen+'%':'-',
+        e.seanceL7.confiantL8?'✓':'-',
+        e.seanceL7.strategieTrouvee?'✓':'-'
     ]);
-
-    doc.autoTable({
-        startY: 59,
-        head: headers,
-        body: rows,
-        styles: { fontSize: 7.5, cellPadding: 2 },
-        headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [239, 246, 255] },
-        margin: { left: 14, right: 14 },
-    });
-
+    doc.autoTable({startY:28, head:headers, body:rows,
+        styles:{fontSize:8,cellPadding:2},
+        headStyles:{fillColor:[59,130,246],textColor:255,fontStyle:'bold'},
+        alternateRowStyles:{fillColor:[239,246,255]},
+        margin:{left:14,right:14}});
     const pages = doc.internal.getNumberOfPages();
-    for(let p = 1; p <= pages; p++) {
-        doc.setPage(p);
-        doc.setFontSize(7); doc.setTextColor(160,160,160); doc.setFont(undefined,'normal');
-        doc.text('EPS Épreuve Combinée · Bilan L7 · ' + date + ' · Page ' + p + '/' + pages, W/2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
+    for(let p=1;p<=pages;p++){
+        doc.setPage(p); doc.setFontSize(7); doc.setTextColor(160,160,160);
+        doc.text('EPS · Bilan L7 · '+date+' · Page '+p+'/'+pages, W/2, doc.internal.pageSize.getHeight()-6, {align:'center'});
     }
-    doc.save('bilan_L7_' + date.replace(/\//g,'-') + '.pdf');
+    doc.save('bilan_L7_'+date.replace(/\//g,'-')+'.pdf');
 }
 
 </script>

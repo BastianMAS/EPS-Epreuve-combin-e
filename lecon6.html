@@ -722,7 +722,7 @@ function saveAll(silent = false) {
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
     // Sync Firebase en arrière-plan
     if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
-    if(!silent) alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
+    if(!silent) if(!silent) alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');
@@ -744,6 +744,10 @@ window.addEventListener('beforeunload', () => {
 });
 
 window.addEventListener('load', startAutosave);
+
+// Autosave silencieux toutes les 30s + à la fermeture
+setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
+window.addEventListener('beforeunload', function(){ if(typeof saveAll==='function') saveAll(true); });
 
 </script>
 </body>

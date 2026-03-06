@@ -285,7 +285,9 @@
         }
     </style>
 
-    <script src="firebase-config.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
@@ -298,12 +300,14 @@
     <div id="content"></div>
 
     <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
-        📊 Exporter le bilan olympique
+        📄 Exporter .TXT
     </button>
-    <div id="export-btns" style="display:none;margin-top:12px;display:none;">
-        <button class="export-btn" onclick="exportXLSX(event)" style="background:var(--success);color:black;margin-right:8px;">📥 Exporter .XLSX</button>
-        <button class="export-btn" onclick="exportPDF()" style="background:#8b5cf6;color:white;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:0.85rem;cursor:pointer;">📑 Exporter .PDF</button>
-    </div>
+    <button class="export-btn" onclick="exportXLSX()" id="exportXlsxBtn" style="display:none;background:#4ade80;color:black;margin-top:8px;">
+        📥 Exporter .XLSX
+    </button>
+    <button class="export-btn" onclick="exportPDF()" id="exportPdfBtn" style="display:none;background:#8b5cf6;color:white;margin-top:8px;">
+        📑 Exporter .PDF
+    </button>
 </div>
 
 <script>
@@ -360,8 +364,7 @@ function generateBilan() {
             nom: eleve.nomPrenom,
             distanceIndividuelle: seanceL5.distanceTotaleIndividuelle || 0,
             distanceMoyenne: seanceL5.distanceMoyenneIndividuelle || 0,
-            detailManches: seanceL5.detailManches || [],
-            vma: parseFloat(eleve.vma) || null
+            detailManches: seanceL5.detailManches || []
         });
         
         equipes[equipeNom].distanceTotale = seanceL5.distanceTotaleEquipe || 0;
@@ -419,7 +422,6 @@ function renderBilan() {
         </div>
     `;
 
-    document.getElementById('export-btns').style.display = 'block';
     if(bilanData.equipes.length > 0) {
         html += renderPodium();
         html += renderEquipesDetails();
@@ -427,6 +429,8 @@ function renderBilan() {
     
     content.innerHTML = html;
     document.getElementById('exportBtn').style.display = 'block';
+    document.getElementById('exportXlsxBtn').style.display = 'block';
+    document.getElementById('exportPdfBtn').style.display = 'block';
 }
 
 function renderPodium() {
@@ -536,8 +540,8 @@ function renderEquipesDetails() {
                             // Calcul % VMA individuel (estimation)
                             const tempsTotal = equipe.manches * 6; // 6min par manche
                             const vitesseReelle = (distanceTotale / 1000) / (tempsTotal / 60); // km/h
-                            const vmaEstimee = membre.vma || 12; // VMA réelle de l'élève
-                            const pourcentVMA = vmaEstimee ? Math.round((vitesseReelle / vmaEstimee) * 100) : null;
+                            const vmaEstimee = 12; // Valeur par défaut, idéalement récupérer vraie VMA
+                            const pourcentVMA = Math.round((vitesseReelle / vmaEstimee) * 100);
                             
                             // Objectif individuel (1/4 à 1/6 de l'objectif équipe selon taille)
                             const objectifIndividuel = Math.round(equipe.objectif / equipe.membres.length);
@@ -556,7 +560,7 @@ function renderEquipesDetails() {
                                 <div style="font-size: 0.85rem; padding: 8px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
                                     <div style="font-weight: 700; color: var(--olympic-blue); margin-bottom: 6px;">${membre.nom}</div>
                                     <div><strong>Distance:</strong> ${membre.distanceIndividuelle}m</div>
-                                    <div><strong>% VMA:</strong> ${pourcentVMA ? `~${pourcentVMA}%` : 'VMA non renseignée'}</div>
+                                    <div><strong>% VMA:</strong> ~${pourcentVMA}%</div>
                                     <div><strong>Objectif:</strong> ${objectifAtteint ? '✅ Atteint' : '⏳ En cours'} (${objectifIndividuel}m)</div>
                                     <div><strong>Régularité:</strong> ${regularite}</div>
                                     <div style="margin-top: 4px; padding: 4px; background: rgba(0,166,81,0.1); border-radius: 4px; font-size: 0.8rem;">
@@ -609,10 +613,9 @@ function exportBilan() {
             const contributionPct = Math.round((membre.distanceIndividuelle/equipe.distanceTotale)*100);
             const tempsTotal = equipe.manches * 6;
             const vitesseReelle = (membre.distanceIndividuelle / 1000) / (tempsTotal / 60);
-            const vmaIndiv = membre.vma || null;
-            const pourcentVMA = vmaIndiv ? Math.round((vitesseReelle / vmaIndiv) * 100) : null; // VMA réelle de l'élève
+            const pourcentVMA = Math.round((vitesseReelle / 12) * 100); // VMA estimée 12 km/h
             
-            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (${pourcentVMA ? `~${pourcentVMA}% VMA` : 'VMA non renseignée'})\n`;
+            contenu += `    - ${membre.nom}: ${membre.distanceIndividuelle}m total (~${pourcentVMA}% VMA)\n`;
             contenu += `      Objectif individuel: ${objectifIndiv}m (${membre.distanceIndividuelle >= objectifIndiv*0.9 ? 'Atteint' : 'En cours'})\n`;
             contenu += `      Contribution équipe: ${contributionPct}%\n`;
         });
@@ -626,52 +629,6 @@ function exportBilan() {
     a.click();
     window.URL.revokeObjectURL(url);
 }
-
-function exportXLSX(event) {
-    if(event) event.stopPropagation();
-    const wb = XLSX.utils.book_new();
-
-    // Feuille résumé équipes
-    const resumeData = [
-        ['BILAN L5 - RELAIS OLYMPIQUE', ''],
-        ['Date', new Date().toLocaleDateString('fr-FR')],
-        ['', ''],
-        ['Équipes objectif atteint', bilanData.stats.equipesObjectifAtteint || 0],
-        ['Total équipes', bilanData.stats.totalEquipes],
-        ['Total élèves', bilanData.stats.totalEleves],
-    ];
-    const wsResume = XLSX.utils.aoa_to_sheet(resumeData);
-    XLSX.utils.book_append_sheet(wb, wsResume, 'Résumé');
-
-    // Feuille détail individuel
-    const header = ['Élève', 'Équipe', 'Manches', 'Distance totale (m)', 'Distance moy/manche (m)', '% VMA (estimé)', 'Objectif individuel (m)', 'Objectif atteint'];
-    const rows = [];
-    bilanData.equipes.forEach(equipe => {
-        const objectifIndiv = Math.round(equipe.objectif / equipe.membres.length);
-        equipe.membres.forEach(membre => {
-            const tempsTotal = equipe.manches * 6;
-            const vitesseReelle = (membre.distanceIndividuelle / 1000) / (tempsTotal / 60);
-            const vmaIndiv = membre.vma || null;
-            const pctVMA = vmaIndiv ? Math.round((vitesseReelle / vmaIndiv) * 100) : '';
-            rows.push([
-                membre.nom,
-                equipe.nom || 'Équipe',
-                equipe.manches,
-                membre.distanceIndividuelle,
-                membre.distanceMoyenne,
-                pctVMA,
-                objectifIndiv,
-                membre.distanceIndividuelle >= objectifIndiv * 0.9 ? 'Oui' : 'Non',
-            ]);
-        });
-    });
-    const wsEleves = XLSX.utils.aoa_to_sheet([header, ...rows]);
-    wsEleves['!cols'] = header.map(() => ({wch: 20}));
-    XLSX.utils.book_append_sheet(wb, wsEleves, 'Détail élèves');
-
-    XLSX.writeFile(wb, `bilan_L5_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.xlsx`);
-}
-
 </script>
 
 </body>

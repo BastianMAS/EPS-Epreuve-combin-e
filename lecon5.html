@@ -766,6 +766,10 @@ window.addEventListener('beforeunload', () => {
 
 window.addEventListener('load', startAutosave);
 
+// Autosave silencieux toutes les 30s + à la fermeture
+setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
+window.addEventListener('beforeunload', function(){ if(typeof saveAll==='function') saveAll(true); });
+
 </script>
 </body>
 </html>

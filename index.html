@@ -5217,6 +5217,13 @@ async function handlePullFromFirebase() {
     document.getElementById('firebase-panel').style.display = 'none';
     alert(`✅ ${students.length} élève(s) récupéré(s) depuis Firebase.`);
 }
+// Stubs pour screenSeance2 (écran non utilisé)
+function selectSeance2Student() {}
+function backToStudentsFromSeance2() {
+    document.querySelectorAll('.screen,[id^="screen"]').forEach(s => s.classList.add('hidden'));
+    document.getElementById('screen0')?.classList.remove('hidden');
+}
+
 </script>
 </body>
 </html>

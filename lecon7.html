@@ -24,7 +24,9 @@
             background: linear-gradient(135deg, var(--bg) 0%, #2d1810 100%);
             color: white; 
             padding: 16px; 
+            padding-bottom: 100px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         h1 { 
@@ -60,7 +62,7 @@
             background: var(--card);
             border: 1px solid rgba(255,107,53,0.3);
             border-radius: 12px;
-            overflow: hidden;
+            overflow: visible;
             transition: all 0.3s ease;
         }
         
@@ -93,7 +95,7 @@
         .section {
             margin-bottom: 16px;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
             background: rgba(255,255,255,0.02);
         }
         
@@ -777,7 +779,7 @@ function toggleSection(sec, i) {
     arr.classList.toggle('open', !isOpen);
 }
 
-function saveAll() {
+function saveAll(silent = false) {
     let count = 0;
     let erreurs = [];
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
@@ -883,6 +885,25 @@ function saveAll() {
     if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
     alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
 }
+// ══════════════════════════════════════════════════
+// AUTOSAVE — toutes les 30 secondes + à la fermeture
+// ══════════════════════════════════════════════════
+let _autosaveTimer = null;
+
+function startAutosave() {
+    _autosaveTimer = setInterval(() => {
+        if(typeof saveAll === 'function') {
+            saveAll(true); // true = silencieux (pas d'alert)
+        }
+    }, 30000);
+}
+
+window.addEventListener('beforeunload', () => {
+    if(typeof saveAll === 'function') saveAll(true);
+});
+
+window.addEventListener('load', startAutosave);
+
 </script>
 </body>
 </html>

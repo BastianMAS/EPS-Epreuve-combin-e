@@ -222,7 +222,7 @@ function renderEleves() {
                         const sl4 = seances.find(s => s.lecon === 'L4');
                         const sl6 = seances.find(s => s.lecon === 'L6');
                         const sl7 = seances.find(s => s.lecon === 'L7');
-                        const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=s%60; return `${m}:${sec.toString().padStart(2,'0')}`; };
+                        const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=Math.round(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; };
                         const courseRows = [
                             sl3?.moyenne200m ? `<tr><td>L3</td><td>${fmtS(sl3.moyenne200m)}</td><td>200m</td></tr>` : '',
                             sl4?.moyenne200m ? `<tr><td>L4</td><td>${fmtS(sl4.moyenne200m)}</td><td>200m</td></tr>` : '',
@@ -231,14 +231,14 @@ function renderEleves() {
                             sl7?.temps3 ? `<tr><td>L7 T3</td><td>${sl7.temps3}</td><td>400m</td></tr>` : '',
                         ].filter(Boolean).join('');
                         const sautRows = [
-                            sl3?.sautDistance ? `<tr><td>L3</td><td>${sl3.sautDistance} m</td></tr>` : '',
-                            sl4?.sautDistance ? `<tr><td>L4</td><td>${sl4.sautDistance} m</td></tr>` : '',
-                            sl6?.sautDistance ? `<tr><td>L6</td><td>${sl6.sautDistance} m</td></tr>` : '',
+                            sl3?.sautDistance ? `<tr><td>L3</td><td>${parseFloat(sl3.sautDistance).toFixed(2)} m</td></tr>` : '',
+                            sl4?.sautDistance ? `<tr><td>L4</td><td>${parseFloat(sl4.sautDistance).toFixed(2)} m</td></tr>` : '',
+                            sl6?.sautDistance ? `<tr><td>L6</td><td>${parseFloat(sl6.sautDistance).toFixed(2)} m</td></tr>` : '',
                         ].filter(Boolean).join('');
                         const lancerRows = [
-                            sl3?.lancerDistance ? `<tr><td>L3</td><td>${sl3.lancerDistance} m</td></tr>` : '',
-                            sl4?.lancerDistance ? `<tr><td>L4</td><td>${sl4.lancerDistance} m</td></tr>` : '',
-                            sl6?.lancerDistance ? `<tr><td>L6</td><td>${sl6.lancerDistance} m</td></tr>` : '',
+                            sl3?.lancerDistance ? `<tr><td>L3</td><td>${parseFloat(sl3.lancerDistance).toFixed(2)} m</td></tr>` : '',
+                            sl4?.lancerDistance ? `<tr><td>L4</td><td>${parseFloat(sl4.lancerDistance).toFixed(2)} m</td></tr>` : '',
+                            sl6?.lancerDistance ? `<tr><td>L6</td><td>${parseFloat(sl6.lancerDistance).toFixed(2)} m</td></tr>` : '',
                         ].filter(Boolean).join('');
                         if(!courseRows && !sautRows && !lancerRows) return '';
                         const tStyle = 'width:100%;border-collapse:collapse;font-size:0.75rem;margin-bottom:8px;';
@@ -624,67 +624,157 @@ function analyserProfil(reponses, eleve) {
     if(course.length === 0 && saut.length === 0 && lancer.length === 0 && mental.length === 0 && objectif.length === 0) {
         return '🤔 Coche les cases qui te correspondent pour découvrir ton projet !';
     }
+
+    // ── Données cycle ──────────────────────────────────────────
+    const seances = eleve.seances || [];
+    const sL3 = seances.find(s => s.lecon === 'L3') || {};
+    const sL4 = seances.find(s => s.lecon === 'L4') || {};
+    const sL6 = seances.find(s => s.lecon === 'L6') || {};
+    const sL7 = seances.find(s => s.lecon === 'L7') || {};
+
+    // Scores techniques accumulés sur le cycle
+    const techSautL4 = [sL4.sautTech1,sL4.sautTech2,sL4.sautTech3,sL4.sautTech4].filter(Boolean).length;
+    const techSautL6 = [sL6.sautTech1,sL6.sautTech2,sL6.sautTech3,sL6.sautTech4,sL6.sautTech5].filter(Boolean).length;
+    const techLancerL4 = [sL4.lancerTech1,sL4.lancerTech2,sL4.lancerTech3,sL4.lancerTech4].filter(Boolean).length;
+    const techLancerL6 = [sL6.lancerTech1,sL6.lancerTech2,sL6.lancerTech3,sL6.lancerTech4,sL6.lancerTech5].filter(Boolean).length;
+
+    // Évolution distance saut
+    const distSautL3 = parseFloat(sL3.sautDistance) || 0;
+    const distSautL6 = parseFloat(sL6.sautDistance) || 0;
+    const evolSaut = distSautL3 && distSautL6 ? distSautL6 - distSautL3 : null;
+
+    // Évolution distance lancer
+    const distLancerL3 = parseFloat(sL3.lancerDistance) || 0;
+    const distLancerL6 = parseFloat(sL6.lancerDistance) || 0;
+    const evolLancer = distLancerL3 && distLancerL6 ? distLancerL6 - distLancerL3 : null;
+
+    // L7 : régularité course
+    const fmtSec = t => { if(!t) return null; const p=t.replace(',',':').split(':'); return p.length===2?parseInt(p[0])*60+parseInt(p[1]):null; };
+    const t1s = fmtSec(sL7.temps1), t2s = fmtSec(sL7.temps2), t3s = fmtSec(sL7.temps3);
+    const toursL7 = [t1s,t2s,t3s].filter(Boolean);
+    const moyL7 = toursL7.length ? Math.round(toursL7.reduce((a,b)=>a+b,0)/toursL7.length) : null;
+    const ecartL7 = toursL7.length === 3 ? Math.max(...toursL7) - Math.min(...toursL7) : null;
+    const regulierL7 = ecartL7 !== null && ecartL7 <= 8;
+    const finisseurL7 = t1s && t3s && t3s < t1s - 2;
+    const pctVMAL7 = eleve.vma && moyL7 ? Math.round(((0.4/(moyL7/3600))/eleve.vma)*100) : null;
+
+    // Niveau choisi en L3
+    const niveauL3pct = sL3.niveau === 'vma110' ? 110 : sL3.niveau === 'vma105' ? 105 : sL3.niveau === 'vma100' ? 100 : sL3.niveau === 'vma95' ? 95 : null;
+
+    // Pyramide L6 complète ?
+    const pyramideL6 = sL6.pyramide60_1 && sL6.pyramide80_1 && sL6.pyramide100 && sL6.pyramide80_2 && sL6.pyramide60_2;
     
     let strategieCourse = '';
     let intensite = '';
     let conseilSaut = '';
     let conseilLancer = '';
     let gestion = '';
-    
-    // STRATÉGIE COURSE basée sur L7
-    if(course.includes('course1') || course.includes('course2')) {
-        // Performance L7 élevée ou bonne gestion
-        if(mental.includes('mental1') || objectif.includes('objectif2')) {
-            strategieCourse = '🚀 <strong>STRATÉGIE AMBITIEUSE</strong> : Ton L7 montre que tu peux viser haut !';
-            intensite = 'Reproduis ton L7 ou mieux : 110-120% VMA';
+    let conseilPerso = [];
+
+    // ── Données cycle ──────────────────────────────────────────
+    const seances = eleve.seances || [];
+    const sL3 = seances.find(s => s.lecon === 'L3') || {};
+    const sL4 = seances.find(s => s.lecon === 'L4') || {};
+    const sL6 = seances.find(s => s.lecon === 'L6') || {};
+    const sL7 = seances.find(s => s.lecon === 'L7') || {};
+
+    const techSautL6 = [sL6.sautTech1,sL6.sautTech2,sL6.sautTech3,sL6.sautTech4,sL6.sautTech5].filter(Boolean).length;
+    const techLancerL6 = [sL6.lancerTech1,sL6.lancerTech2,sL6.lancerTech3,sL6.lancerTech4,sL6.lancerTech5].filter(Boolean).length;
+    const techSautL4 = [sL4.sautTech1,sL4.sautTech2,sL4.sautTech3,sL4.sautTech4].filter(Boolean).length;
+    const techLancerL4 = [sL4.lancerTech1,sL4.lancerTech2,sL4.lancerTech3,sL4.lancerTech4].filter(Boolean).length;
+    const distSautL3 = parseFloat(sL3.sautDistance)||0, distSautL6 = parseFloat(sL6.sautDistance)||0;
+    const distLancerL3 = parseFloat(sL3.lancerDistance)||0, distLancerL6 = parseFloat(sL6.lancerDistance)||0;
+    const evolSaut = distSautL3 && distSautL6 ? distSautL6 - distSautL3 : null;
+    const evolLancer = distLancerL3 && distLancerL6 ? distLancerL6 - distLancerL3 : null;
+    const pyramideL6 = sL6.pyramide60_1 && sL6.pyramide80_1 && sL6.pyramide100 && sL6.pyramide80_2 && sL6.pyramide60_2;
+    const niveauL3pct = sL3.niveau === 'vma110' ? 110 : sL3.niveau === 'vma105' ? 105 : sL3.niveau === 'vma100' ? 100 : sL3.niveau === 'vma95' ? 95 : null;
+
+    // L7 analyse
+    const fmtSec = t => { if(!t) return null; const p=String(t).replace(',',':').split(':'); return p.length===2?parseInt(p[0])*60+parseInt(p[1]):null; };
+    const t1s = fmtSec(sL7.temps1), t2s = fmtSec(sL7.temps2), t3s = fmtSec(sL7.temps3);
+    const toursL7 = [t1s,t2s,t3s].filter(Boolean);
+    const moyL7 = toursL7.length ? Math.round(toursL7.reduce((a,b)=>a+b,0)/toursL7.length) : null;
+    const ecartL7 = toursL7.length === 3 ? Math.max(...toursL7) - Math.min(...toursL7) : null;
+    const regulierL7 = ecartL7 !== null && ecartL7 <= 8;
+    const finisseurL7 = t1s && t3s && t3s < t1s - 2;
+    const pctVMAL7 = eleve.vma && moyL7 ? Math.round(((0.4/(moyL7/3600))/eleve.vma)*100) : null;
+
+    // ── STRATÉGIE COURSE ──────────────────────────────────────
+    if(pctVMAL7) {
+        if(pctVMAL7 >= 110 && regulierL7) {
+            strategieCourse = '🚀 <strong>STRATÉGIE AMBITIEUSE</strong> : Ton L7 à ' + pctVMAL7 + '% avec une belle régularité — vise encore plus haut !';
+            intensite = 'Objectif : ' + Math.min(pctVMAL7+5,125) + '% VMA' + (eleve.vma ? ' · ' + Math.round(eleve.vma*Math.min(pctVMAL7+5,125)/100*10)/10 + ' km/h' : '');
+        } else if(pctVMAL7 >= 100 && regulierL7) {
+            strategieCourse = '⚖️ <strong>STRATÉGIE REPRODUCTIBLE</strong> : L7 à ' + pctVMAL7 + '% régulier — reproduis la même chose !';
+            intensite = 'Même rythme qu'en L7 : ' + pctVMAL7 + '% VMA · départ calme, tiens jusqu'au bout';
+        } else if(ecartL7 !== null && ecartL7 > 15) {
+            strategieCourse = '🛡️ <strong>STRATÉGIE RÉGULARITÉ</strong> : En L7 l'écart entre tours était de ' + ecartL7 + 's — soigne le rythme en L8 !';
+            intensite = 'Départ prudent à ' + Math.max(pctVMAL7-5,90) + '% VMA, maintiens jusqu'au bout';
         } else {
-            strategieCourse = '⚖️ <strong>STRATÉGIE REPRODUCTIBLE</strong> : Ton L7 était réussi, refais pareil !';
-            intensite = 'Même intensité qu\'en L7 : 105-110% VMA';
+            strategieCourse = '⚖️ <strong>STRATÉGIE ÉQUILIBRÉE</strong> : Pars à ' + pctVMAL7 + '% VMA comme en L7';
+            intensite = 'Tour 1 calme → Tour 2 régulier → Tour 3 tout donner';
         }
+        if(finisseurL7) conseilPerso.push('💪 Tu as fini plus fort en L7 — répète ce finish en L8 !');
+        if(sL7.strategieTrouvee) conseilPerso.push('🎯 Ta stratégie est trouvée en L7 — fais confiance à ton plan !');
+    } else if(course.includes('course1') || course.includes('course2')) {
+        strategieCourse = '🚀 <strong>STRATÉGIE AMBITIEUSE</strong> : Ton ressenti en L7 était bon — vise haut !';
+        intensite = 'Objectif : 110-115% VMA';
     } else if(course.includes('course3') || mental.includes('mental4')) {
-        // Difficultés L7 ou besoin sécurité
-        strategieCourse = '🛡️ <strong>STRATÉGIE SÉCURISÉE</strong> : Après L7, sois plus prudent au départ';
-        intensite = 'Départ plus calme : 95-100% VMA puis progression';
+        strategieCourse = '🛡️ <strong>STRATÉGIE SÉCURISÉE</strong> : L7 était dur — pars plus calme en L8';
+        intensite = 'Départ à 95-100% VMA, puis progressif';
     } else {
-        // Pas de retour L7 clair
-        strategieCourse = '⚖️ <strong>STRATÉGIE ÉQUILIBRÉE</strong> : Base-toi sur tes sensations L7';
-        intensite = 'Départ contrôlé : 100-105% VMA';
+        strategieCourse = '⚖️ <strong>STRATÉGIE ÉQUILIBRÉE</strong> : Pars contrôlé, accélère sur les 2 derniers tours';
+        intensite = 'Rythme régulier : 100-105% VMA';
     }
-    
-    // CONSEIL SAUT (inchangé mais adapté)
-    if(saut.includes('saut1') && saut.includes('saut2')) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Tu progresses ! Vise ta meilleure distance';
+    if(niveauL3pct === 110) conseilPerso.push('⚡ Tu avais choisi le niveau Challenge en L3 — tu as le profil pour un L8 ambitieux');
+    else if(niveauL3pct === 95) conseilPerso.push('🌱 Tu as progressé depuis L3 — regarde le chemin parcouru !');
+
+    // ── CONSEIL SAUT ──────────────────────────────────────────
+    if(techSautL6 >= 4) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Technique solide en L6 (' + techSautL6 + '/5' + (sL6.sautTech5?' ⭐':'') + ')';
+        if(evolSaut !== null) conseilSaut += evolSaut > 0 ? ' — +' + evolSaut.toFixed(2) + 'm depuis L3 → confiance !' : ' — vise la distance record !';
+    } else if(saut.includes('saut1') && saut.includes('saut2')) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Tu as progressé sur le cycle — vise ta meilleure distance';
     } else if(saut.includes('saut3')) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Travaille encore la régularité (comme en L7)';
-    } else if(saut.includes('saut4')) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Relève le défi technique !';
-    } else if(saut.length > 0) {
-        conseilSaut = '🦘 <strong>SAUT</strong> : Continue sur ta lancée L6/L7';
+        conseilSaut = '🦘 <strong>SAUT</strong> : Soigne l'élan régulier et l'appel — les bases suffisent';
+    } else if(pyramideL6) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Pyramide L6 complète 🏆 — exploite cette puissance !';
+    } else if(Math.max(techSautL4,techSautL6) >= 2) {
+        conseilSaut = '🦘 <strong>SAUT</strong> : Applique tes 2 critères : élan régulier + appel précis';
     }
-    
-    // CONSEIL LANCER (inchangé mais adapté)
-    if(lancer.includes('lancer1') && lancer.includes('lancer2')) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Tes progrès payent ! Vise encore plus loin';
+
+    // ── CONSEIL LANCER ──────────────────────────────────────
+    if(techLancerL6 >= 4) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Technique avancée en L6 (' + techLancerL6 + '/5' + (sL6.lancerTech5?' ⭐':'') + ')';
+        if(evolLancer !== null) conseilLancer += evolLancer > 0 ? ' — +' + evolLancer.toFixed(2) + 'm depuis L3 → vise encore plus loin !' : ' — soigne la rotation + accompagnement';
+    } else if(lancer.includes('lancer1') && lancer.includes('lancer2')) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Tes progrès sur le cycle paient — vise ta meilleure distance';
     } else if(lancer.includes('lancer3')) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Focus régularité (applique ton travail L7)';
-    } else if(lancer.includes('lancer4')) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Va chercher ta distance record !';
-    } else if(lancer.length > 0) {
-        conseilLancer = '🎯 <strong>LANCER</strong> : Exploite ton travail technique L6/L7';
+        conseilLancer = '🎯 <strong>LANCER</strong> : Focus : profil de côté + rotation du bassin';
+    } else if(Math.max(techLancerL4,techLancerL6) >= 2) {
+        conseilLancer = '🎯 <strong>LANCER</strong> : Base acquise — ajoute la rotation du bassin pour gagner des mètres';
     }
-    
-    // GESTION GLOBALE avec référence L7
-    if(course.includes('course4') || objectif.includes('objectif4')) {
-        gestion = 'Comme en L7 : garde des forces pour un finish puissant ! 💥';
-    } else if(objectif.includes('objectif1') || mental.includes('mental2')) {
-        gestion = 'Sécurité comme en L7 : reste dans ta zone de confort ✅';
+
+    // ── GESTION GLOBALE ──────────────────────────────────────
+    if(finisseurL7 || course.includes('course4')) {
+        gestion = 'Tu es un finisseur — garde des forces pour un Tour 3 explosif ! 💥';
+    } else if(regulierL7 && sL7.strategieTrouvee) {
+        gestion = 'Ta stratégie est trouvée — reproduis-la exactement ! 🔄';
     } else if(objectif.includes('objectif3')) {
-        gestion = 'Objectif clair : faire mieux qu\'en L7 ! 🎯';
+        gestion = 'Objectif : faire mieux qu'en L7 — pars 2-3s plus vite au Tour 1 🎯';
+    } else if(mental.includes('mental2')) {
+        gestion = 'Reste dans ta zone de confort — la régularité vaut mieux que le risque ✅';
     } else {
-        gestion = 'Reproduis ce qui a marché en L7 🔄';
+        gestion = 'Tour 1 contrôlé → Tour 2 maintenu → Tour 3 tout donner 🏁';
     }
-    
-    let projetHTML = `<div style="font-size: 0.9rem;">`;
+
+        let projetHTML = `<div style="font-size: 0.9rem;">`;
+
+    if(conseilPerso.length > 0) {
+        projetHTML += `<div style="background:rgba(0,210,255,0.08);border:1px solid rgba(0,210,255,0.2);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:0.8rem;">`;
+        conseilPerso.forEach(tip => { projetHTML += `<div style="margin-bottom:3px;">${tip}</div>`; });
+        projetHTML += `</div>`;
+    }
     
     if(strategieCourse) {
         projetHTML += `<div style="margin-bottom: 8px;">${strategieCourse}</div>`;

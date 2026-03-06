@@ -24,8 +24,6 @@
             color: white; 
             padding: 16px; 
             min-height: 100vh;
-            overflow-x: hidden;
-            padding-bottom: 80px;
         }
         
         h1 { 
@@ -298,8 +296,6 @@
             .temps-cibles, .pyramide-validation { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
-
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -640,7 +636,7 @@ function toggleSection(sec, i) {
     arr.classList.toggle('open', !isOpen);
 }
 
-function saveAll(silent = false) {
+function saveAll() {
     let count = 0;
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
 
@@ -720,31 +716,10 @@ function saveAll(silent = false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    // Sync Firebase en arrière-plan
-    if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
-    if(!silent) alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
+    alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');
-// ══════════════════════════════════════════════════
-// AUTOSAVE — toutes les 30 secondes + à la fermeture
-// ══════════════════════════════════════════════════
-let _autosaveTimer = null;
-
-function startAutosave() {
-    _autosaveTimer = setInterval(() => {
-        if(typeof saveAll === 'function') {
-            saveAll(true); // true = silencieux (pas d'alert)
-        }
-    }, 30000);
-}
-
-window.addEventListener('beforeunload', () => {
-    if(typeof saveAll === 'function') saveAll(true);
-});
-
-window.addEventListener('load', startAutosave);
-
 </script>
 </body>
 </html>

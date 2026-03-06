@@ -24,7 +24,6 @@
             color: white; 
             padding: 16px; 
             min-height: 100vh;
-            overflow-x: hidden;
         }
         
         h1 { 
@@ -49,9 +48,9 @@
 
         .grid6 {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 16px;
-            max-width: 700px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -59,7 +58,7 @@
             background: var(--card);
             border: 1px solid rgba(139,92,246,0.2);
             border-radius: 16px;
-            overflow: visible;
+            overflow: hidden;
             position: relative;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
@@ -507,8 +506,6 @@
             .subtitle { font-size: 1rem; }
         }
     </style>
-
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -972,7 +969,7 @@ function updateTours(i) {
     }
 }
 
-function saveAll(silent = false) {
+function saveAll() {
     let count = 0;
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
 
@@ -1031,9 +1028,7 @@ function saveAll(silent = false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    // Sync Firebase en arrière-plan
-    if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
-    if(!silent) alert(`🏆 Données L3 sauvegardées pour ${count} élève(s) !`);
+    alert(`🏆 Données L3 sauvegardées pour ${count} élève(s) !`);
 }
 
 function parseTime(str) {
@@ -1051,25 +1046,6 @@ function fmtSec(sec) {
     const s = Math.round(sec%60);
     return `${m}:${s.toString().padStart(2,'0')}`;
 }
-// ══════════════════════════════════════════════════
-// AUTOSAVE — toutes les 30 secondes + à la fermeture
-// ══════════════════════════════════════════════════
-let _autosaveTimer = null;
-
-function startAutosave() {
-    _autosaveTimer = setInterval(() => {
-        if(typeof saveAll === 'function') {
-            saveAll(true); // true = silencieux (pas d'alert)
-        }
-    }, 30000);
-}
-
-window.addEventListener('beforeunload', () => {
-    if(typeof saveAll === 'function') saveAll(true);
-});
-
-window.addEventListener('load', startAutosave);
-
 </script>
 </body>
 </html>

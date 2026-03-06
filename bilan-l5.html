@@ -284,8 +284,6 @@
             .team-header { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
     </style>
-
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -300,10 +298,7 @@
     <button class="export-btn" onclick="exportBilan()" id="exportBtn" style="display:none">
         📊 Exporter le bilan olympique
     </button>
-    <div id="export-btns" style="display:none;margin-top:12px;display:none;">
-        <button class="export-btn" onclick="exportXLSX(event)" style="background:var(--success);color:black;margin-right:8px;">📥 Exporter .XLSX</button>
-        <button class="export-btn" onclick="exportPDF()" style="background:#8b5cf6;color:white;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:0.85rem;cursor:pointer;">📑 Exporter .PDF</button>
-    </div>
+    <button class="export-btn" onclick="exportXLSX()" style="background:var(--success);color:black;margin-top:8px;">📥 Exporter .XLSX</button>
 </div>
 
 <script>
@@ -419,7 +414,6 @@ function renderBilan() {
         </div>
     `;
 
-    document.getElementById('export-btns').style.display = 'block';
     if(bilanData.equipes.length > 0) {
         html += renderPodium();
         html += renderEquipesDetails();

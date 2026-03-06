@@ -28,6 +28,8 @@
             color: var(--text);
             padding: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
         }
         
         .container { max-width: 1200px; margin: 0 auto; }
@@ -317,6 +319,8 @@
             .setup-grid, .results-grid { grid-template-columns: 1fr; }
         }
     </style>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -739,8 +743,29 @@ function saveResults() {
     });
     
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    // Sync Firebase en arrière-plan
+    if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
     alert(`🏆 Sauvé pour ${currentTeam.length} élèves !`);
 }
+// ══════════════════════════════════════════════════
+// AUTOSAVE — toutes les 30 secondes + à la fermeture
+// ══════════════════════════════════════════════════
+let _autosaveTimer = null;
+
+function startAutosave() {
+    _autosaveTimer = setInterval(() => {
+        if(typeof saveAll === 'function') {
+            saveAll(true); // true = silencieux (pas d'alert)
+        }
+    }, 30000);
+}
+
+window.addEventListener('beforeunload', () => {
+    if(typeof saveAll === 'function') saveAll(true);
+});
+
+window.addEventListener('load', startAutosave);
+
 </script>
 </body>
 </html>

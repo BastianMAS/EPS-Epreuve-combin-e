@@ -308,6 +308,43 @@
 <h1>EPS: épreuve Combinée</h1>
 <p class="subtitle">⚡ L6 - PERFECTIONNEMENT TECHNIQUE</p>
 
+<div style="
+    max-width: 1400px; margin: 0 auto 20px auto;
+    background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(0,217,255,0.1));
+    border: 2px solid var(--purple);
+    border-radius: 14px;
+    padding: 14px 20px;
+    display: flex; align-items: flex-start; gap: 14px;
+    flex-wrap: wrap;
+">
+    <span style="font-size: 1.6rem;">⏱️</span>
+    <div style="flex:1; min-width: 220px;">
+        <div style="font-weight: 800; color: var(--accent); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Récupération pyramide — variable selon intensité
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.82rem;">
+            <div style="background: rgba(74,222,128,0.15); border: 1px solid var(--success); border-radius: 8px; padding: 6px 12px; line-height: 1.4;">
+                <div style="color: var(--success); font-weight: 800;">60m &amp; 80m</div>
+                <div style="color: #e2e8f0;">≈ 95–105% VMA</div>
+                <div style="color: var(--warning); font-weight: 700;">Récup : 90s</div>
+            </div>
+            <div style="background: rgba(251,191,36,0.15); border: 1px solid var(--warning); border-radius: 8px; padding: 6px 12px; line-height: 1.4;">
+                <div style="color: var(--warning); font-weight: 800;">100m (sommet)</div>
+                <div style="color: #e2e8f0;">≈ 110% VMA</div>
+                <div style="color: var(--warning); font-weight: 700;">Récup : 2 minutes</div>
+            </div>
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 6px 12px; line-height: 1.4;">
+                <div style="color: var(--danger); font-weight: 800;">Sprint final 60m</div>
+                <div style="color: #e2e8f0;">≈ 115–120% VMA</div>
+                <div style="color: var(--warning); font-weight: 700;">Récup : 2 min 30</div>
+            </div>
+        </div>
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">
+            💡 Chaque élève gère sa récup avec son propre chrono — retour en place avant la fin du temps imparti.
+        </div>
+    </div>
+</div>
+
 <div class="grid6" id="grid"></div>
 
 <button class="save-btn" onclick="saveAll()">💾 Sauvegarder</button>
@@ -368,7 +405,7 @@ function createCard(i) {
                     <div class="pyramide-info">
                         <strong>📊 Pyramide Autonome :</strong><br>
                         60m → 80m → 100m → 80m → 60m<br>
-                        <small>⏱️ Récup 60s | Chrono de groupe | 110-120% VMA</small>
+                        <small>🏃 Chrono individuel | Intensité 95–120% VMA | Récup variable (voir bandeau ↑)</small>
                     </div>
                     <div class="temps-cibles" id="temps-cibles-${i}"></div>
                     <div style="font-size: 0.85rem; color: var(--warning); margin: 10px 0;">

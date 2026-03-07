@@ -936,8 +936,6 @@ function fmtSec(sec) {
     const s = Math.round(sec%60);
     return `${m}:${s.toString().padStart(2,'0')}`;
 }
-// Autosave silencieux toutes les 30s + à la fermeture
-setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
 window.addEventListener('beforeunload', function(e) {
     if(typeof saveAll === 'function') saveAll(true); // sauvegarde silencieuse auto
 });

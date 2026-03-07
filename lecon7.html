@@ -24,7 +24,7 @@
             background: linear-gradient(135deg, var(--bg) 0%, #2d1810 100%);
             color: white; 
             padding: 16px;
-            padding-bottom: 90px;
+            padding-bottom: 120px;
             min-height: 100vh;
         }
         
@@ -859,10 +859,9 @@ function saveAll(silent=false) {
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
     alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
 }
-// Autosave silencieux toutes les 30s + à la fermeture
-setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
-window.addEventListener('beforeunload', function(e) {
-    if(typeof saveAll === 'function') saveAll(true); // sauvegarde silencieuse auto
+// Sauvegarde automatique uniquement à la fermeture/quitter la page
+window.addEventListener('beforeunload', function() {
+    if(typeof saveAll === 'function') saveAll(true);
 });
 
 </script>

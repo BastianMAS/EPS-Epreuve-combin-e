@@ -800,8 +800,6 @@ function saveAll(silent = false) {
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');
-// Autosave silencieux toutes les 30s + sauvegarde à la fermeture
-setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
 window.addEventListener('beforeunload', function() {
     if(typeof saveAll === 'function') saveAll(true);
 });

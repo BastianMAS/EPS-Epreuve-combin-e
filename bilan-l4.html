@@ -240,7 +240,7 @@
 <body>
 
 <h1>EPS<span style="color: var(--accent);">: épreuve Combinée</span></h1>
-<p class="subtitle">🧠 BILAN L4 - PROGRESSION INTELLIGENTE</p>
+<p class="subtitle">📈 BILAN L4 - CONSOLIDATION & PROGRESSION</p>
 
 <div class="container">
     <button class="btn-back" onclick="window.location.href='index.html'">← Retour accueil</button>
@@ -443,7 +443,7 @@ function renderBilan() {
     let html = `
         <div class="grid">
             <div class="card summary-card">
-                <div class="card-title">🧠 RÉSUMÉ CLASSE L4 - INTELLIGENCE ADAPTATIVE</div>
+                <div class="card-title">📈 RÉSUMÉ CLASSE L4 - CONSOLIDATION & PROGRESSION</div>
                 <div class="summary-stats">
                     <div class="summary-box">
                         <div class="summary-number">${bilanData.stats.totalEleves}</div>
@@ -566,7 +566,7 @@ function fmtSec(sec) {
 }
 
 function exportBilan() {
-    let contenu = `BILAN L4 - PROGRESSION INTELLIGENTE\n`;
+    let contenu = `BILAN L4 - CONSOLIDATION & PROGRESSION\n`;
     contenu += `Date: ${new Date().toLocaleDateString('fr-FR')}\n\n`;
     
     contenu += `RÉSUMÉ CLASSE:\n`;
@@ -616,7 +616,7 @@ function exportXLSX(event) {
 
     // Feuille résumé classe
     const resumeData = [
-        ['BILAN L4 - PROGRESSION INTELLIGENTE', '', '', ''],
+        ['BILAN L4 - CONSOLIDATION & PROGRESSION', '', '', ''],
         ['Date', new Date().toLocaleDateString('fr-FR'), '', ''],
         ['', '', '', ''],
         ['RÉSUMÉ CLASSE', '', '', ''],
@@ -674,7 +674,7 @@ function exportPDF() {
     doc.setFontSize(16); doc.setFont(undefined,'bold');
     doc.text('EPS : Épreuve Combinée', 14, 10);
     doc.setFontSize(11); doc.setFont(undefined,'normal');
-    doc.text('BILAN L4 — TECHNIQUE DE BASE / PROGRESSION INTELLIGENTE', 14, 17);
+    doc.text('BILAN L4 — CONSOLIDATION & PROGRESSION', 14, 17);
     doc.setFontSize(9);
     doc.text('Date : ' + date, W - 14, 17, { align: 'right' });
 

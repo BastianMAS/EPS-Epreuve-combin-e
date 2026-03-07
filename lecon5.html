@@ -529,30 +529,71 @@ function renderSelectedTeam() {
     }
 }
 
+function getPctVMAProgression(member) {
+    // Lit L3 et L4 pour calculer le % VMA progressif de l'élève
+    const seances = member.seances || [];
+    const lastOf = l => { const f = seances.filter(s => s.lecon === l); return f.length ? f[f.length-1] : null; };
+    const sL3 = lastOf('L3');
+    const sL4 = lastOf('L4');
+    const vma = parseFloat(member.vma) || 10;
+
+    function pctFromNiveau(niveau) {
+        return {vma95:95, vma100:100, vma105:105, vma110:110}[niveau] || 100;
+    }
+    function tempsCible(pct) {
+        // Temps pour 200m à pct% VMA
+        return (0.2 / (vma * pct / 100)) * 3600;
+    }
+    function objectifAtteint(seance) {
+        if(!seance || !seance.niveau || !seance.moyenne200m) return false;
+        const pct = pctFromNiveau(seance.niveau);
+        const cible = tempsCible(pct);
+        return seance.moyenne200m <= cible + 2; // tolérance 2s
+    }
+
+    // Partir du % de L3 ou 100% par défaut
+    let pctBase = sL3 ? pctFromNiveau(sL3.niveau) : 100;
+
+    // Si L3 atteint → +5%
+    if(objectifAtteint(sL3)) pctBase += 5;
+
+    // Si L4 atteint → +5% supplémentaire
+    if(objectifAtteint(sL4)) pctBase += 5;
+
+    // Plafonner à 120%
+    return Math.min(pctBase, 120);
+}
+
+function calcObjectifIndividuel(member) {
+    // Distance en 6min à son % VMA progressif, arrondie au 50m
+    const vma = parseFloat(member.vma) || 10;
+    const pct = getPctVMAProgression(member);
+    const vitesseMs = (vma * pct / 100) / 3.6;
+    const distanceBrute = vitesseMs * 360; // 6 minutes = 360 secondes
+    return { distance: Math.round(distanceBrute / 50) * 50, pct };
+}
+
 function calculateObjective() {
     if(currentTeam.length < 4) {
         document.getElementById('objective-panel').style.display = 'none';
         teamObjective = 0;
         return;
     }
-    
-    const avgVMA = currentTeam.reduce((sum, m) => sum + (parseFloat(m.vma) || 10), 0) / currentTeam.length;
-    const teamSize = currentTeam.length;
-    
-    // Calcul simple : VMA * 105% * 6min * facteur équipe
-    let facteurEquipe = 1.0;
-    if(teamSize === 5) facteurEquipe = 1.15;
-    else if(teamSize === 6) facteurEquipe = 1.25;
-    
-    const vitesseMS = (avgVMA * 1.05) / 3.6;
-    teamObjective = Math.round(vitesseMS * 360 * facteurEquipe);
-    
+
+    // Objectif équipe = somme des objectifs individuels
+    let totalObj = 0;
+    let explanations = [];
+    currentTeam.forEach(member => {
+        const { distance, pct } = calcObjectifIndividuel(member);
+        totalObj += distance;
+        explanations.push(`${member.nomPrenom.split(' ')[0]} : ${pct}% VMA → ${distance}m`);
+    });
+
+    teamObjective = totalObj;
+
     document.getElementById('objective-panel').style.display = 'block';
     document.getElementById('objective-distance').textContent = `${teamObjective}m`;
-    
-    let explanation = `VMA moy ${avgVMA.toFixed(1)} km/h à 105%`;
-    if(teamSize > 4) explanation += ` (+${Math.round((facteurEquipe-1)*100)}% car ${teamSize} coureurs)`;
-    document.getElementById('objective-explanation').textContent = explanation;
+    document.getElementById('objective-explanation').textContent = explanations.join(' | ');
 }
 
 function updateStartButton() {
@@ -576,14 +617,24 @@ function setupResultsPhase() {
     let html = '';
     
     currentTeam.forEach(member => {
+        const { distance: objIndiv, pct } = calcObjectifIndividuel(member);
         html += `
             <div class="member-result">
                 <div class="member-name">${member.nomPrenom}</div>
+                <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:6px;">
+                    Objectif : <strong style="color:var(--accent)">${objIndiv}m</strong> 
+                    <span style="opacity:0.7">(${pct}% VMA — Manche ${currentRound})</span>
+                </div>
                 <input type="number" class="plots-input" id="plots-${member.id}" 
                        placeholder="Plots" min="0" max="50" oninput="updateTotal()">
                 <div class="distance-display" id="distance-${member.id}">0m</div>
             </div>
         `;
+    });
+    
+    container.innerHTML = html;
+    updateTotal();
+}
     });
     
     container.innerHTML = html;
@@ -599,13 +650,15 @@ function updateTotal() {
         document.getElementById(`distance-${member.id}`).textContent = `${distance}m`;
         totalDistance += distance;
     });
-    
-    document.getElementById('total-distance').textContent = `Distance: ${totalDistance}m`;
-    document.getElementById('vs-objective').textContent = `Objectif: ${teamObjective}m`;
 
-    // Mise à jour barre de progression
-    const pct = teamObjective > 0 ? Math.min(Math.round((totalDistance / teamObjective) * 100), 100) : 0;
-    const rawPct = teamObjective > 0 ? Math.round((totalDistance / teamObjective) * 100) : 0;
+    // Objectif de cette manche = somme des objectifs individuels (identique à teamObjective pour 1 manche)
+    const objManche = teamObjective;
+
+    document.getElementById('total-distance').textContent = `Distance: ${totalDistance}m`;
+    document.getElementById('vs-objective').textContent = `Objectif manche ${currentRound}: ${objManche}m`;
+
+    const pct = objManche > 0 ? Math.min(Math.round((totalDistance / objManche) * 100), 100) : 0;
+    const rawPct = objManche > 0 ? Math.round((totalDistance / objManche) * 100) : 0;
     const bar = document.getElementById('team-progress-bar');
     const label = document.getElementById('progress-label');
     const missing = document.getElementById('progress-missing');
@@ -615,9 +668,9 @@ function updateTotal() {
                                rawPct >= 80  ? 'linear-gradient(90deg,var(--accent),#00ff88)' :
                                                'linear-gradient(90deg,var(--accent),var(--success))';
     }
-    if(label) label.textContent = `${rawPct}% de l'objectif`;
+    if(label) label.textContent = `${rawPct}% de l'objectif de la manche`;
     if(missing) {
-        const diff = teamObjective - totalDistance;
+        const diff = objManche - totalDistance;
         missing.textContent = diff > 0 ? `Il manque ${diff}m` : diff === 0 ? '🎯 Objectif atteint !' : `✅ +${Math.abs(diff)}m au-dessus !`;
         missing.style.color = diff <= 0 ? 'var(--success)' : '#aaa';
     }

@@ -617,11 +617,15 @@ function renderEquipesDetails() {
                     </div>
                     <div class="detail-item">
                         <div class="detail-number">${equipe.objectif}m</div>
-                        <div>Objectif</div>
+                        <div>Objectif total</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-number">${manchesNums.length ? Math.round(equipe.objectif / manchesNums.length) : equipe.objectif}m</div>
+                        <div>Objectif / manche</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-number">${equipe.performanceMoyenne}%</div>
-                        <div>Performance</div>
+                        <div>de l'objectif atteint</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-number">${manchesNums.length || equipe.manches}</div>

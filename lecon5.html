@@ -530,7 +530,7 @@ function renderSelectedTeam() {
 }
 
 function getPctVMAProgression(member) {
-    // Lit L3 et L4 pour calculer le % VMA progressif de l'élève
+    // Calcule le % VMA progressif d'un élève selon ses résultats L3/L4
     const seances = member.seances || [];
     const lastOf = l => { const f = seances.filter(s => s.lecon === l); return f.length ? f[f.length-1] : null; };
     const sL3 = lastOf('L3');
@@ -540,37 +540,17 @@ function getPctVMAProgression(member) {
     function pctFromNiveau(niveau) {
         return {vma95:95, vma100:100, vma105:105, vma110:110}[niveau] || 100;
     }
-    function tempsCible(pct) {
-        // Temps pour 200m à pct% VMA
-        return (0.2 / (vma * pct / 100)) * 3600;
-    }
     function objectifAtteint(seance) {
         if(!seance || !seance.niveau || !seance.moyenne200m) return false;
         const pct = pctFromNiveau(seance.niveau);
-        const cible = tempsCible(pct);
-        return seance.moyenne200m <= cible + 2; // tolérance 2s
+        const tempsCible = (0.2 / (vma * pct / 100)) * 3600;
+        return seance.moyenne200m <= tempsCible + 2;
     }
 
-    // Partir du % de L3 ou 100% par défaut
     let pctBase = sL3 ? pctFromNiveau(sL3.niveau) : 100;
-
-    // Si L3 atteint → +5%
     if(objectifAtteint(sL3)) pctBase += 5;
-
-    // Si L4 atteint → +5% supplémentaire
     if(objectifAtteint(sL4)) pctBase += 5;
-
-    // Plafonner à 120%
     return Math.min(pctBase, 120);
-}
-
-function calcObjectifIndividuel(member) {
-    // Distance en 6min à son % VMA progressif, arrondie au 50m
-    const vma = parseFloat(member.vma) || 10;
-    const pct = getPctVMAProgression(member);
-    const vitesseMs = (vma * pct / 100) / 3.6;
-    const distanceBrute = vitesseMs * 360; // 6 minutes = 360 secondes
-    return { distance: Math.round(distanceBrute / 50) * 50, pct };
 }
 
 function calculateObjective() {
@@ -580,20 +560,29 @@ function calculateObjective() {
         return;
     }
 
-    // Objectif équipe = somme des objectifs individuels
-    let totalObj = 0;
-    let explanations = [];
-    currentTeam.forEach(member => {
-        const { distance, pct } = calcObjectifIndividuel(member);
-        totalObj += distance;
-        explanations.push(`${member.nomPrenom.split(' ')[0]} : ${pct}% VMA → ${distance}m`);
-    });
+    const teamSize = currentTeam.length;
 
-    teamObjective = totalObj;
+    // % VMA moyen de l'équipe basé sur la progression individuelle L3/L4
+    const avgPct = currentTeam.reduce((sum, m) => sum + getPctVMAProgression(m), 0) / teamSize;
+    const avgVMA = currentTeam.reduce((sum, m) => sum + (parseFloat(m.vma) || 10), 0) / teamSize;
+
+    // Facteur taille équipe (plus on est nombreux, plus on se repose entre les relais)
+    let facteurEquipe = 1.0;
+    if(teamSize === 5) facteurEquipe = 1.15;
+    else if(teamSize === 6) facteurEquipe = 1.25;
+
+    // Distance collective en relais sur 6min, arrondie au 50m
+    const vitesseMS = (avgVMA * avgPct / 100) / 3.6;
+    const distanceBrute = vitesseMS * 360 * facteurEquipe;
+    teamObjective = Math.round(distanceBrute / 50) * 50;
 
     document.getElementById('objective-panel').style.display = 'block';
     document.getElementById('objective-distance').textContent = `${teamObjective}m`;
-    document.getElementById('objective-explanation').textContent = explanations.join(' | ');
+
+    const pctLabel = Math.round(avgPct);
+    let explanation = `VMA moy ${avgVMA.toFixed(1)} km/h à ${pctLabel}% (progression L3/L4)`;
+    if(teamSize > 4) explanation += ` · +${Math.round((facteurEquipe-1)*100)}% car ${teamSize} coureurs`;
+    document.getElementById('objective-explanation').textContent = explanation;
 }
 
 function updateStartButton() {
@@ -617,13 +606,12 @@ function setupResultsPhase() {
     let html = '';
     
     currentTeam.forEach(member => {
-        const { distance: objIndiv, pct } = calcObjectifIndividuel(member);
+        const pct = getPctVMAProgression(member);
         html += `
             <div class="member-result">
                 <div class="member-name">${member.nomPrenom}</div>
                 <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:6px;">
-                    Objectif : <strong style="color:var(--accent)">${objIndiv}m</strong> 
-                    <span style="opacity:0.7">(${pct}% VMA — Manche ${currentRound})</span>
+                    Niveau : <strong style="color:var(--accent)">${pct}% VMA</strong>
                 </div>
                 <input type="number" class="plots-input" id="plots-${member.id}" 
                        placeholder="Plots" min="0" max="50" oninput="updateTotal()">

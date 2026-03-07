@@ -369,7 +369,8 @@ function generateBilan() {
                     membres: {},      // map id → données agrégées
                     mancheKeys: new Set(),
                     distanceTotaleEquipeParManche: [], // une entrée par manche unique
-                    objectif: seance.objectifEquipe || 0,
+                    objectifManche: seance.objectifManche || seance.objectifEquipe || 0,
+                    objectif: (seance.objectifManche || seance.objectifEquipe || 0), // sera multiplié après
                     performancesParManche: [],
                 };
             }
@@ -412,7 +413,8 @@ function generateBilan() {
                 nom: eq.nom,
                 membres,
                 distanceTotale,
-                objectif: eq.objectif,
+                objectifManche: eq.objectifManche,
+                objectif: eq.objectifManche * nbManches,
                 manches: nbManches,
                 performanceMoyenne
             };
@@ -616,12 +618,12 @@ function renderEquipesDetails() {
                         <div>Distance totale</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-number">${equipe.objectif}m</div>
-                        <div>Objectif total</div>
+                        <div class="detail-number">${equipe.objectifManche}m</div>
+                        <div>Objectif / manche</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-number">${manchesNums.length ? Math.round(equipe.objectif / manchesNums.length) : equipe.objectif}m</div>
-                        <div>Objectif / manche</div>
+                        <div class="detail-number">${equipe.objectif}m</div>
+                        <div>Objectif total (×${manchesNums.length || equipe.manches})</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-number">${equipe.performanceMoyenne}%</div>

@@ -760,7 +760,8 @@ function saveResults() {
             lecon: 'L5',
             type: 'relais_olympique',
             equipe: currentTeam.map(m => m.nomPrenom).join(', '),
-            objectifEquipe: teamObjective,
+            objectifManche: teamObjective,
+            objectifEquipe: teamObjective * roundResults.length,
             manches: roundResults.length,
             distanceTotaleIndividuelle: memberTotal,
             distanceMoyenneIndividuelle: Math.round(memberTotal / roundResults.length),
@@ -783,10 +784,8 @@ function saveResults() {
     if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
     alert(`🏆 Sauvé pour ${currentTeam.length} élèves !`);
 }
-// Sauvegarde uniquement à la fermeture de la page
-window.addEventListener('beforeunload', () => {
-    if(typeof saveResults === 'function') saveResults();
-});
+// Pas de sauvegarde automatique à la fermeture pour L5
+// car saveResults() fait un push() — risque de doublons
 
 
 </script>

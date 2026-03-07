@@ -341,64 +341,94 @@ function generateBilan() {
         return;
     }
 
-    // Grouper par équipes — agréger TOUTES les séances L5 (manches 1, 2, 3...)
+    // Grouper par équipes
+    // Stratégie : chaque séance L5 = 1 manche (sauvegardée individuellement par élève)
+    // On regroupe par équipe en prenant TOUTES les séances L5 de tous les élèves
     const equipes = {};
-    
+
+    // Collecter toutes les séances L5 de tous les élèves, déduplicater par manche
+    // Une manche = un roundResult sauvegardé pour toute l'équipe au même moment
+    // Pour éviter le double-comptage, on regroupe par (equipe + date arrondie à la minute)
+    const manchesVues = new Set();
+
     elevesL5.forEach(eleve => {
-        // Récupérer TOUTES les séances L5, pas seulement la première
         const seancesL5 = eleve.seances.filter(s => s.lecon === 'L5');
         if(!seancesL5.length) return;
 
-        // Agréger les données de toutes les séances
-        const seanceL5 = {
-            equipe: seancesL5[seancesL5.length - 1].equipe, // équipe de la dernière séance
-            objectifEquipe: seancesL5[seancesL5.length - 1].objectifEquipe || 0,
-            manches: seancesL5.reduce((sum, s) => sum + (s.manches || 1), 0),
-            distanceTotaleIndividuelle: seancesL5.reduce((sum, s) => sum + (s.distanceTotaleIndividuelle || 0), 0),
-            distanceTotaleEquipe: seancesL5.reduce((sum, s) => sum + (s.distanceTotaleEquipe || 0), 0),
-            performanceMoyenne: Math.round(seancesL5.reduce((sum, s) => sum + (s.performanceMoyenne || 0), 0) / seancesL5.length),
-            detailManches: seancesL5.flatMap(s => s.detailManches || [])
-        };
-        seanceL5.distanceMoyenneIndividuelle = seanceL5.manches > 0 
-            ? Math.round(seanceL5.distanceTotaleIndividuelle / seanceL5.manches) : 0;
+        seancesL5.forEach(seance => {
+            const equipeNom = seance.equipe;
+            if(!equipeNom) return;
 
-        if(!seanceL5.equipe) return;
-        
-        const equipeNom = seanceL5.equipe;
-        if(!equipes[equipeNom]) {
-            equipes[equipeNom] = {
-                nom: equipeNom,
-                membres: [],
-                distanceTotale: 0,
-                objectif: seanceL5.objectifEquipe || 0,
-                manches: seanceL5.manches || 0,
-                performanceMoyenne: 0
-            };
-        }
-        
-        equipes[equipeNom].membres.push({
-            nom: eleve.nomPrenom,
-            distanceIndividuelle: seanceL5.distanceTotaleIndividuelle || 0,
-            distanceMoyenne: seanceL5.distanceMoyenneIndividuelle || 0,
-            detailManches: seanceL5.detailManches || []
+            // Clé unique par manche : équipe + date arrondie à la minute
+            const dateMin = seance.date ? seance.date.slice(0, 16) : 'unknown';
+            const mancheKey = `${equipeNom}||${dateMin}`;
+
+            if(!equipes[equipeNom]) {
+                equipes[equipeNom] = {
+                    nom: equipeNom,
+                    membres: {},      // map id → données agrégées
+                    mancheKeys: new Set(),
+                    distanceTotaleEquipeParManche: [], // une entrée par manche unique
+                    objectif: seance.objectifEquipe || 0,
+                    performancesParManche: [],
+                };
+            }
+
+            // Ajouter les données membre (agrégées sur toutes ses séances)
+            const membreId = eleve.id;
+            if(!equipes[equipeNom].membres[membreId]) {
+                equipes[equipeNom].membres[membreId] = {
+                    id: membreId,
+                    nom: eleve.nomPrenom,
+                    distanceIndividuelle: 0,
+                    detailManches: []
+                };
+            }
+            equipes[equipeNom].membres[membreId].distanceIndividuelle += seance.distanceTotaleIndividuelle || 0;
+            equipes[equipeNom].membres[membreId].detailManches.push(...(seance.detailManches || []));
+
+            // Compter la distance équipe une seule fois par manche unique
+            if(!equipes[equipeNom].mancheKeys.has(mancheKey)) {
+                equipes[equipeNom].mancheKeys.add(mancheKey);
+                equipes[equipeNom].distanceTotaleEquipeParManche.push(seance.distanceTotaleEquipe || 0);
+                equipes[equipeNom].performancesParManche.push(seance.performanceMoyenne || 0);
+            }
         });
-        
-        equipes[equipeNom].distanceTotale = seanceL5.distanceTotaleEquipe || 0;
-        equipes[equipeNom].performanceMoyenne = seanceL5.performanceMoyenne || 0;
     });
 
+    // Consolider les données équipes
     bilanData = {
-        equipes: Object.values(equipes),
+        equipes: Object.values(equipes).map(eq => {
+            const membres = Object.values(eq.membres);
+            const nbManches = eq.mancheKeys.size;
+            const distanceTotale = eq.distanceTotaleEquipeParManche.reduce((a,b) => a+b, 0);
+            const performanceMoyenne = nbManches > 0
+                ? Math.round(eq.performancesParManche.reduce((a,b) => a+b, 0) / nbManches)
+                : 0;
+            membres.forEach(m => {
+                m.distanceMoyenne = nbManches > 0 ? Math.round(m.distanceIndividuelle / nbManches) : 0;
+            });
+            return {
+                nom: eq.nom,
+                membres,
+                distanceTotale,
+                objectif: eq.objectif,
+                manches: nbManches,
+                performanceMoyenne
+            };
+        }),
         stats: {
-            totalEquipes: Object.keys(equipes).length,
-            totalEleves: elevesL5.length,
+            totalEquipes: 0,
+            totalEleves: 0,
             distanceTotaleClasse: 0,
             performanceMoyenneClasse: 0,
             equipesObjectifAtteint: 0
         }
     };
 
-    // Calculs statistiques
+    // Calculs statistiques finaux
+    bilanData.stats.totalEquipes = bilanData.equipes.length;
+    bilanData.stats.totalEleves = bilanData.equipes.reduce((sum, eq) => sum + eq.membres.length, 0);
     bilanData.stats.distanceTotaleClasse = bilanData.equipes.reduce((sum, eq) => sum + eq.distanceTotale, 0);
     bilanData.stats.performanceMoyenneClasse = Math.round(
         bilanData.equipes.reduce((sum, eq) => sum + eq.performanceMoyenne, 0) / bilanData.equipes.length

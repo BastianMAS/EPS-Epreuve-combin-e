@@ -183,82 +183,65 @@ function analyzerL7(eleves) {
     bilanData.elevesAvecL7 = [];
     
     eleves.forEach(eleve => {
-        const seanceL7 = eleve.seances?.find(s => s.lecon === 'L7');
-        if(!seanceL7) return;
-        
-        console.log(`Élève: ${eleve.nomPrenom}, VMA: ${eleve.vma}`);
-        console.log(`Temps bruts: ${seanceL7.temps1}, ${seanceL7.temps2}, ${seanceL7.temps3}`);
-        
-        // Calcul % VMA avec conversion intelligente
-        let pctVMA1 = null, pctVMA2 = null, pctVMA3 = null, pctVMAMoyen = null;
-        
-        if(seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
-            const vmaKmh = parseFloat(eleve.vma);
-            const vmaMs = vmaKmh / 3.6; // Conversion m/s
+        // Prendre TOUTES les sessions L7, pas seulement la première
+        const seancesL7 = eleve.seances?.filter(s => s.lecon === 'L7') || [];
+        if(!seancesL7.length) return;
+
+        const sessionsAnalysees = seancesL7.map((seanceL7, sessionIdx) => {
+            let pctVMA1 = null, pctVMA2 = null, pctVMA3 = null, pctVMAMoyen = null;
             
-            // Conversion temps avec système intelligent
-            const t1 = convertTempsIntelligent(seanceL7.temps1);
-            const t2 = convertTempsIntelligent(seanceL7.temps2);
-            const t3 = convertTempsIntelligent(seanceL7.temps3);
-            
-            console.log(`VMA: ${vmaKmh} km/h = ${vmaMs.toFixed(2)} m/s`);
-            console.log(`Temps convertis: ${t1}s, ${t2}s, ${t3}s`);
-            
-            if(t1 > 0 && t2 > 0 && t3 > 0) {
-                // Vitesse = distance / temps
-                const v1 = 400 / t1;
-                const v2 = 400 / t2;
-                const v3 = 400 / t3;
-                
-                // % VMA = (vitesse course / VMA) × 100
-                pctVMA1 = Math.round((v1 / vmaMs) * 100);
-                pctVMA2 = Math.round((v2 / vmaMs) * 100);
-                pctVMA3 = Math.round((v3 / vmaMs) * 100);
-                
-                // Vérification cohérence (éviter aberrations)
-                if(pctVMA1 >= 50 && pctVMA1 <= 200 && pctVMA2 >= 50 && pctVMA2 <= 200 && pctVMA3 >= 50 && pctVMA3 <= 200) {
-                    pctVMAMoyen = Math.round((pctVMA1 + pctVMA2 + pctVMA3) / 3);
-                    console.log(`Vitesses: ${v1.toFixed(2)}, ${v2.toFixed(2)}, ${v3.toFixed(2)} m/s`);
-                    console.log(`% VMA: ${pctVMA1}%, ${pctVMA2}%, ${pctVMA3}% → Moyenne: ${pctVMAMoyen}%`);
-                } else {
-                    console.log(`⚠️ % VMA aberrants ignorés: ${pctVMA1}%, ${pctVMA2}%, ${pctVMA3}%`);
-                    pctVMA1 = pctVMA2 = pctVMA3 = pctVMAMoyen = null;
+            if(seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
+                const vmaKmh = parseFloat(eleve.vma);
+                const vmaMs = vmaKmh / 3.6;
+                const t1 = convertTempsIntelligent(seanceL7.temps1);
+                const t2 = convertTempsIntelligent(seanceL7.temps2);
+                const t3 = convertTempsIntelligent(seanceL7.temps3);
+                if(t1 > 0 && t2 > 0 && t3 > 0) {
+                    pctVMA1 = Math.round((400/t1/vmaMs)*100);
+                    pctVMA2 = Math.round((400/t2/vmaMs)*100);
+                    pctVMA3 = Math.round((400/t3/vmaMs)*100);
+                    if(pctVMA1>=50&&pctVMA1<=200&&pctVMA2>=50&&pctVMA2<=200&&pctVMA3>=50&&pctVMA3<=200) {
+                        pctVMAMoyen = Math.round((pctVMA1+pctVMA2+pctVMA3)/3);
+                    } else {
+                        pctVMA1=pctVMA2=pctVMA3=pctVMAMoyen=null;
+                    }
                 }
             }
-        }
+            
+            const travailSaut = [];
+            const travailLancer = [];
+            if(seanceL7.sautCourseElan) travailSaut.push("Course d'élan");
+            if(seanceL7.sautPrecision) travailSaut.push("Précision");
+            if(seanceL7.sautReception) travailSaut.push("Réception");
+            if(seanceL7.sautDistance) travailSaut.push("Distance");
+            if(seanceL7.lancerCoordination) travailLancer.push("Coordination");
+            if(seanceL7.lancerTransfert) travailLancer.push("Transfert");
+            if(seanceL7.lancerAccompagnement) travailLancer.push("Accompagnement");
+            if(seanceL7.lancerRegularite) travailLancer.push("Régularité");
+
+            return {
+                sessionIdx,   // index dans le tableau seances de l'élève (pour suppression)
+                seanceIdx: eleve.seances.indexOf(seanceL7),
+                seanceL7,
+                pctVMA1, pctVMA2, pctVMA3, pctVMAMoyen,
+                travailSaut, travailLancer,
+                date: seanceL7.date
+            };
+        });
         
-        // Analyse travail autonome
-        const travailSaut = [];
-        const travailLancer = [];
-        
-        if(seanceL7.sautCourseElan) travailSaut.push("Course d'élan");
-        if(seanceL7.sautPrecision) travailSaut.push("Précision");
-        if(seanceL7.sautReception) travailSaut.push("Réception");
-        if(seanceL7.sautDistance) travailSaut.push("Distance");
-        
-        if(seanceL7.lancerCoordination) travailLancer.push("Coordination");
-        if(seanceL7.lancerTransfert) travailLancer.push("Transfert");
-        if(seanceL7.lancerAccompagnement) travailLancer.push("Accompagnement");
-        if(seanceL7.lancerRegularite) travailLancer.push("Régularité");
-        
-        const eleveData = {
+        bilanData.elevesAvecL7.push({
             id: eleve.id,
             nomPrenom: eleve.nomPrenom,
             sexe: eleve.sexe,
             vma: eleve.vma,
-            seanceL7: seanceL7,
-            pctVMA1: pctVMA1,
-            pctVMA2: pctVMA2,
-            pctVMA3: pctVMA3,
-            pctVMAMoyen: pctVMAMoyen,
-            travailSaut: travailSaut,
-            travailLancer: travailLancer
-        };
-        
-        bilanData.elevesAvecL7.push(eleveData);
+            sessions: sessionsAnalysees,
+            // Rétrocompat : exposer la dernière session comme seanceL7
+            seanceL7: sessionsAnalysees[sessionsAnalysees.length-1]?.seanceL7,
+            pctVMAMoyen: sessionsAnalysees[sessionsAnalysees.length-1]?.pctVMAMoyen,
+        });
     });
-    
-    // Stats globales
+
+        // Stats globales
     bilanData.stats.totalEleves = bilanData.elevesAvecL7.length;
     bilanData.stats.confiantsL8 = bilanData.elevesAvecL7.filter(e => e.seanceL7.confiantL8).length;
     bilanData.stats.strategiesTrouvees = bilanData.elevesAvecL7.filter(e => e.seanceL7.strategieTrouvee).length;
@@ -534,60 +517,88 @@ function renderEleves() {
     let html = '';
     
     bilanData.elevesAvecL7.forEach(eleve => {
-        const seance = eleve.seanceL7;
+        const nbSessions = eleve.sessions.length;
         
-        html += `
-            <div class="eleve-card">
-                <div class="eleve-header">
-                    <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
-                    <span>${eleve.nomPrenom}</span>
-                    <span style="margin-left: auto; font-size: 0.8rem;">VMA ${eleve.vma || 'N/A'} km/h</span>
-                </div>
-                <div class="eleve-body">
+        html += `<div class="eleve-card">
+            <div class="eleve-header">
+                <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
+                <span>${eleve.nomPrenom}</span>
+                <span style="margin-left: auto; font-size: 0.8rem;">VMA ${eleve.vma || 'N/A'} km/h</span>
+            </div>`;
+
+        eleve.sessions.forEach((sess, si) => {
+            const seance = sess.seanceL7;
+            const dateLabel = sess.date ? new Date(sess.date).toLocaleDateString('fr-FR') : `Session ${si+1}`;
+            const isMulti = nbSessions > 1;
+
+            html += `<div class="eleve-body" style="${isMulti ? 'border-top: 2px dashed rgba(255,255,255,0.1); padding-top:10px;' : ''}">`;
+            
+            if(isMulti) {
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-size:0.8rem;color:#94a3b8;font-weight:700;">📅 ${dateLabel}</span>
+                    <button onclick="deleteSession('${eleve.id}', ${sess.seanceIdx})" 
+                        style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;
+                               padding:3px 10px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-weight:700;">
+                        🗑️ Supprimer
+                    </button>
+                </div>`;
+            }
+
+            html += `
                     <div class="performance-row">
                         <span>🏃‍♂️ 400m #1</span>
-                        <span>${seance.temps1 || 'N/A'} ${eleve.pctVMA1 ? `(${eleve.pctVMA1}% VMA)` : ''}</span>
+                        <span>${seance.temps1 || 'N/A'} ${sess.pctVMA1 ? `(${sess.pctVMA1}% VMA)` : ''}</span>
                     </div>
                     <div class="performance-row">
                         <span>🏃‍♂️ 400m #2</span>
-                        <span>${seance.temps2 || 'N/A'} ${eleve.pctVMA2 ? `(${eleve.pctVMA2}% VMA)` : ''}</span>
+                        <span>${seance.temps2 || 'N/A'} ${sess.pctVMA2 ? `(${sess.pctVMA2}% VMA)` : ''}</span>
                     </div>
                     <div class="performance-row">
                         <span>🏃‍♂️ 400m #3</span>
-                        <span>${seance.temps3 || 'N/A'} ${eleve.pctVMA3 ? `(${eleve.pctVMA3}% VMA)` : ''}</span>
+                        <span>${seance.temps3 || 'N/A'} ${sess.pctVMA3 ? `(${sess.pctVMA3}% VMA)` : ''}</span>
                     </div>
-                    ${eleve.pctVMAMoyen ? `
-                    <div class="performance-row" style="background: linear-gradient(45deg, rgba(255,107,53,0.2), rgba(255,136,0,0.2)); font-weight: 700; border: 2px solid rgba(255,107,53,0.5);">
+                    ${sess.pctVMAMoyen ? `
+                    <div class="performance-row" style="background:linear-gradient(45deg,rgba(255,107,53,0.2),rgba(255,136,0,0.2));font-weight:700;border:2px solid rgba(255,107,53,0.5);">
                         <span>📊 MOYENNE VMA</span>
-                        <span style="color: var(--accent); font-size: 1.2rem; font-weight: 900;">${eleve.pctVMAMoyen}%</span>
-                    </div>
-                    ` : ''}
-                    ${eleve.travailSaut.length > 0 ? `
+                        <span style="color:var(--accent);font-size:1.2rem;font-weight:900;">${sess.pctVMAMoyen}%</span>
+                    </div>` : ''}
+                    ${sess.travailSaut.length > 0 ? `
                     <div class="performance-row">
                         <span>🦘 Saut travaillé</span>
-                        <span style="font-size: 0.8rem;">${eleve.travailSaut.join(', ')}</span>
-                    </div>
-                    ` : ''}
-                    ${eleve.travailLancer.length > 0 ? `
+                        <span style="font-size:0.8rem;">${sess.travailSaut.join(', ')}</span>
+                    </div>` : ''}
+                    ${sess.travailLancer.length > 0 ? `
                     <div class="performance-row">
                         <span>🎯 Lancer travaillé</span>
-                        <span style="font-size: 0.8rem;">${eleve.travailLancer.join(', ')}</span>
-                    </div>
-                    ` : ''}
-                    <div style="margin-top: 12px; padding: 8px; background: rgba(75,222,128,0.1); border-radius: 6px; font-size: 0.85rem;">
+                        <span style="font-size:0.8rem;">${sess.travailLancer.join(', ')}</span>
+                    </div>` : ''}
+                    <div style="margin-top:12px;padding:8px;background:rgba(75,222,128,0.1);border-radius:6px;font-size:0.85rem;">
                         ${seance.projetReussi ? '✅ Projet réussi<br>' : ''}
                         ${seance.confiantL8 ? '💪 Confiant pour L8<br>' : ''}
                         ${seance.strategieTrouvee ? '🎯 Stratégie trouvée<br>' : ''}
                         ${!seance.projetReussi && !seance.confiantL8 && !seance.strategieTrouvee ? '<em>Aucun ressenti sélectionné</em>' : ''}
                     </div>
-                </div>
-            </div>
-        `;
+            </div>`;
+        });
+
+        html += `</div>`;
     });
     
     container.innerHTML = html;
     const ez = document.getElementById('export-zone'); if(ez) ez.style.display='block';
 }
+function deleteSession(eleveId, seanceIdx) {
+    if(!confirm('🗑️ Supprimer cette session ? Cette action est irréversible.')) return;
+    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    const idx = allStudents.findIndex(s => s.id === eleveId);
+    if(idx === -1) return;
+    allStudents[idx].seances.splice(seanceIdx, 1);
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    // Recharger le bilan
+    ELEVES = allStudents;
+    generateBilan();
+}
+
 function exportTXT() {
     if(!bilanData || !bilanData.elevesAvecL7.length) return;
     const date = new Date().toLocaleDateString('fr-FR');

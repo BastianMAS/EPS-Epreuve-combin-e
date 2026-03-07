@@ -356,6 +356,7 @@ function renderTable() {
         <th>⭐ Saut</th>
         <th>⭐ Lancer</th>
         <th>🏆 Global</th>
+        <th>Fiche</th>
     </tr></thead><tbody>`;
 
     filteredStudents.forEach((s, idx) => {
@@ -389,6 +390,7 @@ function renderTable() {
             <td>${evS?renderBadge(evS):'—'}</td>
             <td>${evL?renderBadge(evL):'—'}</td>
             <td>${renderGlobalBadge(globalLevel)}</td>
+            <td><button onclick="exportStudentPDF('${s.id}')" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;">📄 Fiche</button></td>
         </tr>`;
     });
 
@@ -491,6 +493,82 @@ function exportExcel() {
 }
 
 // ── Export PDF (impression) ───────────────────────────────────────────────────
+function exportStudentPDF(studentId) {
+    const s = allStudents.find(st => st.id === studentId);
+    if(!s || !s.diagnostique) return;
+    const d = s.diagnostique;
+    const vma = parseFloat(s.vma);
+    const moy = getCourseMoy(d);
+    const sautSans = getSautSansBest(d);
+    const sautAvec = getSautBest(s)||null;
+    const lancer = getLancerBest(s)||null;
+    const lancerType = getLancerType(d);
+    const evC = evaluateVMA(vma, s.sexe);
+    const evS = sautAvec ? evaluateSaut(sautAvec, s.sexe) : null;
+    const evL = lancer ? evaluateLancer(lancer, s.sexe) : null;
+    const nbEval = 1+(evS?1:0)+(evL?1:0);
+    const globalLevel = Math.round(((evC.level)+(evS?.level||0)+(evL?.level||0))/nbEval);
+    const niveauLabels = ['','Fragile','En construction','Solide','Confirmé','Champion'];
+    const niveauColors = ['','#9f1239','#b45309','#15803d','#1d4ed8','#7c3aed'];
+    const stars = n => '⭐'.repeat(n);
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Fiche Diagnostique — ${s.nomPrenom}</title>
+    <style>
+        body{font-family:Arial,sans-serif;padding:24px;max-width:600px;margin:0 auto;color:#1e293b}
+        .header{background:linear-gradient(135deg,#0d9488,#0891b2);color:white;padding:20px;border-radius:12px;margin-bottom:20px;text-align:center}
+        .header h2{margin:0 0 4px 0;font-size:1.4rem}
+        .header p{margin:0;opacity:0.85;font-size:0.9rem}
+        .section{background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid #e2e8f0}
+        .section-title{font-weight:800;color:#0d9488;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+        .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:0.9rem}
+        .row:last-child{border-bottom:none}
+        .val{font-weight:700;color:#1e293b}
+        .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.8rem;font-weight:800;color:white}
+        .global{text-align:center;padding:16px;border-radius:10px;margin-bottom:14px}
+        .global-val{font-size:2rem;font-weight:900}
+        .no-print{text-align:center;margin:20px 0}
+        @media print{.no-print{display:none}}
+    </style></head><body>
+    <div class="header">
+        <h2>${s.sexe==='F'?'👧':'🧑'} ${s.nomPrenom}</h2>
+        <p>Classe : ${s.classe||'—'} | Évaluation diagnostique L1/L2 | ${new Date().toLocaleDateString('fr-FR')}</p>
+    </div>
+
+    <div class="global" style="background:${niveauColors[globalLevel]||'#444'};color:white">
+        <div class="global-val">${niveauLabels[globalLevel]||'—'}</div>
+        <div style="font-size:0.85rem;opacity:0.9;margin-top:4px">Niveau global — ${stars(globalLevel)}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🏃 Course — 3×400m</div>
+        <div class="row"><span>VMA</span><span class="val">${vma.toFixed(1)} km/h (${d.methode||d.testCourse||'—'})</span></div>
+        <div class="row"><span>Moyenne 3×400m</span><span class="val">${moy?formatTime(moy):'—'}</span></div>
+        <div class="row"><span>Niveau</span><span class="val">${stars(evC.level)}</span></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🦘 Saut en longueur</div>
+        <div class="row"><span>Sans élan</span><span class="val">${sautSans?sautSans.toFixed(2)+'m':'—'}</span></div>
+        <div class="row"><span>Avec élan</span><span class="val">${sautAvec?sautAvec.toFixed(2)+'m':'—'}</span></div>
+        <div class="row"><span>Niveau</span><span class="val">${evS?stars(evS.level):'—'}</span></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🎯 Lancer</div>
+        <div class="row"><span>Meilleur lancer</span><span class="val">${lancer?lancer.toFixed(1)+'m'+(lancerType?' ('+lancerType+')':''):'—'}</span></div>
+        <div class="row"><span>Niveau</span><span class="val">${evL?stars(evL.level):'—'}</span></div>
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:10px 24px;background:#0d9488;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:12px;">🖨️ Imprimer</button>
+        <button onclick="window.close()" style="padding:10px 24px;background:#64748b;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
+}
+
 function exportPDF() {
     if (!filteredStudents.length) { alert('⚠️ Aucun élève à exporter.'); return; }
     const filtreClasse = document.getElementById('filter-classe').value || 'Toutes classes';

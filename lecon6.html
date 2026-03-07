@@ -308,6 +308,26 @@
 <h1>EPS: épreuve Combinée</h1>
 <p class="subtitle">⚡ L6 - PERFECTIONNEMENT TECHNIQUE</p>
 
+<!-- BLOC EXPLICATION SÉANCE — commun à tous les élèves -->
+<div style="
+    max-width: 1400px; margin: 0 auto 16px auto;
+    background: linear-gradient(135deg, rgba(0,217,255,0.08), rgba(139,92,246,0.08));
+    border: 2px solid rgba(0,217,255,0.3);
+    border-radius: 14px;
+    padding: 16px 20px;
+">
+    <div style="font-weight: 800; color: var(--accent); font-size: 1rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+        📋 Organisation de la séance
+    </div>
+    <div style="font-size: 0.88rem; color: #e2e8f0; line-height: 1.7;">
+        Chaque élève réalise <strong>la pyramide en autonomie</strong> : 60m → 80m → 100m → 80m → 60m.<br>
+        Il gère son propre chrono de récupération entre chaque distance, en respectant l'intensité cible.<br>
+        Pendant la récupération des uns, les autres travaillent <strong>saut ou lancer</strong> de façon autonome.<br>
+        <span style="color: #94a3b8; font-size: 0.8rem;">👉 Cocher chaque distance validée dans la carte de l'élève.</span>
+    </div>
+</div>
+
+<!-- BANDEAU RÉCUPÉRATION -->
 <div style="
     max-width: 1400px; margin: 0 auto 20px auto;
     background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(0,217,255,0.1));
@@ -336,7 +356,7 @@
             <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 6px 12px; line-height: 1.4;">
                 <div style="color: var(--danger); font-weight: 800;">Sprint final 60m</div>
                 <div style="color: #e2e8f0;">≈ 115–120% VMA</div>
-                <div style="color: var(--warning); font-weight: 700;">Récup : 2 min 30</div>
+                <div style="color: #94a3b8; font-size: 0.78rem; font-style: italic;">Fin de pyramide — pas de récup</div>
             </div>
         </div>
         <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">
@@ -402,11 +422,6 @@ function createCard(i) {
                     <span>🏃‍♂️ PYRAMIDE DOUCE</span><span class="arrow" id="arr-course-${i}">▼</span>
                 </div>
                 <div class="section-body" id="body-course-${i}">
-                    <div class="pyramide-info">
-                        <strong>📊 Pyramide Autonome :</strong><br>
-                        60m → 80m → 100m → 80m → 60m<br>
-                        <small>🏃 Chrono individuel | Intensité 95–120% VMA | Récup variable (voir bandeau ↑)</small>
-                    </div>
                     <div class="temps-cibles" id="temps-cibles-${i}"></div>
                     <div style="font-size: 0.85rem; color: var(--warning); margin: 10px 0;">
                         <strong>✅ Validation des distances :</strong>
@@ -711,13 +726,35 @@ function saveAll(silent = false) {
 
         if(!allStudents[idx].seances) allStudents[idx].seances = [];
 
-        let seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L6');
-        if(seanceIdx === -1) {
-            allStudents[idx].seances.push({
-                lecon: 'L6',
-                date: new Date().toISOString()
-            });
-            seanceIdx = allStudents[idx].seances.length - 1;
+        // ── Sécurité multi-sessions ──────────────────────────────────────────
+        const sessionsExistantes_L6 = allStudents[idx].seances
+            .map((s, si) => ({...s, _idx: si}))
+            .filter(s => s.lecon === 'L6');
+
+        let seanceIdx = -1;
+
+        if(!silent && sessionsExistantes_L6.length > 0) {
+            const lastDate = sessionsExistantes_L6[sessionsExistantes_L6.length-1].date
+                ? new Date(sessionsExistantes_L6[sessionsExistantes_L6.length-1].date).toLocaleDateString('fr-FR')
+                : 'date inconnue';
+            const choix = window.confirm(
+                `⚠️ ${d.student.nomPrenom} a déjà une séance L6 (${lastDate}).\n\n` +
+                `OK → Nouvelle session (conserve l'ancienne)\n` +
+                `Annuler → Écraser la session existante`
+            );
+            if(choix) {
+                allStudents[idx].seances.push({ lecon: 'L6', date: new Date().toISOString() });
+                seanceIdx = allStudents[idx].seances.length - 1;
+            } else {
+                seanceIdx = sessionsExistantes_L6[sessionsExistantes_L6.length-1]._idx;
+            }
+        } else {
+            if(sessionsExistantes_L6.length > 0) {
+                seanceIdx = sessionsExistantes_L6[sessionsExistantes_L6.length-1]._idx;
+            } else {
+                allStudents[idx].seances.push({ lecon: 'L6', date: new Date().toISOString() });
+                seanceIdx = allStudents[idx].seances.length - 1;
+            }
         }
 
         const scoreSaut = [sautTech1, sautTech2, sautTech3, sautTech4, sautTech5].filter(Boolean).length;
@@ -763,28 +800,11 @@ function saveAll(silent = false) {
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');
-// ══════════════════════════════════════════════════
-// AUTOSAVE — toutes les 30 secondes + à la fermeture
-// ══════════════════════════════════════════════════
-let _autosaveTimer = null;
-
-function startAutosave() {
-    _autosaveTimer = setInterval(() => {
-        if(typeof saveAll === 'function') {
-            saveAll(true); // true = silencieux (pas d'alert)
-        }
-    }, 30000);
-}
-
-window.addEventListener('beforeunload', () => {
+// Autosave silencieux toutes les 30s + sauvegarde à la fermeture
+setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
+window.addEventListener('beforeunload', function() {
     if(typeof saveAll === 'function') saveAll(true);
 });
-
-window.addEventListener('load', startAutosave);
-
-// Autosave silencieux toutes les 30s + à la fermeture
-setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
-window.addEventListener('beforeunload', function(){ if(typeof saveAll==='function') saveAll(true); });
 
 </script>
 

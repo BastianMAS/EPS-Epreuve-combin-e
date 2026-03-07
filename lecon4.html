@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L4 - Consolidation & Progression - EPS: épreuve Combinée</title>
+    <title>L4 - Technique de Base Atelier 2 - EPS: épreuve Combinée</title>
     <style>
         :root {
             --bg: #0f1419;
@@ -507,33 +507,7 @@
 <body>
 
 <h1>EPS<span style="color: var(--accent);">PRO</span></h1>
-<p class="subtitle">📈 L4 - CONSOLIDATION & PROGRESSION</p>
-
-<div style="
-    max-width: 1400px; margin: 0 auto 20px auto;
-    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(255,107,53,0.1));
-    border: 2px solid var(--warning);
-    border-radius: 14px;
-    padding: 14px 20px;
-    display: flex; align-items: center; gap: 14px;
-    flex-wrap: wrap;
-">
-    <span style="font-size: 1.6rem;">⏱️</span>
-    <div>
-        <div style="font-weight: 800; color: var(--warning); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
-            Temps de récupération entre chaque 200m
-        </div>
-        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.5;">
-            <strong style="color: var(--success);">95–100% VMA</strong> → récup <strong>90 secondes</strong> &nbsp;|&nbsp;
-            <strong style="color: var(--warning);">105% VMA</strong> → récup <strong>2 minutes</strong> &nbsp;|&nbsp;
-            <strong style="color: var(--danger);">110–115% VMA</strong> → récup <strong>2 min 30</strong>
-        </div>
-        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">
-            💡 Chaque élève gère sa récup avec son propre chrono — retour en place avant la fin du temps imparti.
-        </div>
-    </div>
-</div>
-
+<p class="subtitle">🔧 L4 - TECHNIQUE DE BASE ATELIER 2</p>
 <button class="btn-back" onclick="window.location.href='index.html'">← Retour</button>
 
 <div class="grid6" id="grid"></div>
@@ -786,7 +760,7 @@ function buildCard(i) {
                         </div>
                     </div>
                     <label>Distance sautée (m) :</label>
-                    <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.00" style="width:100px">
+                    <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.00" style="width:100px" inputmode="decimal">
                 </div>
             </div>
 
@@ -815,7 +789,7 @@ function buildCard(i) {
                         </div>
                     </div>
                     <label>Distance lancée (m) :</label>
-                    <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="10.50" style="width:100px">
+                    <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="10.50" style="width:100px" inputmode="decimal">
                 </div>
             </div>
         </div>
@@ -1149,13 +1123,35 @@ function saveAll(silent=false) {
 
         if(!allStudents[idx].seances) allStudents[idx].seances = [];
 
-        let seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L4');
-        if(seanceIdx === -1) {
-            allStudents[idx].seances.push({
-                lecon: 'L4',
-                date: new Date().toISOString()
-            });
-            seanceIdx = allStudents[idx].seances.length - 1;
+        // ── Sécurité multi-sessions ──────────────────────────────────────────
+        const sessionsExistantes_L4 = allStudents[idx].seances
+            .map((s, si) => ({...s, _idx: si}))
+            .filter(s => s.lecon === 'L4');
+
+        let seanceIdx = -1;
+
+        if(!silent && sessionsExistantes_L4.length > 0) {
+            const lastDate = sessionsExistantes_L4[sessionsExistantes_L4.length-1].date
+                ? new Date(sessionsExistantes_L4[sessionsExistantes_L4.length-1].date).toLocaleDateString('fr-FR')
+                : 'date inconnue';
+            const choix = window.confirm(
+                `⚠️ ${d.student.nomPrenom} a déjà une séance L4 (${lastDate}).\n\n` +
+                `OK → Nouvelle session (conserve l'ancienne)\n` +
+                `Annuler → Écraser la session existante`
+            );
+            if(choix) {
+                allStudents[idx].seances.push({ lecon: 'L4', date: new Date().toISOString() });
+                seanceIdx = allStudents[idx].seances.length - 1;
+            } else {
+                seanceIdx = sessionsExistantes_L4[sessionsExistantes_L4.length-1]._idx;
+            }
+        } else {
+            if(sessionsExistantes_L4.length > 0) {
+                seanceIdx = sessionsExistantes_L4[sessionsExistantes_L4.length-1]._idx;
+            } else {
+                allStudents[idx].seances.push({ lecon: 'L4', date: new Date().toISOString() });
+                seanceIdx = allStudents[idx].seances.length - 1;
+            }
         }
 
         allStudents[idx].seances[seanceIdx] = {
@@ -1185,7 +1181,7 @@ function saveAll(silent=false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    if(!silent) alert(`🔧 Données L4 techniques sauvegardées pour ${count} élève(s) !`);
+    if(!silent) alert(`🔧 Données L4 sauvegardées pour ${count} élève(s) !`);
 }
 
 function parseTime(str) {
@@ -1205,7 +1201,9 @@ function fmtSec(sec) {
 }
 // Autosave silencieux toutes les 30s + à la fermeture
 setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
-window.addEventListener('beforeunload', function(){ if(typeof saveAll==='function') saveAll(true); });
+window.addEventListener('beforeunload', function(e) {
+    if(typeof saveAll === 'function') saveAll(true); // sauvegarde silencieuse auto
+});
 
 </script>
 

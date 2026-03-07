@@ -187,13 +187,17 @@
         .temps-saisie {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             margin: 12px 0;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .temps-input {
             flex: 1;
-            padding: 12px;
+            min-width: 0;
+            max-width: 140px;
+            padding: 10px 8px;
             background: rgba(255,255,255,0.1);
             border: 2px solid rgba(255,255,255,0.2);
             border-radius: 8px;
@@ -202,6 +206,7 @@
             font-family: 'SF Mono', Monaco, monospace;
             font-weight: 600;
             font-size: 1.1rem;
+            box-sizing: border-box;
         }
         
         .temps-input:focus {
@@ -273,29 +278,6 @@
 <h1>EPS: épreuve Combinée</h1>
 <p class="subtitle">🎯 L7 - MISE EN SITUATION ADAPTATIVE</p>
 
-<div style="
-    max-width: 1400px; margin: 0 auto 20px auto;
-    background: linear-gradient(135deg, rgba(74,222,128,0.12), rgba(0,217,255,0.08));
-    border: 2px solid var(--success);
-    border-radius: 14px;
-    padding: 14px 20px;
-    display: flex; align-items: center; gap: 14px;
-    flex-wrap: wrap;
-">
-    <span style="font-size: 1.6rem;">⏱️</span>
-    <div>
-        <div style="font-weight: 800; color: var(--success); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
-            Récupération entre les 400m
-        </div>
-        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.5;">
-            Entre chaque 400m : récupération <strong style="color: var(--warning);">3 à 4 minutes</strong> — même durée que pour l'épreuve finale.
-        </div>
-        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">
-            💡 C'est la mise en situation réelle : l'élève choisit son allure <em>avant</em> chaque tour, puis compare avec ce qu'il a réellement couru.
-        </div>
-    </div>
-</div>
-
 <div class="grid6" id="grid"></div>
 
 <button class="save-btn" onclick="saveAll()">💾 Sauvegarder</button>
@@ -365,7 +347,7 @@ function createCard(i) {
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
-                            <input type="text" class="temps-input" id="temps1-${i}" placeholder="1:25" onchange="checkTour2(${i})">
+                            <input type="text" class="temps-input" id="temps1-${i}" placeholder="1:25" onchange="checkTour2(${i})" inputmode="decimal">
                         </div>
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
@@ -406,7 +388,7 @@ function createCard(i) {
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
-                            <input type="text" class="temps-input" id="temps2-${i}" placeholder="1:25" onchange="checkTour3(${i})">
+                            <input type="text" class="temps-input" id="temps2-${i}" placeholder="1:25" onchange="checkTour3(${i})" inputmode="decimal">
                         </div>
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
@@ -447,7 +429,7 @@ function createCard(i) {
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
-                            <input type="text" class="temps-input" id="temps3-${i}" placeholder="1:25">
+                            <input type="text" class="temps-input" id="temps3-${i}" placeholder="1:25" inputmode="decimal">
                         </div>
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Ressenti final :</div>
@@ -797,13 +779,39 @@ function saveAll(silent=false) {
 
         if(!allStudents[idx].seances) allStudents[idx].seances = [];
 
-        let seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L7');
-        if(seanceIdx === -1) {
-            allStudents[idx].seances.push({
-                lecon: 'L7',
-                date: new Date().toISOString()
-            });
-            seanceIdx = allStudents[idx].seances.length - 1;
+        // ── Sécurité multi-sessions ──────────────────────────────────────────
+        // Chercher une session L7 existante NON horodatée (ancienne) ou la session active
+        const sessionsExistantes = allStudents[idx].seances
+            .map((s, idx) => ({...s, _idx: idx}))
+            .filter(s => s.lecon === 'L7');
+
+        let seanceIdx = -1;
+
+        if(!silent && sessionsExistantes.length > 0) {
+            const lastDate = sessionsExistantes[sessionsExistantes.length-1].date
+                ? new Date(sessionsExistantes[sessionsExistantes.length-1].date).toLocaleDateString('fr-FR')
+                : 'date inconnue';
+            const choix = window.confirm(
+                `⚠️ ${d.student.nomPrenom} a déjà une séance L7 (${lastDate}).\n\n` +
+                `OK → Nouvelle session (conserve l'ancienne)\n` +
+                `Annuler → Écraser la session existante`
+            );
+            if(choix) {
+                // Nouvelle session horodatée
+                allStudents[idx].seances.push({ lecon: 'L7', date: new Date().toISOString() });
+                seanceIdx = allStudents[idx].seances.length - 1;
+            } else {
+                // Écraser la dernière session L7
+                seanceIdx = sessionsExistantes[sessionsExistantes.length-1]._idx;
+            }
+        } else {
+            // Autosave : toujours mettre à jour la dernière session ou en créer une
+            if(sessionsExistantes.length > 0) {
+                seanceIdx = sessionsExistantes[sessionsExistantes.length-1]._idx;
+            } else {
+                allStudents[idx].seances.push({ lecon: 'L7', date: new Date().toISOString() });
+                seanceIdx = allStudents[idx].seances.length - 1;
+            }
         }
 
         allStudents[idx].seances[seanceIdx] = {
@@ -853,7 +861,9 @@ function saveAll(silent=false) {
 }
 // Autosave silencieux toutes les 30s + à la fermeture
 setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000);
-window.addEventListener('beforeunload', function(){ if(typeof saveAll==='function') saveAll(true); });
+window.addEventListener('beforeunload', function(e) {
+    if(typeof saveAll === 'function') saveAll(true); // sauvegarde silencieuse auto
+});
 
 </script>
 

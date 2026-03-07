@@ -341,12 +341,28 @@ function generateBilan() {
         return;
     }
 
-    // Grouper par équipes
+    // Grouper par équipes — agréger TOUTES les séances L5 (manches 1, 2, 3...)
     const equipes = {};
     
     elevesL5.forEach(eleve => {
-        const seanceL5 = eleve.seances.find(s => s.lecon === 'L5');
-        if(!seanceL5 || !seanceL5.equipe) return;
+        // Récupérer TOUTES les séances L5, pas seulement la première
+        const seancesL5 = eleve.seances.filter(s => s.lecon === 'L5');
+        if(!seancesL5.length) return;
+
+        // Agréger les données de toutes les séances
+        const seanceL5 = {
+            equipe: seancesL5[seancesL5.length - 1].equipe, // équipe de la dernière séance
+            objectifEquipe: seancesL5[seancesL5.length - 1].objectifEquipe || 0,
+            manches: seancesL5.reduce((sum, s) => sum + (s.manches || 1), 0),
+            distanceTotaleIndividuelle: seancesL5.reduce((sum, s) => sum + (s.distanceTotaleIndividuelle || 0), 0),
+            distanceTotaleEquipe: seancesL5.reduce((sum, s) => sum + (s.distanceTotaleEquipe || 0), 0),
+            performanceMoyenne: Math.round(seancesL5.reduce((sum, s) => sum + (s.performanceMoyenne || 0), 0) / seancesL5.length),
+            detailManches: seancesL5.flatMap(s => s.detailManches || [])
+        };
+        seanceL5.distanceMoyenneIndividuelle = seanceL5.manches > 0 
+            ? Math.round(seanceL5.distanceTotaleIndividuelle / seanceL5.manches) : 0;
+
+        if(!seanceL5.equipe) return;
         
         const equipeNom = seanceL5.equipe;
         if(!equipes[equipeNom]) {

@@ -533,7 +533,10 @@ function exportPDF() {
         <th>Moy 3×400</th><th>Saut+élan</th><th>Lancer</th>
         <th>⭐Course</th><th>⭐Saut</th><th>⭐Lancer</th>
     </tr></thead><tbody>${rows}</tbody></table>
-    <script>window.onload=function(){window.print();}<\/script>
+    <div class="no-print" style="margin-bottom:16px;">
+        <button onclick="window.print()" style="padding:10px 24px;background:#0d9488;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:12px;">🖨️ Imprimer</button>
+        <button onclick="window.close()" style="padding:10px 24px;background:#64748b;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">✕ Fermer</button>
+    </div>
     </body></html>`);
     win.document.close();
 }

@@ -373,6 +373,16 @@ function renderEleves() {
                     <div class="projet-result" id="projet-${index}">
                         🤔 Coche les cases qui te correspondent pour découvrir ton projet personnalisé !
                     </div>
+
+                    <div style="display:flex;gap:10px;margin-top:12px;">
+                        <button onclick="sauvegarderProjet(${index})" style="flex:1;padding:12px;background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+                            💾 Sauvegarder
+                        </button>
+                        <button onclick="exportFicheEleve(${index})" style="flex:1;padding:12px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+                            📄 Fiche PDF
+                        </button>
+                    </div>
+                    <div id="save-status-${index}" style="text-align:center;font-size:0.8rem;color:#4ade80;margin-top:6px;min-height:18px;"></div>
                     
                 </div>
             </div>
@@ -449,7 +459,85 @@ function generateSummary(eleve) {
     return summary || 'Parcours en cours...';
 }
 
-// Fonction conversion intelligente pour résumés (sans UI)
+function sauvegarderProjet(eleveIndex) {
+    const eleve = elevesData[eleveIndex];
+    const projetHTML = document.getElementById(`projet-${eleveIndex}`)?.innerHTML || '';
+    
+    // Lire les cases cochées
+    const coches = {};
+    ['course1','course2','course3','course4','saut1','saut2','saut3','saut4',
+     'lancer1','lancer2','lancer3','lancer4','mental1','mental2','mental3','mental4',
+     'objectif1','objectif2','objectif3','objectif4'].forEach(id => {
+        const el = document.getElementById(`${id}-${eleveIndex}`);
+        if(el) coches[id] = el.checked;
+    });
+
+    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    const idx = allStudents.findIndex(s => s.id === eleve.id);
+    if(idx === -1) return;
+    
+    allStudents[idx].projetL8 = {
+        coches,
+        projetHTML,
+        date: new Date().toISOString()
+    };
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    
+    const status = document.getElementById(`save-status-${eleveIndex}`);
+    if(status) {
+        status.textContent = '✅ Sauvegardé !';
+        setTimeout(() => { status.textContent = ''; }, 2500);
+    }
+}
+
+function exportFicheEleve(eleveIndex) {
+    const eleve = elevesData[eleveIndex];
+    const projetHTML = document.getElementById(`projet-${eleveIndex}`)?.innerHTML || '';
+    const summary = generateSummary(eleve);
+    const seances = eleve.seances || [];
+    const sL7 = seances.find(s => s.lecon === 'L7') || {};
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Mon Projet L8 — ${eleve.nomPrenom}</title>
+    <style>
+        body{font-family:Arial,sans-serif;padding:24px;max-width:620px;margin:0 auto;color:#1e293b;background:#fff}
+        .header{background:linear-gradient(135deg,#7c3aed,#0d9488);color:white;padding:20px;border-radius:12px;margin-bottom:20px;text-align:center}
+        .header h2{margin:0 0 4px 0;font-size:1.4rem}
+        .header p{margin:0;opacity:0.85;font-size:0.85rem}
+        .section{background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #e2e8f0}
+        .section-title{font-weight:800;color:#7c3aed;font-size:0.85rem;text-transform:uppercase;margin-bottom:8px}
+        .projet-box{background:linear-gradient(135deg,#f0fdf4,#e0f2fe);border:2px solid #0d9488;border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.9rem;line-height:1.6}
+        .summary-box{background:#f1f5f9;border-radius:8px;padding:10px;font-size:0.85rem;margin-bottom:12px;color:#475569}
+        .no-print{text-align:center;margin:20px 0}
+        @media print{.no-print{display:none}}
+    </style></head><body>
+    <div class="header">
+        <h2>${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nomPrenom}</h2>
+        <p>🎯 Mon Projet pour L8 — EPS: épreuve Combinée | ${new Date().toLocaleDateString('fr-FR')}</p>
+    </div>
+    <div class="summary-box"><strong>📊 Mon parcours :</strong> ${summary}</div>
+    <div class="section">
+        <div class="section-title">🎯 Mon projet personnalisé</div>
+        <div class="projet-box">${projetHTML.includes('Coche') ? '⚠️ Projet non encore généré — cochez les cases dans l\'application.' : projetHTML}</div>
+    </div>
+    ${sL7.temps1 ? `<div class="section">
+        <div class="section-title">🏃 Mes temps L7 (référence)</div>
+        <div style="display:flex;gap:12px;font-size:0.9rem;">
+            <span>Tour 1 : <strong>${sL7.temps1}</strong></span>
+            <span>Tour 2 : <strong>${sL7.temps2}</strong></span>
+            <span>Tour 3 : <strong>${sL7.temps3}</strong></span>
+        </div>
+    </div>` : ''}
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:10px 24px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:12px;">🖨️ Imprimer</button>
+        <button onclick="window.close()" style="padding:10px 24px;background:#64748b;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
+}
+
+
 function convertTempsIntelligent(tempsStr) {
     if(!tempsStr || tempsStr.trim() === '') return 0;
     

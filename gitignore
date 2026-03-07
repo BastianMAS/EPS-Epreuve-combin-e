@@ -1,0 +1,11 @@
+# Firebase — contient les clés API si configurées
+firebase-config.js
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+*.swp
+*.swo
+.vscode/

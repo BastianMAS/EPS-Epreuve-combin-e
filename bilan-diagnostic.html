@@ -11,6 +11,7 @@
             --accent: #00d2ff;
             --success: #00ff88;
             --warning: #ffcc00;
+            --danger: #ef4444;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -23,206 +24,520 @@
         .container { max-width: 1400px; margin: 0 auto; }
         h1 { text-align: center; font-size: 2rem; margin-bottom: 10px; }
         .accent-text { color: var(--accent); }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-secondary { background: #666; color: white; }
+        .btn {
+            padding: 10px 18px; border: none; border-radius: 8px;
+            font-size: 0.88rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn-secondary { background: #444; color: white; }
+        .btn-export-xl { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
+        .btn-export-pdf { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
+
+        /* Barre d'outils */
+        .toolbar {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+            margin-bottom: 20px; background: var(--card);
+            padding: 14px 16px; border-radius: 12px;
+            border: 1px solid rgba(0,210,255,0.2);
+        }
+        .toolbar-label { font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+        .toolbar-group { display: flex; align-items: center; gap: 8px; }
+        .filter-select {
+            padding: 7px 12px; border-radius: 8px;
+            border: 1px solid rgba(0,210,255,0.3);
+            background: rgba(0,0,0,0.4); color: white;
+            font-size: 0.85rem; cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: var(--accent); }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 10px; margin-bottom: 20px;
+        }
         .stat-box {
-            background: var(--card);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--accent);
+            background: var(--card); padding: 14px; border-radius: 10px;
+            border: 1px solid rgba(0,210,255,0.2); text-align: center;
         }
+        .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+        .stat-label { font-size: 0.73rem; color: #94a3b8; margin-top: 2px; }
+
+        /* Badges niveau */
+        .badge {
+            display: inline-block; padding: 2px 8px; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px;
+        }
+        .badge-5 { background: #7c3aed; color: #e9d5ff; }
+        .badge-4 { background: #1d4ed8; color: #bfdbfe; }
+        .badge-3 { background: #15803d; color: #bbf7d0; }
+        .badge-2 { background: #b45309; color: #fde68a; }
+        .badge-1 { background: #9f1239; color: #fecdd3; }
+
+        /* Tableau */
+        .table-wrapper { overflow-x: auto; border-radius: 12px; margin-top: 10px; }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
-            font-size: 0.75rem;
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 12px;
-            margin-top: 20px;
+            width: 100%; border-collapse: collapse;
+            background: var(--card); border-radius: 12px;
+            overflow: hidden; font-size: 0.75rem;
         }
         th {
-            background: linear-gradient(135deg, var(--warning), var(--success));
-            color: black;
-            padding: 8px 6px;
-            font-weight: 700;
-            text-align: left;
-            font-size: 0.72rem;
-            white-space: nowrap;
+            background: linear-gradient(135deg, #0d9488, #0891b2);
+            color: white; padding: 9px 8px; font-weight: 700;
+            text-align: left; font-size: 0.72rem; white-space: nowrap;
         }
         td {
-            padding: 7px 6px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             white-space: nowrap;
         }
-        tr:hover { background: rgba(0,210,255,0.05); }
-        .stars { color: var(--warning); font-size: 0.9rem; }
+        tr:hover { background: rgba(0,210,255,0.04); }
+
+        /* Tooltip aide VMA */
+        .help-wrap { position: relative; display: inline-block; vertical-align: middle; margin-left: 4px; }
+        .help-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: rgba(0,210,255,0.2); color: var(--accent);
+            font-size: 0.62rem; font-weight: 800; cursor: pointer;
+            border: 1px solid rgba(0,210,255,0.4);
+        }
+        .help-wrap:hover .tooltip { display: block; }
+        .tooltip {
+            display: none; position: absolute;
+            bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+            width: 230px; background: #1e293b;
+            border: 1px solid rgba(0,210,255,0.3); border-radius: 8px;
+            padding: 10px; font-size: 0.73rem; color: #e2e8f0;
+            line-height: 1.5; z-index: 200; white-space: normal;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+        .tooltip::after {
+            content: ''; position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%); border: 6px solid transparent;
+            border-top-color: rgba(0,210,255,0.3);
+        }
+
+        /* Alerte validation */
+        .validation-alert {
+            background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35);
+            border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+            font-size: 0.8rem; color: #fca5a5; display: none;
+        }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 40px; color: #64748b; }
+        .empty-state .emoji { font-size: 3rem; margin-bottom: 10px; }
+
+        @media (max-width: 600px) {
+            .toolbar { flex-direction: column; align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>EPS<span class="accent-text">PRO</span></h1>
-        <p class="subtitle" style="color: var(--warning); font-size: 1.3rem; font-weight: 700;">📊 BILAN L1/L2 - ÉVALUATION DIAGNOSTIQUE</p>
-        
-        <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="margin-bottom: 20px;">← Retour</button>
-        
-        <div id="stats"></div>
-        <div id="table-container"></div>
+<div class="container">
+    <h1>EPS<span class="accent-text">PRO</span></h1>
+    <p style="text-align:center;color:var(--warning);font-size:1.2rem;font-weight:700;margin-bottom:20px;">📊 BILAN L1/L2 — ÉVALUATION DIAGNOSTIQUE</p>
+
+    <!-- BARRE D'OUTILS -->
+    <div class="toolbar">
+        <button onclick="window.location.href='index.html'" class="btn btn-secondary">← Retour</button>
+
+        <div class="toolbar-group">
+            <span class="toolbar-label">Classe :</span>
+            <select id="filter-classe" class="filter-select" onchange="applyFilters()">
+                <option value="">Toutes</option>
+            </select>
+        </div>
+
+        <div class="toolbar-group">
+            <span class="toolbar-label">Sexe :</span>
+            <select id="filter-sexe" class="filter-select" onchange="applyFilters()">
+                <option value="">Tous</option>
+                <option value="M">Garçons</option>
+                <option value="F">Filles</option>
+            </select>
+        </div>
+
+        <div class="toolbar-group">
+            <span class="toolbar-label">Tri :</span>
+            <select id="filter-sort" class="filter-select" onchange="applyFilters()">
+                <option value="nom">Nom</option>
+                <option value="vma-desc">VMA ↓</option>
+                <option value="vma-asc">VMA ↑</option>
+                <option value="saut-desc">Saut ↓</option>
+                <option value="lancer-desc">Lancer ↓</option>
+            </select>
+        </div>
+
+        <div style="margin-left:auto;display:flex;gap:8px;">
+            <button onclick="exportExcel()" class="btn btn-export-xl">📊 Export Excel</button>
+            <button onclick="exportPDF()" class="btn btn-export-pdf">📄 Export PDF</button>
+        </div>
     </div>
-    
-    <script>
-    let students = [];
-    
-    window.onload = function() {
-        const stored = localStorage.getItem('eps_pro_students');
-        if (!stored) {
-            alert('⚠️ Aucun élève.');
-            return;
+
+    <!-- ALERTE VALIDATION -->
+    <div class="validation-alert" id="validation-alert"></div>
+
+    <!-- STATS -->
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- TABLEAU -->
+    <div id="table-container"></div>
+</div>
+
+<script>
+let allStudents = [];
+let filteredStudents = [];
+
+window.onload = function() {
+    const stored = localStorage.getItem('eps_pro_students');
+    if (!stored) {
+        document.getElementById('table-container').innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>Aucun élève enregistré.</p></div>';
+        return;
+    }
+    allStudents = JSON.parse(stored);
+    validateData();
+    populateClassFilter();
+    applyFilters();
+};
+
+// ── Validation données ───────────────────────────────────────────────────────
+function validateData() {
+    const issues = [];
+    allStudents.forEach(s => {
+        if (!s.diagnostique) return;
+        if (s.vma && parseFloat(s.vma) > 25) {
+            issues.push(`⚠️ ${s.nomPrenom} : VMA = ${s.vma} km/h semble anormalement élevée — vérifier la saisie`);
         }
-        students = JSON.parse(stored);
-        displayBilan();
-    };
-    
-    function displayBilan() {
-        const withDiag = students.filter(s => s.diagnostique && s.vma);
-        
-        if(withDiag.length === 0) {
-            document.getElementById('stats').innerHTML = '<div class="stat-box"><p>Aucun diagnostic enregistré.</p></div>';
-            return;
-        }
-        
-        // Stats
-        let totalVMA = 0;
-        withDiag.forEach(s => totalVMA += parseFloat(s.vma));
-        
-        document.getElementById('stats').innerHTML = `
-            <div class="stat-box">
-                <h3 style="color: var(--accent); margin-bottom: 10px;">Statistiques globales</h3>
-                <p><strong>Élèves diagnostiqués :</strong> ${withDiag.length} / ${students.length}</p>
-                <p><strong>VMA moyenne :</strong> ${(totalVMA/withDiag.length).toFixed(1)} km/h</p>
-            </div>
-        `;
-        
-        // Tableau compact
-        let html = '<table><thead><tr>';
-        html += '<th>Élève</th><th>VMA</th><th>Moy 3×400</th><th>Saut -élan</th><th>Saut +élan</th><th>Lancer</th><th>⭐Course</th><th>⭐Saut</th><th>⭐Lanc</th></tr></thead><tbody>';
-        
-        withDiag.forEach(s => {
-            const d = s.diagnostique;
-            const vma = parseFloat(s.vma);
-            
-            // Lire les champs selon le format réel stocké par diagnostic.html
-            // Course : d.course.tours[] contient des ms
-            let moy = null;
-            if (d.course && d.course.tours && d.course.tours.length === 3) {
-                moy = d.course.tours.reduce((a, b) => a + b, 0) / 3;
-            } else if (d.tour1 && d.tour2 && d.tour3) {
-                // ancien format de compatibilité
-                moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+        const tours = s.diagnostique.course?.tours || [];
+        tours.forEach((t, i) => {
+            if (t > 0 && t < 30) {
+                issues.push(`⚠️ ${s.nomPrenom} : tour ${i+1} = ${t}s paraît trop court (temps en ms attendus ?)`);
             }
-            
-            // Saut : d.sautDetente.meilleur et d.sautElan.meilleur
-            const sautSansBest = d.sautDetente?.meilleur
-                || d.sautSansBest
-                || (d.sautSans?.length ? Math.max(...d.sautSans) : null);
-            const sautAvecBest = d.sautElan?.meilleur
-                || d.sautAvecBest
-                || (d.sautAvec?.length ? Math.max(...d.sautAvec) : null);
-            
-            // Lancer : d.lancer.meilleur
-            const lancerBest = d.lancer?.meilleur
-                || d.lancerBest
-                || (d.lancerResults?.length ? Math.max(...d.lancerResults) : null);
-            const lancerType = d.lancer?.type || d.lancerType || null;
-            
-            const evalVMA = evaluateVMA(vma, s.sexe);
-            const evalSaut = sautAvecBest ? evaluateSaut(sautAvecBest, s.sexe) : null;
-            const evalLancer = lancerBest ? evaluateLancer(lancerBest, s.sexe) : null;
-            
-            html += '<tr>';
-            html += '<td>'+(s.sexe==='F'?'👧':'🧑')+' '+s.nomPrenom+'</td>';
-            html += '<td>'+vma.toFixed(1)+' km/h</td>';
-            html += '<td>'+(moy ? formatTime(moy*1000) : '-')+'</td>';
-            html += '<td>'+(sautSansBest ? sautSansBest.toFixed(2)+'m' : '-')+'</td>';
-            html += '<td>'+(sautAvecBest ? sautAvecBest.toFixed(2)+'m' : '-')+'</td>';
-            html += '<td>'+(lancerBest ? lancerBest.toFixed(1)+'m'+(lancerType?' ('+lancerType+')':'') : '-')+'</td>';
-            html += '<td class="stars">'+evalVMA.stars+'</td>';
-            html += '<td class="stars">'+(evalSaut ? evalSaut.stars : '-')+'</td>';
-            html += '<td class="stars">'+(evalLancer ? evalLancer.stars : '-')+'</td>';
-            html += '</tr>';
         });
-        
-        html += '</tbody></table>';
-        document.getElementById('table-container').innerHTML = '<div class="table-wrapper">'+html+'</div>';
+    });
+    if (issues.length > 0) {
+        const el = document.getElementById('validation-alert');
+        el.style.display = 'block';
+        el.innerHTML = '🔍 <strong>Anomalies détectées :</strong><br>' + issues.join('<br>');
     }
-    
-    function evaluateVMA(vma, sexe) {
-        let stars;
-        if(sexe === 'F') {
-            if(vma >= 13.5) stars = 5;
-            else if(vma >= 12.5) stars = 4;
-            else if(vma >= 11.5) stars = 3;
-            else if(vma >= 10.5) stars = 2;
-            else stars = 1;
-        } else {
-            if(vma >= 15) stars = 5;
-            else if(vma >= 14) stars = 4;
-            else if(vma >= 13) stars = 3;
-            else if(vma >= 12) stars = 2;
-            else stars = 1;
+}
+
+// ── Filtre classe ────────────────────────────────────────────────────────────
+function populateClassFilter() {
+    const classes = [...new Set(allStudents.map(s => s.classe).filter(Boolean))].sort();
+    const sel = document.getElementById('filter-classe');
+    classes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
+    });
+}
+
+function applyFilters() {
+    const classe = document.getElementById('filter-classe').value;
+    const sexe   = document.getElementById('filter-sexe').value;
+    const sort   = document.getElementById('filter-sort').value;
+
+    filteredStudents = allStudents.filter(s => {
+        if (!s.diagnostique || !s.vma) return false;
+        if (classe && s.classe !== classe) return false;
+        if (sexe && s.sexe !== sexe) return false;
+        return true;
+    });
+
+    filteredStudents.sort((a, b) => {
+        switch(sort) {
+            case 'vma-desc':   return parseFloat(b.vma) - parseFloat(a.vma);
+            case 'vma-asc':    return parseFloat(a.vma) - parseFloat(b.vma);
+            case 'saut-desc':  return getSautBest(b) - getSautBest(a);
+            case 'lancer-desc':return getLancerBest(b) - getLancerBest(a);
+            default: return (a.nomPrenom||'').localeCompare(b.nomPrenom||'');
         }
-        return { stars: '⭐'.repeat(stars) };
+    });
+
+    renderStats();
+    renderTable();
+}
+
+// ── Lecture données (rétrocompat ancien + nouveau format) ────────────────────
+function getCourseMoy(d) {
+    if (!d) return null;
+    // Nouveau format : course.tours[] en ms
+    if (d.course?.tours?.length) {
+        const valid = d.course.tours.filter(t => t && t > 0);
+        if (valid.length === 3) return valid.reduce((a,b) => a+b, 0) / 3 / 1000;
     }
-    
-    function evaluateSaut(distance, sexe) {
-        let stars;
-        if(sexe === 'F') {
-            if(distance >= 3.2) stars = 5;
-            else if(distance >= 2.8) stars = 4;
-            else if(distance >= 2.4) stars = 3;
-            else if(distance >= 2.0) stars = 2;
-            else stars = 1;
-        } else {
-            if(distance >= 3.8) stars = 5;
-            else if(distance >= 3.3) stars = 4;
-            else if(distance >= 2.8) stars = 3;
-            else if(distance >= 2.3) stars = 2;
-            else stars = 1;
-        }
-        return { stars: '⭐'.repeat(stars) };
+    // Ancien format
+    if (d.tour1 && d.tour2 && d.tour3) return (d.tour1+d.tour2+d.tour3)/3;
+    if (d.moyenneCourse) return d.moyenneCourse;
+    return null;
+}
+
+function getSautBest(s) {
+    const d = s.diagnostique; if (!d) return 0;
+    return d.sautElan?.meilleur || d.sautAvecBest ||
+           (d.sautAvec?.length ? Math.max(...d.sautAvec) : 0) || 0;
+}
+
+function getSautSansBest(d) {
+    if (!d) return null;
+    return d.sautDetente?.meilleur || d.sautSansBest ||
+           (d.sautSans?.length ? Math.max(...d.sautSans) : null);
+}
+
+function getLancerBest(s) {
+    const d = s.diagnostique; if (!d) return 0;
+    return d.lancer?.meilleur || d.lancerBest ||
+           (d.lancerResults?.length ? Math.max(...d.lancerResults) : 0) || 0;
+}
+
+function getLancerType(d) {
+    if (!d) return '';
+    return d.lancer?.type || d.lancerType || '';
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+function renderStats() {
+    if (filteredStudents.length === 0) {
+        document.getElementById('stats-grid').innerHTML = '';
+        return;
     }
-    
-    function evaluateLancer(distance, sexe) {
-        let stars;
-        if(sexe === 'F') {
-            if(distance >= 10) stars = 5;
-            else if(distance >= 8) stars = 4;
-            else if(distance >= 6) stars = 3;
-            else if(distance >= 4) stars = 2;
-            else stars = 1;
-        } else {
-            if(distance >= 12) stars = 5;
-            else if(distance >= 10) stars = 4;
-            else if(distance >= 8) stars = 3;
-            else if(distance >= 6) stars = 2;
-            else stars = 1;
-        }
-        return { stars: '⭐'.repeat(stars) };
+    const vmas = filteredStudents.map(s => parseFloat(s.vma));
+    const moyVMA = vmas.reduce((a,b)=>a+b,0)/vmas.length;
+    const maxVMA = Math.max(...vmas);
+    const minVMA = Math.min(...vmas);
+    const sauts   = filteredStudents.map(s=>getSautBest(s)).filter(v=>v>0);
+    const lancers = filteredStudents.map(s=>getLancerBest(s)).filter(v=>v>0);
+    const niv3    = filteredStudents.filter(s=>evaluateVMA(parseFloat(s.vma),s.sexe).level>=3).length;
+
+    document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-box"><div class="stat-value">${filteredStudents.length}</div><div class="stat-label">Élèves diagnostiqués</div></div>
+        <div class="stat-box"><div class="stat-value">${moyVMA.toFixed(1)}</div><div class="stat-label">VMA moyenne (km/h)</div></div>
+        <div class="stat-box"><div class="stat-value">${minVMA.toFixed(1)} – ${maxVMA.toFixed(1)}</div><div class="stat-label">VMA min – max</div></div>
+        <div class="stat-box"><div class="stat-value">${sauts.length?(sauts.reduce((a,b)=>a+b,0)/sauts.length).toFixed(2)+'m':'-'}</div><div class="stat-label">Saut moyen (avec élan)</div></div>
+        <div class="stat-box"><div class="stat-value">${lancers.length?(lancers.reduce((a,b)=>a+b,0)/lancers.length).toFixed(1)+'m':'-'}</div><div class="stat-label">Lancer moyen</div></div>
+        <div class="stat-box"><div class="stat-value">${niv3}</div><div class="stat-label">Niveau ≥ 3⭐ en course</div></div>
+    `;
+}
+
+// ── Tableau ──────────────────────────────────────────────────────────────────
+function renderTable() {
+    if (filteredStudents.length === 0) {
+        document.getElementById('table-container').innerHTML =
+            '<div class="empty-state"><div class="emoji">🔍</div><p>Aucun élève dans cette sélection.</p></div>';
+        return;
     }
-    
-    function formatTime(ms) {
-        const sec = Math.floor(ms/1000);
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        return m+"'"+(s<10?'0':'')+s+'"';
+
+    let html = `<div class="table-wrapper"><table><thead><tr>
+        <th>Élève</th>
+        <th>Classe</th>
+        <th>VMA <span class="help-wrap"><span class="help-btn">?</span><span class="tooltip">
+            <strong>Vitesse Maximale Aérobie</strong><br>
+            Mesurée par :<br>
+            • Luc Léger (paliers)<br>
+            • Demi-Cooper (6 min)<br>
+            • Cooper (12 min)<br><br>
+            <strong>Barèmes 6ème :</strong><br>
+            ⭐⭐⭐⭐⭐ G ≥15 / F ≥13.5 km/h<br>
+            ⭐⭐⭐⭐ G ≥14 / F ≥12.5<br>
+            ⭐⭐⭐ G ≥13 / F ≥11.5<br>
+            ⭐⭐ G ≥12 / F ≥10.5<br>
+            ⭐ en dessous
+        </span></span></th>
+        <th>Méthode</th>
+        <th>Moy 3×400m</th>
+        <th>Saut sans élan</th>
+        <th>Saut avec élan</th>
+        <th>Lancer</th>
+        <th>⭐ Course</th>
+        <th>⭐ Saut</th>
+        <th>⭐ Lancer</th>
+        <th>🏆 Global</th>
+    </tr></thead><tbody>`;
+
+    filteredStudents.forEach((s, idx) => {
+        const d = s.diagnostique;
+        const vma      = parseFloat(s.vma);
+        const moy      = getCourseMoy(d);
+        const sautSans = getSautSansBest(d);
+        const sautAvec = getSautBest(s) || null;
+        const lancer   = getLancerBest(s) || null;
+        const lancerType = getLancerType(d);
+
+        const evC = evaluateVMA(vma, s.sexe);
+        const evS = sautAvec ? evaluateSaut(sautAvec, s.sexe) : null;
+        const evL = lancer   ? evaluateLancer(lancer, s.sexe) : null;
+
+        const nbEval = 1 + (evS?1:0) + (evL?1:0);
+        const globalLevel = Math.round(((evC.level)+(evS?.level||0)+(evL?.level||0))/nbEval);
+
+        const rowStyle = idx%2===0 ? '' : 'style="background:rgba(255,255,255,0.02)"';
+
+        html += `<tr ${rowStyle}>
+            <td><strong>${s.sexe==='F'?'👧':'🧑'} ${s.nomPrenom||''}</strong></td>
+            <td>${s.classe||'<span style="color:#64748b">—</span>'}</td>
+            <td><strong style="color:var(--accent)">${vma.toFixed(1)}</strong> km/h</td>
+            <td style="color:#94a3b8;font-size:0.7rem">${d.methode||d.testCourse||'—'}</td>
+            <td>${moy?formatTime(moy):'<span style="color:#64748b">—</span>'}</td>
+            <td>${sautSans?sautSans.toFixed(2)+'m':'<span style="color:#64748b">—</span>'}</td>
+            <td>${sautAvec?'<strong>'+sautAvec.toFixed(2)+'m</strong>':'<span style="color:#64748b">—</span>'}</td>
+            <td>${lancer?lancer.toFixed(1)+'m'+(lancerType?' <small style="color:#94a3b8">('+lancerType+')</small>':''):'<span style="color:#64748b">—</span>'}</td>
+            <td>${renderBadge(evC)}</td>
+            <td>${evS?renderBadge(evS):'—'}</td>
+            <td>${evL?renderBadge(evL):'—'}</td>
+            <td>${renderGlobalBadge(globalLevel)}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table></div>';
+    document.getElementById('table-container').innerHTML = html;
+}
+
+function renderBadge(ev) {
+    const labels = ['','Débutant','En cours','Acquis','Avancé','Expert'];
+    return `<span class="badge badge-${ev.level}">${'⭐'.repeat(ev.level)} ${labels[ev.level]}</span>`;
+}
+
+function renderGlobalBadge(level) {
+    const bg = ['','#9f1239','#b45309','#15803d','#1d4ed8','#7c3aed'];
+    const lb = ['','Fragile','En construction','Solide','Confirmé','Champion'];
+    if (!level) return '—';
+    return `<span class="badge" style="background:${bg[level]||'#444'};color:white">${lb[level]||level+'⭐'}</span>`;
+}
+
+// ── Évaluations ──────────────────────────────────────────────────────────────
+function evaluateVMA(vma, sexe) {
+    let level;
+    if (sexe==='F') {
+        if(vma>=13.5) level=5; else if(vma>=12.5) level=4;
+        else if(vma>=11.5) level=3; else if(vma>=10.5) level=2; else level=1;
+    } else {
+        if(vma>=15) level=5; else if(vma>=14) level=4;
+        else if(vma>=13) level=3; else if(vma>=12) level=2; else level=1;
     }
-    </script>
+    return { level };
+}
+
+function evaluateSaut(d, sexe) {
+    let level;
+    if (sexe==='F') {
+        if(d>=3.2) level=5; else if(d>=2.8) level=4;
+        else if(d>=2.4) level=3; else if(d>=2.0) level=2; else level=1;
+    } else {
+        if(d>=3.8) level=5; else if(d>=3.3) level=4;
+        else if(d>=2.8) level=3; else if(d>=2.3) level=2; else level=1;
+    }
+    return { level };
+}
+
+function evaluateLancer(d, sexe) {
+    let level;
+    if (sexe==='F') {
+        if(d>=10) level=5; else if(d>=8) level=4;
+        else if(d>=6) level=3; else if(d>=4) level=2; else level=1;
+    } else {
+        if(d>=12) level=5; else if(d>=10) level=4;
+        else if(d>=8) level=3; else if(d>=6) level=2; else level=1;
+    }
+    return { level };
+}
+
+function formatTime(totalSec) {
+    const m = Math.floor(totalSec/60);
+    const s = Math.round(totalSec%60);
+    return m+"'"+(s<10?'0':'')+s+'"';
+}
+
+// ── Export Excel (CSV) ───────────────────────────────────────────────────────
+function exportExcel() {
+    if (!filteredStudents.length) { alert('⚠️ Aucun élève à exporter.'); return; }
+    const sep = ';';
+    const BOM = '\uFEFF';
+    const headers = ['Nom','Classe','Sexe','VMA (km/h)','Méthode','Moy 3x400m (s)','Saut sans élan (m)','Saut avec élan (m)','Lancer (m)','Type lancer','Niv. Course','Niv. Saut','Niv. Lancer'];
+    const rows = filteredStudents.map(s => {
+        const d = s.diagnostique;
+        const vma = parseFloat(s.vma);
+        const moy = getCourseMoy(d);
+        const sautSans = getSautSansBest(d);
+        const sautAvec = getSautBest(s)||null;
+        const lancer   = getLancerBest(s)||null;
+        const evC = evaluateVMA(vma,s.sexe);
+        const evS = sautAvec ? evaluateSaut(sautAvec,s.sexe) : null;
+        const evL = lancer   ? evaluateLancer(lancer,s.sexe)  : null;
+        return [
+            s.nomPrenom||'', s.classe||'', s.sexe==='F'?'Fille':'Garçon',
+            vma.toFixed(1), d.methode||d.testCourse||'',
+            moy?moy.toFixed(1):'',
+            sautSans?sautSans.toFixed(2):'',
+            sautAvec?sautAvec.toFixed(2):'',
+            lancer?lancer.toFixed(1):'',
+            getLancerType(d),
+            '⭐'.repeat(evC.level),
+            evS?'⭐'.repeat(evS.level):'',
+            evL?'⭐'.repeat(evL.level):'',
+        ].join(sep);
+    });
+    const csv = BOM + headers.join(sep) + '\n' + rows.join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `bilan-diagnostic-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ── Export PDF (impression) ───────────────────────────────────────────────────
+function exportPDF() {
+    if (!filteredStudents.length) { alert('⚠️ Aucun élève à exporter.'); return; }
+    const filtreClasse = document.getElementById('filter-classe').value || 'Toutes classes';
+    const rows = filteredStudents.map(s => {
+        const d = s.diagnostique;
+        const vma = parseFloat(s.vma);
+        const moy = getCourseMoy(d);
+        const sautAvec = getSautBest(s)||null;
+        const lancer   = getLancerBest(s)||null;
+        const evC = evaluateVMA(vma,s.sexe);
+        const evS = sautAvec?evaluateSaut(sautAvec,s.sexe):null;
+        const evL = lancer?evaluateLancer(lancer,s.sexe):null;
+        return `<tr>
+            <td>${s.nomPrenom||''}</td><td>${s.classe||'—'}</td>
+            <td>${s.sexe==='F'?'F':'G'}</td><td><b>${vma.toFixed(1)}</b></td>
+            <td>${moy?formatTime(moy):'—'}</td>
+            <td>${sautAvec?sautAvec.toFixed(2)+'m':'—'}</td>
+            <td>${lancer?lancer.toFixed(1)+'m':'—'}</td>
+            <td>${'⭐'.repeat(evC.level)}</td>
+            <td>${evS?'⭐'.repeat(evS.level):'—'}</td>
+            <td>${evL?'⭐'.repeat(evL.level):'—'}</td>
+        </tr>`;
+    }).join('');
+    const win = window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Bilan Diagnostique</title>
+    <style>
+        body{font-family:Arial,sans-serif;font-size:11px;padding:20px}
+        h2{margin-bottom:4px} p{color:#666;margin-bottom:14px;font-size:10px}
+        table{width:100%;border-collapse:collapse}
+        th{background:#0d9488;color:white;padding:5px 6px;text-align:left;font-size:10px}
+        td{padding:5px 6px;border-bottom:1px solid #e2e8f0;font-size:11px}
+        tr:nth-child(even){background:#f8fafc}
+        @media print{body{padding:8px}}
+    </style></head><body>
+    <h2>📊 Bilan Diagnostique L1/L2 — EPS PRO</h2>
+    <p>Filtre : ${filtreClasse} | ${new Date().toLocaleDateString('fr-FR')} | ${filteredStudents.length} élève(s)</p>
+    <table><thead><tr>
+        <th>Élève</th><th>Classe</th><th>S.</th><th>VMA</th>
+        <th>Moy 3×400</th><th>Saut+élan</th><th>Lancer</th>
+        <th>⭐Course</th><th>⭐Saut</th><th>⭐Lancer</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`);
+    win.document.close();
+}
+</script>
 
 <!-- SW registration + bandeau offline -->
 <script>
@@ -235,12 +550,10 @@ if ('serviceWorker' in navigator) {
         if (!b) {
             b = document.createElement('div');
             b.id = '_offline_banner';
-            b.style.cssText = [
-                'display:none','position:fixed','top:0','left:0','right:0',
+            b.style.cssText = ['display:none','position:fixed','top:0','left:0','right:0',
                 'background:#ff6b35','color:#fff','text-align:center',
                 'padding:8px 12px','font-size:0.82rem','font-weight:700',
-                'z-index:99999','letter-spacing:0.3px'
-            ].join(';');
+                'z-index:99999','letter-spacing:0.3px'].join(';');
             b.textContent = '\u{1F4E1} Mode hors ligne — données sauvegardées localement';
             document.body.appendChild(b);
         }

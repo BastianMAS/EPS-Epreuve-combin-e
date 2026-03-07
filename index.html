@@ -1109,7 +1109,7 @@
                             🚀 L3 : Découverte & Technique
                         </button>
                         <button onclick="window.open('./lecon4.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            → L4 : Consolidation & Progression
+                            → L4 : Technique de Base Atelier 2
                         </button>
                         <button onclick="window.open('./lecon5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
                             → L5 : Relais Olympique <span style="font-size:0.72rem;opacity:0.7;font-weight:400">· Séance collective — motivation &amp; coopération</span>
@@ -1137,7 +1137,7 @@
                             📊 Bilan L3 - Découverte & Technique
                         </button>
                         <button onclick="window.open('./bilan-l4.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            📊 Bilan L4 - Consolidation & Progression
+                            📊 Bilan L4 - Technique de Base Atelier 2
                         </button>
                         <button onclick="window.open('./bilan-l5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
                             📊 Bilan L5 - Relais Olympique
@@ -1491,39 +1491,6 @@
     </div>
 </div>
 
-
-<!-- PAGE SÉANCE 2 : ENTRAÎNEMENT -->
-<div id="screenSeance2" class="hidden">
-    <h1>EPS<span class="accent-text">: épreuve Combinée</span></h1>
-    <p class="text-center" style="color: #9b59b6; margin-bottom: 10px; font-size: 1.3rem;">
-        📅 SÉANCE 2 - ENTRAÎNEMENT
-    </p>
-    <p class="text-center" style="color: #aaa; margin-bottom: 30px; font-size: 0.9rem;">
-        3×400m + Saut
-    </p>
-    
-    <div class="config-container">
-        <div class="card">
-            <!-- BOUTON RETOUR -->
-            <button onclick="backToStudentsFromSeance2()" class="btn-action" style="background: #666; color: white; margin-bottom: 20px;">
-                ← Retour
-            </button>
-            
-            <!-- SÉLECTION ÉLÈVE -->
-            <div style="background: rgba(155,89,182,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #9b59b6;">
-                <h3 style="color: #9b59b6; margin-bottom: 15px;">👤 Sélectionner un élève</h3>
-                <select id="seance2-student-select" onchange="selectSeance2Student()" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #9b59b6; background: #0f0f23; color: white; font-size: 1.1rem;">
-                    <option value="">-- Choisir un élève --</option>
-                </select>
-            </div>
-            
-            <!-- FORMULAIRE SÉANCE (caché jusqu'à sélection) -->
-            <div id="seance2-form" style="display: none;">
-                <!-- Rempli dynamiquement par JavaScript -->
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- PAGE 1 : CONFIGURATION -->
 <div id="screen1" class="hidden">
@@ -4700,7 +4667,7 @@ function importDiagnostics(event) {
             // Sauvegarder
             if (saveStudentsToStorage()) {
                 renderStudentsList();
-                updateStudentsStats();
+                updateStats();
                 
                 const importDate = new Date(importData.date).toLocaleDateString('fr-FR');
                 alert(`✅ Import terminé !\n\n📅 Date d'export : ${importDate}\n\n👥 Résultats :\n• ${imported} nouvel(le)(s) élève(s)\n• ${updated} élève(s) mis à jour\n• ${skipped} élève(s) ignoré(s)`);
@@ -5199,12 +5166,7 @@ async function handlePullFromFirebase() {
     document.getElementById('firebase-panel').style.display = 'none';
     alert(`✅ ${students.length} élève(s) récupéré(s) depuis Firebase.`);
 }
-// Stubs pour screenSeance2 (écran non utilisé)
-function selectSeance2Student() {}
-function backToStudentsFromSeance2() {
-    document.querySelectorAll('.screen,[id^="screen"]').forEach(s => s.classList.add('hidden'));
-    document.getElementById('screen0')?.classList.remove('hidden');
-}
+
 
 </script>
 </body>

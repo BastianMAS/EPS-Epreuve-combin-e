@@ -356,12 +356,14 @@ function buildCard(i) {
                         <div class="input-row">
                             <input type="number" id="dc-${i}" placeholder="ex: 1250" oninput="calcVMA(${i})">
                         </div>
+                        <small style="color:#aaa;font-size:0.72rem">VMA = distance (m) ÷ 3 → ex : 1200m ÷ 3 = 4 m/s = 14,4 km/h</small>
                     </div>
                     <div id="vma-input-cooper-${i}" style="display:none">
                         <label>Distance en 12 min (m) :</label>
                         <div class="input-row">
                             <input type="number" id="co-${i}" placeholder="ex: 2500" oninput="calcVMA(${i})">
                         </div>
+                        <small style="color:#aaa;font-size:0.72rem">VMA = distance (m) ÷ 6 → ex : 2400m ÷ 6 = 4 m/s = 14,4 km/h</small>
                     </div>
                     <div id="vma-input-lucleger-${i}" style="display:none">
                         <label>Palier atteint :</label>
@@ -406,17 +408,17 @@ function buildCard(i) {
 
                     <div class="tour-row">
                         <span class="tour-label">T1</span>
-                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i})" style="width:60px">
+                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t1r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T2</span>
-                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i})" style="width:60px">
+                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t2r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T3</span>
-                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i})" style="width:60px">
+                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t3r-${i}"></span>
                     </div>
                     <div id="moy-course-${i}" style="font-size:0.75rem;margin-top:4px;color:var(--success);font-weight:700"></div>
@@ -646,7 +648,7 @@ function saveVMATest(i) {
     const classePct = vmaFinal >= 13 ? 'dans les meilleurs de la classe 🏆' :
                       vmaFinal >= 11 ? 'dans la bonne moyenne 👍' :
                       vmaFinal >= 9  ? 'en progression 💪' : 'avec du potentiel à développer 🌱';
-    alert(`✅ VMA enregistrée : ${vmaFinal} km/h\n\n🏃 Ce que ça veut dire :\n→ Ta vitesse max sur 12 min est de ${vmaFinal} km/h\n→ Tu peux courir 200m en environ ${t200str}\n→ Tu es ${classePct}`);
+
 }
 
 function updateHistorique(i) {

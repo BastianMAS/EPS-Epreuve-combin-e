@@ -3,7 +3,7 @@
  * Cache-First : 100% offline après le 1er chargement avec WiFi
  */
 
-const CACHE = 'eps-v5';
+const CACHE = 'eps-v6';
 
 // Tous les fichiers HTML de l'app
 const APP_FILES = [

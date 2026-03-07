@@ -117,11 +117,29 @@
             const d = s.diagnostique;
             const vma = parseFloat(s.vma);
             
-            // Lire les bons champs selon le nouveau format
-            const moy = d.moyenneCourse || (d.tour1 && d.tour2 && d.tour3 ? (d.tour1+d.tour2+d.tour3)/3 : null);
-            const sautSansBest = d.sautSansBest || (d.sautSans && d.sautSans.length ? Math.max(...d.sautSans) : null);
-            const sautAvecBest = d.sautAvecBest || (d.sautAvec && d.sautAvec.length ? Math.max(...d.sautAvec) : null);
-            const lancerBest = d.lancerBest || (d.lancerResults && d.lancerResults.length ? Math.max(...d.lancerResults) : null);
+            // Lire les champs selon le format réel stocké par diagnostic.html
+            // Course : d.course.tours[] contient des ms
+            let moy = null;
+            if (d.course && d.course.tours && d.course.tours.length === 3) {
+                moy = d.course.tours.reduce((a, b) => a + b, 0) / 3;
+            } else if (d.tour1 && d.tour2 && d.tour3) {
+                // ancien format de compatibilité
+                moy = (d.tour1 + d.tour2 + d.tour3) / 3;
+            }
+            
+            // Saut : d.sautDetente.meilleur et d.sautElan.meilleur
+            const sautSansBest = d.sautDetente?.meilleur
+                || d.sautSansBest
+                || (d.sautSans?.length ? Math.max(...d.sautSans) : null);
+            const sautAvecBest = d.sautElan?.meilleur
+                || d.sautAvecBest
+                || (d.sautAvec?.length ? Math.max(...d.sautAvec) : null);
+            
+            // Lancer : d.lancer.meilleur
+            const lancerBest = d.lancer?.meilleur
+                || d.lancerBest
+                || (d.lancerResults?.length ? Math.max(...d.lancerResults) : null);
+            const lancerType = d.lancer?.type || d.lancerType || null;
             
             const evalVMA = evaluateVMA(vma, s.sexe);
             const evalSaut = sautAvecBest ? evaluateSaut(sautAvecBest, s.sexe) : null;
@@ -133,7 +151,7 @@
             html += '<td>'+(moy ? formatTime(moy*1000) : '-')+'</td>';
             html += '<td>'+(sautSansBest ? sautSansBest.toFixed(2)+'m' : '-')+'</td>';
             html += '<td>'+(sautAvecBest ? sautAvecBest.toFixed(2)+'m' : '-')+'</td>';
-            html += '<td>'+(lancerBest ? lancerBest.toFixed(1)+'m'+(d.lancerType?' ('+d.lancerType+')':'') : '-')+'</td>';
+            html += '<td>'+(lancerBest ? lancerBest.toFixed(1)+'m'+(lancerType?' ('+lancerType+')':'') : '-')+'</td>';
             html += '<td class="stars">'+evalVMA.stars+'</td>';
             html += '<td class="stars">'+(evalSaut ? evalSaut.stars : '-')+'</td>';
             html += '<td class="stars">'+(evalLancer ? evalLancer.stars : '-')+'</td>';

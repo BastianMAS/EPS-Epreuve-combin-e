@@ -299,7 +299,9 @@ function generateBilan() {
     let totalTechSaut = 0, totalTechLancer = 0;
 
     elevesL4.forEach(eleve => {
-        const seanceL4 = eleve.seances.find(s => s.lecon === 'L4');
+        // Toutes les sessions L4 — on analyse la dernière pour les stats
+        const sessionsL4 = eleve.seances.filter(s => s.lecon === 'L4');
+        const seanceL4 = sessionsL4[sessionsL4.length - 1];
         const seanceL3 = eleve.seances?.find(s => s.lecon === 'L3');
         if(!seanceL4) return;
 
@@ -369,12 +371,18 @@ function generateBilan() {
 
         // Ajouter élève au bilan
         bilanData.eleves.push({
+            id: eleve.id,
             nom: eleve.nomPrenom,
             sexe: eleve.sexe,
             age: eleve.age,
             vma: eleve.vma,
             progression: progression,
             seanceL4: seanceL4,
+            sessions: sessionsL4.map(seance => ({
+                seance,
+                seanceIdx: eleve.seances.indexOf(seance),
+                date: seance.date
+            })),
             course: courseAnalyse,
             saut: {
                 distance: seanceL4.sautDistance,
@@ -504,6 +512,13 @@ function renderEleveDetails() {
         html += `
             <div class="student-card">
                 <div class="student-name">${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nom} (${eleve.age} ans) ${evolutionIcon}</div>
+                ${eleve.sessions && eleve.sessions.length > 1 ? `<div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px;">
+                    ${eleve.sessions.map((sess, i) => `
+                        <div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:3px 7px;font-size:0.7rem;">
+                            <span style="color:#94a3b8;">Session ${i+1} · ${sess.date ? new Date(sess.date).toLocaleDateString('fr-FR') : '—'}</span>
+                            <button onclick="deleteSessionL4('${eleve.id}', ${sess.seanceIdx})" style="background:rgba(239,68,68,0.2);border:none;color:#f87171;border-radius:4px;padding:1px 5px;cursor:pointer;font-size:0.65rem;">🗑️</button>
+                        </div>`).join('')}
+                </div>` : eleve.sessions && eleve.sessions.length === 1 && eleve.sessions[0].date ? `<div style="font-size:0.7rem;color:#64748b;margin-bottom:4px;">📅 ${new Date(eleve.sessions[0].date).toLocaleDateString('fr-FR')} <button onclick="deleteSessionL4('${eleve.id}', ${eleve.sessions[0].seanceIdx})" style="background:rgba(239,68,68,0.2);border:none;color:#f87171;border-radius:4px;padding:1px 5px;cursor:pointer;font-size:0.65rem;margin-left:6px;">🗑️</button></div>` : ''}
                 
                 <div class="progression-stats">
                     <strong>🧠 Progression intelligente :</strong>
@@ -563,6 +578,16 @@ function fmtSec(sec) {
     const m = Math.floor(sec / 60);
     const s = Math.round(sec % 60);
     return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function deleteSessionL4(eleveId, seanceIdx) {
+    if(!confirm('🗑️ Supprimer cette session L4 ? Cette action est irréversible.')) return;
+    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    const idx = allStudents.findIndex(s => s.id === eleveId);
+    if(idx === -1) return;
+    allStudents[idx].seances.splice(seanceIdx, 1);
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    location.reload();
 }
 
 function exportBilan() {

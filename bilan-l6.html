@@ -295,7 +295,9 @@ function analyseL6(eleves) {
     let totalTechSaut = 0, totalTechLancer = 0, totalHarmonieux = 0;
 
     elevesL6.forEach(eleve => {
-        const s   = eleve.seances.find(s => s.lecon === 'L6');
+        // Toutes les sessions L6 — on analyse la dernière pour les stats
+        const sessionsL6 = eleve.seances.filter(s => s.lecon === 'L6');
+        const s   = sessionsL6[sessionsL6.length - 1];
         const sL4 = eleve.seances?.find(s => s.lecon === 'L4') || null;
 
         // Pyramide
@@ -321,12 +323,18 @@ function analyseL6(eleves) {
         }
 
         bilanData.elevesAvecL6.push({
+            id: eleve.id,
             nomPrenom: eleve.nomPrenom,
             sexe: eleve.sexe,
             age: eleve.age,
             vma: eleve.vma,
             seanceL6: s,
             seanceL4: sL4,
+            sessions: sessionsL6.map(seance => ({
+                seance,
+                seanceIdx: eleve.seances.indexOf(seance),
+                date: seance.date
+            })),
             techSaut, techLancer,
             harmonieux: s.sautTech5 || s.lancerTech5,
             pyramideComplete,
@@ -410,6 +418,13 @@ function renderCards() {
 
         return `<div class="eleve-card">
             <div class="eleve-name">${e.sexe === 'F' ? '👧' : '🧑'} ${e.nomPrenom} ${pyramideTxt}</div>
+            ${e.sessions && e.sessions.length > 1 ? `<div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px;">
+                ${e.sessions.map((sess, i) => `
+                    <div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:3px 7px;font-size:0.7rem;">
+                        <span style="color:#94a3b8;">Session ${i+1} · ${sess.date ? new Date(sess.date).toLocaleDateString('fr-FR') : '—'}</span>
+                        <button onclick="deleteSessionL6('${e.id}', ${sess.seanceIdx})" style="background:rgba(239,68,68,0.2);border:none;color:#f87171;border-radius:4px;padding:1px 5px;cursor:pointer;font-size:0.65rem;">🗑️</button>
+                    </div>`).join('')}
+            </div>` : e.sessions && e.sessions.length === 1 && e.sessions[0].date ? `<div style="font-size:0.7rem;color:#64748b;margin-bottom:4px;">📅 ${new Date(e.sessions[0].date).toLocaleDateString('fr-FR')} <button onclick="deleteSessionL6('${e.id}', ${e.sessions[0].seanceIdx})" style="background:rgba(239,68,68,0.2);border:none;color:#f87171;border-radius:4px;padding:1px 5px;cursor:pointer;font-size:0.65rem;margin-left:6px;">🗑️</button></div>` : ''}
             <div style="font-size:0.72rem;color:#888;margin-bottom:6px;">🔺 Pyramide 60/80/100/80↩/60↩</div>
             <div class="pyramide-mini">${pyraHtml}</div>
             ${s.pyramideEchec ? `<div style="font-size:0.72rem;color:var(--danger);margin-top:6px;">❌ Abandon : ${s.pyramideEchec}</div>` : ''}
@@ -459,6 +474,16 @@ function renderCards() {
             <div class="tech-row">${lancerChips}</div>
         </div>`;
     }).join('');
+}
+
+function deleteSessionL6(eleveId, seanceIdx) {
+    if(!confirm('🗑️ Supprimer cette session L6 ? Cette action est irréversible.')) return;
+    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    const idx = allStudents.findIndex(s => s.id === eleveId);
+    if(idx === -1) return;
+    allStudents[idx].seances.splice(seanceIdx, 1);
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    location.reload();
 }
 
 function exportTXT() {

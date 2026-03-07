@@ -260,7 +260,10 @@ function analyseL3(eleves) {
     let totalTechSaut = 0, totalTechLancer = 0, totalObjAtteint = 0;
 
     elevesL3.forEach(eleve => {
-        const s = eleve.seances.find(s => s.lecon === 'L3');
+        // Toutes les sessions L3
+        const sessionsL3 = eleve.seances.filter(s => s.lecon === 'L3');
+        // Stats sur la dernière session (pour les moyennes classe)
+        const s = sessionsL3[sessionsL3.length - 1];
         const niv = NIVEAUX[s.niveau] || null;
 
         if(s.niveau && bilanData.stats.niveauxRepartition[s.niveau] !== undefined)
@@ -271,12 +274,10 @@ function analyseL3(eleves) {
         totalTechSaut += techSaut;
         totalTechLancer += techLancer;
 
-        // Objectif atteint = au moins 4/6 tours saisis ET niveau ≥ 100%
         const toursValides = s.tours ? s.tours.filter(t => t).length : 0;
         const objAtteint = toursValides >= 4 && niv && niv.pourcent >= 100;
         if(objAtteint) totalObjAtteint++;
 
-        // % VMA moyen sur les tours
         let pctVMAMoyen = null;
         if(eleve.vma && s.moyenne200m) {
             const vitesse = (0.2 / (s.moyenne200m / 3600));
@@ -284,12 +285,21 @@ function analyseL3(eleves) {
             if(pctVMAMoyen < 50 || pctVMAMoyen > 200) pctVMAMoyen = null;
         }
 
+        // Toutes sessions avec index réel pour suppression
+        const sessions = sessionsL3.map(seance => ({
+            seance,
+            seanceIdx: eleve.seances.indexOf(seance),
+            date: seance.date
+        }));
+
         bilanData.elevesAvecL3.push({
+            id: eleve.id,
             nomPrenom: eleve.nomPrenom,
             sexe: eleve.sexe,
             age: eleve.age,
             vma: eleve.vma,
             seanceL3: s,
+            sessions,
             niv,
             techSaut,
             techLancer,
@@ -375,6 +385,13 @@ function renderCards() {
                 ${e.sexe === 'F' ? '👧' : '🧑'} ${e.nomPrenom}
                 ${e.niv ? `<span class="niveau-badge ${e.niv.classe}">${e.niv.label}</span>` : '<span class="niveau-badge" style="background:rgba(255,255,255,0.1);color:#aaa">N/D</span>'}
             </div>
+            ${e.sessions.length > 1 ? `<div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px;">
+                ${e.sessions.map((sess, i) => `
+                    <div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:3px 7px;font-size:0.7rem;">
+                        <span style="color:#94a3b8;">Session ${i+1} · ${sess.date ? new Date(sess.date).toLocaleDateString('fr-FR') : '—'}</span>
+                        <button onclick="deleteSessionL3('${e.id}', ${sess.seanceIdx})" style="background:rgba(239,68,68,0.2);border:none;color:#f87171;border-radius:4px;padding:1px 5px;cursor:pointer;font-size:0.65rem;">🗑️</button>
+                    </div>`).join('')}
+            </div>` : e.sessions.length === 1 && e.sessions[0].date ? `<div style="font-size:0.7rem;color:#64748b;margin-bottom:4px;">📅 ${new Date(e.sessions[0].date).toLocaleDateString('fr-FR')} <button onclick="deleteSessionL3('${e.id}', ${e.sessions[0].seanceIdx})" style="background:rgba(239,68,68,0.2);border:none;color:#f87171;border-radius:4px;padding:1px 5px;cursor:pointer;font-size:0.65rem;margin-left:6px;">🗑️</button></div>` : ''}
             <div class="stat-line"><span>VMA</span><span>${e.vma || '?'} km/h</span></div>
             <div class="stat-line"><span>Moy. 200m</span><span>${fmtS(s.moyenne200m)}</span></div>
             ${e.pctVMAMoyen ? `<div class="stat-line"><span>% VMA réel</span><span>${e.pctVMAMoyen}%</span></div>` : ''}
@@ -403,6 +420,16 @@ function renderCards() {
             <div class="tech-row">${lancerChips}</div>
         </div>`;
     }).join('');
+}
+
+function deleteSessionL3(eleveId, seanceIdx) {
+    if(!confirm('🗑️ Supprimer cette session L3 ? Cette action est irréversible.')) return;
+    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    const idx = allStudents.findIndex(s => s.id === eleveId);
+    if(idx === -1) return;
+    allStudents[idx].seances.splice(seanceIdx, 1);
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    location.reload();
 }
 
 function exportTXT() {

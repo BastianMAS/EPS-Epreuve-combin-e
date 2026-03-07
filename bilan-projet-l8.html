@@ -3,172 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilan Projet L8 - EPS: épreuve Combinée</title>
+    <title>Mon Projet L8 - EPS: épreuve Combinée</title>
     <style>
         :root {
-            --bg: #0f1419;
-            --card: #1a2332;
+            --bg: #0a0f1a;
+            --card: #111827;
+            --border: rgba(255,255,255,0.08);
             --accent: #00d9ff;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --danger: #ef4444;
-            --purple: #8b5cf6;
-            --gold: #f59e0b;
+            --purple: #a78bfa;
+            --green: #34d399;
+            --orange: #fb923c;
+            --gold: #fbbf24;
+            --red: #f87171;
         }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
-            color: white; 
-            padding: 16px; 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            padding: 16px;
             min-height: 100vh;
         }
-        
-        h1 { 
-            text-align: center; 
-            font-size: 2.5rem; 
-            font-weight: 900;
-            margin-bottom: 8px;
+        .btn-back {
+            position: fixed; top: 16px; left: 16px; z-index: 100;
+            padding: 8px 16px; background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: white; text-decoration: none; font-size: 0.85rem; font-weight: 600;
+        }
+        .page-header { text-align: center; padding: 60px 16px 32px; }
+        .page-header h1 {
+            font-size: 2rem; font-weight: 900;
             background: linear-gradient(135deg, var(--accent), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 6px;
         }
-        
-        .subtitle { 
-            text-align: center; 
-            color: var(--accent); 
-            font-size: 1.2rem; 
-            font-weight: 600; 
-            margin-bottom: 30px;
-        }
-        
+        .page-header p { color: rgba(255,255,255,0.5); font-size: 0.9rem; }
+
         .eleves-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px; max-width: 1400px; margin: 0 auto 40px;
         }
-        
         .eleve-card {
             background: var(--card);
-            border: 1px solid rgba(0,217,255,0.3);
-            border-radius: 16px;
-            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
         }
-        
         .eleve-header {
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            color: white;
+            background: linear-gradient(135deg, rgba(0,217,255,0.12), rgba(167,139,250,0.12));
+            border-bottom: 1px solid var(--border);
             padding: 16px 20px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex; align-items: center; gap: 10px;
         }
-        
-        .eleve-body {
-            padding: 20px;
+        .eleve-header .nom { font-weight: 800; font-size: 1.05rem; flex: 1; }
+        .vma-badge {
+            background: rgba(0,217,255,0.15); border: 1px solid rgba(0,217,255,0.3);
+            color: var(--accent); padding: 3px 10px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 700;
         }
-        
-        .section {
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.02);
-            padding: 16px;
-            border-radius: 12px;
+
+        /* Timeline */
+        .timeline { padding: 16px 20px; }
+        .tl-title {
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; color: rgba(255,255,255,0.3); margin-bottom: 14px;
         }
-        
-        .section-title {
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 12px;
-            font-size: 1rem;
+        .seance-bloc { display: flex; gap: 12px; margin-bottom: 12px; }
+        .seance-ligne { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .seance-dot {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.68rem; font-weight: 900; flex-shrink: 0;
         }
-        
-        .checkbox-group {
-            display: grid;
-            gap: 8px;
-            margin: 12px 0;
+        .dot-diag { background: rgba(251,191,36,0.15); border: 2px solid var(--gold); color: var(--gold); }
+        .dot-L3   { background: rgba(52,211,153,0.15); border: 2px solid var(--green); color: var(--green); }
+        .dot-L4   { background: rgba(52,211,153,0.15); border: 2px solid var(--green); color: var(--green); }
+        .dot-L5   { background: rgba(0,217,255,0.12); border: 2px solid var(--accent); color: var(--accent); }
+        .dot-L6   { background: rgba(167,139,250,0.15); border: 2px solid var(--purple); color: var(--purple); }
+        .dot-L7   { background: rgba(251,113,74,0.15); border: 2px solid var(--orange); color: var(--orange); }
+        .dot-empty{ background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); }
+        .connector { width: 2px; flex: 1; background: var(--border); margin: 3px 0; min-height: 8px; }
+        .seance-content { flex: 1; padding-bottom: 2px; }
+        .seance-label {
+            font-size: 0.75rem; font-weight: 700; margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        
+        .seance-date { font-size: 0.68rem; color: rgba(255,255,255,0.28); font-weight: 400; }
+        .perf-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+        .pill {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: 6px; padding: 3px 8px; font-size: 0.72rem;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .pill span { color: rgba(255,255,255,0.4); }
+        .pill strong { color: white; }
+        .pill.hi { background: rgba(0,217,255,0.07); border-color: rgba(0,217,255,0.22); }
+        .tech-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+        .chip {
+            background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.22);
+            color: var(--green); border-radius: 4px; padding: 2px 6px;
+            font-size: 0.64rem; font-weight: 600;
+        }
+        .chip-gold { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); color: var(--gold); }
+        .empty-txt { font-size: 0.7rem; color: rgba(255,255,255,0.22); font-style: italic; padding: 4px 0; }
+
+        /* Projet */
+        .projet-section { padding: 16px 20px; border-top: 1px solid var(--border); }
+        .proj-title {
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; color: rgba(255,255,255,0.3); margin-bottom: 14px;
+        }
+        .section { margin-bottom: 12px; }
+        .sec-label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.55); margin-bottom: 7px; }
+        .checkbox-group { display: flex; flex-direction: column; gap: 5px; }
         .checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+            padding: 7px 10px; background: rgba(255,255,255,0.025);
+            border: 1px solid transparent; border-radius: 8px;
+            font-size: 0.82rem; cursor: pointer; transition: background 0.15s;
         }
-        
-        .checkbox-row:hover {
-            background: rgba(0,217,255,0.1);
-        }
-        
-        .checkbox-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent);
-        }
-        
+        .checkbox-row:hover { background: rgba(255,255,255,0.055); }
+        .checkbox-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); flex-shrink: 0; }
         .projet-result {
-            background: linear-gradient(135deg, var(--success), var(--accent));
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 16px;
-            color: white;
-            font-weight: 600;
-            min-height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            line-height: 1.4;
+            background: rgba(255,255,255,0.025); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px;
+            min-height: 72px; font-size: 0.83rem; line-height: 1.6;
+            color: rgba(255,255,255,0.45); font-style: italic; margin-bottom: 12px;
         }
-        
-        .btn-back {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
+        .projet-result.filled {
+            color: white; font-style: normal;
+            background: rgba(0,217,255,0.04); border-color: rgba(0,217,255,0.18);
         }
-        
-        .no-data {
-            text-align: center;
-            color: rgba(255,255,255,0.6);
-            font-style: italic;
-            padding: 40px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 12px;
-            margin: 20px 0;
-        }
-        
-        .performance-summary {
-            background: rgba(0,217,255,0.1);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 0.9rem;
-        }
+        .btn-row { display: flex; gap: 8px; }
+        .btn-save { flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.85rem; background:linear-gradient(135deg,#16a34a,#15803d); color:white; }
+        .btn-pdf  { flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.85rem; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:white; }
+        .save-status { text-align:center; font-size:0.75rem; color:var(--green); min-height:18px; margin-top:6px; }
+        .no-data { text-align:center; color:rgba(255,255,255,0.4); padding:60px 20px; font-style:italic; }
     </style>
 </head>
 <body>
 
 <a href="index.html" class="btn-back">← Retour</a>
 
-<h1>EPS: épreuve Combinée</h1>
-<p class="subtitle">🎯 MON PROJET POUR L8 - 3×400M</p>
+<div class="page-header">
+    <h1>EPS : épreuve Combinée</h1>
+    <p>🎯 Mon Projet pour L8 — Bilan du cycle complet L1→L7</p>
+</div>
 
 <div class="eleves-grid" id="eleves-grid"></div>
 
@@ -181,688 +161,449 @@ window.onload = function() {
         document.getElementById('eleves-grid').innerHTML = '<div class="no-data">⚠️ Aucune donnée trouvée</div>';
         return;
     }
-    
     elevesData = JSON.parse(stored);
     renderEleves();
 };
 
+function fmtTime(sec) {
+    if(!sec || sec <= 0) return null;
+    const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+}
+
+function cvtTemps(v) {
+    if(!v) return 0;
+    const s = String(v).trim();
+    const m1 = s.match(/^(\d+):(\d+)$/); if(m1){ const [,a,b]=[...m1]; const sec=parseInt(b); if(sec<60) return parseInt(a)*60+sec; }
+    const m2 = s.replace(',','.').match(/^(\d+)[.,](\d+)$/); if(m2){ const [,a,b]=[...m2]; const sec=parseInt(b); if(sec<60&&parseInt(a)<=10) return parseInt(a)*60+sec; }
+    const n = parseInt(s); if(!isNaN(n)&&n>=60&&n<=300) return n;
+    if(!isNaN(n)&&n>=100&&n<=999){ const mm=Math.floor(n/100),ss=n%100; if(ss<60) return mm*60+ss; }
+    return 0;
+}
+
+function pctVMA(tSec, vmaKmh, dist=400) {
+    if(!tSec||!vmaKmh||tSec<=0) return null;
+    const p = Math.round((dist/tSec/(parseFloat(vmaKmh)/3.6))*100);
+    return (p>=50&&p<=200) ? p : null;
+}
+
+function lastOf(seances, lecon) {
+    const f = seances.filter(s => s.lecon === lecon);
+    return f.length ? f[f.length-1] : null;
+}
+
+// ── Render ──────────────────────────────────────────────────────────────
 function renderEleves() {
-    const container = document.getElementById('eleves-grid');
-    
-    if(elevesData.length === 0) {
-        container.innerHTML = '<div class="no-data">⚠️ Aucun élève trouvé</div>';
-        return;
-    }
-    
-    let html = '';
-    
-    elevesData.forEach((eleve, index) => {
-        const summary = generateSummary(eleve);
-        
-        html += `
-            <div class="eleve-card">
-                <div class="eleve-header">
-                    <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
-                    <span>${eleve.nomPrenom}</span>
-                    <span style="margin-left: auto; font-size: 0.9rem;">${eleve.age} ans</span>
-                </div>
-                <div class="eleve-body">
-                    
-                    <div class="performance-summary">
-                        <strong>📊 Ton parcours en résumé :</strong><br>
-                        ${summary}
-                    </div>
+    const c = document.getElementById('eleves-grid');
+    if(!elevesData.length){ c.innerHTML='<div class="no-data">⚠️ Aucun élève trouvé</div>'; return; }
+    c.innerHTML = elevesData.map((e,i) => buildCard(e,i)).join('');
+    // Restaurer projets sauvegardés
+    elevesData.forEach((e,i) => { if(e.projetL8) restoreProjet(e,i); });
+}
 
-                    ${(function() {
-                        const sl3 = (eleve.seances||[]).find(s=>s.lecon==='L3')||{};
-                        const sl4 = (eleve.seances||[]).find(s=>s.lecon==='L4')||{};
-                        const sl6 = (eleve.seances||[]).find(s=>s.lecon==='L6')||{};
-                        const sl7 = (eleve.seances||[]).find(s=>s.lecon==='L7')||{};
-                        const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=Math.round(s%60); return m+':'+(sec+'').padStart(2,'0'); };
-                        const fmtD = d => d ? parseFloat(d).toFixed(2)+' m' : '-';
-                        const hasCourse = sl3.moyenne200m||sl4.moyenne200m||sl7.temps1;
-                        const hasSaut = sl3.sautDistance||sl4.sautDistance||sl6.sautDistance;
-                        const hasLancer = sl3.lancerDistance||sl4.lancerDistance||sl6.lancerDistance;
-                        if(!hasCourse && !hasSaut && !hasLancer) return '';
-                        let t = '<div style="margin:10px 0;background:rgba(0,210,255,0.07);border:1px solid rgba(0,210,255,0.15);border-radius:10px;padding:10px;">';
-                        t += '<div style="font-weight:800;color:#00d2ff;margin-bottom:8px;font-size:0.82rem;">📈 Mes performances du cycle</div>';
-                        if(hasCourse) {
-                            t += '<div style="font-weight:700;font-size:0.78rem;margin-bottom:4px;">🏃 Course</div>';
-                            t += '<table style="width:100%;font-size:0.72rem;border-collapse:collapse;">';
-                            t += '<tr style="color:#888"><td>Séance</td><td>Temps</td><td>Dist.</td></tr>';
-                            if(sl3.moyenne200m) t += '<tr><td>L3</td><td>'+fmtS(sl3.moyenne200m)+'</td><td>200m</td></tr>';
-                            if(sl4.moyenne200m) t += '<tr><td>L4</td><td>'+fmtS(sl4.moyenne200m)+'</td><td>200m</td></tr>';
-                            if(sl7.temps1) t += '<tr><td>L7 T1</td><td>'+sl7.temps1+'</td><td>400m</td></tr>';
-                            if(sl7.temps2) t += '<tr><td>L7 T2</td><td>'+sl7.temps2+'</td><td>400m</td></tr>';
-                            if(sl7.temps3) t += '<tr><td>L7 T3</td><td>'+sl7.temps3+'</td><td>400m</td></tr>';
-                            t += '</table>';
-                        }
-                        if(hasSaut) {
-                            t += '<div style="font-weight:700;font-size:0.78rem;margin:8px 0 4px;">🦘 Saut</div>';
-                            t += '<table style="width:100%;font-size:0.72rem;border-collapse:collapse;">';
-                            t += '<tr style="color:#888"><td>Séance</td><td>Distance</td></tr>';
-                            if(sl3.sautDistance) t += '<tr><td>L3</td><td>'+fmtD(sl3.sautDistance)+'</td></tr>';
-                            if(sl4.sautDistance) t += '<tr><td>L4</td><td>'+fmtD(sl4.sautDistance)+'</td></tr>';
-                            if(sl6.sautDistance) t += '<tr><td>L6</td><td>'+fmtD(sl6.sautDistance)+'</td></tr>';
-                            t += '</table>';
-                        }
-                        if(hasLancer) {
-                            t += '<div style="font-weight:700;font-size:0.78rem;margin:8px 0 4px;">🎯 Lancer</div>';
-                            t += '<table style="width:100%;font-size:0.72rem;border-collapse:collapse;">';
-                            t += '<tr style="color:#888"><td>Séance</td><td>Distance</td></tr>';
-                            if(sl3.lancerDistance) t += '<tr><td>L3</td><td>'+fmtD(sl3.lancerDistance)+'</td></tr>';
-                            if(sl4.lancerDistance) t += '<tr><td>L4</td><td>'+fmtD(sl4.lancerDistance)+'</td></tr>';
-                            if(sl6.lancerDistance) t += '<tr><td>L6</td><td>'+fmtD(sl6.lancerDistance)+'</td></tr>';
-                            t += '</table>';
-                        }
-                        t += '</div>';
-                        return t;
-                    })()}
+function buildCard(eleve, idx) {
+    const seances = eleve.seances || [];
+    const diag = eleve.diagnostique || null;
+    const vma = parseFloat(eleve.vma) || null;
+    const sL3=lastOf(seances,'L3'), sL4=lastOf(seances,'L4'), sL5=lastOf(seances,'L5');
+    const sL6=lastOf(seances,'L6'), sL7=lastOf(seances,'L7');
+    const saved = eleve.projetL8 || null;
 
-                    
-                    <div class="section">
-                        <div class="section-title">🏃‍♂️ TON TEST L7 - Comment ça s'est passé ?</div>
-                        <div class="checkbox-group">
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="course1-${index}" onchange="generateProjet(${index})">
-                                <label for="course1-${index}">Mon % VMA sur 3×400m était élevé (>110%)</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="course2-${index}" onchange="generateProjet(${index})">
-                                <label for="course2-${index}">J'ai bien géré ma stratégie de course</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="course3-${index}" onchange="generateProjet(${index})">
-                                <label for="course3-${index}">J'ai eu du mal à tenir le rythme</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="course4-${index}" onchange="generateProjet(${index})">
-                                <label for="course4-${index}">J'ai fini plus fort qu'au début</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">💪 MENTAL - Quel est ton profil ?</div>
-                        <div class="checkbox-group">
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="mental1-${index}" onchange="generateProjet(${index})">
-                                <label for="mental1-${index}">Je préfère prendre des risques</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="mental2-${index}" onchange="generateProjet(${index})">
-                                <label for="mental2-${index}">Je préfère jouer la sécurité</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="mental3-${index}" onchange="generateProjet(${index})">
-                                <label for="mental3-${index}">Je suis confiant après L7</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="mental4-${index}" onchange="generateProjet(${index})">
-                                <label for="mental4-${index}">J'ai besoin de me rassurer</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">🦘 SAUT - Comment te sens-tu ?</div>
-                        <div class="checkbox-group">
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="saut1-${index}" onchange="generateProjet(${index})">
-                                <label for="saut1-${index}">Ma course d'élan est devenue régulière</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="saut2-${index}" onchange="generateProjet(${index})">
-                                <label for="saut2-${index}">J'ai bien progressé entre L3/L4 et L6</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="saut3-${index}" onchange="generateProjet(${index})">
-                                <label for="saut3-${index}">J'ai encore du mal avec la précision d'appel</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="saut4-${index}" onchange="generateProjet(${index})">
-                                <label for="saut4-${index}">J'aime les défis techniques</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">🎯 LANCER - Comment te sens-tu ?</div>
-                        <div class="checkbox-group">
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="lancer1-${index}" onchange="generateProjet(${index})">
-                                <label for="lancer1-${index}">Ma technique s'améliore séance après séance</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="lancer2-${index}" onchange="generateProjet(${index})">
-                                <label for="lancer2-${index}">J'ai une bonne coordination globale</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="lancer3-${index}" onchange="generateProjet(${index})">
-                                <label for="lancer3-${index}">Je n'arrive pas à être régulier dans mes lancers</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="lancer4-${index}" onchange="generateProjet(${index})">
-                                <label for="lancer4-${index}">Je veux surtout réussir une belle distance</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section">
-                        <div class="section-title">🎯 OBJECTIF - Que veux-tu ?</div>
-                        <div class="checkbox-group">
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="objectif1-${index}" onchange="generateProjet(${index})">
-                                <label for="objectif1-${index}">Réussir sans prendre de risque</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="objectif2-${index}" onchange="generateProjet(${index})">
-                                <label for="objectif2-${index}">Me dépasser et viser une belle performance</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="objectif3-${index}" onchange="generateProjet(${index})">
-                                <label for="objectif3-${index}">Faire mieux qu'en L7</label>
-                            </div>
-                            <div class="checkbox-row">
-                                <input type="checkbox" id="objectif4-${index}" onchange="generateProjet(${index})">
-                                <label for="objectif4-${index}">Montrer ce que je sais faire</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="projet-result" id="projet-${index}">
-                        🤔 Coche les cases qui te correspondent pour découvrir ton projet personnalisé !
-                    </div>
+    return `<div class="eleve-card">
+        <div class="eleve-header">
+            <span style="font-size:1.4rem">${eleve.sexe==='F'?'👧':'🧑'}</span>
+            <span class="nom">${eleve.nomPrenom}</span>
+            ${vma?`<span class="vma-badge">VMA ${vma} km/h</span>`:''}
+        </div>
 
-                    <div style="display:flex;gap:10px;margin-top:12px;">
-                        <button onclick="sauvegarderProjet(${index})" style="flex:1;padding:12px;background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;">
-                            💾 Sauvegarder
-                        </button>
-                        <button onclick="exportFicheEleve(${index})" style="flex:1;padding:12px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;">
-                            📄 Fiche PDF
-                        </button>
-                    </div>
-                    <div id="save-status-${index}" style="text-align:center;font-size:0.8rem;color:#4ade80;margin-top:6px;min-height:18px;"></div>
-                    
+        <div class="timeline">
+            <div class="tl-title">📋 Parcours du cycle</div>
+            ${tlDiag(diag, vma)}
+            ${tlL3(sL3, vma)}
+            ${tlL4(sL4, vma)}
+            ${tlL5(sL5)}
+            ${tlL6(sL6)}
+            ${tlL7(sL7, vma, true)}
+        </div>
+
+        <div class="projet-section">
+            <div class="proj-title">🎯 Mon projet pour L8</div>
+
+            <div class="section">
+                <div class="sec-label">🏃 Course — Comment ça s'est passé en L7 ?</div>
+                <div class="checkbox-group">
+                    ${cb(idx,'course1','Mon % VMA sur 3×400m était élevé (>110%)',saved)}
+                    ${cb(idx,'course2','J\'ai bien géré ma stratégie de course',saved)}
+                    ${cb(idx,'course3','J\'ai eu du mal à tenir le rythme',saved)}
+                    ${cb(idx,'course4','J\'ai fini plus fort qu\'au début',saved)}
                 </div>
             </div>
-        `;
-    });
-    
-    container.innerHTML = html;
+            <div class="section">
+                <div class="sec-label">💪 Mental — Quel est ton profil ?</div>
+                <div class="checkbox-group">
+                    ${cb(idx,'mental1','Je préfère prendre des risques',saved)}
+                    ${cb(idx,'mental2','Je préfère jouer la sécurité',saved)}
+                    ${cb(idx,'mental3','Je suis confiant après L7',saved)}
+                    ${cb(idx,'mental4','J\'ai besoin de me rassurer',saved)}
+                </div>
+            </div>
+            <div class="section">
+                <div class="sec-label">🦘 Saut — Comment tu te sens ?</div>
+                <div class="checkbox-group">
+                    ${cb(idx,'saut1','Ma course d\'élan est devenue régulière',saved)}
+                    ${cb(idx,'saut2','J\'ai bien progressé entre L3/L4 et L6',saved)}
+                    ${cb(idx,'saut3','J\'ai encore du mal avec la précision d\'appel',saved)}
+                    ${cb(idx,'saut4','J\'aime les défis techniques',saved)}
+                </div>
+            </div>
+            <div class="section">
+                <div class="sec-label">🎯 Lancer — Comment tu te sens ?</div>
+                <div class="checkbox-group">
+                    ${cb(idx,'lancer1','Ma technique s\'améliore séance après séance',saved)}
+                    ${cb(idx,'lancer2','J\'ai une bonne coordination globale',saved)}
+                    ${cb(idx,'lancer3','Je n\'arrive pas à être régulier dans mes lancers',saved)}
+                    ${cb(idx,'lancer4','Je veux surtout réussir une belle distance',saved)}
+                </div>
+            </div>
+            <div class="section">
+                <div class="sec-label">🏁 Objectif — Que veux-tu en L8 ?</div>
+                <div class="checkbox-group">
+                    ${cb(idx,'objectif1','Réussir sans prendre de risque',saved)}
+                    ${cb(idx,'objectif2','Me dépasser et viser une belle performance',saved)}
+                    ${cb(idx,'objectif3','Faire mieux qu\'en L7',saved)}
+                    ${cb(idx,'objectif4','Montrer ce que je sais faire',saved)}
+                </div>
+            </div>
+
+            <div class="projet-result" id="projet-${idx}">Coche les cases pour générer ton projet personnalisé…</div>
+            <div class="btn-row">
+                <button class="btn-save" onclick="sauvegarderProjet(${idx})">💾 Sauvegarder</button>
+                <button class="btn-pdf"  onclick="exportFiche(${idx})">📄 Fiche PDF</button>
+            </div>
+            <div class="save-status" id="save-status-${idx}"></div>
+        </div>
+    </div>`;
 }
 
-function generateSummary(eleve) {
-    const seances = eleve.seances || [];
-    const seanceL7 = seances.find(s => s.lecon === 'L7');
-    
-    let summary = '';
-    
-    // VMA en premier
-    if(eleve.vma) {
-        summary += `VMA ${eleve.vma} km/h. `;
-    }
-    
-    // Performance L7 (PRIORITÉ) avec conversion intelligente
-    if(seanceL7 && seanceL7.temps1 && seanceL7.temps2 && seanceL7.temps3 && eleve.vma) {
-        const vmaMs = parseFloat(eleve.vma) / 3.6;
-        
-        // Conversion intelligente des temps
-        const t1 = convertTempsIntelligent(seanceL7.temps1);
-        const t2 = convertTempsIntelligent(seanceL7.temps2);
-        const t3 = convertTempsIntelligent(seanceL7.temps3);
-        
-        console.log(`Résumé ${eleve.nomPrenom}: VMA ${eleve.vma}, Temps: ${seanceL7.temps1}→${t1}s, ${seanceL7.temps2}→${t2}s, ${seanceL7.temps3}→${t3}s`);
-        
-        if(t1 > 0 && t2 > 0 && t3 > 0) {
-            const pct1 = Math.round(((400/t1) / vmaMs) * 100);
-            const pct2 = Math.round(((400/t2) / vmaMs) * 100);
-            const pct3 = Math.round(((400/t3) / vmaMs) * 100);
-            const pctMoy = Math.round((pct1 + pct2 + pct3) / 3);
-            
-            // Vérification cohérence (éviter les 5000% VMA)
-            if(pct1 >= 50 && pct1 <= 200 && pct2 >= 50 && pct2 <= 200 && pct3 >= 50 && pct3 <= 200) {
-                summary += `L7: ${pct1}%-${pct2}%-${pct3}% (moy ${pctMoy}%). `;
-                
-                // Évolution
-                if(pct3 > pct1 + 3) summary += 'Finit fort. ';
-                else if(pct3 < pct1 - 5) summary += 'Décroche. ';
-                else summary += 'Régulier. ';
-            } else {
-                console.log(`⚠️ % VMA aberrants ignorés: ${pct1}%, ${pct2}%, ${pct3}%`);
-                summary += `L7: 3×400m réalisé. `;
-            }
-        }
-    }
-    
-    // État mental L7
-    if(seanceL7?.confiantL8) summary += 'Confiant L8. ';
-    if(seanceL7?.strategieTrouvee) summary += 'Stratégie OK. ';
-    
-    // Travail L7
-    const travailSaut = [];
-    const travailLancer = [];
-    
-    if(seanceL7?.sautCourseElan) travailSaut.push("élan");
-    if(seanceL7?.sautPrecision) travailSaut.push("précision");
-    if(seanceL7?.sautReception) travailSaut.push("réception");
-    if(seanceL7?.sautDistance) travailSaut.push("distance");
-    
-    if(seanceL7?.lancerCoordination) travailLancer.push("coordination");
-    if(seanceL7?.lancerTransfert) travailLancer.push("transfert");
-    if(seanceL7?.lancerAccompagnement) travailLancer.push("accompagnement");
-    if(seanceL7?.lancerRegularite) travailLancer.push("régularité");
-    
-    if(travailSaut.length > 0) summary += `Saut: ${travailSaut.join(', ')}. `;
-    if(travailLancer.length > 0) summary += `Lancer: ${travailLancer.join(', ')}. `;
-    
-    return summary || 'Parcours en cours...';
+function cb(idx, id, label, saved) {
+    const chk = saved?.coches?.[id] ? 'checked' : '';
+    return `<label class="checkbox-row"><input type="checkbox" id="${id}-${idx}" ${chk} onchange="generateProjet(${idx})"><span>${label}</span></label>`;
 }
 
-function sauvegarderProjet(eleveIndex) {
-    const eleve = elevesData[eleveIndex];
-    const projetHTML = document.getElementById(`projet-${eleveIndex}`)?.innerHTML || '';
-    
-    // Lire les cases cochées
-    const coches = {};
-    ['course1','course2','course3','course4','saut1','saut2','saut3','saut4',
-     'lancer1','lancer2','lancer3','lancer4','mental1','mental2','mental3','mental4',
-     'objectif1','objectif2','objectif3','objectif4'].forEach(id => {
-        const el = document.getElementById(`${id}-${eleveIndex}`);
-        if(el) coches[id] = el.checked;
-    });
-
-    const allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
-    const idx = allStudents.findIndex(s => s.id === eleve.id);
-    if(idx === -1) return;
-    
-    allStudents[idx].projetL8 = {
-        coches,
-        projetHTML,
-        date: new Date().toISOString()
-    };
-    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    
-    const status = document.getElementById(`save-status-${eleveIndex}`);
-    if(status) {
-        status.textContent = '✅ Sauvegardé !';
-        setTimeout(() => { status.textContent = ''; }, 2500);
-    }
+// ── Blocs timeline ────────────────────────────────────────────────────
+function dot(cls, label, isLast) {
+    return `<div class="seance-ligne">
+        <div class="seance-dot ${cls}">${label}</div>
+        ${isLast?'':'<div class="connector"></div>'}
+    </div>`;
+}
+function pill(label, val, hi=false) {
+    return val ? `<div class="pill${hi?' hi':''}"><span>${label}</span><strong>${val}</strong></div>` : '';
 }
 
-function exportFicheEleve(eleveIndex) {
-    const eleve = elevesData[eleveIndex];
-    const projetHTML = document.getElementById(`projet-${eleveIndex}`)?.innerHTML || '';
-    const summary = generateSummary(eleve);
-    const seances = eleve.seances || [];
-    const sL7 = seances.find(s => s.lecon === 'L7') || {};
+function tlDiag(diag, vma) {
+    const date = diag?.date ? new Date(diag.date).toLocaleDateString('fr-FR') : '';
+    const moy  = diag?.moyenneCourse ? fmtTime(diag.moyenneCourse) : null;
+    const saut = diag?.sautAvecBest  ? diag.sautAvecBest.toFixed(2)+'m' : null;
+    const lance= diag?.lancerBest    ? diag.lancerBest.toFixed(1)+'m'   : null;
+    return `<div class="seance-bloc">
+        ${dot('dot-diag','L1/L2',false)}
+        <div class="seance-content">
+            <div class="seance-label"><span style="color:var(--gold)">Diagnostic L1/L2</span><span class="seance-date">${date}</span></div>
+            <div class="perf-grid">
+                ${pill('VMA', vma?vma+' km/h':null, true)}
+                ${pill('3×400m moy.', moy)}
+                ${pill('Saut élan', saut)}
+                ${pill('Lancer', lance)}
+                ${!vma&&!moy&&!saut&&!lance?'<span class="empty-txt">Non enregistré</span>':''}
+            </div>
+        </div>
+    </div>`;
+}
 
-    const win = window.open('', '_blank');
+function tlL3(s, vma) {
+    if(!s) return vide('dot-empty','L3','L3 non enregistrée', false);
+    const date = s.date?new Date(s.date).toLocaleDateString('fr-FR'):'';
+    const moy  = s.moyenne200m ? fmtTime(s.moyenne200m) : null;
+    const saut = s.sautDistance ? parseFloat(s.sautDistance).toFixed(2)+'m' : null;
+    const lance= s.lancerDistance ? parseFloat(s.lancerDistance).toFixed(1)+'m' : null;
+    const niv  = {vma95:'95% VMA',vma100:'100% VMA',vma105:'105% VMA',vma110:'110% VMA'}[s.niveau]||s.niveau||'';
+    const techs= [s.sautTech1&&'Élan',s.sautTech2&&'Appel',s.lancerTech1&&'Armé',s.lancerTech2&&'Rotation'].filter(Boolean);
+    return `<div class="seance-bloc">
+        ${dot('dot-L3','L3',false)}
+        <div class="seance-content">
+            <div class="seance-label"><span style="color:var(--green)">L3 — Découverte combinée</span><span class="seance-date">${date}</span></div>
+            <div class="perf-grid">
+                ${pill('Niveau',niv,true)}${pill('200m moy.',moy)}${pill('🦘',saut)}${pill('🎯',lance)}
+            </div>
+            ${techs.length?`<div class="tech-row">${techs.map(t=>`<span class="chip">✓ ${t}</span>`).join('')}</div>`:''}
+        </div>
+    </div>`;
+}
+
+function tlL4(s, vma) {
+    if(!s) return vide('dot-empty','L4','L4 non enregistrée', false);
+    const date = s.date?new Date(s.date).toLocaleDateString('fr-FR'):'';
+    const moy  = s.moyenne200m ? fmtTime(s.moyenne200m) : null;
+    const saut = s.sautDistance ? parseFloat(s.sautDistance).toFixed(2)+'m' : null;
+    const lance= s.lancerDistance ? parseFloat(s.lancerDistance).toFixed(1)+'m' : null;
+    const prog = {maintien:'Maintien',progression:'Progression',depassement:'Dépassement'}[s.progression]||'';
+    const techs= [s.sautTech1&&'Élan',s.sautTech2&&'Appel',s.sautTech3&&'Envol',s.sautTech4&&'Réception',
+                  s.lancerTech1&&'Armé',s.lancerTech2&&'Rotation',s.lancerTech3&&'Transfert',s.lancerTech4&&'Accomp.'].filter(Boolean);
+    return `<div class="seance-bloc">
+        ${dot('dot-L4','L4',false)}
+        <div class="seance-content">
+            <div class="seance-label"><span style="color:var(--green)">L4 — Consolidation</span><span class="seance-date">${date}</span></div>
+            <div class="perf-grid">
+                ${pill('Objectif',prog,true)}${pill('200m moy.',moy)}${pill('🦘',saut)}${pill('🎯',lance)}
+            </div>
+            ${techs.length?`<div class="tech-row">${techs.map(t=>`<span class="chip">✓ ${t}</span>`).join('')}</div>`:''}
+        </div>
+    </div>`;
+}
+
+function tlL5(s) {
+    if(!s) return vide('dot-empty','L5','L5 non enregistrée', false);
+    const date = s.date?new Date(s.date).toLocaleDateString('fr-FR'):'';
+    const pct  = s.performanceMoyenne ? Math.round(s.performanceMoyenne)+'%' : null;
+    const dist = s.distanceTotaleEquipe ? s.distanceTotaleEquipe+'m' : null;
+    return `<div class="seance-bloc">
+        ${dot('dot-L5','L5',false)}
+        <div class="seance-content">
+            <div class="seance-label"><span style="color:var(--accent)">L5 — Relais Olympique</span><span class="seance-date">${date}</span></div>
+            <div class="perf-grid">
+                ${pill('% objectif',pct,true)}${pill('Distance éq.',dist)}
+                ${s.manches?pill('Manches',s.manches+''):''}
+            </div>
+            ${s.equipe?`<div style="font-size:0.67rem;color:rgba(255,255,255,0.25);margin-top:3px">Éq. : ${s.equipe}</div>`:''}
+        </div>
+    </div>`;
+}
+
+function tlL6(s) {
+    if(!s) return vide('dot-empty','L6','L6 non enregistrée', false);
+    const date  = s.date?new Date(s.date).toLocaleDateString('fr-FR'):'';
+    const saut  = s.sautDistance ? parseFloat(s.sautDistance).toFixed(2)+'m' : null;
+    const lance = s.lancerDistance ? parseFloat(s.lancerDistance).toFixed(1)+'m' : null;
+    const scS   = [s.sautTech1,s.sautTech2,s.sautTech3,s.sautTech4,s.sautTech5].filter(Boolean).length;
+    const scL   = [s.lancerTech1,s.lancerTech2,s.lancerTech3,s.lancerTech4,s.lancerTech5].filter(Boolean).length;
+    const pyram = [s.pyramide60_1,s.pyramide80_1,s.pyramide100,s.pyramide80_2,s.pyramide60_2].filter(Boolean).length;
+    return `<div class="seance-bloc">
+        ${dot('dot-L6','L6',false)}
+        <div class="seance-content">
+            <div class="seance-label"><span style="color:var(--purple)">L6 — Perfectionnement</span><span class="seance-date">${date}</span></div>
+            <div class="perf-grid">
+                ${pyram?pill('Pyramide',pyram+'/5'+(pyram===5?' 🏆':''),true):''}
+                ${saut?pill('🦘 '+scS+'/5',saut):scS?pill('🦘 Saut',scS+'/5 tech.'):''}
+                ${lance?pill('🎯 '+scL+'/5',lance):scL?pill('🎯 Lancer',scL+'/5 tech.'):''}
+            </div>
+        </div>
+    </div>`;
+}
+
+function tlL7(s, vma, isLast=true) {
+    if(!s) return vide('dot-empty','L7','L7 non enregistrée', isLast);
+    const date = s.date?new Date(s.date).toLocaleDateString('fr-FR'):'';
+    const t1=cvtTemps(s.temps1),t2=cvtTemps(s.temps2),t3=cvtTemps(s.temps3);
+    const p1=pctVMA(t1,vma),p2=pctVMA(t2,vma),p3=pctVMA(t3,vma);
+    const pMoy=(p1&&p2&&p3)?Math.round((p1+p2+p3)/3):null;
+    const chips=[];
+    if(s.confiantL8) chips.push('<span class="chip chip-gold">💪 Confiant</span>');
+    if(s.strategieTrouvee) chips.push('<span class="chip chip-gold">🎯 Stratégie OK</span>');
+    return `<div class="seance-bloc">
+        ${dot('dot-L7','L7',isLast)}
+        <div class="seance-content">
+            <div class="seance-label"><span style="color:var(--orange)">L7 — Mise en situation 3×400m</span><span class="seance-date">${date}</span></div>
+            <div class="perf-grid">
+                ${s.temps1?pill('T1',s.temps1+(p1?' ('+p1+'%)':'')):''}
+                ${s.temps2?pill('T2',s.temps2+(p2?' ('+p2+'%)':'')):''}
+                ${s.temps3?pill('T3',s.temps3+(p3?' ('+p3+'%)':'')):''}
+                ${pMoy?pill('Moy %VMA',pMoy+'%',true):''}
+            </div>
+            ${chips.length?`<div class="tech-row">${chips.join('')}</div>`:''}
+        </div>
+    </div>`;
+}
+
+function vide(cls, label, msg, isLast) {
+    return `<div class="seance-bloc">
+        ${dot(cls, label, isLast)}
+        <div class="seance-content"><div class="empty-txt" style="padding:6px 0">${msg}</div></div>
+    </div>`;
+}
+
+// ── Projet généré ─────────────────────────────────────────────────────
+function generateProjet(idx) {
+    const eleve = elevesData[idx];
+    const el = document.getElementById(`projet-${idx}`);
+    const get = id => document.getElementById(`${id}-${idx}`)?.checked||false;
+    const course=[1,2,3,4].map(n=>`course${n}`).filter(get);
+    const mental=[1,2,3,4].map(n=>`mental${n}`).filter(get);
+    const saut  =[1,2,3,4].map(n=>`saut${n}`).filter(get);
+    const lancer=[1,2,3,4].map(n=>`lancer${n}`).filter(get);
+    const obj   =[1,2,3,4].map(n=>`objectif${n}`).filter(get);
+
+    if(!course.length&&!mental.length&&!saut.length&&!lancer.length&&!obj.length) {
+        el.className='projet-result';
+        el.innerHTML='Coche les cases pour générer ton projet personnalisé…';
+        return;
+    }
+
+    const seances=eleve.seances||[];
+    const sL3=lastOf(seances,'L3')||{}, sL4=lastOf(seances,'L4')||{};
+    const sL6=lastOf(seances,'L6')||{}, sL7=lastOf(seances,'L7')||{};
+    const vma=parseFloat(eleve.vma)||null;
+
+    const t1=cvtTemps(sL7.temps1),t2=cvtTemps(sL7.temps2),t3=cvtTemps(sL7.temps3);
+    const p1=pctVMA(t1,vma),p2=pctVMA(t2,vma),p3=pctVMA(t3,vma);
+    const pMoy=(p1&&p2&&p3)?Math.round((p1+p2+p3)/3):null;
+    const ecart=(t1&&t2&&t3)?Math.max(t1,t2,t3)-Math.min(t1,t2,t3):null;
+    const regulier=ecart!==null&&ecart<=8;
+    const finisseur=t1>0&&t3>0&&t3<t1-2;
+
+    let strat='', intensite='';
+    if(pMoy) {
+        if(pMoy>=110&&regulier){strat='🚀 STRATÉGIE AMBITIEUSE';intensite=`Vise ${Math.min(pMoy+5,125)}% VMA — tu en as la capacité !`;}
+        else if(pMoy>=100&&regulier){strat='⚖️ STRATÉGIE REPRODUCTIBLE';intensite=`Reproduis exactement ton L7 : ${pMoy}% VMA, départ calme`;}
+        else if(ecart>15){strat='🛡️ STRATÉGIE RÉGULARITÉ';intensite=`Départ prudent à ${Math.max(pMoy-5,90)}% VMA — soigne le rythme`;}
+        else{strat='⚖️ STRATÉGIE ÉQUILIBRÉE';intensite='Tour 1 calme → Tour 2 régulier → Tour 3 tout donner';}
+    } else if(course.includes('course1')||course.includes('course2')) {
+        strat='🚀 STRATÉGIE AMBITIEUSE';intensite='Ton ressenti est bon — vise 110-115% VMA';
+    } else if(course.includes('course3')||mental.includes('mental4')) {
+        strat='🛡️ STRATÉGIE SÉCURISÉE';intensite='Pars à 95-100% VMA, puis progressif';
+    } else {
+        strat='⚖️ STRATÉGIE ÉQUILIBRÉE';intensite='Rythme régulier : 100-105% VMA';
+    }
+
+    const scS6=[sL6.sautTech1,sL6.sautTech2,sL6.sautTech3,sL6.sautTech4,sL6.sautTech5].filter(Boolean).length;
+    const scL6=[sL6.lancerTech1,sL6.lancerTech2,sL6.lancerTech3,sL6.lancerTech4,sL6.lancerTech5].filter(Boolean).length;
+    const dS3=parseFloat(sL3.sautDistance)||0, dS6=parseFloat(sL6.sautDistance)||0;
+    const dL3=parseFloat(sL3.lancerDistance)||0, dL6=parseFloat(sL6.lancerDistance)||0;
+    const evS=dS3&&dS6?(dS6-dS3).toFixed(2):null;
+    const evL=dL3&&dL6?(dL6-dL3).toFixed(2):null;
+
+    let cSaut='';
+    if(scS6>=4) cSaut=`🦘 Saut : Technique solide (${scS6}/5)${evS?` — +${evS}m depuis L3 !`:' — vise ta distance record'}`;
+    else if(saut.includes('saut1')&&saut.includes('saut2')) cSaut='🦘 Saut : Tu as progressé — vise ta meilleure distance';
+    else if(saut.includes('saut3')) cSaut='🦘 Saut : Soigne l\'élan régulier et la précision d\'appel';
+
+    let cLancer='';
+    if(scL6>=4) cLancer=`🎯 Lancer : Technique avancée (${scL6}/5)${evL?` — +${evL}m depuis L3 !`:' — soigne la rotation'}`;
+    else if(lancer.includes('lancer1')&&lancer.includes('lancer2')) cLancer='🎯 Lancer : Tes progrès paient — vise ta meilleure distance';
+    else if(lancer.includes('lancer3')) cLancer='🎯 Lancer : Focus : profil de côté + rotation du bassin';
+
+    let final='';
+    if(finisseur||course.includes('course4')) final='Tu es un finisseur — garde des forces pour un Tour 3 explosif ! 💥';
+    else if(regulier&&sL7.strategieTrouvee) final='Ta stratégie est trouvée — reproduis-la exactement ! 🔄';
+    else if(obj.includes('objectif3')) final='Objectif : faire mieux qu\'en L7 — pars 2-3s plus vite au Tour 1 🎯';
+    else if(mental.includes('mental2')) final='Reste dans ta zone de confort — la régularité vaut mieux que le risque ✅';
+    else final='Tour 1 contrôlé → Tour 2 maintenu → Tour 3 tout donner 🏁';
+
+    el.className='projet-result filled';
+    el.innerHTML=`
+        <div style="margin-bottom:6px"><strong>${strat}</strong></div>
+        <div style="margin-bottom:10px;font-size:0.8rem;color:rgba(255,255,255,0.65)">${intensite}</div>
+        ${cSaut?`<div style="margin-bottom:5px;font-size:0.81rem">${cSaut}</div>`:''}
+        ${cLancer?`<div style="margin-bottom:5px;font-size:0.81rem">${cLancer}</div>`:''}
+        <div style="margin-top:8px;font-size:0.81rem;color:var(--gold)">${final}</div>
+        ${finisseur?'<div style="font-size:0.72rem;margin-top:5px;color:rgba(255,255,255,0.35)">✓ Tendance L7 : tu as fini plus fort qu\'au départ</div>':''}
+        ${sL7.strategieTrouvee?'<div style="font-size:0.72rem;color:rgba(255,255,255,0.35)">✓ Stratégie validée en L7</div>':''}
+    `;
+}
+
+function restoreProjet(eleve, idx) {
+    // Déclencher la génération avec les cases cochées
+    generateProjet(idx);
+}
+
+// ── Sauvegarde ────────────────────────────────────────────────────────
+function sauvegarderProjet(idx) {
+    const eleve = elevesData[idx];
+    const projetHTML = document.getElementById(`projet-${idx}`)?.innerHTML||'';
+    const ids=['course1','course2','course3','course4','saut1','saut2','saut3','saut4',
+               'lancer1','lancer2','lancer3','lancer4','mental1','mental2','mental3','mental4',
+               'objectif1','objectif2','objectif3','objectif4'];
+    const coches={};
+    ids.forEach(id => { const e=document.getElementById(`${id}-${idx}`); if(e) coches[id]=e.checked; });
+    const all=JSON.parse(localStorage.getItem('eps_pro_students')||'[]');
+    const i=all.findIndex(s=>s.id===eleve.id);
+    if(i===-1) return;
+    all[i].projetL8={coches,projetHTML,date:new Date().toISOString()};
+    localStorage.setItem('eps_pro_students',JSON.stringify(all));
+    elevesData[i]=all[i];
+    const st=document.getElementById(`save-status-${idx}`);
+    if(st){st.textContent='✅ Sauvegardé !';setTimeout(()=>st.textContent='',2500);}
+}
+
+// ── Export PDF ────────────────────────────────────────────────────────
+function exportFiche(idx) {
+    const eleve=elevesData[idx];
+    const projetHTML=document.getElementById(`projet-${idx}`)?.innerHTML||'';
+    const seances=eleve.seances||[];
+    const diag=eleve.diagnostique||{};
+    const sL3=lastOf(seances,'L3')||{}, sL4=lastOf(seances,'L4')||{};
+    const sL5=lastOf(seances,'L5')||{}, sL6=lastOf(seances,'L6')||{}, sL7=lastOf(seances,'L7')||{};
+    const vma=parseFloat(eleve.vma)||null;
+    const t1=cvtTemps(sL7.temps1),t2=cvtTemps(sL7.temps2),t3=cvtTemps(sL7.temps3);
+    const p1=pctVMA(t1,vma),p2=pctVMA(t2,vma),p3=pctVMA(t3,vma);
+    const pMoy=(p1&&p2&&p3)?Math.round((p1+p2+p3)/3):null;
+    const row=(l,v)=>v?`<tr><td style="color:#666;padding:4px 8px;font-size:.83rem">${l}</td><td style="font-weight:700;padding:4px 8px;font-size:.83rem">${v}</td></tr>`:'';
+    const win=window.open('','_blank');
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
     <title>Mon Projet L8 — ${eleve.nomPrenom}</title>
     <style>
-        body{font-family:Arial,sans-serif;padding:24px;max-width:620px;margin:0 auto;color:#1e293b;background:#fff}
-        .header{background:linear-gradient(135deg,#7c3aed,#0d9488);color:white;padding:20px;border-radius:12px;margin-bottom:20px;text-align:center}
-        .header h2{margin:0 0 4px 0;font-size:1.4rem}
-        .header p{margin:0;opacity:0.85;font-size:0.85rem}
-        .section{background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #e2e8f0}
-        .section-title{font-weight:800;color:#7c3aed;font-size:0.85rem;text-transform:uppercase;margin-bottom:8px}
-        .projet-box{background:linear-gradient(135deg,#f0fdf4,#e0f2fe);border:2px solid #0d9488;border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.9rem;line-height:1.6}
-        .summary-box{background:#f1f5f9;border-radius:8px;padding:10px;font-size:0.85rem;margin-bottom:12px;color:#475569}
+        body{font-family:Arial,sans-serif;padding:24px;max-width:680px;margin:0 auto;color:#1e293b}
+        .hdr{background:linear-gradient(135deg,#7c3aed,#0d9488);color:white;padding:18px 20px;border-radius:12px;margin-bottom:16px}
+        .hdr h2{font-size:1.3rem;margin:0 0 4px} .hdr p{opacity:.8;font-size:.82rem;margin:0}
+        .bloc{background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #e2e8f0}
+        .bloc-title{font-weight:800;color:#7c3aed;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+        table{width:100%;border-collapse:collapse}
+        .projet-box{background:#f0fdf4;border:2px solid #0d9488;border-radius:8px;padding:12px;font-size:.85rem;line-height:1.6;margin-bottom:12px}
         .no-print{text-align:center;margin:20px 0}
         @media print{.no-print{display:none}}
     </style></head><body>
-    <div class="header">
-        <h2>${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nomPrenom}</h2>
-        <p>🎯 Mon Projet pour L8 — EPS: épreuve Combinée | ${new Date().toLocaleDateString('fr-FR')}</p>
+    <div class="hdr"><h2>${eleve.sexe==='F'?'👧':'🧑'} ${eleve.nomPrenom}</h2>
+    <p>🎯 Mon Projet pour L8 — EPS : épreuve Combinée | ${new Date().toLocaleDateString('fr-FR')}</p></div>
+
+    <div class="bloc">
+        <div class="bloc-title">📋 Bilan du cycle L1→L7</div>
+        <table>
+            ${row('VMA (L1/L2)', vma?vma+' km/h':null)}
+            ${row('3×400m moy. diag.', diag.moyenneCourse?fmtTime(diag.moyenneCourse):null)}
+            ${row('L3 — 200m moy.', sL3.moyenne200m?fmtTime(sL3.moyenne200m)+(sL3.niveau?' ('+sL3.niveau+')':''):null)}
+            ${row('L4 — 200m moy.', sL4.moyenne200m?fmtTime(sL4.moyenne200m):null)}
+            ${row('L5 — Relais', sL5.distanceTotaleEquipe?sL5.distanceTotaleEquipe+'m ('+Math.round(sL5.performanceMoyenne||0)+'% obj.)':null)}
+            ${row('L6 — Saut', sL6.sautDistance?parseFloat(sL6.sautDistance).toFixed(2)+'m':null)}
+            ${row('L6 — Lancer', sL6.lancerDistance?parseFloat(sL6.lancerDistance).toFixed(1)+'m':null)}
+            ${row('L7 T1', sL7.temps1?(sL7.temps1+(p1?' ('+p1+'% VMA)':'')):null)}
+            ${row('L7 T2', sL7.temps2?(sL7.temps2+(p2?' ('+p2+'% VMA)':'')):null)}
+            ${row('L7 T3', sL7.temps3?(sL7.temps3+(p3?' ('+p3+'% VMA)':'')):null)}
+            ${row('% VMA moyen L7', pMoy?pMoy+'%':null)}
+        </table>
     </div>
-    <div class="summary-box"><strong>📊 Mon parcours :</strong> ${summary}</div>
-    <div class="section">
-        <div class="section-title">🎯 Mon projet personnalisé</div>
-        <div class="projet-box">${projetHTML.includes('Coche') ? '⚠️ Projet non encore généré — cochez les cases dans l\'application.' : projetHTML}</div>
-    </div>
-    ${sL7.temps1 ? `<div class="section">
-        <div class="section-title">🏃 Mes temps L7 (référence)</div>
-        <div style="display:flex;gap:12px;font-size:0.9rem;">
-            <span>Tour 1 : <strong>${sL7.temps1}</strong></span>
-            <span>Tour 2 : <strong>${sL7.temps2}</strong></span>
-            <span>Tour 3 : <strong>${sL7.temps3}</strong></span>
-        </div>
-    </div>` : ''}
+
+    <div class="projet-box"><strong style="display:block;margin-bottom:8px;color:#0d9488">🎯 Mon projet personnalisé</strong>
+    ${projetHTML.includes('Coche')?'<em style="color:#999">Projet non encore généré.</em>':projetHTML}</div>
+
     <div class="no-print">
         <button onclick="window.print()" style="padding:10px 24px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:12px;">🖨️ Imprimer</button>
         <button onclick="window.close()" style="padding:10px 24px;background:#64748b;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">✕ Fermer</button>
-    </div>
-    </body></html>`);
+    </div></body></html>`);
     win.document.close();
-}
-
-
-function convertTempsIntelligent(tempsStr) {
-    if(!tempsStr || tempsStr.trim() === '') return 0;
-    
-    const input = tempsStr.trim();
-    console.log(`🔍 Conversion résumé: "${input}"`);
-    
-    // Format standard M:SS ou MM:SS
-    const matchStandard = input.match(/^(\d+):(\d+)$/);
-    if(matchStandard) {
-        const min = parseInt(matchStandard[1]);
-        const sec = parseInt(matchStandard[2]);
-        if(sec < 60) {
-            const total = min * 60 + sec;
-            console.log(`✅ ${min}:${sec.toString().padStart(2,'0')} = ${total}s`);
-            return total;
-        }
-        console.log(`⚠️ Secondes invalides: ${sec}`);
-        return 0;
-    }
-    
-    // Format avec dixièmes M:SS.D
-    const matchDixiemes = input.match(/^(\d+):(\d+)\.(\d+)$/);
-    if(matchDixiemes) {
-        const min = parseInt(matchDixiemes[1]);
-        const sec = parseInt(matchDixiemes[2]);
-        const dixieme = parseInt(matchDixiemes[3]);
-        if(sec < 60) {
-            const total = min * 60 + sec + dixieme / 10;
-            console.log(`✅ ${min}:${sec.toString().padStart(2,'0')}.${dixieme} = ${total}s`);
-            return total;
-        }
-        console.log(`⚠️ Secondes invalides: ${sec}`);
-        return 0;
-    }
-    
-    // Tentative correction automatique pour formats courants
-    
-    // Format décimal 2.30 → 2:30 (interprété comme 2min30s)
-    const matchDecimal = input.replace(',', '.').match(/^(\d+)[.,](\d+)$/);
-    if(matchDecimal) {
-        const min = parseInt(matchDecimal[1]);
-        const sec = parseInt(matchDecimal[2]);
-        if(sec < 60 && min >= 0 && min <= 10) {
-            const total = min * 60 + sec;
-            console.log(`🔄 Auto-corrigé: ${input} → ${min}:${sec.toString().padStart(2,'0')} = ${total}s`);
-            return total;
-        }
-    }
-    
-    // Nombre entier: secondes directes ou format MMSS
-    const nombreEntier = parseInt(input);
-    if(!isNaN(nombreEntier) && nombreEntier.toString() === input) {
-        
-        // Secondes directes logiques (60-300s pour 400m)
-        if(nombreEntier >= 60 && nombreEntier <= 300) {
-            console.log(`🔄 Secondes directes: ${nombreEntier}s`);
-            return nombreEntier;
-        }
-        
-        // Format MMSS → MM:SS (ex: 125 → 1:25)
-        if(nombreEntier >= 100 && nombreEntier <= 999) {
-            const minStr = Math.floor(nombreEntier / 100);
-            const secStr = nombreEntier % 100;
-            if(secStr < 60 && minStr >= 1 && minStr <= 9) {
-                const total = minStr * 60 + secStr;
-                console.log(`🔄 Auto-corrigé: ${nombreEntier} → ${minStr}:${secStr.toString().padStart(2,'0')} = ${total}s`);
-                return total;
-            }
-        }
-    }
-    
-    // Secondes avec décimales
-    const secondes = parseFloat(input.replace(',', '.'));
-    if(!isNaN(secondes) && secondes >= 60 && secondes <= 300) {
-        console.log(`🔄 Secondes décimales: ${secondes}s`);
-        return secondes;
-    }
-    
-    console.log(`❌ Format non reconnu: "${input}"`);
-    return 0;
-}
-
-function convertTemps(tempsStr) {
-    if(!tempsStr) return 0;
-    
-    // Format M:SS ou MM:SS (STANDARD)
-    const matchMinSec = tempsStr.replace(',', '.').match(/^(\d+):(\d+)$/);
-    if(matchMinSec) {
-        const min = parseInt(matchMinSec[1]);
-        const sec = parseInt(matchMinSec[2]);
-        if(sec < 60) {
-            return min * 60 + sec;
-        }
-    }
-    
-    // Format M:SS.D (avec dixièmes)
-    const matchDixiemes = tempsStr.replace(',', '.').match(/^(\d+):(\d+)\.(\d+)$/);
-    if(matchDixiemes) {
-        const min = parseInt(matchDixiemes[1]);
-        const sec = parseInt(matchDixiemes[2]);
-        const dixieme = parseInt(matchDixiemes[3]);
-        if(sec < 60) {
-            return min * 60 + sec + dixieme / 10;
-        }
-    }
-    
-    // Format secondes directes (si cohérent)
-    const sec = parseFloat(tempsStr.replace(',', '.'));
-    if(!isNaN(sec) && sec >= 60 && sec <= 300) {
-        return sec;
-    }
-    
-    console.log(`⚠️ Temps ignoré (format incorrect): "${tempsStr}"`);
-    return 0;
-}
-
-function parseTemps(tempsStr) {
-    if(!tempsStr || tempsStr.trim() === '') return null;
-    const parts = tempsStr.trim().replace(',', '.').match(/(\d+):(\d+)\.(\d+)/);
-    if(parts) {
-        return parseInt(parts[1]) * 60 + parseInt(parts[2]) + parseInt(parts[3]) / 10;
-    }
-    const secondsOnly = parseFloat(tempsStr);
-    return !isNaN(secondsOnly) ? secondsOnly : null;
-}
-
-function generateProjet(eleveIndex) {
-    const eleve = elevesData[eleveIndex];
-    const container = document.getElementById(`projet-${eleveIndex}`);
-    
-    // Lire toutes les cases cochées
-    const reponses = {
-        course: [],
-        saut: [],
-        lancer: [],
-        mental: [],
-        objectif: []
-    };
-    
-    ['course1', 'course2', 'course3', 'course4'].forEach(id => {
-        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
-            reponses.course.push(id);
-        }
-    });
-    
-    ['saut1', 'saut2', 'saut3', 'saut4'].forEach(id => {
-        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
-            reponses.saut.push(id);
-        }
-    });
-    
-    ['lancer1', 'lancer2', 'lancer3', 'lancer4'].forEach(id => {
-        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
-            reponses.lancer.push(id);
-        }
-    });
-    
-    ['mental1', 'mental2', 'mental3', 'mental4'].forEach(id => {
-        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
-            reponses.mental.push(id);
-        }
-    });
-    
-    ['objectif1', 'objectif2', 'objectif3', 'objectif4'].forEach(id => {
-        if(document.getElementById(`${id}-${eleveIndex}`)?.checked) {
-            reponses.objectif.push(id);
-        }
-    });
-    
-    // Analyser le profil et générer le projet
-    const projet = analyserProfil(reponses, eleve);
-    container.innerHTML = projet;
-}
-
-function analyserProfil(reponses, eleve) {
-    const { course, saut, lancer, mental, objectif } = reponses;
-
-    if(course.length === 0 && saut.length === 0 && lancer.length === 0 && mental.length === 0 && objectif.length === 0) {
-        return '🤔 Coche les cases qui te correspondent pour découvrir ton projet !';
-    }
-
-    // Données cycle réelles
-    const seances = eleve.seances || [];
-    const sL3 = seances.find(s=>s.lecon==='L3')||{};
-    const sL4 = seances.find(s=>s.lecon==='L4')||{};
-    const sL6 = seances.find(s=>s.lecon==='L6')||{};
-    const sL7 = seances.find(s=>s.lecon==='L7')||{};
-
-    const techSautL6  = [sL6.sautTech1,sL6.sautTech2,sL6.sautTech3,sL6.sautTech4,sL6.sautTech5].filter(Boolean).length;
-    const techLancerL6= [sL6.lancerTech1,sL6.lancerTech2,sL6.lancerTech3,sL6.lancerTech4,sL6.lancerTech5].filter(Boolean).length;
-    const techSautL4  = [sL4.sautTech1,sL4.sautTech2,sL4.sautTech3,sL4.sautTech4].filter(Boolean).length;
-    const techLancerL4= [sL4.lancerTech1,sL4.lancerTech2,sL4.lancerTech3,sL4.lancerTech4].filter(Boolean).length;
-    const distSautL3=parseFloat(sL3.sautDistance)||0, distSautL6=parseFloat(sL6.sautDistance)||0;
-    const distLancerL3=parseFloat(sL3.lancerDistance)||0, distLancerL6=parseFloat(sL6.lancerDistance)||0;
-    const evolSaut  = distSautL3   && distSautL6   ? distSautL6-distSautL3     : null;
-    const evolLancer= distLancerL3 && distLancerL6 ? distLancerL6-distLancerL3 : null;
-    const pyramideL6= sL6.pyramide60_1 && sL6.pyramide80_1 && sL6.pyramide100 && sL6.pyramide80_2 && sL6.pyramide60_2;
-    const niveauL3pct= sL3.niveau==='vma110'?110:sL3.niveau==='vma105'?105:sL3.niveau==='vma100'?100:sL3.niveau==='vma95'?95:null;
-
-    // Analyse L7
-    const cvt = t => { if(!t) return 0; const p=String(t).replace(',',':').split(':'); return p.length===2?parseInt(p[0])*60+parseInt(p[1]):0; };
-    const t1s=cvt(sL7.temps1), t2s=cvt(sL7.temps2), t3s=cvt(sL7.temps3);
-    const toursOk = [t1s,t2s,t3s].filter(Boolean);
-    const moyL7 = toursOk.length===3 ? (t1s+t2s+t3s)/3 : null;
-    const ecartL7 = toursOk.length===3 ? Math.max(t1s,t2s,t3s)-Math.min(t1s,t2s,t3s) : null;
-    const regulierL7 = ecartL7!==null && ecartL7<=8;
-    const finisseurL7 = t1s>0 && t3s>0 && t3s < t1s-2;
-    const pctVMAL7 = eleve.vma && moyL7 ? Math.round(((0.4/(moyL7/3600))/eleve.vma)*100) : null;
-
-    let strategieCourse='', intensite='', conseilSaut='', conseilLancer='', gestion='', conseilPerso=[];
-
-    // STRATÉGIE COURSE — basée sur données L7 réelles
-    if(pctVMAL7) {
-        if(pctVMAL7>=110 && regulierL7) {
-            strategieCourse='🚀 <strong>STRATÉGIE AMBITIEUSE</strong> : Ton L7 à '+pctVMAL7+'% avec une belle régularité — vise encore plus haut !';
-            intensite='Objectif : '+Math.min(pctVMAL7+5,125)+'% VMA'+(eleve.vma?' · '+(Math.round(eleve.vma*Math.min(pctVMAL7+5,125)/100*10)/10)+' km/h':'');
-        } else if(pctVMAL7>=100 && regulierL7) {
-            strategieCourse='⚖️ <strong>STRATÉGIE REPRODUCTIBLE</strong> : L7 à '+pctVMAL7+'% régulier — reproduis exactement la même chose !';
-            intensite='Même rythme qu\'en L7 : '+pctVMAL7+'% VMA · départ calme, tiens jusqu\'au bout';
-        } else if(ecartL7!==null && ecartL7>15) {
-            strategieCourse='🛡️ <strong>STRATÉGIE RÉGULARITÉ</strong> : En L7 l\'écart entre tours était de '+ecartL7+'s — soigne le rythme en L8 !';
-            intensite='Départ prudent à '+Math.max(pctVMAL7-5,90)+'% VMA, maintiens jusqu\'au bout';
-        } else {
-            strategieCourse='⚖️ <strong>STRATÉGIE ÉQUILIBRÉE</strong> : Pars à '+pctVMAL7+'% VMA comme en L7';
-            intensite='Tour 1 calme → Tour 2 régulier → Tour 3 tout donner';
-        }
-        if(finisseurL7) conseilPerso.push('💪 Tu as fini plus fort en L7 — répète ce finish en L8 !');
-        if(sL7.strategieTrouvee) conseilPerso.push('🎯 Ta stratégie est trouvée — fais confiance à ton plan !');
-    } else if(course.includes('course1')||course.includes('course2')) {
-        strategieCourse='🚀 <strong>STRATÉGIE AMBITIEUSE</strong> : Ton ressenti en L7 était bon — vise haut !';
-        intensite='Objectif : 110-115% VMA';
-    } else if(course.includes('course3')||mental.includes('mental4')) {
-        strategieCourse='🛡️ <strong>STRATÉGIE SÉCURISÉE</strong> : L7 était dur — pars plus calme en L8';
-        intensite='Départ à 95-100% VMA, puis progressif';
-    } else {
-        strategieCourse='⚖️ <strong>STRATÉGIE ÉQUILIBRÉE</strong> : Pars contrôlé, accélère sur les 2 derniers tours';
-        intensite='Rythme régulier : 100-105% VMA';
-    }
-    if(niveauL3pct===110) conseilPerso.push('⚡ Tu avais choisi le niveau Challenge en L3 — tu as le profil pour un L8 ambitieux');
-    else if(niveauL3pct===95) conseilPerso.push('🌱 Tu as bien progressé depuis L3 — regarde le chemin parcouru !');
-
-    // CONSEIL SAUT
-    if(techSautL6>=4) {
-        conseilSaut='🦘 <strong>SAUT</strong> : Technique solide en L6 ('+techSautL6+'/5'+(sL6.sautTech5?' ⭐':'')+')';
-        if(evolSaut!==null) conseilSaut+=evolSaut>0?' — +'+evolSaut.toFixed(2)+'m depuis L3 → confiance !':' — vise ta distance record !';
-    } else if(saut.includes('saut1')&&saut.includes('saut2')) {
-        conseilSaut='🦘 <strong>SAUT</strong> : Tu as progressé sur le cycle — vise ta meilleure distance';
-    } else if(saut.includes('saut3')) {
-        conseilSaut='🦘 <strong>SAUT</strong> : Soigne l\'élan régulier et l\'appel précis';
-    } else if(pyramideL6) {
-        conseilSaut='🦘 <strong>SAUT</strong> : Pyramide L6 complète 🏆 — exploite cette puissance dans ton saut !';
-    } else if(Math.max(techSautL4,techSautL6)>=2) {
-        conseilSaut='🦘 <strong>SAUT</strong> : Applique tes 2 critères de base : élan régulier + appel précis';
-    }
-
-    // CONSEIL LANCER
-    if(techLancerL6>=4) {
-        conseilLancer='🎯 <strong>LANCER</strong> : Technique avancée en L6 ('+techLancerL6+'/5'+(sL6.lancerTech5?' ⭐':'')+')';
-        if(evolLancer!==null) conseilLancer+=evolLancer>0?' — +'+evolLancer.toFixed(2)+'m depuis L3 → vise encore plus loin !':' — soigne la rotation + accompagnement';
-    } else if(lancer.includes('lancer1')&&lancer.includes('lancer2')) {
-        conseilLancer='🎯 <strong>LANCER</strong> : Tes progrès sur le cycle paient — vise ta meilleure distance';
-    } else if(lancer.includes('lancer3')) {
-        conseilLancer='🎯 <strong>LANCER</strong> : Focus : profil de côté + rotation du bassin';
-    } else if(Math.max(techLancerL4,techLancerL6)>=2) {
-        conseilLancer='🎯 <strong>LANCER</strong> : Base acquise — ajoute la rotation du bassin pour gagner des mètres';
-    }
-
-    // GESTION GLOBALE
-    if(finisseurL7||course.includes('course4')) {
-        gestion='Tu es un finisseur — garde des forces pour un Tour 3 explosif ! 💥';
-    } else if(regulierL7&&sL7.strategieTrouvee) {
-        gestion='Ta stratégie est trouvée — reproduis-la exactement ! 🔄';
-    } else if(objectif.includes('objectif3')) {
-        gestion='Objectif : faire mieux qu\'en L7 — pars 2-3s plus vite au Tour 1 🎯';
-    } else if(mental.includes('mental2')) {
-        gestion='Reste dans ta zone de confort — la régularité vaut mieux que le risque ✅';
-    } else {
-        gestion='Tour 1 contrôlé → Tour 2 maintenu → Tour 3 tout donner 🏁';
-    }
-
-    let projetHTML = `<div style="font-size: 0.9rem;">`;
-
-    if(conseilPerso.length>0) {
-        projetHTML+=`<div style="background:rgba(0,210,255,0.08);border:1px solid rgba(0,210,255,0.2);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:0.8rem;">`;
-        conseilPerso.forEach(t=>{projetHTML+=`<div style="margin-bottom:3px;">${t}</div>`;});
-        projetHTML+=`</div>`;
-    }
-    if(strategieCourse) {
-        projetHTML+=`<div style="margin-bottom: 8px;">${strategieCourse}</div>`;
-        projetHTML+=`<div style="margin-bottom: 8px; font-size: 0.85rem;"><strong>Intensité :</strong> ${intensite}</div>`;
-    }
-    if(conseilSaut) projetHTML+=`<div style="margin-bottom: 6px;">${conseilSaut}</div>`;
-    if(conseilLancer) projetHTML+=`<div style="margin-bottom: 6px;">${conseilLancer}</div>`;
-    projetHTML+=`<div style="margin-top: 8px; font-weight: 600;"><strong>Conseil final :</strong> ${gestion}</div>`;
-    projetHTML+=`</div>`;
-
-    return projetHTML;
 }
 </script>
 
-<!-- SW registration + bandeau offline -->
 <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').catch(function(){});
-}
-(function() {
-    function updateBanner() {
-        var b = document.getElementById('_offline_banner');
-        if (!b) {
-            b = document.createElement('div');
-            b.id = '_offline_banner';
-            b.style.cssText = [
-                'display:none','position:fixed','top:0','left:0','right:0',
-                'background:#ff6b35','color:#fff','text-align:center',
-                'padding:8px 12px','font-size:0.82rem','font-weight:700',
-                'z-index:99999','letter-spacing:0.3px'
-            ].join(';');
-            b.textContent = '\u{1F4E1} Mode hors ligne — données sauvegardées localement';
-            document.body.appendChild(b);
-        }
-        b.style.display = navigator.onLine ? 'none' : 'block';
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js').catch(function(){}); }
+(function(){
+    function upd(){
+        var b=document.getElementById('_ob');
+        if(!b){b=document.createElement('div');b.id='_ob';
+        b.style.cssText='display:none;position:fixed;top:0;left:0;right:0;background:#ff6b35;color:#fff;text-align:center;padding:8px 12px;font-size:0.82rem;font-weight:700;z-index:99999';
+        b.textContent='\u{1F4E1} Mode hors ligne — données sauvegardées localement';document.body.appendChild(b);}
+        b.style.display=navigator.onLine?'none':'block';
     }
-    window.addEventListener('online',  updateBanner);
-    window.addEventListener('offline', updateBanner);
-    window.addEventListener('load',    updateBanner);
+    window.addEventListener('online',upd);window.addEventListener('offline',upd);window.addEventListener('load',upd);
 })();
 </script>
 </body>

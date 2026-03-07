@@ -546,17 +546,70 @@ function renderEquipesDetails() {
     bilanData.equipes.forEach(equipe => {
         const badgeClass = equipe.performanceMoyenne >= 95 ? 'badge-excellent' : 
                           equipe.performanceMoyenne >= 85 ? 'badge-good' : 'badge-progress';
-        
-        const badgeText = equipe.performanceMoyenne >= 95 ? 'OBJECTIF ATTEINT' : 
-                         equipe.performanceMoyenne >= 85 ? 'TRÈS PROCHE' : 'EN PROGRESSION';
-        
+        const badgeText  = equipe.performanceMoyenne >= 95 ? 'OBJECTIF ATTEINT' : 
+                          equipe.performanceMoyenne >= 85 ? 'TRÈS PROCHE' : 'EN PROGRESSION';
+        const membres = equipe.membres;
+
+        // Reconstituer les manches : chaque membre a detailManches = [{manche,distance}...]
+        // On regroupe par numéro de manche
+        const manchesMap = {}; // mancheNum → { membres: [{nom, distance}], total }
+        membres.forEach(m => {
+            (m.detailManches || []).forEach(dm => {
+                const num = dm.manche || 1;
+                if(!manchesMap[num]) manchesMap[num] = { membres: [], total: 0 };
+                manchesMap[num].membres.push({ nom: m.nom, distance: dm.distance || 0 });
+                manchesMap[num].total += dm.distance || 0;
+            });
+        });
+        const manchesNums = Object.keys(manchesMap).map(Number).sort((a,b)=>a-b);
+
+        // HTML manches
+        let manchesHTML = '';
+        if(manchesNums.length > 0) {
+            manchesHTML = `<div style="margin-top:16px">
+                <div style="font-weight:700;margin-bottom:10px;color:var(--olympic-blue)">📊 Détail par manche</div>`;
+            manchesNums.forEach(num => {
+                const m = manchesMap[num];
+                manchesHTML += `
+                <div style="background:rgba(0,166,81,0.06);border:1px solid rgba(0,166,81,0.2);border-radius:8px;padding:10px;margin-bottom:8px;">
+                    <div style="font-weight:700;font-size:0.9rem;margin-bottom:8px;">Manche ${num} — <span style="color:var(--olympic-green)">${m.total}m</span> au total</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${m.membres.map(mb => `
+                            <div style="background:white;border-radius:6px;padding:5px 10px;font-size:0.82rem;border:1px solid #e2e8f0;">
+                                <span style="color:#64748b">${mb.nom}</span>
+                                <strong style="margin-left:6px;color:var(--olympic-blue)">${mb.distance}m</strong>
+                            </div>`).join('')}
+                    </div>
+                </div>`;
+            });
+            manchesHTML += `</div>`;
+        }
+
+        // HTML membres (bilan individuel)
+        const membresHTML = `<div style="margin-top:16px">
+            <div style="font-weight:700;margin-bottom:10px;color:var(--olympic-blue)">🏃 Bilan par équipier</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+            ${membres.map(m => {
+                const contrib = equipe.distanceTotale > 0 ? Math.round((m.distanceIndividuelle/equipe.distanceTotale)*100) : 0;
+                const moy = manchesNums.length > 0 ? Math.round(m.distanceIndividuelle / manchesNums.length) : 0;
+                return `<div style="background:white;border-radius:8px;padding:10px;border:1px solid #e2e8f0;font-size:0.83rem;">
+                    <div style="font-weight:700;color:var(--olympic-blue);margin-bottom:6px">${m.nom}</div>
+                    <div><strong>Total :</strong> ${m.distanceIndividuelle}m</div>
+                    <div><strong>Moy/manche :</strong> ${moy}m</div>
+                    <div style="margin-top:4px;padding:3px 6px;background:rgba(0,166,81,0.1);border-radius:4px;">
+                        Contribution : <strong>${contrib}%</strong>
+                    </div>
+                </div>`;
+            }).join('')}
+            </div>
+        </div>`;
+
         html += `
             <div class="team-card">
                 <div class="team-header">
                     <span>🏃‍♂️ ${equipe.nom}</span>
                     <span class="performance-badge ${badgeClass}">${badgeText}</span>
                 </div>
-                
                 <div class="team-details">
                     <div class="detail-item">
                         <div class="detail-number">${equipe.distanceTotale}m</div>
@@ -571,52 +624,12 @@ function renderEquipesDetails() {
                         <div>Performance</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-number">${equipe.manches}</div>
+                        <div class="detail-number">${manchesNums.length || equipe.manches}</div>
                         <div>Manches</div>
                     </div>
                 </div>
-                
-                <div style="margin-top: 16px;">
-                    <strong>Membres :</strong>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
-                        ${equipe.membres.map(membre => {
-                            const distanceMoyenne = membre.distanceMoyenne;
-                            const distanceTotale = membre.distanceIndividuelle;
-                            
-                            // Calcul % VMA individuel (estimation)
-                            const tempsTotal = equipe.manches * 6; // 6min par manche
-                            const vitesseReelle = (distanceTotale / 1000) / (tempsTotal / 60); // km/h
-                            const vmaEstimee = 12; // Valeur par défaut, idéalement récupérer vraie VMA
-                            const pourcentVMA = Math.round((vitesseReelle / vmaEstimee) * 100);
-                            
-                            // Objectif individuel (1/4 à 1/6 de l'objectif équipe selon taille)
-                            const objectifIndividuel = Math.round(equipe.objectif / equipe.membres.length);
-                            const objectifAtteint = distanceMoyenne >= (objectifIndividuel * 0.9); // 90% tolérance
-                            
-                            // Régularité (si détails manches disponibles)
-                            let regularite = "N/A";
-                            if(membre.detailManches && membre.detailManches.length > 1) {
-                                const distances = membre.detailManches.map(m => m.distance);
-                                const moyenne = distances.reduce((a,b) => a+b, 0) / distances.length;
-                                const ecartType = Math.sqrt(distances.map(d => Math.pow(d - moyenne, 2)).reduce((a,b) => a+b, 0) / distances.length);
-                                regularite = ecartType < 50 ? "Excellent" : ecartType < 100 ? "Bon" : "Variable";
-                            }
-                            
-                            return `
-                                <div style="font-size: 0.85rem; padding: 8px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                    <div style="font-weight: 700; color: var(--olympic-blue); margin-bottom: 6px;">${membre.nom}</div>
-                                    <div><strong>Distance:</strong> ${membre.distanceIndividuelle}m</div>
-                                    <div><strong>% VMA:</strong> ~${pourcentVMA}%</div>
-                                    <div><strong>Objectif:</strong> ${objectifAtteint ? '✅ Atteint' : '⏳ En cours'} (${objectifIndividuel}m)</div>
-                                    <div><strong>Régularité:</strong> ${regularite}</div>
-                                    <div style="margin-top: 4px; padding: 4px; background: rgba(0,166,81,0.1); border-radius: 4px; font-size: 0.8rem;">
-                                        <strong>🤝 Contribution équipe:</strong> ${Math.round((membre.distanceIndividuelle/equipe.distanceTotale)*100)}%
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
+                ${manchesHTML}
+                ${membresHTML}
             </div>
         `;
     });

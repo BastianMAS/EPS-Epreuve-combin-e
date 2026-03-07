@@ -503,8 +503,8 @@ function generateProjet(idx) {
     el.innerHTML=`
         <div style="margin-bottom:6px"><strong>${strat}</strong></div>
         <div style="margin-bottom:10px;font-size:0.8rem;color:rgba(255,255,255,0.65)">${intensite}</div>
-        ${cSaut?`<div style="margin-bottom:5px;font-size:0.81rem">${cSaut}</div>`:''}
-        ${cLancer?`<div style="margin-bottom:5px;font-size:0.81rem">${cLancer}</div>`:''}
+        ${cSaut?`<div style="margin-bottom:5px;font-size:0.81rem;padding:6px 8px;background:rgba(52,211,153,0.07);border-left:3px solid var(--green);border-radius:0 6px 6px 0">${cSaut}</div>`:''}
+        ${cLancer?`<div style="margin-bottom:5px;font-size:0.81rem;padding:6px 8px;background:rgba(251,191,36,0.07);border-left:3px solid var(--gold);border-radius:0 6px 6px 0">${cLancer}</div>`:''}
         <div style="margin-top:8px;font-size:0.81rem;color:var(--gold)">${final}</div>
         ${finisseur?'<div style="font-size:0.72rem;margin-top:5px;color:rgba(255,255,255,0.35)">✓ Tendance L7 : tu as fini plus fort qu\'au départ</div>':''}
         ${sL7.strategieTrouvee?'<div style="font-size:0.72rem;color:rgba(255,255,255,0.35)">✓ Stratégie validée en L7</div>':''}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L4 - Technique de Base Atelier 2 - EPS: épreuve Combinée</title>
+    <title>L4 - Consolidation & Progression - EPS: épreuve Combinée</title>
     <style>
         :root {
             --bg: #0f1419;
@@ -507,7 +507,7 @@
 <body>
 
 <h1>EPS<span style="color: var(--accent);">PRO</span></h1>
-<p class="subtitle">🔧 L4 - TECHNIQUE DE BASE ATELIER 2</p>
+<p class="subtitle">📈 L4 - CONSOLIDATION & PROGRESSION</p>
 
 <div style="
     max-width: 1400px; margin: 0 auto 20px auto;
@@ -1185,7 +1185,7 @@ function saveAll(silent=false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    alert(`🔧 Données L4 techniques sauvegardées pour ${count} élève(s) !`);
+    if(!silent) alert(`🔧 Données L4 techniques sauvegardées pour ${count} élève(s) !`);
 }
 
 function parseTime(str) {

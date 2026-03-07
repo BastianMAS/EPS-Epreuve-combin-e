@@ -750,5 +750,33 @@ setInterval(function(){ if(typeof saveAll==='function') saveAll(true); }, 30000)
 window.addEventListener('beforeunload', function(){ if(typeof saveAll==='function') saveAll(true); });
 
 </script>
+
+<!-- SW registration + bandeau offline -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js').catch(function(){});
+}
+(function() {
+    function updateBanner() {
+        var b = document.getElementById('_offline_banner');
+        if (!b) {
+            b = document.createElement('div');
+            b.id = '_offline_banner';
+            b.style.cssText = [
+                'display:none','position:fixed','top:0','left:0','right:0',
+                'background:#ff6b35','color:#fff','text-align:center',
+                'padding:8px 12px','font-size:0.82rem','font-weight:700',
+                'z-index:99999','letter-spacing:0.3px'
+            ].join(';');
+            b.textContent = '\u{1F4E1} Mode hors ligne — données sauvegardées localement';
+            document.body.appendChild(b);
+        }
+        b.style.display = navigator.onLine ? 'none' : 'block';
+    }
+    window.addEventListener('online',  updateBanner);
+    window.addEventListener('offline', updateBanner);
+    window.addEventListener('load',    updateBanner);
+})();
+</script>
 </body>
 </html>

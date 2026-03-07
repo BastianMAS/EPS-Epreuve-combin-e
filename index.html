@@ -1069,7 +1069,25 @@
                     <!-- Rempli dynamiquement -->
                 </div>
             </div>
-
+            
+            <!-- EXPORT/IMPORT DIAGNOSTICS -->
+            <div style="margin-top: 30px; padding: 20px; background: rgba(0,210,255,0.1); border-radius: 12px; border: 2px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 10px; font-size: 1.1rem;">
+                    💾 Sauvegarde des Diagnostics
+                </h3>
+                <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+                    Exportez les diagnostics de cette tablette pour les transférer sur votre tablette pro ou pour les fusionner plus tard.
+                </p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button onclick="exportDiagnostics()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--success); color: black;">
+                        💾 EXPORTER DIAGNOSTICS
+                    </button>
+                    <button onclick="document.getElementById('import-diagnostics-input').click()" class="btn-action" style="flex: 1; min-width: 200px; background: var(--accent); color: black;">
+                        📥 IMPORTER DIAGNOSTICS
+                    </button>
+                </div>
+                <input type="file" id="import-diagnostics-input" accept=".json" style="display: none;" onchange="importDiagnostics(event)">
+            </div>
             
             <!-- SAUVEGARDE LISTE ÉLÈVES -->
             <div style="background: rgba(255,136,0,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--orange);">

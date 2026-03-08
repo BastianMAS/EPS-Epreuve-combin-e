@@ -846,7 +846,10 @@ function selectEleve(i, id) {
     if(s) {
         info.style.display = 'block';
         const vmaInfo = s.vma ? ` | VMA: <strong style="color:var(--success)">${s.vma} km/h</strong>` : '';
-        info.innerHTML = `<strong>${s.sexe==='F'?'👧':'🧑'} ${s.nomPrenom}</strong> | ${s.age} ans${vmaInfo}`;
+        info.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
+            ${s.photo ? `<img src="${s.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0">` : `<span style="font-size:1.3rem">${s.sexe==='F'?'👧':'🧑'}</span>`}
+            <div><strong>${s.nomPrenom}</strong><span style="font-size:0.82rem;opacity:0.7"> | ${s.age} ans${vmaInfo}</span></div>
+        </div>`;
         
         if(s.vma) {
             // Analyser performance L3

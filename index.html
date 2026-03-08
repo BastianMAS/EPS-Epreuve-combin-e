@@ -1169,6 +1169,11 @@
                     ➡️ ÉVALUATION FINALE (L8)
                 </button>
                 
+                <!-- Archives & données -->
+                <button onclick="goToArchives()" class="btn-action" style="width: 100%; margin-bottom: 15px; background: #334155; color: white; font-size: 1.1rem;">
+                    🗄️ ARCHIVES & DONNÉES
+                </button>
+                
             </div>
         </div>
     </div>
@@ -1452,6 +1457,50 @@
     <div id="stats-sexe-content" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"></div>
     <div id="stats-classe-content" style="margin-bottom:14px;"></div>
     <div id="stats-difficulte-content" style="margin-bottom:20px;"></div>
+</div>
+
+
+<!-- PAGE ARCHIVES -->
+<div id="screenArchives" class="hidden">
+    <div style="background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:16px;padding:20px;margin-bottom:16px">
+        <h2 style="color:white;font-size:1.3rem;font-weight:800;margin-bottom:2px">🗄️ Archives & Données</h2>
+        <p style="color:rgba(255,255,255,0.5);font-size:0.82rem">Backup, restauration, gestion des élèves</p>
+    </div>
+
+    <button onclick="backToStudentsFromArchives()" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:8px 16px;font-size:0.85rem;font-weight:700;cursor:pointer;margin-bottom:16px">← Retour</button>
+
+    <!-- BACKUP / RESTORE -->
+    <div style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:14px;padding:16px;margin-bottom:14px">
+        <div style="font-size:0.72rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">💾 Sauvegarde & Restauration</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button onclick="exportJSON()" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;border:none;border-radius:10px;padding:12px;font-size:0.85rem;font-weight:800;cursor:pointer">
+                📤 Exporter JSON<br><span style="font-weight:400;opacity:0.8;font-size:0.72rem">Backup complet</span>
+            </button>
+            <button onclick="document.getElementById('import-json-input').click()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;border:none;border-radius:10px;padding:12px;font-size:0.85rem;font-weight:800;cursor:pointer">
+                📥 Importer JSON<br><span style="font-weight:400;opacity:0.8;font-size:0.72rem">Restaurer backup</span>
+            </button>
+        </div>
+        <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+
+    <!-- NETTOYAGE DOUBLONS L5 -->
+    <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:16px;margin-bottom:14px">
+        <div style="font-size:0.72rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧹 Nettoyage</div>
+        <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:10px">Supprime les séances L5 en doublon (même équipe, même date)</p>
+        <button onclick="cleanDoublonsL5()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:0.85rem;font-weight:800;cursor:pointer;width:100%">
+            🧹 Nettoyer les doublons L5
+        </button>
+        <div id="doublon-result" style="margin-top:8px;font-size:0.78rem;color:#fbbf24"></div>
+    </div>
+
+    <!-- LISTE ÉLÈVES -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:0.72rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px">👥 Élèves & séances</div>
+            <span id="archives-count" style="font-size:0.72rem;color:rgba(255,255,255,0.3)"></span>
+        </div>
+        <div id="archives-eleves-list"></div>
+    </div>
 </div>
 
 
@@ -2003,9 +2052,15 @@ function renderStudentsList() {
         }).join(' ');
         return `
         <div class="student-item">
-            <div class="student-item-info">
+            <div class="student-item-info" style="display:flex;align-items:center;gap:10px">
+                <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;border:2px solid rgba(255,255,255,0.15)">
+                    ${student.photo
+                        ? `<img src="${student.photo}" style="width:100%;height:100%;object-fit:cover">`
+                        : (student.sexe === 'F' ? '👧' : '🧑')}
+                </div>
+                <div style="flex:1">
                 <div class="student-item-name">
-                    ${student.sexe === 'F' ? '👧' : '🧑'} ${student.nomPrenom}
+                    ${student.nomPrenom}
                     <span style="background: var(--accent); color: black; padding: 2px 8px; border-radius: 5px; font-size: 0.75rem; margin-left: 8px; font-weight: 700;">
                         📚 ${student.classe || 'Sans classe'}
                     </span>
@@ -2015,6 +2070,7 @@ function renderStudentsList() {
                     ${student.diagnostique ? `<span style="color: var(--success); margin-left: 10px; font-weight: 700;">🔬 Diagnostic (${new Date(student.diagnostique.date).toLocaleDateString('fr-FR')})</span>` : ''}
                 </div>
                 <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">${leconsBadges}</div>
+                </div>
             </div>
             <div class="student-item-actions">
                 ${student.diagnostique ? `<button onclick="viewDiagnostic('${student.id}')" class="btn-small" style="background: var(--accent); color: black; margin-right: 8px;">👁️ Diagnostic</button>` : ''}
@@ -2114,6 +2170,158 @@ function openPrintCards() {
 function backToStudentsFromStats() {
     document.getElementById('screenStats').classList.add('hidden');
     document.getElementById('screen0').classList.remove('hidden');
+}
+
+// ── ARCHIVES ────────────────────────────────────────────────────────────────
+
+function goToArchives() {
+    if(!storedStudents.length) { alert('⚠️ Aucun élève enregistré.'); return; }
+    document.getElementById('screen0').classList.add('hidden');
+    document.getElementById('screenArchives').classList.remove('hidden');
+    renderArchivesEleves();
+}
+
+function backToStudentsFromArchives() {
+    document.getElementById('screenArchives').classList.add('hidden');
+    document.getElementById('screen0').classList.remove('hidden');
+}
+
+function exportJSON() {
+    const data = {
+        students: storedStudents,
+        classes: storedClasses,
+        exportDate: new Date().toISOString(),
+        version: 'eps-pro-v1'
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'eps_backup_' + new Date().toLocaleDateString('fr-FR').replace(/\//g,'-') + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            // Support format direct array ou objet avec students
+            const students = data.students || (Array.isArray(data) ? data : null);
+            if(!students) { alert('❌ Format JSON invalide.'); return; }
+            if(!confirm(`⚠️ Importer ${students.length} élève(s) ?\n\nCela REMPLACERA toutes les données actuelles.`)) return;
+            storedStudents = students;
+            storedClasses = data.classes || [...new Set(students.map(s => s.classe).filter(Boolean))];
+            localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+            localStorage.setItem('eps_pro_classes', JSON.stringify(storedClasses));
+            updateStudentsStats();
+            renderStudentsList();
+            renderArchivesEleves();
+            alert(`✅ ${students.length} élève(s) importé(s) avec succès.`);
+        } catch(err) {
+            alert('❌ Erreur de lecture du fichier JSON.');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function cleanDoublonsL5() {
+    let totalSupprimés = 0;
+    storedStudents.forEach(eleve => {
+        if(!eleve.seances) return;
+        const seancesL5 = eleve.seances.filter(s => s.lecon === 'L5');
+        const autres = eleve.seances.filter(s => s.lecon !== 'L5');
+        if(seancesL5.length <= 1) return;
+        // Dédoublonner par clé : equipe + date (arrondi à la minute)
+        const seen = new Set();
+        const dedup = seancesL5.filter(s => {
+            const dateMin = s.date ? s.date.substring(0, 16) : '';
+            const key = (s.equipe || '') + '|' + dateMin;
+            if(seen.has(key)) { totalSupprimés++; return false; }
+            seen.add(key);
+            return true;
+        });
+        eleve.seances = [...autres, ...dedup];
+    });
+    localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+    const msg = totalSupprimés > 0
+        ? `✅ ${totalSupprimés} doublon(s) L5 supprimé(s).`
+        : '✅ Aucun doublon détecté.';
+    document.getElementById('doublon-result').textContent = msg;
+    renderArchivesEleves();
+}
+
+function deleteEleve(eleveId) {
+    const eleve = storedStudents.find(e => e.id === eleveId);
+    if(!eleve) return;
+    if(!confirm(`⚠️ Supprimer définitivement "${eleve.nomPrenom}" et toutes ses séances ?`)) return;
+    storedStudents = storedStudents.filter(e => e.id !== eleveId);
+    localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+    updateStudentsStats();
+    renderStudentsList();
+    renderArchivesEleves();
+}
+
+function deleteSeanceArchive(eleveId, seanceIdx) {
+    const eleve = storedStudents.find(e => e.id === eleveId);
+    if(!eleve || !eleve.seances) return;
+    const s = eleve.seances[seanceIdx];
+    if(!s) return;
+    const label = s.lecon + (s.date ? ' du ' + new Date(s.date).toLocaleDateString('fr-FR') : '');
+    if(!confirm(`Supprimer la séance ${label} ?`)) return;
+    eleve.seances.splice(seanceIdx, 1);
+    localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+    renderArchivesEleves();
+}
+
+function renderArchivesEleves() {
+    const container = document.getElementById('archives-eleves-list');
+    const count = document.getElementById('archives-count');
+    count.textContent = storedStudents.length + ' élève(s)';
+    if(!storedStudents.length) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:0.82rem">Aucun élève</p>'; return; }
+
+    container.innerHTML = storedStudents.map(eleve => {
+        const seances = eleve.seances || [];
+        const diag = eleve.diagnostique ? 1 : 0;
+        const totalSeances = seances.length + diag;
+        const leconCounts = {};
+        seances.forEach(s => { leconCounts[s.lecon] = (leconCounts[s.lecon]||0)+1; });
+
+        const seanceRows = seances.map((s, idx) => {
+            const d = s.date ? new Date(s.date).toLocaleDateString('fr-FR') : '?';
+            const label = s.lecon + (s.equipe ? ' · Éq. '+s.equipe : '') + (s.niveau ? ' · '+s.niveau : '');
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:rgba(255,255,255,0.03);border-radius:7px;margin-bottom:3px">
+                <span style="font-size:0.75rem;color:rgba(255,255,255,0.6)">${label}</span>
+                <div style="display:flex;align-items:center;gap:6px">
+                    <span style="font-size:0.68rem;color:rgba(255,255,255,0.3)">${d}</span>
+                    <button onclick="deleteSeanceArchive('${eleve.id}',${idx})" style="background:rgba(239,68,68,0.15);color:#f87171;border:none;border-radius:5px;padding:2px 7px;font-size:0.7rem;cursor:pointer">🗑️</button>
+                </div>
+            </div>`;
+        }).join('');
+
+        const diagRow = eleve.diagnostique ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:rgba(251,191,36,0.05);border-radius:7px;margin-bottom:3px">
+            <span style="font-size:0.75rem;color:rgba(251,191,36,0.7)">🔬 Diagnostic L1/L2</span>
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.3)">${eleve.diagnostique.date ? new Date(eleve.diagnostique.date).toLocaleDateString('fr-FR') : '?'}</span>
+        </div>` : '';
+
+        return `<div style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:10px;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.04)">
+                <div>
+                    <span style="font-weight:800;font-size:0.9rem">${eleve.sexe==='F'?'👧':'🧑'} ${eleve.nomPrenom}</span>
+                    <span style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-left:8px">${eleve.classe||'?'} · VMA ${eleve.vma||'?'} km/h</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                    <span style="font-size:0.7rem;color:rgba(255,255,255,0.3)">${totalSeances} séance(s)</span>
+                    <button onclick="deleteEleve('${eleve.id}')" style="background:rgba(239,68,68,0.2);color:#f87171;border:none;border-radius:7px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer">🗑️ Supprimer</button>
+                </div>
+            </div>
+            ${totalSeances > 0 ? `<div style="padding:8px 12px">${diagRow}${seanceRows}</div>` : ''}
+        </div>`;
+    }).join('');
 }
 
 /**

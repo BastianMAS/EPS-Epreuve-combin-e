@@ -465,9 +465,12 @@ function renderAvailableStudents() {
         const isSelected = currentTeam.find(member => member.id === eleve.id);
         html += `
             <div class="student-item ${isSelected ? 'selected' : ''}" onclick="toggleStudent('${eleve.id}')">
-                <div>
-                    <div style="font-weight: 600;">${eleve.nomPrenom}</div>
-                    <div style="font-size: 0.8rem; opacity: 0.8;">${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.age}ans VMA:${eleve.vma || 'N/A'}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    ${eleve.photo ? `<img src="${eleve.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<span style="font-size:1.2rem">${eleve.sexe==='F'?'👧':'🧑'}</span>`}
+                    <div>
+                        <div style="font-weight:600">${eleve.nomPrenom}</div>
+                        <div style="font-size:0.78rem;opacity:0.7">${eleve.age}ans · VMA:${eleve.vma||'N/A'}</div>
+                    </div>
                 </div>
             </div>
         `;

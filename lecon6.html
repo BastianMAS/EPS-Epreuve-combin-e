@@ -627,7 +627,10 @@ function selectStudent(i, studentId) {
     if(student) {
         info.style.display = 'block';
         const vmaInfo = student.vma ? ` | VMA: <strong style="color:var(--success)">${student.vma} km/h</strong>` : '';
-        info.innerHTML = `<strong>${student.sexe==='F'?'👧':'🧑'} ${student.sexe==='F'?'Fille':'Garçon'}</strong> | ${student.age} ans${vmaInfo}`;
+        info.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
+            ${student.photo ? `<img src="${student.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0">` : `<span style="font-size:1.3rem">${student.sexe==='F'?'👧':'🧑'}</span>`}
+            <div><strong>${student.nomPrenom}</strong><span style="font-size:0.82rem;opacity:0.7"> | ${student.age} ans${vmaInfo}</span></div>
+        </div>`;
         generateTempsCibles(i, student.vma);
     } else {
         info.style.display = 'none';

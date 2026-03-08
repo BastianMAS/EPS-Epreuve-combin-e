@@ -211,7 +211,9 @@ function buildCard(eleve, idx) {
 
     return `<div class="eleve-card">
         <div class="eleve-header">
-            <span style="font-size:1.4rem">${eleve.sexe==='F'?'👧':'🧑'}</span>
+            ${eleve.photo
+                ? `<img src="${eleve.photo}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.25);flex-shrink:0">`
+                : `<span style="font-size:1.4rem">${eleve.sexe==='F'?'👧':'🧑'}</span>`}
             <span class="nom">${eleve.nomPrenom}</span>
             ${vma?`<span class="vma-badge">VMA ${vma} km/h</span>`:''}
         </div>

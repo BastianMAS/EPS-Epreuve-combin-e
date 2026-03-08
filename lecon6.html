@@ -304,6 +304,17 @@
         .student-confirm .student-name-big { font-size:1.15rem;font-weight:900;color:white;margin-bottom:3px; }
         .student-confirm .student-meta { font-size:0.75rem;color:#94a3b8; }
         .no-vma-warning { background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:10px;padding:10px 12px;color:#fca5a5;font-size:0.8rem;font-weight:600;margin-bottom:8px;display:none; }
+
+        .star-btn { font-size:1.3rem;cursor:pointer;opacity:0.3;transition:opacity 0.15s,transform 0.15s;background:none;border:none;padding:2px;line-height:1; }
+        .star-btn.active { opacity:1;transform:scale(1.1); }
+        .star-rating { display:flex;gap:4px;align-items:center;margin:4px 0; }
+        .star-label { font-size:0.7rem;color:#94a3b8;margin-left:4px;font-style:italic; }
+        .star-section-title { font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.55);margin:8px 0 2px; }
+        .save-wrapper { position:relative;display:inline-block;width:100%; }
+        .save-badge { position:absolute;top:-8px;right:-8px;background:#ef4444;color:white;border-radius:50%;width:22px;height:22px;font-size:0.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;pointer-events:none;opacity:0;transition:opacity 0.2s; }
+        .save-badge.visible { opacity:1; }
+        @keyframes savePulse6 { 0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.5)} 50%{box-shadow:0 0 0 10px rgba(139,92,246,0)} }
+        .save-btn.dirty { animation:savePulse6 1.5s infinite; }
     </style>
 
     <script src="firebase-config.js"></script>
@@ -374,7 +385,7 @@
 
 <div class="grid6" id="grid"></div>
 
-<button class="save-btn" onclick="saveAll()">💾 Sauvegarder</button>
+<div class="save-wrapper"><button class="save-btn" id="save-btn-l6" onclick="saveAll()">💾 Sauvegarder</button><div class="save-badge" id="save-badge-l6">0</div></div>
 
 <script>
 let ELEVES = [];
@@ -435,23 +446,23 @@ function createCard(i) {
                     </div>
                     <div class="pyramide-validation">
                         <div class="pyramide-check">
-                            <input type="checkbox" id="pyramide-60-1-${i}">
+                            <input type="checkbox" id="pyramide-60-1-${i}" onchange="markDirty6(${i})">
                             <div>60m T1</div>
                         </div>
                         <div class="pyramide-check">
-                            <input type="checkbox" id="pyramide-80-1-${i}">
+                            <input type="checkbox" id="pyramide-80-1-${i}" onchange="markDirty6(${i})">
                             <div>80m T2</div>
                         </div>
                         <div class="pyramide-check">
-                            <input type="checkbox" id="pyramide-100-${i}">
+                            <input type="checkbox" id="pyramide-100-${i}" onchange="markDirty6(${i})">
                             <div>100m T3</div>
                         </div>
                         <div class="pyramide-check">
-                            <input type="checkbox" id="pyramide-80-2-${i}">
+                            <input type="checkbox" id="pyramide-80-2-${i}" onchange="markDirty6(${i})">
                             <div>80m T4</div>
                         </div>
                         <div class="pyramide-check">
-                            <input type="checkbox" id="pyramide-60-2-${i}">
+                            <input type="checkbox" id="pyramide-60-2-${i}" onchange="markDirty6(${i})">
                             <div>60m T5</div>
                         </div>
                     </div>
@@ -464,31 +475,21 @@ function createCard(i) {
                 </div>
                 <div class="section-body" id="body-saut-${i}">
                     <div class="technique-box">
-                        <div class="technique-title">🎯 Maîtrise avancée (5/5)</div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut1-${i}">
-                            <label>✅ Course d'élan fluide</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut2-${i}">
-                            <label>✅ Placement précis</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut3-${i}">
-                            <label>✅ Impulsion maximale</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut4-${i}">
-                            <label>✅ Vol et réception</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut5-${i}">
-                            <label>⭐ Geste harmonieux</label>
-                        </div>
+                        <div class="technique-title">⭐ Mon niveau technique — Saut</div>
+                        <div class="star-section-title">Course d'élan fluide</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'saut',1,1)" id="saut1-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',1,2)" id="saut1-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',1,3)" id="saut1-s3-${i}">⭐</button><span class="star-label" id="saut1-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Placement précis</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'saut',2,1)" id="saut2-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',2,2)" id="saut2-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',2,3)" id="saut2-s3-${i}">⭐</button><span class="star-label" id="saut2-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Impulsion maximale</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'saut',3,1)" id="saut3-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',3,2)" id="saut3-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',3,3)" id="saut3-s3-${i}">⭐</button><span class="star-label" id="saut3-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Vol et réception</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'saut',4,1)" id="saut4-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',4,2)" id="saut4-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',4,3)" id="saut4-s3-${i}">⭐</button><span class="star-label" id="saut4-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Geste harmonieux</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'saut',5,1)" id="saut5-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',5,2)" id="saut5-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'saut',5,3)" id="saut5-s3-${i}">⭐</button><span class="star-label" id="saut5-lbl-${i}">Non évalué</span></div>
                     </div>
                     <div class="distance-input">
                         <label>Distance (m):</label>
-                        <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.50">
+                        <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.50" oninput="markDirty6(${i})">
                     </div>
                     <div class="distance-input">
                         <label>Tentatives:</label>
@@ -503,31 +504,21 @@ function createCard(i) {
                 </div>
                 <div class="section-body" id="body-lancer-${i}">
                     <div class="technique-box">
-                        <div class="technique-title">🎯 Maîtrise avancée (5/5)</div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer1-${i}">
-                            <label>✅ Placement optimal</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer2-${i}">
-                            <label>✅ Chaîne cinétique</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer3-${i}">
-                            <label>✅ Transfert poids</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer4-${i}">
-                            <label>✅ Accompagnement</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer5-${i}">
-                            <label>⭐ Coordination globale</label>
-                        </div>
+                        <div class="technique-title">⭐ Mon niveau technique — Lancer</div>
+                        <div class="star-section-title">Placement optimal</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'lancer',1,1)" id="lancer1-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',1,2)" id="lancer1-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',1,3)" id="lancer1-s3-${i}">⭐</button><span class="star-label" id="lancer1-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Chaîne cinétique</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'lancer',2,1)" id="lancer2-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',2,2)" id="lancer2-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',2,3)" id="lancer2-s3-${i}">⭐</button><span class="star-label" id="lancer2-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Transfert de poids</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'lancer',3,1)" id="lancer3-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',3,2)" id="lancer3-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',3,3)" id="lancer3-s3-${i}">⭐</button><span class="star-label" id="lancer3-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Accompagnement du geste</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'lancer',4,1)" id="lancer4-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',4,2)" id="lancer4-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',4,3)" id="lancer4-s3-${i}">⭐</button><span class="star-label" id="lancer4-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Coordination globale</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar6(${i},'lancer',5,1)" id="lancer5-s1-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',5,2)" id="lancer5-s2-${i}">⭐</button><button class="star-btn" onclick="setStar6(${i},'lancer',5,3)" id="lancer5-s3-${i}">⭐</button><span class="star-label" id="lancer5-lbl-${i}">Non évalué</span></div>
                     </div>
                     <div class="distance-input">
                         <label>Distance (m):</label>
-                        <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="12.00">
+                        <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="12.00" oninput="markDirty6(${i})">
                     </div>
                     <div class="distance-input">
                         <label>Tentatives:</label>
@@ -649,6 +640,21 @@ function selectStudent(i, studentId) {
         if(!student.vma) { const nv=document.getElementById(`novma-${i}`); if(nv) nv.style.display='block'; }
         else { const nv=document.getElementById(`novma-${i}`); if(nv) nv.style.display='none'; }
         generateTempsCibles(i, student.vma);
+        // Ouverture auto section Course
+        const bCourse6 = document.getElementById(`body-course-${i}`);
+        const aCourse6 = document.getElementById(`arr-course-${i}`);
+        if(bCourse6 && !bCourse6.classList.contains('open')) {
+            bCourse6.classList.add('open');
+            if(aCourse6) aCourse6.classList.add('open');
+        }
+        // Recharger étoiles depuis données sauvegardées
+        setTimeout(() => {
+            const ex = student.seances?.find(s => s.lecon === 'L6') || {};
+            [1,2,3,4,5].forEach(c => {
+                if(ex[`sautTech${c}`])   renderStar6(i,'saut',c,   ex[`sautTech${c}`]);
+                if(ex[`lancerTech${c}`]) renderStar6(i,'lancer',c, ex[`lancerTech${c}`]);
+            });
+        }, 150);
     } else {
         info.style.display = 'none';
         document.getElementById(`temps-cibles-${i}`).innerHTML = '';
@@ -712,6 +718,36 @@ function toggleSection(sec, i) {
     arr.classList.toggle('open', !isOpen);
 }
 
+
+// ── Étoiles L6 ──
+const STAR_LABELS6 = ['', "J'ai essayé", 'Je commence à maîtriser', 'Je maîtrise bien'];
+const _starValues6 = {};
+function setStar6(i, discipline, critere, val) {
+    const key = `${i}_${discipline}_${critere}`;
+    _starValues6[key] = val;
+    for(let s = 1; s <= 3; s++) {
+        const btn = document.getElementById(`${discipline}${critere}-s${s}-${i}`);
+        if(btn) btn.classList.toggle('active', s <= val);
+    }
+    const lbl = document.getElementById(`${discipline}${critere}-lbl-${i}`);
+    if(lbl) lbl.textContent = STAR_LABELS6[val] || '';
+    markDirty6(i);
+}
+function getStarValue6(i, discipline, critere) { return _starValues6[`${i}_${discipline}_${critere}`] || 0; }
+function renderStar6(i, discipline, critere, val) { if(val) setStar6(i, discipline, critere, val); }
+
+// ── Dirty tracking L6 ──
+const _dirtyCards6 = new Set();
+function markDirty6(i) { _dirtyCards6.add(i); updateSaveBadge6(); }
+function clearDirty6() { _dirtyCards6.clear(); updateSaveBadge6(); }
+function updateSaveBadge6() {
+    const btn = document.getElementById('save-btn-l6');
+    const badge = document.getElementById('save-badge-l6');
+    const n = _dirtyCards6.size;
+    if(btn) btn.classList.toggle('dirty', n > 0);
+    if(badge) { badge.textContent = n; badge.classList.toggle('visible', n > 0); }
+}
+
 function saveAll(silent = false) {
     let count = 0;
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
@@ -722,20 +758,20 @@ function saveAll(silent = false) {
         const sautRaw6 = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
         const sautDistance = (!isNaN(sautRaw6) && sautRaw6>=0.8 && sautRaw6<=5.5) ? sautRaw6 : null;
         const sautTentatives = parseInt(document.getElementById(`saut-tentatives-${i}`)?.value) || null;
-        const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
-        const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
-        const sautTech3 = document.getElementById(`saut3-${i}`)?.checked || false;
-        const sautTech4 = document.getElementById(`saut4-${i}`)?.checked || false;
-        const sautTech5 = document.getElementById(`saut5-${i}`)?.checked || false;
+        const sautTech1 = getStarValue6(i,'saut',1);
+        const sautTech2 = getStarValue6(i,'saut',2);
+        const sautTech3 = getStarValue6(i,'saut',3);
+        const sautTech4 = getStarValue6(i,'saut',4);
+        const sautTech5 = getStarValue6(i,'saut',5);
 
         const lancerRaw6 = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
         const lancerDistance = (!isNaN(lancerRaw6) && lancerRaw6>=3.0 && lancerRaw6<=25.0) ? lancerRaw6 : null;
         const lancerTentatives = parseInt(document.getElementById(`lancer-tentatives-${i}`)?.value) || null;
-        const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
-        const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
-        const lancerTech3 = document.getElementById(`lancer3-${i}`)?.checked || false;
-        const lancerTech4 = document.getElementById(`lancer4-${i}`)?.checked || false;
-        const lancerTech5 = document.getElementById(`lancer5-${i}`)?.checked || false;
+        const lancerTech1 = getStarValue6(i,'lancer',1);
+        const lancerTech2 = getStarValue6(i,'lancer',2);
+        const lancerTech3 = getStarValue6(i,'lancer',3);
+        const lancerTech4 = getStarValue6(i,'lancer',4);
+        const lancerTech5 = getStarValue6(i,'lancer',5);
 
         const pyramide60_1 = document.getElementById(`pyramide-60-1-${i}`)?.checked || false;
         const pyramide80_1 = document.getElementById(`pyramide-80-1-${i}`)?.checked || false;

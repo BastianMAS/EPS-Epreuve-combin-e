@@ -294,6 +294,12 @@
         .no-vma-warning { background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:10px;padding:10px 12px;color:#fca5a5;font-size:0.8rem;font-weight:600;margin-bottom:8px;display:none; }
         .temps-input.invalid { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
         .temps-input.valid-time { border-color: #4ade80 !important; }
+
+        .save-wrapper { position: relative; display: inline-block; width: 100%; }
+        .save-badge { position:absolute;top:-8px;right:-8px;background:#ef4444;color:white;border-radius:50%;width:22px;height:22px;font-size:0.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;pointer-events:none;opacity:0;transition:opacity 0.2s; }
+        .save-badge.visible { opacity: 1; }
+        @keyframes savePulse { 0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.5)} 50%{box-shadow:0 0 0 10px rgba(139,92,246,0)} }
+        .save-all.dirty { animation: savePulse 1.5s infinite; }
     </style>
 </head>
 <body>
@@ -620,12 +626,36 @@ function generateHistorique(i, student) {
         html += `</div>`;
     }
 
-    // Conseil T1
+    // ── Conseil T1 avec delta meilleur temps passé ──
     const tConseil = vma ? calcTemps400(vma, pctConseil) : null;
+    const tConseilSec = tConseil ? (() => { const p=tConseil.split(':'); return parseInt(p[0])*60+parseInt(p[1]); })() : null;
     const raisStr = raisonnement.length ? ` (${raisonnement.join(', ')})` : '';
-    html += `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:8px;padding:8px 10px">`;
-    html += `<div style="font-size:0.72rem;font-weight:800;color:#fbbf24;margin-bottom:3px">💡 Mon conseil pour ton 1er 400m${raisStr}</div>`;
-    html += `<div style="font-size:0.85rem;font-weight:900;color:white">Pars à <span style="color:#fbbf24">${pctConseil}% VMA</span>${tConseil ? ` → <span style="color:#fbbf24">⏱ ${tConseil}</span>` : ''}</div>`;
+
+    // Trouver meilleur temps 200m pour estimer référence 400m
+    let bestRef = null, bestRefLabel = '';
+    const toursL4 = (sL4?.tours || []).filter(Boolean);
+    const toursL3 = (sL3?.tours || []).filter(Boolean);
+    if(toursL4.length) {
+        const best200 = Math.min(...toursL4);
+        bestRef = Math.round(best200 * 2 * 1.07); // facteur allure 400m
+        bestRefLabel = 'L4';
+    } else if(toursL3.length) {
+        const best200 = Math.min(...toursL3);
+        bestRef = Math.round(best200 * 2 * 1.07);
+        bestRefLabel = 'L3';
+    }
+
+    html += `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:8px;padding:8px 10px;margin-top:6px">`;
+    html += `<div style="font-size:0.72rem;font-weight:800;color:#fbbf24;margin-bottom:4px">💡 Mon conseil pour le 1er 400m${raisStr}</div>`;
+    html += `<div style="font-size:0.9rem;font-weight:900;color:white">Pars à <span style="color:#fbbf24">${pctConseil}% VMA</span>${tConseil ? ` → <span style="color:#fbbf24">⏱ ${tConseil}</span>` : ''}</div>`;
+
+    if(bestRef && tConseilSec) {
+        const delta = bestRef - tConseilSec;
+        const fmtRef = `${Math.floor(bestRef/60)}:${(bestRef%60).toString().padStart(2,'0')}`;
+        const sign = delta > 0 ? `+${delta}s plus vite` : delta < 0 ? `${Math.abs(delta)}s plus lent` : 'même rythme';
+        const color = delta > 0 ? '#34d399' : delta < 0 ? '#f87171' : '#94a3b8';
+        html += `<div style="font-size:0.72rem;color:#94a3b8;margin-top:4px">🏆 Meilleur 200m en ${bestRefLabel} × 2 ≈ <strong style="color:white">${fmtRef}</strong> → objectif : <span style="color:${color}">${sign}</span></div>`;
+    }
     html += `</div>`;
 
     html += '</div>';
@@ -637,6 +667,11 @@ function generateHistorique(i, student) {
 function buildChoixBtns(i, student) {
     const vma = parseFloat(student.vma) || null;
     const pctRef = cardState[i]?.pctConseil || 100;
+
+    // ── Ouvrir section tour1 automatiquement ──
+    const bTour1 = document.getElementById(`body-tour1-${i}`);
+    const aTour1 = document.getElementById(`arr-tour1-${i}`);
+    if(bTour1 && !bTour1.classList.contains('open')) { bTour1.classList.add('open'); if(aTour1) aTour1.classList.add('open'); }
 
     // Tour 1 : surbrillance conseil active dès le départ
     renderChoixGrid(i, 'tour1', [
@@ -843,6 +878,7 @@ function selectChoix(i, tour, choix) {
     // Stocker le choix
     if(!cardState[i].choix) cardState[i].choix = {};
     cardState[i].choix[tour] = choix;
+    markDirty7(i);
 }
 
 function checkTour2(i) {
@@ -989,6 +1025,17 @@ function toggleSection(sec, i) {
     arr.classList.toggle('open', !isOpen);
 }
 
+
+const _dirtyCards7 = new Set();
+function markDirty7(i) { _dirtyCards7.add(i); updateSaveBadge7(); }
+function clearDirty7() { _dirtyCards7.clear(); updateSaveBadge7(); }
+function updateSaveBadge7() {
+    const btn=document.getElementById('save-btn'), badge=document.getElementById('save-badge');
+    const n=_dirtyCards7.size;
+    if(btn) btn.classList.toggle('dirty', n>0);
+    if(badge) { badge.textContent=n; badge.classList.toggle('visible', n>0); }
+}
+
 function saveAll(silent=false) {
     let count = 0;
     let erreurs = [];
@@ -1005,24 +1052,27 @@ function saveAll(silent=false) {
         let temps1 = null, temps2 = null, temps3 = null;
         
         if(temps1Input?.value) {
-            const v1 = convertTempsAvecValidation(temps1Input.value, temps1Input);
-            if(!v1.valide) { erreurs.push(`${d.student.nomPrenom} — T1 format invalide`); return; }
-            if(v1.secondes < 60 || v1.secondes > 210) { erreurs.push(`${d.student.nomPrenom} — T1 hors plage (1:00 à 3:30)`); return; }
-            temps1 = temps1Input.value;
+            const v1 = convertTempsAvecValidation(temps1Input.value, silent ? null : temps1Input);
+            if(!v1.valide) { if(!silent) erreurs.push(`${d.student.nomPrenom} — T1 format invalide`); else temps1 = null; }
+            else if(v1.secondes < 60 || v1.secondes > 210) { if(!silent) erreurs.push(`${d.student.nomPrenom} — T1 hors plage (1:00 à 3:30)`); else temps1 = null; }
+            else temps1 = temps1Input.value;
+            if(!silent && !temps1) return;
         }
 
         if(temps2Input?.value) {
-            const v2 = convertTempsAvecValidation(temps2Input.value, temps2Input);
-            if(!v2.valide) { erreurs.push(`${d.student.nomPrenom} — T2 format invalide`); return; }
-            if(v2.secondes < 60 || v2.secondes > 210) { erreurs.push(`${d.student.nomPrenom} — T2 hors plage (1:00 à 3:30)`); return; }
-            temps2 = temps2Input.value;
+            const v2 = convertTempsAvecValidation(temps2Input.value, silent ? null : temps2Input);
+            if(!v2.valide) { if(!silent) erreurs.push(`${d.student.nomPrenom} — T2 format invalide`); else temps2 = null; }
+            else if(v2.secondes < 60 || v2.secondes > 210) { if(!silent) erreurs.push(`${d.student.nomPrenom} — T2 hors plage (1:00 à 3:30)`); else temps2 = null; }
+            else temps2 = temps2Input.value;
+            if(!silent && !temps2) return;
         }
 
         if(temps3Input?.value) {
-            const v3 = convertTempsAvecValidation(temps3Input.value, temps3Input);
-            if(!v3.valide) { erreurs.push(`${d.student.nomPrenom} — T3 format invalide`); return; }
-            if(v3.secondes < 60 || v3.secondes > 210) { erreurs.push(`${d.student.nomPrenom} — T3 hors plage (1:00 à 3:30)`); return; }
-            temps3 = temps3Input.value;
+            const v3 = convertTempsAvecValidation(temps3Input.value, silent ? null : temps3Input);
+            if(!v3.valide) { if(!silent) erreurs.push(`${d.student.nomPrenom} — T3 format invalide`); else temps3 = null; }
+            else if(v3.secondes < 60 || v3.secondes > 210) { if(!silent) erreurs.push(`${d.student.nomPrenom} — T3 hors plage (1:00 à 3:30)`); else temps3 = null; }
+            else temps3 = temps3Input.value;
+            if(!silent && !temps3) return;
         }
 
         const idx = allStudents.findIndex(s => s.id === d.student.id);
@@ -1097,13 +1147,13 @@ function saveAll(silent=false) {
         count++;
     });
 
-    if(!silent && erreurs.length > 0) {
-        alert(`⚠️ Erreurs de saisie :\n\n${erreurs.join('\n')}\n\nCorrige les temps avant de sauvegarder !`);
-        return;
+    if(erreurs.length > 0) {
+        if(!silent) alert(`⚠️ Erreurs de saisie :\n\n${erreurs.join('\n')}\n\nCorrige les temps avant de sauvegarder !`);
+        if(!silent) return;  // En mode silent on sauvegarde quand même les élèves sans erreur
     }
-    if(!silent && count === 0) { alert('⚠️ Aucun élève sélectionné !'); return; }
+    if(count === 0) { if(!silent) alert('⚠️ Aucun élève sélectionné !'); return; }
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    if(!silent) alert(`🎯 L7 sauvegardée pour ${count} élève(s) !`);
+    if(!silent) { alert(`🎯 L7 sauvegardée pour ${count} élève(s) !`); clearDirty7(); }
 }
 // Sauvegarde automatique uniquement à la fermeture/quitter la page
 window.addEventListener('beforeunload', function() { try { saveAll(true); } catch(e){} });

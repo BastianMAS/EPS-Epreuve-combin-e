@@ -507,6 +507,35 @@
             25%      { transform: translateX(-4px); }
             75%      { transform: translateX(4px); }
         }
+
+        /* ── Badge save dirty ── */
+        .save-wrapper { position: relative; display: inline-block; width: 100%; }
+        .save-badge {
+            position: absolute; top: -8px; right: -8px;
+            background: #ef4444; color: white;
+            border-radius: 50%; width: 22px; height: 22px;
+            font-size: 0.7rem; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #0f172a; pointer-events: none;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .save-badge.visible { opacity: 1; }
+        @keyframes savePulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.5); }
+            50%      { box-shadow: 0 0 0 10px rgba(139,92,246,0); }
+        }
+        .save-all.dirty { animation: savePulse 1.5s infinite; }
+
+        /* ── Notation étoiles ── */
+        .star-rating { display: flex; gap: 6px; align-items: center; margin: 8px 0; }
+        .star-btn {
+            font-size: 1.4rem; cursor: pointer; opacity: 0.3;
+            transition: opacity 0.15s, transform 0.15s;
+            background: none; border: none; padding: 2px; line-height: 1;
+        }
+        .star-btn.active { opacity: 1; transform: scale(1.1); }
+        .star-label { font-size: 0.72rem; color: #94a3b8; margin-left: 6px; font-style: italic; }
+        .star-section-title { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
     </style>
 </head>
 <body>
@@ -519,14 +548,14 @@
 <div id="autosave-indicator">💾 Sauvegarde auto active</div>
 <div class="grid6" id="grid"></div>
 
-<button class="save-all" onclick="saveAll()">🏆 Enregistrer les performances</button>
+<div class="save-wrapper"><button class="save-all" id="save-btn" onclick="saveAll()">🏆 Enregistrer les performances</button><div class="save-badge" id="save-badge">0</div></div>
 
 <script>
 const NIVEAUX_VMA_L3 = [
-    { id: 'vma95', label: '95% VMA', desc: 'Endurance active - Rythme régulier', pourcent: 95 },
-    { id: 'vma100', label: '100% VMA', desc: 'Découverte - Rythme soutenu', pourcent: 100 },
-    { id: 'vma105', label: '105% VMA', desc: 'Progression - Rythme intense', pourcent: 105 },
-    { id: 'vma110', label: '110% VMA', desc: 'Challenge - Rythme très intense', pourcent: 110 }
+    { id: 'vma95',  label: '95% VMA',  desc: '🟢 Je peux parler — rythme régulier et maîtrisé',       pourcent: 95  },
+    { id: 'vma100', label: '100% VMA', desc: '🟡 Mon meilleur rythme régulier — respiration soutenue', pourcent: 100 },
+    { id: 'vma105', label: '105% VMA', desc: '🟠 Je suis poussé — difficile de parler',               pourcent: 105 },
+    { id: 'vma110', label: '110% VMA', desc: '🔴 Effort max — très difficile de tenir',               pourcent: 110 }
 ];
 
 function getFeedbackCourse(tempsSecEleve, tempsCibleSec, tourNum) {
@@ -812,6 +841,14 @@ function selectNiveau(i, niveauId) {
     document.getElementById(`sec-course-${i}`).style.display = 'block';
     document.getElementById(`sec-saut-${i}`).style.display = 'block';
     document.getElementById(`sec-lancer-${i}`).style.display = 'block';
+
+    // ── Ouverture auto de la section Course ──
+    const bodyCourse = document.getElementById(`body-course-${i}`);
+    const arrCourse  = document.getElementById(`arr-course-${i}`);
+    if(bodyCourse && !bodyCourse.classList.contains('open')) {
+        bodyCourse.classList.add('open');
+        if(arrCourse) arrCourse.classList.add('open');
+    }
 }
 
 function toggleSection(sec, i) {
@@ -823,11 +860,8 @@ function toggleSection(sec, i) {
 }
 
 function updateTours(i) {
-    // Validation visuelle de chaque champ temps
-    [1,2,3,4,5,6].forEach(n => {
-        const inp = document.getElementById(`t${n}-${i}`);
-        if(inp) validateTimeInput(inp, LIMITES_200M.max, LIMITES_200M.min);
-    });
+    [1,2,3,4,5,6].forEach(n => { const inp=document.getElementById(`t${n}-${i}`); if(inp) validateTimeInput(inp,LIMITES_200M.max,LIMITES_200M.min); });
+    markDirty(i);
     const cardData = cardState[i];
     if(!cardData?.student) return;
     if(!cardData.niveau) return;
@@ -917,6 +951,34 @@ function updateTours(i) {
     }
 }
 
+
+// ── Système d'étoiles ──
+const STAR_LABELS = ['', "J'ai essayé", 'Je commence à maîtriser', 'Je maîtrise bien'];
+const _starValues = {}; // key: `${i}_${discipline}_${critere}` → 1|2|3
+
+function setStar(i, discipline, critere, val) {
+    const key = `${i}_${discipline}_${critere}`;
+    _starValues[key] = val;
+    // Mettre à jour l'affichage
+    for(let s = 1; s <= 3; s++) {
+        const btn = document.getElementById(`${discipline}${critere}-s${s}-${i}`);
+        if(btn) btn.classList.toggle('active', s <= val);
+    }
+    const lbl = document.getElementById(`${discipline}${critere}-lbl-${i}`);
+    if(lbl) lbl.textContent = STAR_LABELS[val] || '';
+    markDirty(i);
+}
+
+function getStarValue(i, discipline, critere) {
+    return _starValues[`${i}_${discipline}_${critere}`] || 0;
+}
+
+function renderStars(i, discipline, critere, val) {
+    // Recharger l'affichage depuis une valeur sauvegardée
+    if(!val) return;
+    setStar(i, discipline, critere, val);
+}
+
 function saveAll(silent=false) {
     let count = 0;
     let erreurs = [];
@@ -936,15 +998,15 @@ function saveAll(silent=false) {
         const sautDistance = (!isNaN(sautRaw) && sautRaw >= 0.8 && sautRaw <= 5.5) ? sautRaw : null;
         if(!isNaN(sautRaw) && sautRaw !== 0 && sautDistance === null)
             erreurs.push(`${d.student.nomPrenom} : distance saut aberrante (${sautRaw}m) — ignorée`);
-        const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
-        const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
+        const sautTech1 = getStarValue(i,'saut',1);
+        const sautTech2 = getStarValue(i,'saut',2);
 
         const lancerRaw = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
         const lancerDistance = (!isNaN(lancerRaw) && lancerRaw >= 3.0 && lancerRaw <= 25.0) ? lancerRaw : null;
         if(!isNaN(lancerRaw) && lancerRaw !== 0 && lancerDistance === null)
             erreurs.push(`${d.student.nomPrenom} : distance lancer aberrante (${lancerRaw}m) — ignorée`);
-        const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
-        const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
+        const lancerTech1 = getStarValue(i,'lancer',1);
+        const lancerTech2 = getStarValue(i,'lancer',2);
 
         const idx = allStudents.findIndex(s => s.id === d.student.id);
         if(idx === -1) return;
@@ -1009,6 +1071,7 @@ function saveAll(silent=false) {
         let msg = `🏆 Données L3 sauvegardées pour ${count} élève(s) !`;
         if(erreurs.length) msg += `\n\n⚠️ Valeurs ignorées (hors plage) :\n` + erreurs.join('\n');
         alert(msg);
+        clearDirty();
     }
 }
 
@@ -1056,6 +1119,25 @@ function fmtSec(sec) {
 window.addEventListener('beforeunload', function(e) {
     silentSave();
 });
+
+
+// ── Dirty tracking (badge save) ──
+const _dirtyCards = new Set();
+function markDirty(i) {
+    _dirtyCards.add(i);
+    updateSaveBadge();
+}
+function clearDirty() {
+    _dirtyCards.clear();
+    updateSaveBadge();
+}
+function updateSaveBadge() {
+    const btn   = document.getElementById('save-btn');
+    const badge = document.getElementById('save-badge');
+    const n = _dirtyCards.size;
+    if(btn)   btn.classList.toggle('dirty', n > 0);
+    if(badge) { badge.textContent = n; badge.classList.toggle('visible', n > 0); }
+}
 
 // Autosave silencieux 30s — jamais de popup
 let _lastAutoSave = Date.now();

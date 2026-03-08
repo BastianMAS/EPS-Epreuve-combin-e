@@ -1005,33 +1005,24 @@ function saveAll(silent=false) {
         let temps1 = null, temps2 = null, temps3 = null;
         
         if(temps1Input?.value) {
-            const validation1 = convertTempsAvecValidation(temps1Input.value, temps1Input);
-            if(validation1.valide) {
-                temps1 = temps1Input.value;
-            } else {
-                erreurs.push(`${d.student.nomPrenom} - Temps 1 incorrect`);
-                return;
-            }
+            const v1 = convertTempsAvecValidation(temps1Input.value, temps1Input);
+            if(!v1.valide) { erreurs.push(`${d.student.nomPrenom} — T1 format invalide`); return; }
+            if(v1.secondes < 60 || v1.secondes > 210) { erreurs.push(`${d.student.nomPrenom} — T1 hors plage (1:00 à 3:30)`); return; }
+            temps1 = temps1Input.value;
         }
-        
+
         if(temps2Input?.value) {
-            const validation2 = convertTempsAvecValidation(temps2Input.value, temps2Input);
-            if(validation2.valide) {
-                temps2 = temps2Input.value;
-            } else {
-                erreurs.push(`${d.student.nomPrenom} - Temps 2 incorrect`);
-                return;
-            }
+            const v2 = convertTempsAvecValidation(temps2Input.value, temps2Input);
+            if(!v2.valide) { erreurs.push(`${d.student.nomPrenom} — T2 format invalide`); return; }
+            if(v2.secondes < 60 || v2.secondes > 210) { erreurs.push(`${d.student.nomPrenom} — T2 hors plage (1:00 à 3:30)`); return; }
+            temps2 = temps2Input.value;
         }
-        
+
         if(temps3Input?.value) {
-            const validation3 = convertTempsAvecValidation(temps3Input.value, temps3Input);
-            if(validation3.valide) {
-                temps3 = temps3Input.value;
-            } else {
-                erreurs.push(`${d.student.nomPrenom} - Temps 3 incorrect`);
-                return;
-            }
+            const v3 = convertTempsAvecValidation(temps3Input.value, temps3Input);
+            if(!v3.valide) { erreurs.push(`${d.student.nomPrenom} — T3 format invalide`); return; }
+            if(v3.secondes < 60 || v3.secondes > 210) { erreurs.push(`${d.student.nomPrenom} — T3 hors plage (1:00 à 3:30)`); return; }
+            temps3 = temps3Input.value;
         }
 
         const idx = allStudents.findIndex(s => s.id === d.student.id);
@@ -1106,15 +1097,13 @@ function saveAll(silent=false) {
         count++;
     });
 
-    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    if(!silent) {
-        if(erreurs.length > 0) {
-            alert(`⚠️ Erreurs de saisie :\n\n${erreurs.join('\n')}\n\nCorrige les temps avant de sauvegarder !`);
-            return;
-        }
-        if(count === 0) { alert('⚠️ Aucun élève sélectionné !'); return; }
-        alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
+    if(!silent && erreurs.length > 0) {
+        alert(`⚠️ Erreurs de saisie :\n\n${erreurs.join('\n')}\n\nCorrige les temps avant de sauvegarder !`);
+        return;
     }
+    if(!silent && count === 0) { alert('⚠️ Aucun élève sélectionné !'); return; }
+    localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    if(!silent) alert(`🎯 L7 sauvegardée pour ${count} élève(s) !`);
 }
 // Sauvegarde automatique uniquement à la fermeture/quitter la page
 window.addEventListener('beforeunload', function() { try { saveAll(true); } catch(e){} });

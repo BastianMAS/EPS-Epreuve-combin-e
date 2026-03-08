@@ -226,6 +226,8 @@ function buildCard(eleve, idx) {
             ${tlL7(sL7, vma, true)}
         </div>
 
+        ${buildProgression(diag, sL3, sL4, sL6)}
+
         <div class="projet-section">
             <div class="proj-title">🎯 Mon projet pour L8</div>
 
@@ -299,6 +301,54 @@ function dot(cls, label, isLast) {
 }
 function pill(label, val, hi=false) {
     return val ? `<div class="pill${hi?' hi':''}"><span>${label}</span><strong>${val}</strong></div>` : '';
+}
+
+function buildProgression(diag, sL3, sL4, sL6) {
+    const diagSaut  = diag?.sautAvecBest  ?? null;
+    const diagLance = diag?.lancerBest    ?? null;
+    const l3Saut    = sL3?.sautDistance   ? parseFloat(sL3.sautDistance)   : null;
+    const l3Lance   = sL3?.lancerDistance ? parseFloat(sL3.lancerDistance) : null;
+    const l4Saut    = sL4?.sautDistance   ? parseFloat(sL4.sautDistance)   : null;
+    const l4Lance   = sL4?.lancerDistance ? parseFloat(sL4.lancerDistance) : null;
+    const l6Saut    = sL6?.sautDistance   ? parseFloat(sL6.sautDistance)   : null;
+    const l6Lance   = sL6?.lancerDistance ? parseFloat(sL6.lancerDistance) : null;
+
+    const hasSaut  = diagSaut||l3Saut||l4Saut||l6Saut;
+    const hasLance = diagLance||l3Lance||l4Lance||l6Lance;
+    if(!hasSaut && !hasLance) return '';
+
+    function arrowRow(label, vals) {
+        // vals = [{lecon, value}] — seulement ceux qui ont une valeur
+        const parts = vals.filter(v => v.value !== null);
+        if(!parts.length) return '';
+        const cells = parts.map((p, i) => {
+            const next = parts[i+1];
+            const arrow = next
+                ? (next.value > p.value ? '↑' : next.value < p.value ? '↓' : '→')
+                : '';
+            const arrowColor = arrow==='↑'?'#10b981':arrow==='↓'?'#ef4444':'#94a3b8';
+            return `<span style="background:rgba(255,255,255,0.07);border-radius:8px;padding:4px 8px;font-size:0.75rem;white-space:nowrap">
+                <span style="color:#94a3b8;font-size:0.65rem">${p.lecon}</span><br>
+                <strong>${p.value.toFixed(2)}m</strong>
+            </span>${arrow?`<span style="color:${arrowColor};font-size:1rem;font-weight:900;margin:0 2px">${arrow}</span>`:''}`;
+        }).join('');
+        return `<div style="margin-bottom:8px">
+            <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
+            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">${cells}</div>
+        </div>`;
+    }
+
+    const sautRow  = arrowRow('🦘 Progression saut en longueur', [
+        {lecon:'Diag',value:diagSaut},{lecon:'L3',value:l3Saut},{lecon:'L4',value:l4Saut},{lecon:'L6',value:l6Saut}
+    ]);
+    const lanceRow = arrowRow('🎯 Progression lancer', [
+        {lecon:'Diag',value:diagLance},{lecon:'L3',value:l3Lance},{lecon:'L4',value:l4Lance},{lecon:'L6',value:l6Lance}
+    ]);
+
+    return `<div style="padding:14px 20px;border-top:1px solid var(--border);background:rgba(255,255,255,0.02)">
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📈 Évolution sur le cycle</div>
+        ${sautRow}${lanceRow}
+    </div>`;
 }
 
 function tlDiag(diag, vma) {

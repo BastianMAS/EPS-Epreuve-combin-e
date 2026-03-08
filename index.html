@@ -1441,26 +1441,17 @@
 
 <!-- PAGE STATS : STATISTIQUES -->
 <div id="screenStats" class="hidden">
-    <h1>EPS<span class="accent-text">: épreuve Combinée</span></h1>
-    <p class="text-center" style="color: var(--success); margin-bottom: 24px; font-size: 1.1rem;">📊 Statistiques de Classe</p>
-
-    <div class="config-container">
-        <div class="card">
-            <button onclick="backToStudentsFromStats()" class="btn-action" style="background:#444;color:white;margin-bottom:20px;">← Retour</button>
-
-            <!-- CHIFFRES CLÉS -->
-            <div id="stats-global-content" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;"></div>
-
-            <!-- VMA PAR SEXE -->
-            <div id="stats-sexe-content" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;"></div>
-
-            <!-- PAR CLASSE -->
-            <div id="stats-classe-content" style="margin-bottom:20px;"></div>
-
-            <!-- EN DIFFICULTÉ -->
-            <div id="stats-difficulte-content"></div>
-        </div>
+    <div style="background:linear-gradient(135deg,#1e3a5f,#0f2940);border-radius:16px;padding:20px;margin-bottom:16px">
+        <h2 style="color:white;font-size:1.3rem;font-weight:800;margin-bottom:2px">📊 Statistiques de classe</h2>
+        <p style="color:rgba(255,255,255,0.6);font-size:0.82rem">Vue d'ensemble des performances EPS</p>
     </div>
+
+    <button onclick="backToStudentsFromStats()" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:8px 16px;font-size:0.85rem;font-weight:700;cursor:pointer;margin-bottom:16px">← Retour</button>
+
+    <div id="stats-global-content" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;"></div>
+    <div id="stats-sexe-content" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"></div>
+    <div id="stats-classe-content" style="margin-bottom:14px;"></div>
+    <div id="stats-difficulte-content" style="margin-bottom:20px;"></div>
 </div>
 
 
@@ -2207,16 +2198,16 @@ function calculateStats() {
 function displayGlobalStats(stats) {
     const container = document.getElementById('stats-global-content');
     const cards = [
-        { emoji:'👥', val: stats.total, label:'Élèves', color:'#6366f1' },
-        { emoji:'⚡', val: stats.moyenneVMA + ' km/h', label:'VMA moyenne', color:'#10b981' },
-        { emoji:'👧', val: stats.filles, label:'Filles', color:'#ec4899' },
-        { emoji:'🧑', val: stats.garcons, label:'Garçons', color:'#3b82f6' },
+        { emoji:'👥', val: stats.total, label:'Élèves au total', color:'#60a5fa', bg:'rgba(96,165,250,0.12)' },
+        { emoji:'⚡', val: stats.moyenneVMA + ' km/h', label:'VMA moyenne classe', color:'#34d399', bg:'rgba(52,211,153,0.12)' },
+        { emoji:'👧', val: stats.filles, label:'Filles', color:'#f472b6', bg:'rgba(244,114,182,0.12)' },
+        { emoji:'🧑', val: stats.garcons, label:'Garçons', color:'#818cf8', bg:'rgba(129,140,248,0.12)' },
     ];
     container.innerHTML = cards.map(c => `
-        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;border-top:3px solid ${c.color}">
-            <div style="font-size:1.6rem;margin-bottom:4px">${c.emoji}</div>
-            <div style="font-size:1.8rem;font-weight:900;color:${c.color};line-height:1">${c.val}</div>
-            <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px">${c.label}</div>
+        <div style="background:${c.bg};border:1px solid ${c.color}30;border-radius:14px;padding:14px 12px;border-top:3px solid ${c.color}">
+            <div style="font-size:1.4rem;margin-bottom:4px">${c.emoji}</div>
+            <div style="font-size:1.6rem;font-weight:900;color:${c.color};line-height:1">${c.val}</div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:4px">${c.label}</div>
         </div>`).join('');
 }
 
@@ -2229,20 +2220,22 @@ function displayStatsBySexe(stats) {
     const pctF = Math.min(Math.round(stats.filles.moyenneVMA / vmaMax * 100), 100);
     const pctG = Math.min(Math.round(stats.garcons.moyenneVMA / vmaMax * 100), 100);
     container.innerHTML = `
-        <div style="background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.3);border-radius:14px;padding:16px;text-align:center">
-            <div style="font-size:1.8rem;margin-bottom:4px">👧</div>
-            <div style="font-size:1.6rem;font-weight:900;color:#ec4899">${stats.filles.moyenneVMA} km/h</div>
-            <div style="font-size:0.75rem;color:#94a3b8;margin:4px 0">${stats.filles.total} filles</div>
-            <div style="background:rgba(255,255,255,0.1);border-radius:99px;height:8px;overflow:hidden;margin-top:8px">
-                <div style="width:${pctF}%;height:100%;background:linear-gradient(90deg,#ec4899,#f472b6);border-radius:99px"></div>
+        <div style="background:rgba(244,114,182,0.1);border:1px solid rgba(244,114,182,0.25);border-radius:12px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:0.78rem;font-weight:700;color:#f472b6">👧 Filles — ${stats.filles.total} élèves</span>
+                <span style="font-size:1.1rem;font-weight:900;color:#f472b6">${stats.filles.moyenneVMA} km/h</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.08);border-radius:99px;height:8px;overflow:hidden">
+                <div style="width:${pctF}%;height:100%;background:linear-gradient(90deg,#f472b6,#ec4899);border-radius:99px"></div>
             </div>
         </div>
-        <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:16px;text-align:center">
-            <div style="font-size:1.8rem;margin-bottom:4px">🧑</div>
-            <div style="font-size:1.6rem;font-weight:900;color:#3b82f6">${stats.garcons.moyenneVMA} km/h</div>
-            <div style="font-size:0.75rem;color:#94a3b8;margin:4px 0">${stats.garcons.total} garçons</div>
-            <div style="background:rgba(255,255,255,0.1);border-radius:99px;height:8px;overflow:hidden;margin-top:8px">
-                <div style="width:${pctG}%;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:99px"></div>
+        <div style="background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.25);border-radius:12px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:0.78rem;font-weight:700;color:#818cf8">🧑 Garçons — ${stats.garcons.total} élèves</span>
+                <span style="font-size:1.1rem;font-weight:900;color:#818cf8">${stats.garcons.moyenneVMA} km/h</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.08);border-radius:99px;height:8px;overflow:hidden">
+                <div style="width:${pctG}%;height:100%;background:linear-gradient(90deg,#818cf8,#6366f1);border-radius:99px"></div>
             </div>
         </div>`;
 }
@@ -2250,26 +2243,26 @@ function displayStatsBySexe(stats) {
 function displayStatsByClasse(statsByClasse) {
     const container = document.getElementById('stats-classe-content');
     if(Object.keys(statsByClasse).length === 0) {
-        container.innerHTML = '<p style="color:#aaa;text-align:center;font-size:0.85rem">Aucune classe créée</p>';
+        container.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;font-size:0.82rem">Aucune classe créée</p>';
         return;
     }
     const vmaMax = 16;
-    let html = '<div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📚 Par classe</div>';
+    let html = '<div style="font-size:0.68rem;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📚 Par classe</div>';
     Object.entries(statsByClasse).forEach(([classe, s]) => {
         const pct = Math.min(Math.round(s.moyenneVMA / vmaMax * 100), 100);
         html += `
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                <span style="font-weight:800;font-size:1rem">📚 ${classe}</span>
-                <span style="font-size:0.78rem;color:#94a3b8">${s.total} élève${s.total>1?'s':''} · ${s.filles}F / ${s.garcons}G</span>
+        <div style="background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:12px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="font-weight:800;font-size:0.9rem">📚 ${classe}</span>
+                <span style="font-size:0.72rem;color:rgba(255,255,255,0.4)">${s.total} élève${s.total>1?'s':''} · ${s.filles}F / ${s.garcons}G</span>
             </div>
-            <div style="display:flex;align-items:center;gap:10px">
-                <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:99px;height:10px;overflow:hidden">
-                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:99px"></div>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:99px;height:8px;overflow:hidden">
+                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#34d399,#10b981);border-radius:99px"></div>
                 </div>
-                <span style="font-weight:900;color:#10b981;font-size:1rem;min-width:60px;text-align:right">${s.moyenneVMA} km/h</span>
+                <span style="font-weight:900;color:#34d399;font-size:0.95rem;min-width:56px;text-align:right">${s.moyenneVMA} km/h</span>
             </div>
-            <div style="display:flex;gap:12px;margin-top:8px;font-size:0.75rem;color:#64748b">
+            <div style="display:flex;gap:12px;margin-top:5px;font-size:0.7rem;color:rgba(255,255,255,0.35)">
                 <span>👧 ${s.moyenneVMAFilles} km/h</span>
                 <span>🧑 ${s.moyenneVMAGarcons} km/h</span>
             </div>
@@ -2281,23 +2274,21 @@ function displayStatsByClasse(statsByClasse) {
 function displayDifficulty(elevesDifficulte) {
     const container = document.getElementById('stats-difficulte-content');
     if(elevesDifficulte.length === 0) {
-        container.innerHTML = `<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:14px;text-align:center;color:#10b981;font-weight:700">✅ Aucun élève avec VMA &lt; 9 km/h</div>`;
+        container.innerHTML = `<div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:12px;padding:12px;text-align:center;color:#34d399;font-weight:700;font-size:0.85rem">✅ Aucun élève avec VMA &lt; 9 km/h</div>`;
         return;
     }
-    let html = `<div style="font-size:0.7rem;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚠️ VMA &lt; 9 km/h — ${elevesDifficulte.length} élève(s)</div>`;
+    let html = `<div style="font-size:0.68rem;font-weight:700;color:rgba(248,113,113,0.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⚠️ VMA &lt; 9 km/h — ${elevesDifficulte.length} élève${elevesDifficulte.length>1?'s':''}</div>`;
     elevesDifficulte.forEach(e => {
         const vma = parseFloat(e.vma);
         html += `
-        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:9px 12px;margin-bottom:6px">
             <div>
-                <span style="font-weight:700">${e.sexe==='F'?'👧':'🧑'} ${e.nomPrenom}</span>
-                <span style="font-size:0.75rem;color:#94a3b8;margin-left:8px">${e.classe||'—'}</span>
+                <span style="font-weight:700;font-size:0.85rem">${e.sexe==='F'?'👧':'🧑'} ${e.nomPrenom}</span>
+                <span style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-left:8px">${e.classe||'—'}</span>
             </div>
-            <span style="font-weight:900;color:#f87171;font-size:1rem">${vma.toFixed(1)} km/h</span>
+            <span style="font-weight:900;color:#f87171;font-size:0.95rem">${vma.toFixed(1)} km/h</span>
         </div>`;
     });
-    
-    html += '</div>';
     container.innerHTML = html;
 }
 

@@ -369,7 +369,8 @@ function generateBilan() {
                     membres: {},
                     mancheKeys: new Set(),
                     distanceTotaleEquipeParManche: [],
-                    objectifManche: seance.objectifManche || seance.objectifEquipe || 0,
+                    objectifManche: seance.objectifManche || 0,
+                    objectifEquipeFallback: seance.objectifEquipe || 0,
                     performancesParManche: [],
                 };
             }
@@ -412,8 +413,10 @@ function generateBilan() {
                 nom: eq.nom,
                 membres,
                 distanceTotale,
-                objectifManche: eq.objectifManche,
-                objectif: eq.objectifManche * nbManches,
+                objectifManche: eq.objectifManche || Math.round(eq.objectifEquipeFallback / Math.max(nbManches, 1)),
+                objectif: eq.objectifManche > 0
+                    ? eq.objectifManche * nbManches
+                    : eq.objectifEquipeFallback,
                 manches: nbManches,
                 performanceMoyenne
             };
@@ -621,10 +624,6 @@ function renderEquipesDetails() {
                         <div>Objectif / manche</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-number">${equipe.objectif}m</div>
-                        <div>Objectif total</div>
-                    </div>
-                    <div class="detail-item">
                         <div class="detail-number">${equipe.performanceMoyenne}%</div>
                         <div>de l'objectif atteint</div>
                     </div>
@@ -763,8 +762,8 @@ function exportPDF() {
             </div>
             <div class="mini-grid">
                 <div class="mini-cell"><span>Distance totale</span><strong style="color:#0891b2">${eq.distanceTotale}m</strong></div>
-                <div class="mini-cell"><span>Objectif total</span>${eq.objectif}m</div>
                 <div class="mini-cell"><span>Objectif / manche</span>${eq.objectifManche}m</div>
+                <div class="mini-cell"><span>Manches</span>${eq.manches}</div>
                 <div class="mini-cell"><span>% atteint</span><strong style="color:${pctColor}">${eq.performanceMoyenne}%</strong></div>
             </div>
             <div style="background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;margin-bottom:8px">

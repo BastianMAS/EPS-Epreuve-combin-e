@@ -1442,51 +1442,23 @@
 <!-- PAGE STATS : STATISTIQUES -->
 <div id="screenStats" class="hidden">
     <h1>EPS<span class="accent-text">: épreuve Combinée</span></h1>
-    <p class="text-center" style="color: var(--success); margin-bottom: 10px; font-size: 1.3rem;">
-        📊 Statistiques de Classe
-    </p>
-    <p class="text-center" style="color: #aaa; margin-bottom: 30px; font-size: 0.9rem;">
-        Vue d'ensemble des performances
-    </p>
-    
+    <p class="text-center" style="color: var(--success); margin-bottom: 24px; font-size: 1.1rem;">📊 Statistiques de Classe</p>
+
     <div class="config-container">
         <div class="card">
-            <!-- BOUTON RETOUR -->
-            <button onclick="backToStudentsFromStats()" class="btn-action" style="background: #666; color: white; margin-bottom: 20px;">
-                ← Retour
-            </button>
-            
-            <!-- STATISTIQUES GLOBALES -->
-            <div id="stats-global" style="background: rgba(0,255,136,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--success);">
-                <h2 style="color: var(--success); margin-bottom: 20px;">📊 STATISTIQUES GLOBALES</h2>
-                <div id="stats-global-content">
-                    <!-- Rempli dynamiquement -->
-                </div>
-            </div>
-            
-            <!-- MOYENNES PAR SEXE -->
-            <div id="stats-sexe" style="background: rgba(0,210,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--accent);">
-                <h2 style="color: var(--accent); margin-bottom: 20px;">👧🧑 MOYENNES PAR SEXE</h2>
-                <div id="stats-sexe-content">
-                    <!-- Rempli dynamiquement -->
-                </div>
-            </div>
-            
-            <!-- STATISTIQUES PAR CLASSE -->
-            <div id="stats-classe" style="background: rgba(255,204,0,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--warning);">
-                <h2 style="color: var(--warning); margin-bottom: 20px;">📚 STATISTIQUES PAR CLASSE</h2>
-                <div id="stats-classe-content">
-                    <!-- Rempli dynamiquement -->
-                </div>
-            </div>
-            
-            <!-- ÉLÈVES EN DIFFICULTÉ -->
-            <div id="stats-difficulte" style="background: rgba(255,107,107,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--danger);">
-                <h2 style="color: var(--danger); margin-bottom: 20px;">⚠️ ÉLÈVES EN DIFFICULTÉ</h2>
-                <div id="stats-difficulte-content">
-                    <!-- Rempli dynamiquement -->
-                </div>
-            </div>
+            <button onclick="backToStudentsFromStats()" class="btn-action" style="background:#444;color:white;margin-bottom:20px;">← Retour</button>
+
+            <!-- CHIFFRES CLÉS -->
+            <div id="stats-global-content" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;"></div>
+
+            <!-- VMA PAR SEXE -->
+            <div id="stats-sexe-content" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;"></div>
+
+            <!-- PAR CLASSE -->
+            <div id="stats-classe-content" style="margin-bottom:20px;"></div>
+
+            <!-- EN DIFFICULTÉ -->
+            <div id="stats-difficulte-content"></div>
         </div>
     </div>
 </div>
@@ -2234,30 +2206,18 @@ function calculateStats() {
  */
 function displayGlobalStats(stats) {
     const container = document.getElementById('stats-global-content');
-    
-    container.innerHTML = `
-        <div class="stats-bar" style="margin-bottom: 20px;">
-            <div class="stat-item">
-                <div class="stat-number">${stats.total}</div>
-                <div class="stat-label">Élèves total</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">${stats.filles}</div>
-                <div class="stat-label">👧 Filles</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">${stats.garcons}</div>
-                <div class="stat-label">🧑 Garçons</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">${stats.moyenneVMA}</div>
-                <div class="stat-label">VMA moyenne (km/h)</div>
-            </div>
-        </div>
-        <p style="color: #ccc; text-align: center; font-size: 0.9rem;">
-            📚 Classes : ${stats.classes}
-        </p>
-    `;
+    const cards = [
+        { emoji:'👥', val: stats.total, label:'Élèves', color:'#6366f1' },
+        { emoji:'⚡', val: stats.moyenneVMA + ' km/h', label:'VMA moyenne', color:'#10b981' },
+        { emoji:'👧', val: stats.filles, label:'Filles', color:'#ec4899' },
+        { emoji:'🧑', val: stats.garcons, label:'Garçons', color:'#3b82f6' },
+    ];
+    container.innerHTML = cards.map(c => `
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;border-top:3px solid ${c.color}">
+            <div style="font-size:1.6rem;margin-bottom:4px">${c.emoji}</div>
+            <div style="font-size:1.8rem;font-weight:900;color:${c.color};line-height:1">${c.val}</div>
+            <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px">${c.label}</div>
+        </div>`).join('');
 }
 
 /**
@@ -2265,100 +2225,76 @@ function displayGlobalStats(stats) {
  */
 function displayStatsBySexe(stats) {
     const container = document.getElementById('stats-sexe-content');
-    
+    const vmaMax = 16;
+    const pctF = Math.min(Math.round(stats.filles.moyenneVMA / vmaMax * 100), 100);
+    const pctG = Math.min(Math.round(stats.garcons.moyenneVMA / vmaMax * 100), 100);
     container.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div style="background: rgba(255,105,180,0.2); padding: 15px; border-radius: 10px; text-align: center;">
-                <h3 style="color: var(--danger); font-size: 1.2rem; margin-bottom: 10px;">👧 FILLES</h3>
-                <p style="font-size: 2rem; font-weight: 700; color: var(--danger); margin: 15px 0;">${stats.filles.moyenneVMA} km/h</p>
-                <p style="color: #aaa; font-size: 0.9rem;">${stats.filles.total} élèves</p>
-            </div>
-            <div style="background: rgba(0,210,255,0.2); padding: 15px; border-radius: 10px; text-align: center;">
-                <h3 style="color: var(--accent); font-size: 1.2rem; margin-bottom: 10px;">🧑 GARÇONS</h3>
-                <p style="font-size: 2rem; font-weight: 700; color: var(--accent); margin: 15px 0;">${stats.garcons.moyenneVMA} km/h</p>
-                <p style="color: #aaa; font-size: 0.9rem;">${stats.garcons.total} élèves</p>
+        <div style="background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.3);border-radius:14px;padding:16px;text-align:center">
+            <div style="font-size:1.8rem;margin-bottom:4px">👧</div>
+            <div style="font-size:1.6rem;font-weight:900;color:#ec4899">${stats.filles.moyenneVMA} km/h</div>
+            <div style="font-size:0.75rem;color:#94a3b8;margin:4px 0">${stats.filles.total} filles</div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:99px;height:8px;overflow:hidden;margin-top:8px">
+                <div style="width:${pctF}%;height:100%;background:linear-gradient(90deg,#ec4899,#f472b6);border-radius:99px"></div>
             </div>
         </div>
-    `;
+        <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:16px;text-align:center">
+            <div style="font-size:1.8rem;margin-bottom:4px">🧑</div>
+            <div style="font-size:1.6rem;font-weight:900;color:#3b82f6">${stats.garcons.moyenneVMA} km/h</div>
+            <div style="font-size:0.75rem;color:#94a3b8;margin:4px 0">${stats.garcons.total} garçons</div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:99px;height:8px;overflow:hidden;margin-top:8px">
+                <div style="width:${pctG}%;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:99px"></div>
+            </div>
+        </div>`;
 }
 
-/**
- * Afficher les stats par classe
- */
 function displayStatsByClasse(statsByClasse) {
     const container = document.getElementById('stats-classe-content');
-    
-    if (Object.keys(statsByClasse).length === 0) {
-        container.innerHTML = '<p style="color: #aaa; text-align: center;">Aucune classe créée</p>';
+    if(Object.keys(statsByClasse).length === 0) {
+        container.innerHTML = '<p style="color:#aaa;text-align:center;font-size:0.85rem">Aucune classe créée</p>';
         return;
     }
-    
-    let html = '<div style="display: grid; gap: 15px;">';
-    
-    Object.entries(statsByClasse).forEach(([classe, stats]) => {
+    const vmaMax = 16;
+    let html = '<div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📚 Par classe</div>';
+    Object.entries(statsByClasse).forEach(([classe, s]) => {
+        const pct = Math.min(Math.round(s.moyenneVMA / vmaMax * 100), 100);
         html += `
-            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="color: var(--warning); font-size: 1.1rem; margin-bottom: 10px;">📚 ${classe}</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-                    <div>
-                        <p style="color: #aaa; font-size: 0.85rem;">Total élèves</p>
-                        <p style="font-size: 1.3rem; font-weight: 700;">${stats.total}</p>
-                    </div>
-                    <div>
-                        <p style="color: #aaa; font-size: 0.85rem;">VMA moyenne</p>
-                        <p style="font-size: 1.3rem; font-weight: 700; color: var(--success);">${stats.moyenneVMA} km/h</p>
-                    </div>
-                    <div>
-                        <p style="color: var(--danger); font-size: 0.85rem;">👧 Filles (${stats.filles})</p>
-                        <p style="font-size: 1.1rem; font-weight: 700;">${stats.moyenneVMAFilles} km/h</p>
-                    </div>
-                    <div>
-                        <p style="color: var(--accent); font-size: 0.85rem;">🧑 Garçons (${stats.garcons})</p>
-                        <p style="font-size: 1.1rem; font-weight: 700;">${stats.moyenneVMAGarcons} km/h</p>
-                    </div>
-                </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <span style="font-weight:800;font-size:1rem">📚 ${classe}</span>
+                <span style="font-size:0.78rem;color:#94a3b8">${s.total} élève${s.total>1?'s':''} · ${s.filles}F / ${s.garcons}G</span>
             </div>
-        `;
+            <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:99px;height:10px;overflow:hidden">
+                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:99px"></div>
+                </div>
+                <span style="font-weight:900;color:#10b981;font-size:1rem;min-width:60px;text-align:right">${s.moyenneVMA} km/h</span>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:8px;font-size:0.75rem;color:#64748b">
+                <span>👧 ${s.moyenneVMAFilles} km/h</span>
+                <span>🧑 ${s.moyenneVMAGarcons} km/h</span>
+            </div>
+        </div>`;
     });
-    
-    html += '</div>';
     container.innerHTML = html;
 }
 
-/**
- * Afficher les élèves en difficulté
- */
 function displayDifficulty(elevesDifficulte) {
     const container = document.getElementById('stats-difficulte-content');
-    
-    if (elevesDifficulte.length === 0) {
-        container.innerHTML = `
-            <p style="color: var(--success); text-align: center; font-size: 1.1rem;">
-                ✅ Aucun élève en difficulté détecté (VMA < 9 km/h)
-            </p>
-        `;
+    if(elevesDifficulte.length === 0) {
+        container.innerHTML = `<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:14px;text-align:center;color:#10b981;font-weight:700">✅ Aucun élève avec VMA &lt; 9 km/h</div>`;
         return;
     }
-    
-    let html = `
-        <p style="color: #ccc; margin-bottom: 15px;">
-            ${elevesDifficulte.length} élève(s) avec VMA < 9 km/h
-        </p>
-        <div style="display: grid; gap: 10px;">
-    `;
-    
-    elevesDifficulte.forEach(eleve => {
+    let html = `<div style="font-size:0.7rem;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚠️ VMA &lt; 9 km/h — ${elevesDifficulte.length} élève(s)</div>`;
+    elevesDifficulte.forEach(e => {
+        const vma = parseFloat(e.vma);
         html += `
-            <div style="background: rgba(255,107,107,0.2); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>${eleve.sexe === 'F' ? '👧' : '🧑'} ${eleve.nomPrenom}</strong>
-                    <span style="color: #aaa; margin-left: 10px;">📚 ${eleve.classe || 'Sans classe'}</span>
-                </div>
-                <div style="font-size: 1.1rem; font-weight: 700; color: var(--danger);">
-                    ${eleve.vma} km/h
-                </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">
+            <div>
+                <span style="font-weight:700">${e.sexe==='F'?'👧':'🧑'} ${e.nomPrenom}</span>
+                <span style="font-size:0.75rem;color:#94a3b8;margin-left:8px">${e.classe||'—'}</span>
             </div>
-        `;
+            <span style="font-weight:900;color:#f87171;font-size:1rem">${vma.toFixed(1)} km/h</span>
+        </div>`;
     });
     
     html += '</div>';

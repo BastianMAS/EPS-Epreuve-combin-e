@@ -24,7 +24,7 @@
             background: linear-gradient(135deg, var(--bg) 0%, #2d1810 100%);
             color: white; 
             padding: 16px;
-            padding-bottom: calc(200px + env(safe-area-inset-bottom, 20px));
+            padding-bottom: 40px;
             min-height: 100vh;
         }
         
@@ -251,11 +251,10 @@
         }
         
         .save-btn {
-            position: fixed;
-            bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-            right: 20px;
-            z-index: 100;
-            padding: 12px 24px;
+            display: block;
+            width: 100%;
+            margin: 24px 0 8px 0;
+            padding: 16px 24px;
             background: linear-gradient(135deg, var(--success), var(--accent));
             border: none;
             border-radius: 25px;
@@ -277,6 +276,8 @@
 
 <h1>EPS: épreuve Combinée</h1>
 <p class="subtitle">🎯 L7 - MISE EN SITUATION ADAPTATIVE</p>
+
+<button class="save-btn" onclick="saveAll()" style="margin-bottom:16px;">💾 Sauvegarder</button>
 
 <div class="grid6" id="grid"></div>
 

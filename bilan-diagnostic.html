@@ -514,56 +514,108 @@ function exportStudentPDF(studentId) {
 
     const win = window.open('', '_blank');
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>Fiche Diagnostique — ${s.nomPrenom}</title>
+    <title>Ma Fiche Athlétisme — ${s.nomPrenom}</title>
     <style>
-        body{font-family:Arial,sans-serif;padding:24px;max-width:600px;margin:0 auto;color:#1e293b}
-        .header{background:linear-gradient(135deg,#0d9488,#0891b2);color:white;padding:20px;border-radius:12px;margin-bottom:20px;text-align:center}
-        .header h2{margin:0 0 4px 0;font-size:1.4rem}
-        .header p{margin:0;opacity:0.85;font-size:0.9rem}
-        .section{background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid #e2e8f0}
-        .section-title{font-weight:800;color:#0d9488;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
-        .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:0.9rem}
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Nunito',Arial,sans-serif;background:#f0f4ff;padding:20px;max-width:680px;margin:0 auto;color:#1e293b}
+        .hero{background:linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4);color:white;padding:28px 24px;border-radius:20px;margin-bottom:18px;position:relative;overflow:hidden}
+        .hero::before{content:'🏃';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:5rem;opacity:0.15}
+        .hero-name{font-size:1.8rem;font-weight:900;margin-bottom:4px}
+        .hero-sub{font-size:0.9rem;opacity:0.85}
+        .badge-global{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);border-radius:30px;padding:6px 16px;margin-top:12px;font-weight:800;font-size:1rem}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+        .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+        .card{background:white;border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+        .card-title{font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+        .big-val{font-size:2.4rem;font-weight:900;line-height:1}
+        .big-sub{font-size:0.78rem;color:#64748b;margin-top:4px}
+        .stars{font-size:1.3rem;letter-spacing:2px;margin:8px 0}
+        .bar-track{background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;margin:6px 0}
+        .bar-fill{height:100%;border-radius:99px;transition:width 0.3s}
+        .level-pill{display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.78rem;font-weight:800;color:white;margin-top:6px}
+        .row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:0.85rem}
         .row:last-child{border-bottom:none}
-        .val{font-weight:700;color:#1e293b}
-        .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.8rem;font-weight:800;color:white}
-        .global{text-align:center;padding:16px;border-radius:10px;margin-bottom:14px}
-        .global-val{font-size:2rem;font-weight:900}
-        .no-print{text-align:center;margin:20px 0}
-        @media print{.no-print{display:none}}
+        .row-val{font-weight:800;color:#1e293b}
+        .conseil{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:14px;padding:16px;margin-bottom:14px;border-left:4px solid #f59e0b}
+        .conseil-title{font-weight:800;color:#92400e;margin-bottom:6px;font-size:0.85rem}
+        .conseil-text{color:#78350f;font-size:0.88rem;line-height:1.5}
+        .objectif{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:14px;padding:16px;margin-bottom:14px;border-left:4px solid #10b981}
+        .objectif-title{font-weight:800;color:#065f46;margin-bottom:6px;font-size:0.85rem}
+        .objectif-text{color:#064e3b;font-size:0.88rem;line-height:1.5}
+        .no-print{text-align:center;margin:24px 0;display:flex;gap:12px;justify-content:center}
+        @media print{.no-print{display:none}body{background:white}@page{margin:15mm}}
+        .emoji-big{font-size:2rem;margin-bottom:6px;display:block}
+        .tag{display:inline-block;background:#e0e7ff;color:#3730a3;border-radius:8px;padding:2px 8px;font-size:0.72rem;font-weight:700;margin:2px}
     </style></head><body>
-    <div class="header">
-        <h2>${s.sexe==='F'?'👧':'🧑'} ${s.nomPrenom}</h2>
-        <p>Classe : ${s.classe||'—'} | Évaluation diagnostique L1/L2 | ${new Date().toLocaleDateString('fr-FR')}</p>
+
+    <div class="hero">
+        <div class="hero-name">${s.sexe==='F'?'👧':'🧑'} ${s.nomPrenom}</div>
+        <div class="hero-sub">Classe ${s.classe||'—'} · EPS Épreuve Combinée · Bilan L1/L2 · ${new Date().toLocaleDateString('fr-FR')}</div>
+        <div class="badge-global" style="background:${niveauColors[globalLevel]||'rgba(255,255,255,0.2)'};border-color:rgba(255,255,255,0.5)">
+            ${stars(globalLevel)} ${niveauLabels[globalLevel]||'—'}
+        </div>
     </div>
 
-    <div class="global" style="background:${niveauColors[globalLevel]||'#444'};color:white">
-        <div class="global-val">${niveauLabels[globalLevel]||'—'}</div>
-        <div style="font-size:0.85rem;opacity:0.9;margin-top:4px">Niveau global — ${stars(globalLevel)}</div>
+    <div class="grid3">
+        <div class="card" style="border-top:4px solid #6366f1;text-align:center">
+            <span class="emoji-big">🏃</span>
+            <div class="card-title" style="color:#6366f1;justify-content:center">Course</div>
+            <div class="big-val" style="color:#6366f1">${vma.toFixed(1)}</div>
+            <div class="big-sub">km/h VMA</div>
+            <div class="stars">${stars(evC.level)}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.min(vma/16*100,100)}%;background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div></div>
+        </div>
+        <div class="card" style="border-top:4px solid #10b981;text-align:center">
+            <span class="emoji-big">🦘</span>
+            <div class="card-title" style="color:#10b981;justify-content:center">Saut</div>
+            <div class="big-val" style="color:#10b981">${sautAvec?sautAvec.toFixed(2):'—'}</div>
+            <div class="big-sub">${sautAvec?'m avec élan':'pas de donnée'}</div>
+            <div class="stars">${evS?stars(evS.level):'—'}</div>
+            ${sautAvec?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(sautAvec/4*100,100)}%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>`:''}
+        </div>
+        <div class="card" style="border-top:4px solid #f59e0b;text-align:center">
+            <span class="emoji-big">🎯</span>
+            <div class="card-title" style="color:#f59e0b;justify-content:center">Lancer</div>
+            <div class="big-val" style="color:#f59e0b">${lancer?lancer.toFixed(1):'—'}</div>
+            <div class="big-sub">${lancer?(lancerType||'m'):'pas de donnée'}</div>
+            <div class="stars">${evL?stars(evL.level):'—'}</div>
+            ${lancer?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(lancer/30*100,100)}%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>`:''}
+        </div>
     </div>
 
-    <div class="section">
-        <div class="section-title">🏃 Course — 3×400m</div>
-        <div class="row"><span>VMA</span><span class="val">${vma.toFixed(1)} km/h (${d.methode||d.testCourse||'—'})</span></div>
-        <div class="row"><span>Moyenne 3×400m</span><span class="val">${moy?formatTime(moy):'—'}</span></div>
-        <div class="row"><span>Niveau</span><span class="val">${stars(evC.level)}</span></div>
+    <div class="card" style="margin-bottom:14px">
+        <div class="card-title" style="color:#475569">📋 Détail de la Course</div>
+        <div class="row"><span>VMA mesurée</span><span class="row-val">${vma.toFixed(1)} km/h</span></div>
+        <div class="row"><span>Méthode</span><span class="row-val">${d.methode||d.testCourse||'—'}</span></div>
+        <div class="row"><span>Moyenne 3×400m</span><span class="row-val">${moy?formatTime(moy):'—'}</span></div>
+        <div class="row"><span>Saut sans élan</span><span class="row-val">${sautSans?sautSans.toFixed(2)+'m':'—'}</span></div>
+        <div class="row"><span>Saut avec élan</span><span class="row-val">${sautAvec?sautAvec.toFixed(2)+'m':'—'}</span></div>
+        <div class="row"><span>Lancer</span><span class="row-val">${lancer?lancer.toFixed(1)+'m':'—'}${lancerType?' ('+lancerType+')':''}</span></div>
     </div>
 
-    <div class="section">
-        <div class="section-title">🦘 Saut en longueur</div>
-        <div class="row"><span>Sans élan</span><span class="val">${sautSans?sautSans.toFixed(2)+'m':'—'}</span></div>
-        <div class="row"><span>Avec élan</span><span class="val">${sautAvec?sautAvec.toFixed(2)+'m':'—'}</span></div>
-        <div class="row"><span>Niveau</span><span class="val">${evS?stars(evS.level):'—'}</span></div>
+    <div class="conseil">
+        <div class="conseil-title">💡 Points à travailler</div>
+        <div class="conseil-text">
+        ${evC.level<=2?'🏃 <strong>Course :</strong> Travaille ta régularité de foulée et ta respiration en endurance.<br>':''}
+        ${evS&&evS.level<=2?'🦘 <strong>Saut :</strong> Concentre-toi sur ton élan et la précision de ton appel de pied.<br>':''}
+        ${evL&&evL.level<=2?'🎯 <strong>Lancer :</strong> Améliore ton placement de côté et la rotation du bassin.<br>':''}
+        ${(evC.level>=4&&(!evS||evS.level>=4)&&(!evL||evL.level>=4))?'⭐ Très belles performances dans toutes les disciplines ! Continue à te dépasser.':''}
+        </div>
     </div>
 
-    <div class="section">
-        <div class="section-title">🎯 Lancer</div>
-        <div class="row"><span>Meilleur lancer</span><span class="val">${lancer?lancer.toFixed(1)+'m'+(lancerType?' ('+lancerType+')':''):'—'}</span></div>
-        <div class="row"><span>Niveau</span><span class="val">${evL?stars(evL.level):'—'}</span></div>
+    <div class="objectif">
+        <div class="objectif-title">🎯 Objectifs pour la suite</div>
+        <div class="objectif-text">
+        🏃 <strong>Course L3 :</strong> Vise ${evC.level>=3?'105%':'100%'} de ta VMA sur les 200m<br>
+        🦘 <strong>Saut L3 :</strong> ${sautAvec?`Objectif : dépasser ${(sautAvec*1.05).toFixed(2)}m`:'Enregistre ta meilleure distance'}<br>
+        🎯 <strong>Lancer L3 :</strong> ${lancer?`Objectif : dépasser ${(lancer*1.05).toFixed(1)}m`:'Enregistre ta meilleure distance'}
+        </div>
     </div>
 
     <div class="no-print">
-        <button onclick="window.print()" style="padding:10px 24px;background:#0d9488;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-right:12px;">🖨️ Imprimer</button>
-        <button onclick="window.close()" style="padding:10px 24px;background:#64748b;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">✕ Fermer</button>
+        <button onclick="window.print()" style="padding:12px 28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;">🖨️ Imprimer</button>
+        <button onclick="window.close()" style="padding:12px 28px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;">✕ Fermer</button>
     </div>
     </body></html>`);
     win.document.close();

@@ -1031,6 +1031,19 @@
                     </select>
                 </div>
                 
+                <!-- Photo avatar -->
+                <div id="form-photo-section" style="margin-bottom:15px;display:none">
+                    <label style="color:var(--accent);font-weight:700;display:block;margin-bottom:8px">📷 Photo avatar <span style="font-weight:400;font-size:0.78rem;color:#aaa">(optionnel)</span></label>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div id="form-photo-preview" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">📷</div>
+                        <div style="display:flex;flex-direction:column;gap:6px">
+                            <button type="button" onclick="document.getElementById('form-photo-input').click()" style="background:var(--accent);color:black;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:800;cursor:pointer">📷 Choisir / Prendre une photo</button>
+                            <button type="button" id="form-photo-delete" onclick="deleteFormPhoto()" style="background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:5px 14px;font-size:0.78rem;font-weight:700;cursor:pointer;display:none">🗑️ Supprimer la photo</button>
+                        </div>
+                    </div>
+                    <input type="file" id="form-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleFormPhotoUpload(event)">
+                </div>
+
                 <div style="display: flex; gap: 10px;">
                     <button onclick="saveStudent()" class="btn-action btn-primary" style="flex: 1;">
                         💾 Enregistrer
@@ -1894,17 +1907,23 @@ function saveStudent() {
     if (editingStudentId) {
         const index = storedStudents.findIndex(s => s.id === editingStudentId);
         if (index !== -1) {
+            const photoData = window._formPhotoData !== undefined
+                ? window._formPhotoData
+                : storedStudents[index].photo;
             storedStudents[index] = {
                 ...storedStudents[index],
                 nomPrenom: nom,
                 classe: classe,
                 age: age,
                 sexe: sexe,
-                statut: statut || ''
+                statut: statut || '',
+                ...(photoData !== undefined ? { photo: photoData } : {})
             };
+            window._formPhotoData = undefined;
             editingStudentId = null;
             document.getElementById('btn-cancel').style.display = 'none';
             document.getElementById('form-title').textContent = '➕ Ajouter un élève';
+            document.getElementById('form-photo-section').style.display = 'none';
         }
     } 
     // Mode ajout
@@ -1954,6 +1973,10 @@ function resetForm() {
     editingStudentId = null;
     document.getElementById('btn-cancel').style.display = 'none';
     document.getElementById('form-title').textContent = '➕ Ajouter un élève';
+    document.getElementById('form-photo-section').style.display = 'none';
+    document.getElementById('form-photo-preview').innerHTML = '📷';
+    document.getElementById('form-photo-delete').style.display = 'none';
+    document.getElementById('form-photo-input').value = '';
 }
 
 /**
@@ -1980,7 +2003,19 @@ function editStudent(id) {
     editingStudentId = id;
     document.getElementById('btn-cancel').style.display = 'block';
     document.getElementById('form-title').textContent = '✏️ Modifier l\'élève';
-    
+
+    // Afficher section photo
+    document.getElementById('form-photo-section').style.display = 'block';
+    const prev = document.getElementById('form-photo-preview');
+    const delBtn = document.getElementById('form-photo-delete');
+    if(student.photo) {
+        prev.innerHTML = `<img src="${student.photo}" style="width:100%;height:100%;object-fit:cover">`;
+        delBtn.style.display = 'block';
+    } else {
+        prev.innerHTML = '📷';
+        delBtn.style.display = 'none';
+    }
+
     // Scroller vers le formulaire
     document.getElementById('student-form').scrollIntoView({ behavior: 'smooth' });
 }
@@ -2275,6 +2310,8 @@ function deleteSeanceArchive(eleveId, seanceIdx) {
     if(!confirm(`Supprimer la séance ${label} ?`)) return;
     eleve.seances.splice(seanceIdx, 1);
     localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+    updateStudentsStats();
+    renderStudentsList();
     renderArchivesEleves();
 }
 
@@ -3880,6 +3917,40 @@ function getNiveauMotivant(niveau) {
 /**
  * Gérer l'upload de photo
  */
+function handleFormPhotoUpload(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const size = 120;
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            // Crop carré centré
+            const min = Math.min(img.width, img.height);
+            const sx = (img.width - min) / 2;
+            const sy = (img.height - min) / 2;
+            ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+            const data = canvas.toDataURL('image/jpeg', 0.8);
+            window._formPhotoData = data;
+            const prev = document.getElementById('form-photo-preview');
+            prev.innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
+            document.getElementById('form-photo-delete').style.display = 'block';
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+function deleteFormPhoto() {
+    window._formPhotoData = null; // null = supprimer la photo
+    document.getElementById('form-photo-preview').innerHTML = '📷';
+    document.getElementById('form-photo-delete').style.display = 'none';
+}
+
 function handlePhotoUpload(event) {
     const file = event.target.files[0];
     if (!file) return;

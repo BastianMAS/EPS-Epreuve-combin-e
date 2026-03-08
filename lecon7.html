@@ -365,15 +365,15 @@ function createCard(i) {
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti1-facile-${i}" onchange="updateTour2Btns(${i})">
+                                <input type="radio" name="ressenti1-${i}" id="ressenti1-facile-${i}" onchange="updateTour2Btns(${i})">
                                 <label>😊 C'était facile</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti1-bien-${i}" onchange="updateTour2Btns(${i})">
+                                <input type="radio" name="ressenti1-${i}" id="ressenti1-bien-${i}" onchange="updateTour2Btns(${i})">
                                 <label>👍 C'était bien</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti1-dur-${i}" onchange="updateTour2Btns(${i})">
+                                <input type="radio" name="ressenti1-${i}" id="ressenti1-dur-${i}" onchange="updateTour2Btns(${i})">
                                 <label>😮‍💨 C'était dur</label>
                             </div>
                         </div>
@@ -400,15 +400,15 @@ function createCard(i) {
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti2-facile-${i}" onchange="updateTour3Btns(${i})">
+                                <input type="radio" name="ressenti2-${i}" id="ressenti2-facile-${i}" onchange="updateTour3Btns(${i})">
                                 <label>😊 Encore facile</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti2-bien-${i}" onchange="updateTour3Btns(${i})">
+                                <input type="radio" name="ressenti2-${i}" id="ressenti2-bien-${i}" onchange="updateTour3Btns(${i})">
                                 <label>👍 Toujours bien</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti2-fatigue-${i}" onchange="updateTour3Btns(${i})">
+                                <input type="radio" name="ressenti2-${i}" id="ressenti2-fatigue-${i}" onchange="updateTour3Btns(${i})">
                                 <label>😮‍💨 Je commence à fatiguer</label>
                             </div>
                         </div>
@@ -501,6 +501,8 @@ function createCard(i) {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
+function roundTo5(v) { return Math.round(v / 5) * 5; }
+
 function calcTemps400(vma, pct) {
     if(!vma || !pct) return '—';
     const vitesse = parseFloat(vma) * pct / 100 / 3.6;
@@ -556,31 +558,28 @@ function generateHistorique(i, student) {
     const pyramideOk = sL6?.pyramideReussie ?? null;
 
     // Calcul du % conseillé pour T1
-    let pctConseil = 100; // défaut
+    // Base = dernier % réel connu (L4 > L3), arrondi aux 5%
+    let pctConseil = 100;
     let baseLabel = 'Base 100% VMA';
     let raisonnement = [];
 
     if(pctL3 !== null) {
-        pctConseil = pctL3;
-        baseLabel = `L3 → ${pctL3}%`;
+        pctConseil = roundTo5(pctL3);
+        baseLabel = `L3 → ${pctConseil}%`;
     }
     if(pctL4 !== null) {
-        if(pctL4 > pctConseil) {
-            raisonnement.push(`progression L3→L4 : +${pctL4 - pctL3}%`);
-        }
-        pctConseil = pctL4;
-        baseLabel = `L4 → ${pctL4}%`;
+        const p4 = roundTo5(pctL4);
+        if(p4 > pctConseil) raisonnement.push(`progression L4 → ${p4}%`);
+        pctConseil = p4;
+        baseLabel = `L4 → ${p4}%`;
     }
-    // L5 relais > 95% = endurance confirmée → +5%
-    if(pctL5 !== null && pctL5 >= 95) {
-        pctConseil = Math.min(pctConseil + 5, 130);
-        raisonnement.push(`relais L5 réussi à ${pctL5}% → +5%`);
-    }
-    // L6 pyramide validée → capable de haute intensité → +5% sup
-    if(pyramideOk === true) {
-        pctConseil = Math.min(pctConseil + 5, 130);
-        raisonnement.push(`pyramide L6 validée → +5%`);
-    }
+    // Bonus unique max +5% si L5 ET L6 confirmés, sinon rien ou +5% si l'un des deux
+    let bonus = 0;
+    if(pctL5 !== null && pctL5 >= 95) { bonus += 5; raisonnement.push(`relais L5 réussi`); }
+    if(pyramideOk === true)            { bonus += 5; raisonnement.push(`pyramide L6 validée`); }
+    // Plafonner le bonus à +5% total (un seul palier)
+    bonus = Math.min(bonus, 5);
+    pctConseil = roundTo5(Math.min(pctConseil + bonus, 130));
 
     // Stocker dans cardState pour que T2/T3 puissent y accéder
     if(!cardState[i]) cardState[i] = {};
@@ -630,34 +629,33 @@ function buildChoixBtns(i, student) {
     const vma = parseFloat(student.vma) || null;
     const pctRef = cardState[i]?.pctConseil || 100;
 
-    // Tour 1 : prudent = pctRef-10, conseillé = pctRef, ambitieux = pctRef+10
+    // Tour 1 : surbrillance conseil active dès le départ
     renderChoixGrid(i, 'tour1', [
         { key:'prudent',   emoji:'🐌', label:'Prudent',    pct: pctRef - 10 },
         { key:'regulier',  emoji:'⚖️', label:'Conseillé',  pct: pctRef, highlight: true },
         { key:'ambitieux', emoji:'⚡', label:'Ambitieux',  pct: pctRef + 10 },
-    ], vma);
+    ], vma, true);
 
-    // Tour 2 : rempli après saisie T1 + ressenti (voir updateTour2Btns)
+    // Tour 2 et 3 : pas de surbrillance avant que l'élève ait couru
     renderChoixGrid(i, 'tour2', [
         { key:'plus-lent', emoji:'🐌', label:'Réduire',    pct: pctRef - 5 },
         { key:'meme',      emoji:'⚖️', label:'Maintenir',  pct: pctRef, highlight: true },
         { key:'plus-vite', emoji:'⚡', label:'Accélérer',  pct: pctRef + 5 },
-    ], vma);
+    ], vma, false);
 
-    // Tour 3 idem
     renderChoixGrid(i, 'tour3', [
         { key:'tenir',     emoji:'🛡️', label:'Tenir',     pct: pctRef - 5 },
         { key:'maintenir', emoji:'⚖️', label:'Maintenir', pct: pctRef, highlight: true },
         { key:'sprint',    emoji:'🚀', label:'Sprint',    pct: pctRef + 10 },
-    ], vma);
+    ], vma, false);
 }
 
-function renderChoixGrid(i, tour, configs, vma) {
+function renderChoixGrid(i, tour, configs, vma, showHighlight=false) {
     const grid = document.getElementById(`choix-grid-${tour}-${i}`);
     if(!grid) return;
     grid.innerHTML = configs.map(c => {
         const t = vma ? calcTemps400(vma, c.pct) : '';
-        const borderStyle = c.highlight ? 'border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.08)' : '';
+        const borderStyle = (c.highlight && showHighlight) ? 'border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.08)' : '';
         return `<div class="choix-btn" id="btn-${tour}-${c.key}-${i}" onclick="selectChoix(${i}, '${tour}', '${c.key}')" style="${borderStyle}">
             ${c.emoji} ${c.label}
             <span class="vma-hint">${vma ? c.pct+'% VMA' : '—'}</span>
@@ -680,10 +678,10 @@ function updateTour2Btns(i) {
 
     let pctT2ref = pctT1;
     let conseil = '';
-    if(facile) { pctT2ref = pctT1 + 10; conseil = 'Facile → tu peux accélérer'; }
-    else if(bien) { pctT2ref = pctT1 + 5; conseil = 'Bien → légère hausse possible'; }
-    else if(dur)  { pctT2ref = pctT1 - 5; conseil = 'Dur → réduis un peu'; }
-    else          { pctT2ref = pctT1;      conseil = 'Choisis ton rythme'; }
+    if(facile) { pctT2ref = roundTo5(pctT1 + 10); conseil = 'Facile → tu peux accélérer'; }
+    else if(bien) { pctT2ref = roundTo5(pctT1 + 5);  conseil = 'Bien → légère hausse possible'; }
+    else if(dur)  { pctT2ref = roundTo5(pctT1 - 5);  conseil = 'Dur → réduis un peu'; }
+    else          { pctT2ref = roundTo5(pctT1);       conseil = 'Choisis ton rythme'; }
 
     // Mettre à jour le header du tour2
     const header = document.querySelector(`#body-tour2-${i} .tour-header`);
@@ -695,7 +693,7 @@ function updateTour2Btns(i) {
         { key:'plus-lent', emoji:'🐌', label:'Réduire',   pct: pctT2ref - 5 },
         { key:'meme',      emoji:'⚖️', label:'Maintenir', pct: pctT2ref, highlight: true },
         { key:'plus-vite', emoji:'⚡', label:'Accélérer', pct: pctT2ref + 5 },
-    ], vma);
+    ], vma, true);
 }
 
 // Mise à jour intelligente de T3 après ressenti T2
@@ -711,10 +709,10 @@ function updateTour3Btns(i) {
 
     let pctT3ref = pctT2;
     let conseil = '';
-    if(facile) { pctT3ref = pctT2 + 10; conseil = 'Encore facile → sprint final !'; }
-    else if(bien) { pctT3ref = pctT2 + 5; conseil = 'Bien → maintiens ou sprint léger'; }
-    else if(fatigue) { pctT3ref = pctT2 - 5; conseil = 'Tu fatigues → tiens le rythme'; }
-    else { pctT3ref = pctT2; conseil = 'Choisis ton projet final'; }
+    if(facile) { pctT3ref = roundTo5(pctT2 + 10); conseil = 'Encore facile → sprint final !'; }
+    else if(bien) { pctT3ref = roundTo5(pctT2 + 5);  conseil = 'Bien → maintiens ou sprint léger'; }
+    else if(fatigue) { pctT3ref = roundTo5(pctT2 - 5); conseil = 'Tu fatigues → tiens le rythme'; }
+    else { pctT3ref = roundTo5(pctT2); conseil = 'Choisis ton projet final'; }
 
     const header = document.querySelector(`#body-tour3-${i} .tour-header`);
     if(header && conseil) header.innerHTML = `Dernier 400m — <span style="color:#fbbf24">${conseil}</span>`;
@@ -723,7 +721,7 @@ function updateTour3Btns(i) {
         { key:'tenir',     emoji:'🛡️', label:'Tenir',     pct: pctT3ref - 5 },
         { key:'maintenir', emoji:'⚖️', label:'Maintenir', pct: pctT3ref, highlight: true },
         { key:'sprint',    emoji:'🚀', label:'Sprint',    pct: pctT3ref + 10 },
-    ], vma);
+    ], vma, true);
 }
 
 function getChoixPct(i, tour) {

@@ -1164,36 +1164,10 @@
                     </div>
                 </div>
                 
-                <!-- Menu Bilans -->
-                <div style="margin-bottom: 15px;">
-                    <button onclick="toggleMenu('bilans-menu')" class="btn-action" style="width: 100%; background: #e74c3c; color: white; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span>📊 BILANS LEÇONS</span>
-                        <span id="bilans-arrow">▼</span>
-                    </button>
-                    <div id="bilans-menu" style="display: none; margin-top: 10px; padding-left: 20px;">
-                        <button onclick="window.open('./bilan-diagnostic.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.5); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px; font-weight: 900;">
-                            → 📊 Bilan L1/L2 - Évaluation diagnostique
-                        </button>
-                        <button onclick="window.open('./bilan-l3.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            📊 Bilan L3 - Découverte & Technique
-                        </button>
-                        <button onclick="window.open('./bilan-l4.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            📊 Bilan L4 - Consolidation &amp; Progression
-                        </button>
-                        <button onclick="window.open('./bilan-l5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            📊 Bilan L5 - Relais Olympique
-                        </button>
-                        <button onclick="window.open('./bilan-l6.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            📊 Bilan L6 - Perfectionnement Technique
-                        </button>
-                        <button onclick="window.open('./bilan-l7.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            📊 Bilan L7 - Mise en Situation
-                        </button>
-                        <button onclick="window.open('./bilan-projet-l8.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.7); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px; font-weight: 900;">
-                            🎯 MON PROJET POUR L8 (aide à la décision)
-                        </button>
-                    </div>
-                </div>
+                <!-- Bilan Projet L8 -->
+                <button onclick="window.open('./bilan-projet-l8.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 15px; background: #e74c3c; color: white; font-size: 1.1rem; font-weight: 900;">
+                    🎯 MON PROJET POUR L8
+                </button>
                 
                 <!-- Statistiques globales -->
                 <button onclick="goToStats()" class="btn-action" style="width: 100%; margin-bottom: 15px; background: var(--success); color: black; font-size: 1.1rem;">
@@ -2428,22 +2402,28 @@ function applyDoublonSuppression(meta) {
     const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
     let totalSupprimés = 0;
 
+    // Collecter les indices à supprimer par élève (triés desc pour splicing safe)
+    const toDelete = {}; // { eleveId: Set<origIdx> }
+
     (window._doublonsData || []).forEach((d, di) => {
-        const eleve = stored.find(e => e.id === d.eleve.id);
-        if(!eleve) return;
         d.group.forEach((item, gi) => {
             const checkbox = document.getElementById(`dd-${di}-${gi}`);
-            if(checkbox && checkbox.checked) {
-                const idx = eleve.seances.indexOf(item.seance);
-                // Trouver par correspondance date+lecon dans les données fraîches
-                const toRemove = eleve.seances.find(s =>
-                    s.lecon === d.lecon &&
-                    (s.date||'').substring(0,16) === (item.seance.date||'').substring(0,16)
-                );
-                if(toRemove) {
-                    eleve.seances.splice(eleve.seances.indexOf(toRemove), 1);
-                    totalSupprimés++;
-                }
+            if(!checkbox || !checkbox.checked) return;
+            if(!toDelete[d.eleve.id]) toDelete[d.eleve.id] = new Set();
+            toDelete[d.eleve.id].add(item.origIdx);
+        });
+    });
+
+    // Appliquer les suppressions sur les données fraîches du localStorage
+    stored.forEach(eleve => {
+        const indices = toDelete[eleve.id];
+        if(!indices || !indices.size) return;
+        // Trier décroissant pour ne pas décaler les index
+        const sorted = [...indices].sort((a, b) => b - a);
+        sorted.forEach(idx => {
+            if(idx >= 0 && idx < eleve.seances.length) {
+                eleve.seances.splice(idx, 1);
+                totalSupprimés++;
             }
         });
     });
@@ -2454,6 +2434,7 @@ function applyDoublonSuppression(meta) {
         totalSupprimés > 0 ? `✅ ${totalSupprimés} doublon(s) supprimé(s).` : '✅ Rien supprimé.';
     window._doublonsData = null;
     if(typeof renderArchivesEleves === 'function') renderArchivesEleves();
+    if(typeof updateStudentsStats === 'function') updateStudentsStats();
 }
 
 function cleanDoublonsL5() { previewDoublons(); }

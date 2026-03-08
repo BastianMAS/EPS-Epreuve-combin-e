@@ -5456,6 +5456,91 @@ function showInstallInstructions() {
 
 <!-- Enregistrement du Service Worker pour mode hors ligne -->
 <script>
+
+// ══════ Graphique progression classe ══════
+let _graphTab = 'vma';
+function renderGraphProgression() {
+    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    if(!stored.length) return;
+    setTimeout(() => drawGraph(stored, _graphTab), 300);
+}
+function switchGraphTab(tab, el) {
+    _graphTab = tab;
+    document.querySelectorAll('.graph-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    drawGraph(stored, tab);
+}
+function drawGraph(students, tab) {
+    const canvas = document.getElementById('graph-canvas');
+    if(!canvas) return;
+    const wrap = canvas.parentElement;
+    const W = (wrap && wrap.offsetWidth > 0) ? wrap.offsetWidth : 340;
+    const H = 160;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    const PAD = {top:16,right:16,bottom:28,left:38};
+    const cW = W-PAD.left-PAD.right, cH = H-PAD.top-PAD.bottom;
+    const LECONS = ['L3','L4','L6','L7'];
+    const COLORS = ['#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16'];
+    const series = []; let ci = 0;
+    students.forEach(eleve => {
+        const vma = parseFloat(eleve.vma) || null;
+        const pts = LECONS.map(lecon => {
+            const s = (eleve.seances||[]).filter(x=>x.lecon===lecon).at(-1);
+            if(!s) return null;
+            if(tab==='vma') {
+                if(!vma) return null;
+                if(s.moyenne200m) return Math.round(200/parseFloat(s.moyenne200m)*3.6/vma*100);
+                if(lecon==='L7') {
+                    const ts=[s.v1?.secondes,s.v2?.secondes,s.v3?.secondes].filter(Boolean);
+                    if(ts.length) return Math.round(400/(ts.reduce((a,b)=>a+b)/ts.length)*3.6/vma*100);
+                }
+                return null;
+            }
+            if(tab==='saut') { const d=parseFloat(s.sautDistance); return isNaN(d)?null:d; }
+            if(tab==='lancer') { const d=parseFloat(s.lancerDistance); return isNaN(d)?null:d; }
+            return null;
+        });
+        if(pts.some(p=>p!==null)) { series.push({nom:(eleve.nomPrenom||'?').split(' ')[0],color:COLORS[ci%COLORS.length],points:pts}); ci++; }
+    });
+    if(!series.length) {
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='13px Arial'; ctx.textAlign='center';
+        ctx.fillText('Pas encore de données', W/2, H/2); return;
+    }
+    const allV = series.flatMap(s=>s.points).filter(v=>v!==null);
+    let minV=Math.floor(Math.min(...allV)*0.93), maxV=Math.ceil(Math.max(...allV)*1.05);
+    if(tab==='vma'){minV=Math.min(minV,80);maxV=Math.max(maxV,120);} if(minV===maxV){minV-=5;maxV+=5;}
+    for(let g=0;g<=4;g++) {
+        const y=PAD.top+cH*(1-g/4);
+        ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+cW,y); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.font='9px Arial'; ctx.textAlign='right';
+        ctx.fillText((minV+(maxV-minV)*g/4).toFixed(tab==='vma'?0:1)+(tab==='vma'?'%':'m'),PAD.left-4,y+3);
+    }
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='10px Arial'; ctx.textAlign='center';
+    LECONS.forEach((l,xi)=>ctx.fillText(l,PAD.left+(xi/(LECONS.length-1))*cW,H-PAD.bottom+14));
+    const xPos = xi => PAD.left+(xi/(LECONS.length-1))*cW;
+    const yPos = v => PAD.top+cH*(1-(v-minV)/(maxV-minV));
+    series.forEach(s => {
+        ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.setLineDash([]);
+        ctx.beginPath(); let st=false;
+        s.points.forEach((v,xi)=>{ if(v===null)return; const x=xPos(xi),y=yPos(v); st?(ctx.lineTo(x,y)):(ctx.moveTo(x,y),st=true); });
+        ctx.stroke();
+        s.points.forEach((v,xi)=>{ if(v===null)return; ctx.fillStyle=s.color; ctx.beginPath(); ctx.arc(xPos(xi),yPos(v),3.5,0,Math.PI*2); ctx.fill(); });
+    });
+    const moy = LECONS.map((_,xi)=>{ const vs=series.map(s=>s.points[xi]).filter(v=>v!==null); return vs.length?vs.reduce((a,b)=>a+b)/vs.length:null; });
+    if(moy.some(v=>v!==null)) {
+        ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=2.5; ctx.setLineDash([5,4]);
+        ctx.beginPath(); let st=false;
+        moy.forEach((v,xi)=>{ if(v===null)return; const x=xPos(xi),y=yPos(v); st?(ctx.lineTo(x,y)):(ctx.moveTo(x,y),st=true); });
+        ctx.stroke(); ctx.setLineDash([]);
+    }
+    const lg=document.getElementById('graph-legend');
+    if(lg) lg.innerHTML='<div class="graph-legend-item"><div class="graph-dot" style="background:rgba(255,255,255,0.55);outline:2px dashed rgba(255,255,255,0.4)"></div>Moy. classe</div>'+series.map(s=>`<div class="graph-legend-item"><div class="graph-dot" style="background:${s.color}"></div>${s.nom}</div>`).join('');
+}
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')

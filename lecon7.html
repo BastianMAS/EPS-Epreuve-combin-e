@@ -1106,18 +1106,15 @@ function saveAll(silent=false) {
         count++;
     });
 
-    if(erreurs.length > 0) {
-        alert(`⚠️ Erreurs de saisie :\n\n${erreurs.join('\n')}\n\nCorrige les temps avant de sauvegarder !`);
-        return;
-    }
-
-    if(count === 0) { 
-        alert('⚠️ Aucun élève sélectionné !'); 
-        return; 
-    }
-
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
+    if(!silent) {
+        if(erreurs.length > 0) {
+            alert(`⚠️ Erreurs de saisie :\n\n${erreurs.join('\n')}\n\nCorrige les temps avant de sauvegarder !`);
+            return;
+        }
+        if(count === 0) { alert('⚠️ Aucun élève sélectionné !'); return; }
+        alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
+    }
 }
 // Sauvegarde automatique uniquement à la fermeture/quitter la page
 window.addEventListener('beforeunload', function() { try { saveAll(true); } catch(e){} });
@@ -1127,7 +1124,16 @@ function updateAutosaveIndicator7() {
     const sec=Math.round((Date.now()-_lastAutoSave7)/1000);
     el.textContent = sec<5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
 }
-setInterval(() => { try { saveAll(true); _lastAutoSave7=Date.now(); updateAutosaveIndicator7(); } catch(e){} }, 30000);
+setInterval(() => {
+    try {
+        // Supprimer alertes pendant autosave
+        const _a = window.alert; const _c = window.confirm;
+        window.alert = () => {}; window.confirm = () => false;
+        saveAll(true);
+        window.alert = _a; window.confirm = _c;
+        _lastAutoSave7 = Date.now(); updateAutosaveIndicator7();
+    } catch(e) {}
+}, 30000);
 setInterval(updateAutosaveIndicator7, 10000);
 
 </script>

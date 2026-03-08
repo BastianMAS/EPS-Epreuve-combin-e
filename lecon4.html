@@ -1314,7 +1314,14 @@ function updateAutosaveIndicator() {
     const sec = Math.round((Date.now()-_lastAutoSave)/1000);
     el.textContent = sec < 5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
 }
-setInterval(silentSave, 30000);
+setInterval(() => {
+    try {
+        const _a = window.alert; const _c = window.confirm;
+        window.alert = () => {}; window.confirm = () => false;
+        silentSave();
+        window.alert = _a; window.confirm = _c;
+    } catch(e) {}
+}, 30000);
 setInterval(updateAutosaveIndicator, 10000);
 
 </script>

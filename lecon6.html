@@ -816,9 +816,11 @@ function saveAll(silent = false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    // Sync Firebase en arrière-plan
     if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
-    if(!silent) if(!silent) alert(`⚡ L6 perfectionnement sauvegardé pour ${count} élève(s) !`);
+    if(!silent) {
+        if(count === 0) { alert('⚠️ Aucun élève sélectionné !'); return; }
+        alert(`✅ L6 sauvegardée pour ${count} élève(s) !`);
+    }
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');
@@ -829,7 +831,15 @@ function updateAutosaveIndicator6() {
     const sec=Math.round((Date.now()-_lastAutoSave6)/1000);
     el.textContent = sec<5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
 }
-setInterval(() => { try { saveAll(true); _lastAutoSave6=Date.now(); updateAutosaveIndicator6(); } catch(e){} }, 30000);
+setInterval(() => {
+    try {
+        const _a = window.alert; const _c = window.confirm;
+        window.alert = () => {}; window.confirm = () => false;
+        saveAll(true);
+        window.alert = _a; window.confirm = _c;
+        _lastAutoSave6 = Date.now(); updateAutosaveIndicator6();
+    } catch(e) {}
+}, 30000);
 setInterval(updateAutosaveIndicator6, 10000);
 
 </script>

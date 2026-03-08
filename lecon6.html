@@ -297,6 +297,13 @@
         @media (max-width: 768px) {
             .temps-cibles, .pyramide-validation { grid-template-columns: repeat(3, 1fr); }
         }
+
+        #autosave-indicator { position:fixed;bottom:80px;right:16px;z-index:9999;background:rgba(30,40,55,0.92);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:6px 12px;font-size:0.72rem;color:#94a3b8;font-weight:600;pointer-events:none; }
+        .student-confirm { background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(0,217,255,0.15));border:2px solid var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:none;animation:confirmPop 0.3s ease-out; }
+        @keyframes confirmPop { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+        .student-confirm .student-name-big { font-size:1.15rem;font-weight:900;color:white;margin-bottom:3px; }
+        .student-confirm .student-meta { font-size:0.75rem;color:#94a3b8; }
+        .no-vma-warning { background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:10px;padding:10px 12px;color:#fca5a5;font-size:0.8rem;font-weight:600;margin-bottom:8px;display:none; }
     </style>
 
     <script src="firebase-config.js"></script>
@@ -631,6 +638,16 @@ function selectStudent(i, studentId) {
             ${student.photo ? `<img src="${student.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0">` : `<span style="font-size:1.3rem">${student.sexe==='F'?'👧':'🧑'}</span>`}
             <div><strong>${student.nomPrenom}</strong><span style="font-size:0.82rem;opacity:0.7"> | ${student.age} ans${vmaInfo}</span></div>
         </div>`;
+        // ── Confirmation visuelle forte ──
+        const avatarEl6 = document.getElementById(`confirm-avatar-${i}`);
+        if(avatarEl6) {
+            avatarEl6.innerHTML = student.photo ? `<img src="${student.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">` : `<span style="font-size:2rem">${student.sexe==='F'?'👧':'🧑'}</span>`;
+            document.getElementById(`confirm-name-${i}`).textContent = student.nomPrenom;
+            document.getElementById(`confirm-meta-${i}`).textContent = `${student.age} ans · VMA : ${student.vma ? student.vma+' km/h' : 'non renseignée'}`;
+            document.getElementById(`confirm-${i}`).style.display = 'block';
+        }
+        if(!student.vma) { const nv=document.getElementById(`novma-${i}`); if(nv) nv.style.display='block'; }
+        else { const nv=document.getElementById(`novma-${i}`); if(nv) nv.style.display='none'; }
         generateTempsCibles(i, student.vma);
     } else {
         info.style.display = 'none';
@@ -702,7 +719,8 @@ function saveAll(silent = false) {
     cardState.forEach((d, i) => {
         if(!d.student) return;
 
-        const sautDistance = parseFloat(document.getElementById(`saut-distance-${i}`)?.value) || null;
+        const sautRaw6 = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
+        const sautDistance = (!isNaN(sautRaw6) && sautRaw6>=0.8 && sautRaw6<=5.5) ? sautRaw6 : null;
         const sautTentatives = parseInt(document.getElementById(`saut-tentatives-${i}`)?.value) || null;
         const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
         const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
@@ -710,7 +728,8 @@ function saveAll(silent = false) {
         const sautTech4 = document.getElementById(`saut4-${i}`)?.checked || false;
         const sautTech5 = document.getElementById(`saut5-${i}`)?.checked || false;
 
-        const lancerDistance = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value) || null;
+        const lancerRaw6 = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
+        const lancerDistance = (!isNaN(lancerRaw6) && lancerRaw6>=3.0 && lancerRaw6<=25.0) ? lancerRaw6 : null;
         const lancerTentatives = parseInt(document.getElementById(`lancer-tentatives-${i}`)?.value) || null;
         const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
         const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
@@ -803,9 +822,15 @@ function saveAll(silent = false) {
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');
-window.addEventListener('beforeunload', function() {
-    if(typeof saveAll === 'function') saveAll(true);
-});
+window.addEventListener('beforeunload', function() { try { saveAll(true); } catch(e){} });
+let _lastAutoSave6 = Date.now();
+function updateAutosaveIndicator6() {
+    const el=document.getElementById('autosave-indicator'); if(!el) return;
+    const sec=Math.round((Date.now()-_lastAutoSave6)/1000);
+    el.textContent = sec<5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
+}
+setInterval(() => { try { saveAll(true); _lastAutoSave6=Date.now(); updateAutosaveIndicator6(); } catch(e){} }, 30000);
+setInterval(updateAutosaveIndicator6, 10000);
 
 </script>
 

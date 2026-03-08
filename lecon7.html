@@ -285,6 +285,15 @@
             opacity: 0.5;
             pointer-events: none;
         }
+
+        #autosave-indicator { position:fixed;bottom:80px;right:16px;z-index:9999;background:rgba(30,40,55,0.92);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:6px 12px;font-size:0.72rem;color:#94a3b8;font-weight:600;pointer-events:none; }
+        .student-confirm { background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(0,217,255,0.15));border:2px solid var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:none;animation:confirmPop 0.3s ease-out; }
+        @keyframes confirmPop { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+        .student-confirm .student-name-big { font-size:1.15rem;font-weight:900;color:white;margin-bottom:3px; }
+        .student-confirm .student-meta { font-size:0.75rem;color:#94a3b8; }
+        .no-vma-warning { background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:10px;padding:10px 12px;color:#fca5a5;font-size:0.8rem;font-weight:600;margin-bottom:8px;display:none; }
+        .temps-input.invalid { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+        .temps-input.valid-time { border-color: #4ade80 !important; }
     </style>
 </head>
 <body>
@@ -797,6 +806,16 @@ function selectStudent(i, studentId) {
             ${student.photo ? `<img src="${student.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0">` : `<span style="font-size:1.3rem">${student.sexe==='F'?'👧':'🧑'}</span>`}
             <div><strong>${student.nomPrenom}</strong><span style="font-size:0.82rem;opacity:0.7"> | ${student.age} ans${vmaInfo}</span></div>
         </div>`;
+        // ── Confirmation visuelle forte ──
+        const av7 = document.getElementById(`confirm-avatar-${i}`);
+        if(av7) {
+            av7.innerHTML = student.photo ? `<img src="${student.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">` : `<span style="font-size:2rem">${student.sexe==='F'?'👧':'🧑'}</span>`;
+            document.getElementById(`confirm-name-${i}`).textContent = student.nomPrenom;
+            document.getElementById(`confirm-meta-${i}`).textContent = `${student.age} ans · VMA : ${student.vma ? student.vma+' km/h' : 'non renseignée'}`;
+            document.getElementById(`confirm-${i}`).style.display = 'block';
+            const nv7 = document.getElementById(`novma-${i}`);
+            if(nv7) nv7.style.display = student.vma ? 'none' : 'block';
+        }
         
         generateHistorique(i, student);
         buildChoixBtns(i, student);
@@ -807,6 +826,8 @@ function selectStudent(i, studentId) {
     } else {
         cardState[i] = {};
         document.getElementById(`info-${i}`).style.display = 'none';
+        const cf7=document.getElementById(`confirm-${i}`); if(cf7) cf7.style.display='none';
+        const nv7e=document.getElementById(`novma-${i}`); if(nv7e) nv7e.style.display='none';
         document.getElementById(`historique-data-${i}`).innerHTML = '';
     }
 }
@@ -829,6 +850,7 @@ function checkTour2(i) {
     const temps = input.value.trim();
     
     if(temps) {
+        validateTempsInput400(input);
         const validation = convertTempsAvecValidation(temps, input);
         if(validation.valide) {
             document.getElementById(`tour2-container-${i}`).classList.remove('disabled');
@@ -948,6 +970,15 @@ function convertTempsAvecValidation(tempsStr, inputElement = null) {
     alert(`❌ Format non reconnu : "${input}"\n\n✅ Formats acceptés :\n• 1:25 (1min25s)\n• 2:00 (2min00s)\n• 1:30.5 (avec dixièmes)\n\n📝 Exemple : Pour 1min25s, écris 1:25`);
     if(inputElement) inputElement.focus();
     return { valide: false, secondes: 0 };
+}
+
+const LIMITES_400M = { min: 60, max: 210 };
+function validateTempsInput400(input) {
+    const v = convertTempsAvecValidation(input.value);
+    input.classList.remove('invalid','valid-time');
+    if(!input.value.trim()) return;
+    if(!v.valide || v.secondes < LIMITES_400M.min || v.secondes > LIMITES_400M.max) input.classList.add('invalid');
+    else input.classList.add('valid-time');
 }
 
 function toggleSection(sec, i) {
@@ -1089,9 +1120,15 @@ function saveAll(silent=false) {
     alert(`🎯 L7 sauvegardée pour ${count} élève(s) !\n\n✅ Tous les temps sont au bon format !`);
 }
 // Sauvegarde automatique uniquement à la fermeture/quitter la page
-window.addEventListener('beforeunload', function() {
-    if(typeof saveAll === 'function') saveAll(true);
-});
+window.addEventListener('beforeunload', function() { try { saveAll(true); } catch(e){} });
+let _lastAutoSave7 = Date.now();
+function updateAutosaveIndicator7() {
+    const el=document.getElementById('autosave-indicator'); if(!el) return;
+    const sec=Math.round((Date.now()-_lastAutoSave7)/1000);
+    el.textContent = sec<5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
+}
+setInterval(() => { try { saveAll(true); _lastAutoSave7=Date.now(); updateAutosaveIndicator7(); } catch(e){} }, 30000);
+setInterval(updateAutosaveIndicator7, 10000);
 
 </script>
 

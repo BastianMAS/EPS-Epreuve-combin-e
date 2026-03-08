@@ -502,6 +502,36 @@
             h1 { font-size: 1.6rem; }
             .subtitle { font-size: 1rem; }
         }
+
+        #autosave-indicator {
+            position: fixed; bottom: 80px; right: 16px; z-index: 9999;
+            background: rgba(30,40,55,0.92); border: 1px solid rgba(74,222,128,0.3);
+            border-radius: 10px; padding: 6px 12px; font-size: 0.72rem;
+            color: #94a3b8; font-weight: 600; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .student-confirm {
+            background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(0,217,255,0.15));
+            border: 2px solid var(--accent); border-radius: 12px;
+            padding: 10px 14px; margin-bottom: 12px; display: none;
+            animation: confirmPop 0.3s ease-out;
+        }
+        @keyframes confirmPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+        .student-confirm .student-name-big {
+            font-size: 1.15rem; font-weight: 900; color: white; margin-bottom: 3px;
+        }
+        .student-confirm .student-meta { font-size: 0.75rem; color: #94a3b8; }
+        .no-vma-warning {
+            background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.4);
+            border-radius: 10px; padding: 10px 12px; color: #fca5a5;
+            font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; display: none;
+        }
+        .tour-input.invalid { border-color: var(--danger) !important; background: rgba(239,68,68,0.1) !important; animation: shake 0.3s ease; }
+        .tour-input.valid-time { border-color: var(--success) !important; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
     </style>
 </head>
 <body>
@@ -510,6 +540,8 @@
 <p class="subtitle">🔧 L4 - TECHNIQUE DE BASE ATELIER 2</p>
 <button class="btn-back" onclick="window.location.href='index.html'">← Retour</button>
 
+
+<div id="autosave-indicator">💾 Sauvegarde auto active</div>
 <div class="grid6" id="grid"></div>
 
 <button class="save-all" onclick="saveAll()">🔥 Enregistrer les performances</button>
@@ -670,6 +702,18 @@ function buildCard(i) {
                 ${opts}
             </select>
             <div class="student-info" id="info-${i}"></div>
+            <div class="student-confirm" id="confirm-${i}">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div id="confirm-avatar-${i}" style="flex-shrink:0"></div>
+                    <div>
+                        <div class="student-name-big" id="confirm-name-${i}"></div>
+                        <div class="student-meta" id="confirm-meta-${i}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="no-vma-warning" id="novma-${i}">
+                ⚠️ Pas de VMA pour cet élève — saisie manuelle uniquement, pas de temps cible calculé.
+            </div>
             
             <div class="analyse-l3" id="analyse-${i}">
                 <div class="analyse-title">📊 Analyse L3 :</div>
@@ -879,13 +923,30 @@ function selectEleve(i, id) {
             if(cardState[i].progression) {
                 selectProgression(i, cardState[i].progression);
             }
+        // ── Confirmation visuelle forte (toujours) ──
+        const avatarEl = document.getElementById(`confirm-avatar-${i}`);
+        avatarEl.innerHTML = s.photo
+            ? `<img src="${s.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">`
+            : `<span style="font-size:2rem">${s.sexe==='F'?'👧':'🧑'}</span>`;
+        document.getElementById(`confirm-name-${i}`).textContent = s.nomPrenom;
+        document.getElementById(`confirm-meta-${i}`).textContent =
+            `${s.age} ans · ${s.classe || ''} · VMA : ${s.vma ? s.vma + ' km/h' : 'non renseignée'}`;
+        document.getElementById(`confirm-${i}`).style.display = 'block';
+
+        if(s.vma) {
+            document.getElementById(`novma-${i}`).style.display = 'none';
         } else {
             analyse.style.display = 'none';
             progression.style.display = 'none';
-            alert('⚠️ Cet élève n\'a pas de VMA. Fais d\'abord le diagnostic !');
+            document.getElementById(`novma-${i}`).style.display = 'block';
+            document.getElementById(`sec-course-${i}`).style.display = 'block';
+            document.getElementById(`sec-saut-${i}`).style.display = 'block';
+            document.getElementById(`sec-lancer-${i}`).style.display = 'block';
         }
     } else {
-        info.style.display = 'none';
+        document.getElementById(`info-${i}`).style.display = 'none';
+        document.getElementById(`confirm-${i}`).style.display = 'none';
+        document.getElementById(`novma-${i}`).style.display = 'none';
         analyse.style.display = 'none';
         progression.style.display = 'none';
         document.getElementById(`sec-course-${i}`).style.display = 'none';
@@ -996,8 +1057,10 @@ function toggleSection(sec, i) {
 }
 
 function updateTours(i) {
+    [1,2,3,4,5,6].forEach(n => { const inp=document.getElementById(`t${n}-${i}`); if(inp) validateTimeInput(inp,LIMITES_200M.max,LIMITES_200M.min); });
     const cardData = cardState[i];
-    if(!cardData?.student?.vma || !cardData.progression) return;
+    if(!cardData?.student) return;
+    if(!cardData.progression) return;
 
     const progression = PROGRESSIONS_L4.find(p => p.id === cardData.progression);
     const perfL3 = analysePerformanceL3(cardData.student);
@@ -1097,6 +1160,7 @@ function updateTours(i) {
 
 function saveAll(silent=false) {
     let count = 0;
+    let erreurs = [];
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
 
     cardState.forEach((d, i) => {
@@ -1109,13 +1173,17 @@ function saveAll(silent=false) {
         const t5 = parseTime(document.getElementById(`t5-${i}`)?.value);
         const t6 = parseTime(document.getElementById(`t6-${i}`)?.value);
 
-        const sautDistance = parseFloat(document.getElementById(`saut-distance-${i}`)?.value) || null;
+        const sautRaw = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
+        const sautDistance = (!isNaN(sautRaw) && sautRaw>=0.8 && sautRaw<=5.5) ? sautRaw : null;
+        if(!isNaN(sautRaw) && sautRaw!==0 && sautDistance===null) erreurs.push(`${d.student.nomPrenom}: saut aberrant (${sautRaw}m)`);
         const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
         const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
         const sautTech3 = document.getElementById(`saut3-${i}`)?.checked || false;
         const sautTech4 = document.getElementById(`saut4-${i}`)?.checked || false;
 
-        const lancerDistance = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value) || null;
+        const lancerRaw = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
+        const lancerDistance = (!isNaN(lancerRaw) && lancerRaw>=3.0 && lancerRaw<=25.0) ? lancerRaw : null;
+        if(!isNaN(lancerRaw) && lancerRaw!==0 && lancerDistance===null) erreurs.push(`${d.student.nomPrenom}: lancer aberrant (${lancerRaw}m)`);
         const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
         const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
         const lancerTech3 = document.getElementById(`lancer3-${i}`)?.checked || false;
@@ -1189,12 +1257,21 @@ function saveAll(silent=false) {
 
 function parseTime(str) {
     if(!str) return null;
-    const parts = str.replace(',',':').split(':');
-    if(parts.length === 2) {
-        const m = parseInt(parts[0]), s = parseInt(parts[1]);
-        if(!isNaN(m) && !isNaN(s)) return m*60 + s;
-    }
+    const raw = str.trim().replace(',', ':').replace('.', ':');
+    const m1 = raw.match(/^(\d+):(\d{1,2})$/);
+    if(m1) { const min=parseInt(m1[1]),sec=parseInt(m1[2]); if(sec<60) return min*60+sec; }
+    const m2 = raw.match(/^(\d{3,4})$/);
+    if(m2) { const n=parseInt(m2[0]); if(n>=100&&n<=9959){const min=Math.floor(n/100),sec=n%100; if(sec<60) return min*60+sec;} }
     return null;
+}
+
+const LIMITES_200M = { min: 28, max: 105 };
+function validateTimeInput(input, max, min) {
+    const val = parseTime(input.value);
+    input.classList.remove('invalid','valid-time');
+    if(!input.value.trim()) return;
+    if(val===null||val<(min||28)||val>(max||105)) input.classList.add('invalid');
+    else input.classList.add('valid-time');
 }
 
 function fmtSec(sec) {
@@ -1202,9 +1279,43 @@ function fmtSec(sec) {
     const s = Math.round(sec%60);
     return `${m}:${s.toString().padStart(2,'0')}`;
 }
-window.addEventListener('beforeunload', function(e) {
-    if(typeof saveAll === 'function') saveAll(true); // sauvegarde silencieuse auto
-});
+window.addEventListener('beforeunload', function() { silentSave(); });
+
+let _lastAutoSave = Date.now();
+function silentSave() {
+    try {
+        let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+        let count = 0;
+        cardState.forEach((d, i) => {
+            if(!d.student) return;
+            const idx = allStudents.findIndex(s => s.id === d.student.id);
+            if(idx === -1) return;
+            if(!allStudents[idx].seances) allStudents[idx].seances = [];
+            const seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L4' && s._autoSlot);
+            const tours = [1,2,3,4,5,6].map(n => parseTime(document.getElementById(`t${n}-${i}`)?.value));
+            const sautRaw = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
+            const lancerRaw = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
+            const payload = {
+                lecon: 'L4', _autoSlot: true, _draft: true,
+                progression: d.progression, tours,
+                sautDistance: (!isNaN(sautRaw) && sautRaw>=0.8 && sautRaw<=5.5) ? sautRaw : null,
+                lancerDistance: (!isNaN(lancerRaw) && lancerRaw>=3.0 && lancerRaw<=25.0) ? lancerRaw : null,
+                date: new Date().toISOString()
+            };
+            if(seanceIdx === -1) allStudents[idx].seances.push(payload);
+            else allStudents[idx].seances[seanceIdx] = payload;
+            count++;
+        });
+        if(count > 0) { localStorage.setItem('eps_pro_students', JSON.stringify(allStudents)); _lastAutoSave = Date.now(); updateAutosaveIndicator(); }
+    } catch(e) {}
+}
+function updateAutosaveIndicator() {
+    const el = document.getElementById('autosave-indicator'); if(!el) return;
+    const sec = Math.round((Date.now()-_lastAutoSave)/1000);
+    el.textContent = sec < 5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
+}
+setInterval(silentSave, 30000);
+setInterval(updateAutosaveIndicator, 10000);
 
 </script>
 

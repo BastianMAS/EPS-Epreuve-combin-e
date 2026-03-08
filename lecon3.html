@@ -456,6 +456,57 @@
             h1 { font-size: 1.6rem; }
             .subtitle { font-size: 1rem; }
         }
+
+        /* ── Autosave indicator ── */
+        #autosave-indicator {
+            position: fixed; bottom: 80px; right: 16px; z-index: 9999;
+            background: rgba(30,40,55,0.92); border: 1px solid rgba(74,222,128,0.3);
+            border-radius: 10px; padding: 6px 12px; font-size: 0.72rem;
+            color: #94a3b8; font-weight: 600; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        /* ── Sélection élève forte ── */
+        .student-confirm {
+            background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(0,217,255,0.15));
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: none;
+            animation: confirmPop 0.3s ease-out;
+        }
+        @keyframes confirmPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+        .student-confirm .student-name-big {
+            font-size: 1.15rem; font-weight: 900; color: white;
+            letter-spacing: 0.3px; margin-bottom: 3px;
+        }
+        .student-confirm .student-meta {
+            font-size: 0.75rem; color: #94a3b8;
+        }
+        .no-vma-warning {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.4);
+            border-radius: 10px; padding: 10px 12px;
+            color: #fca5a5; font-size: 0.8rem; font-weight: 600;
+            margin-bottom: 8px; display: none;
+        }
+        /* ── Champ temps invalide ── */
+        .tour-input.invalid {
+            border-color: var(--danger) !important;
+            background: rgba(239,68,68,0.1) !important;
+            animation: shake 0.3s ease;
+        }
+        .tour-input.valid-time {
+            border-color: var(--success) !important;
+        }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-4px); }
+            75%      { transform: translateX(4px); }
+        }
     </style>
 </head>
 <body>
@@ -464,6 +515,8 @@
 <p class="subtitle">🚀 L3 - DÉCOUVERTE & TECHNIQUE</p>
 <button class="btn-back" onclick="window.location.href='index.html'">← Retour</button>
 
+
+<div id="autosave-indicator">💾 Sauvegarde auto active</div>
 <div class="grid6" id="grid"></div>
 
 <button class="save-all" onclick="saveAll()">🏆 Enregistrer les performances</button>
@@ -553,6 +606,18 @@ function buildCard(i) {
                 ${opts}
             </select>
             <div class="student-info" id="info-${i}"></div>
+            <div class="student-confirm" id="confirm-${i}">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div id="confirm-avatar-${i}" style="flex-shrink:0"></div>
+                    <div>
+                        <div class="student-name-big" id="confirm-name-${i}"></div>
+                        <div class="student-meta" id="confirm-meta-${i}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="no-vma-warning" id="novma-${i}">
+                ⚠️ Pas de VMA pour cet élève — saisie manuelle uniquement, pas de temps cible calculé.
+            </div>
             
             <div class="niveau-box" id="niveau-${i}">
                 <div class="niveau-title">🎯 Choisis ton objectif :</div>
@@ -665,6 +730,10 @@ function buildCard(i) {
 
 function selectEleve(i, id) {
     const s = ELEVES.find(e => e.id === id);
+    const confirmEl = document.getElementById(`confirm-${i}`);
+    const noVmaEl   = document.getElementById(`novma-${i}`);
+    const niveau    = document.getElementById(`niveau-${i}`);
+
     if(s) {
         const existant = s.seances?.find(seance => seance.lecon === 'L3') || {};
         cardState[i] = {
@@ -678,32 +747,34 @@ function selectEleve(i, id) {
             lancerTech1: existant.lancerTech1 || false,
             lancerTech2: existant.lancerTech2 || false
         };
-    } else {
-        cardState[i] = {};
-    }
 
-    const info = document.getElementById(`info-${i}`);
-    const niveau = document.getElementById(`niveau-${i}`);
-    
-    if(s) {
-        info.style.display = 'block';
-        const vmaInfo = s.vma ? ` | VMA: <strong style="color:var(--success)">${s.vma} km/h</strong>` : '';
-        info.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
-            ${s.photo ? `<img src="${s.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0">` : `<span style="font-size:1.3rem">${s.sexe==='F'?'👧':'🧑'}</span>`}
-            <div><strong>${s.nomPrenom}</strong><span style="font-size:0.82rem;opacity:0.7"> | ${s.age} ans${vmaInfo}</span></div>
-        </div>`;
-        
+        // ── Confirmation visuelle forte ──
+        const avatarEl = document.getElementById(`confirm-avatar-${i}`);
+        avatarEl.innerHTML = s.photo
+            ? `<img src="${s.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">`
+            : `<span style="font-size:2rem">${s.sexe==='F'?'👧':'🧑'}</span>`;
+        document.getElementById(`confirm-name-${i}`).textContent = s.nomPrenom;
+        document.getElementById(`confirm-meta-${i}`).textContent =
+            `${s.age} ans · ${s.classe || ''} · VMA : ${s.vma ? s.vma + ' km/h' : 'non renseignée'}`;
+        confirmEl.style.display = 'block';
+
+        // ── Garde VMA ──
         if(s.vma) {
+            noVmaEl.style.display = 'none';
             niveau.style.display = 'block';
-            if(cardState[i].niveau) {
-                selectNiveau(i, cardState[i].niveau);
-            }
+            if(cardState[i].niveau) selectNiveau(i, cardState[i].niveau);
         } else {
+            noVmaEl.style.display = 'block';
             niveau.style.display = 'none';
-            alert('⚠️ Cet élève n\'a pas de VMA. Fais d\'abord le diagnostic !');
+            // Sections saut/lancer toujours accessibles, course sans temps cible
+            document.getElementById(`sec-course-${i}`).style.display = 'block';
+            document.getElementById(`sec-saut-${i}`).style.display = 'block';
+            document.getElementById(`sec-lancer-${i}`).style.display = 'block';
         }
     } else {
-        info.style.display = 'none';
+        cardState[i] = {};
+        confirmEl.style.display = 'none';
+        noVmaEl.style.display = 'none';
         niveau.style.display = 'none';
         document.getElementById(`sec-course-${i}`).style.display = 'none';
         document.getElementById(`sec-saut-${i}`).style.display = 'none';
@@ -752,8 +823,14 @@ function toggleSection(sec, i) {
 }
 
 function updateTours(i) {
+    // Validation visuelle de chaque champ temps
+    [1,2,3,4,5,6].forEach(n => {
+        const inp = document.getElementById(`t${n}-${i}`);
+        if(inp) validateTimeInput(inp, LIMITES_200M.max, LIMITES_200M.min);
+    });
     const cardData = cardState[i];
-    if(!cardData?.student?.vma || !cardData.niveau) return;
+    if(!cardData?.student) return;
+    if(!cardData.niveau) return;
 
     const niveau = NIVEAUX_VMA_L3.find(n => n.id === cardData.niveau);
     const vma = parseFloat(cardData.student.vma);
@@ -842,6 +919,7 @@ function updateTours(i) {
 
 function saveAll(silent=false) {
     let count = 0;
+    let erreurs = [];
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
 
     cardState.forEach((d, i) => {
@@ -854,11 +932,17 @@ function saveAll(silent=false) {
         const t5 = parseTime(document.getElementById(`t5-${i}`)?.value);
         const t6 = parseTime(document.getElementById(`t6-${i}`)?.value);
 
-        const sautDistance = parseFloat(document.getElementById(`saut-distance-${i}`)?.value) || null;
+        const sautRaw = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
+        const sautDistance = (!isNaN(sautRaw) && sautRaw >= 0.8 && sautRaw <= 5.5) ? sautRaw : null;
+        if(!isNaN(sautRaw) && sautRaw !== 0 && sautDistance === null)
+            erreurs.push(`${d.student.nomPrenom} : distance saut aberrante (${sautRaw}m) — ignorée`);
         const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
         const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
 
-        const lancerDistance = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value) || null;
+        const lancerRaw = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
+        const lancerDistance = (!isNaN(lancerRaw) && lancerRaw >= 3.0 && lancerRaw <= 25.0) ? lancerRaw : null;
+        if(!isNaN(lancerRaw) && lancerRaw !== 0 && lancerDistance === null)
+            erreurs.push(`${d.student.nomPrenom} : distance lancer aberrante (${lancerRaw}m) — ignorée`);
         const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
         const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
 
@@ -921,17 +1005,47 @@ function saveAll(silent=false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    if(!silent) alert(`🏆 Données L3 sauvegardées pour ${count} élève(s) !`);
+    if(!silent) {
+        let msg = `🏆 Données L3 sauvegardées pour ${count} élève(s) !`;
+        if(erreurs.length) msg += `\n\n⚠️ Valeurs ignorées (hors plage) :\n` + erreurs.join('\n');
+        alert(msg);
+    }
 }
 
 function parseTime(str) {
     if(!str) return null;
-    const parts = str.replace(',',':').split(':');
-    if(parts.length === 2) {
-        const m = parseInt(parts[0]), s = parseInt(parts[1]);
-        if(!isNaN(m) && !isNaN(s)) return m*60 + s;
+    const raw = str.trim().replace(',', ':').replace('.', ':');
+    // Format M:SS ou MM:SS
+    const m1 = raw.match(/^(\d+):(\d{1,2})$/);
+    if(m1) {
+        const min = parseInt(m1[1]), sec = parseInt(m1[2]);
+        if(sec < 60) return min * 60 + sec;
+    }
+    // Format "entier seul" ex: 125 → détecté comme 1:25
+    const m2 = raw.match(/^(\d{3,4})$/);
+    if(m2) {
+        const n = parseInt(m2[0]);
+        if(n >= 100 && n <= 9959) {
+            const min = Math.floor(n / 100), sec = n % 100;
+            if(sec < 60) return min * 60 + sec;
+        }
     }
     return null;
+}
+
+// Validation visuelle temps en temps réel (L3: 200m entre 28s et 105s)
+const LIMITES_200M = { min: 28, max: 105 };
+function validateTimeInput(input, leMax, leMin) {
+    const max = leMax || LIMITES_200M.max;
+    const min = leMin || LIMITES_200M.min;
+    const val = parseTime(input.value);
+    input.classList.remove('invalid', 'valid-time');
+    if(!input.value.trim()) return;
+    if(val === null || val < min || val > max) {
+        input.classList.add('invalid');
+    } else {
+        input.classList.add('valid-time');
+    }
 }
 
 function fmtSec(sec) {
@@ -940,8 +1054,53 @@ function fmtSec(sec) {
     return `${m}:${s.toString().padStart(2,'0')}`;
 }
 window.addEventListener('beforeunload', function(e) {
-    if(typeof saveAll === 'function') saveAll(true); // sauvegarde silencieuse auto
+    silentSave();
 });
+
+// Autosave silencieux 30s — jamais de popup
+let _lastAutoSave = Date.now();
+function silentSave() {
+    try {
+        let count = 0;
+        let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+        cardState.forEach((d, i) => {
+            if(!d.student) return;
+            const idx = allStudents.findIndex(s => s.id === d.student.id);
+            if(idx === -1) return;
+            if(!allStudents[idx].seances) allStudents[idx].seances = [];
+            const seanceIdx = allStudents[idx].seances.findIndex(s => s.lecon === 'L3' && s._autoSlot);
+            const tours = [1,2,3,4,5,6].map(n => parseTime(document.getElementById(`t${n}-${i}`)?.value));
+            const sautRaw = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
+            const lancerRaw = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
+            const payload = {
+                lecon: 'L3', _autoSlot: true, _draft: true,
+                niveau: d.niveau,
+                tours,
+                sautDistance: (!isNaN(sautRaw) && sautRaw >= 0.8 && sautRaw <= 5.5) ? sautRaw : null,
+                lancerDistance: (!isNaN(lancerRaw) && lancerRaw >= 3.0 && lancerRaw <= 25.0) ? lancerRaw : null,
+                date: new Date().toISOString()
+            };
+            if(seanceIdx === -1) allStudents[idx].seances.push(payload);
+            else allStudents[idx].seances[seanceIdx] = payload;
+            count++;
+        });
+        if(count > 0) {
+            localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+            _lastAutoSave = Date.now();
+            updateAutosaveIndicator();
+        }
+    } catch(e) { /* silent */ }
+}
+
+function updateAutosaveIndicator() {
+    const el = document.getElementById('autosave-indicator');
+    if(!el) return;
+    const sec = Math.round((Date.now() - _lastAutoSave) / 1000);
+    el.textContent = sec < 5 ? '💾 Sauvegardé' : `💾 Sauvegardé il y a ${sec}s`;
+}
+
+setInterval(() => { silentSave(); }, 30000);
+setInterval(() => { updateAutosaveIndicator(); }, 10000);
 
 </script>
 

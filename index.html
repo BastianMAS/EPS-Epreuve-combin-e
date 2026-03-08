@@ -1494,6 +1494,9 @@
             </button>
         </div>
         <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button onclick="showRestorePanel()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#059669,#047857);color:white;border:none;border-radius:10px;padding:10px;font-size:0.82rem;font-weight:800;cursor:pointer">
+            🔄 Restaurer un snapshot auto<br><span style="font-weight:400;opacity:0.8;font-size:0.7rem">3 dernières sauvegardes disponibles</span>
+        </button>
     </div>
 
     <!-- NETTOYAGE DOUBLONS L5 -->
@@ -1719,6 +1722,8 @@ function saveStudentsToStorage() {
     try {
         localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
         console.log('✅ Élèves sauvegardés dans localStorage');
+        // ── Snapshot automatique (3 derniers) ──
+        createAutoSnapshot();
         // Sync Firebase en arrière-plan si configuré
         if(typeof syncStudentsToFirebase === 'function') {
             syncStudentsToFirebase(storedStudents);
@@ -1728,6 +1733,56 @@ function saveStudentsToStorage() {
         console.error('❌ Erreur lors de la sauvegarde:', e);
         alert('⚠️ Erreur lors de la sauvegarde. Vérifiez l\'espace disponible.');
         return false;
+    }
+}
+
+// ── Gestion des snapshots automatiques ──────────────────────────────────────
+function createAutoSnapshot() {
+    try {
+        const snapshots = getSnapshots();
+        const newSnap = {
+            ts: Date.now(),
+            label: new Date().toLocaleString('fr-FR'),
+            count: storedStudents.length,
+            data: JSON.stringify(storedStudents)
+        };
+        snapshots.unshift(newSnap);
+        // Garder seulement les 3 derniers
+        const trimmed = snapshots.slice(0, 3);
+        localStorage.setItem('eps_auto_snapshots', JSON.stringify(trimmed));
+    } catch(e) { /* pas critique */ }
+}
+
+function getSnapshots() {
+    try {
+        return JSON.parse(localStorage.getItem('eps_auto_snapshots') || '[]');
+    } catch(e) { return []; }
+}
+
+function showRestorePanel() {
+    const snapshots = getSnapshots();
+    if(!snapshots.length) {
+        alert('Aucun snapshot disponible. Les snapshots sont créés automatiquement à chaque sauvegarde.');
+        return;
+    }
+    let msg = '🔄 RESTAURER UN SNAPSHOT\n\n';
+    snapshots.forEach((s, i) => {
+        msg += `${i+1}. ${s.label} — ${s.count} élève(s)\n`;
+    });
+    msg += '\nEntrez le numéro à restaurer (1, 2 ou 3) :';
+    const choice = prompt(msg);
+    const idx = parseInt(choice) - 1;
+    if(isNaN(idx) || idx < 0 || idx >= snapshots.length) return;
+    if(!confirm(`Restaurer le snapshot du ${snapshots[idx].label} (${snapshots[idx].count} élèves) ?\nCela remplacera vos données actuelles.`)) return;
+    try {
+        const restored = JSON.parse(snapshots[idx].data);
+        storedStudents = restored;
+        localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+        renderStudentsList();
+        updateStudentsStats();
+        alert(`✅ Snapshot restauré ! ${restored.length} élève(s) rechargé(s).`);
+    } catch(e) {
+        alert('❌ Erreur lors de la restauration : ' + e.message);
     }
 }
 
@@ -4974,7 +5029,13 @@ function importStudents(event) {
             const importData = JSON.parse(e.target.result);
             
             if (!importData.students || !Array.isArray(importData.students)) {
-                alert('⚠️ Fichier invalide.');
+                alert('⚠️ Fichier invalide — structure non reconnue. Vérifiez que c\'est bien un export EPS PRO.');
+                return;
+            }
+            // Vérification basique de la structure des élèves
+            const sampleOk = importData.students.every(s => s.id && s.nomPrenom !== undefined);
+            if(!sampleOk) {
+                alert('⚠️ Fichier invalide — certains élèves manquent de champs obligatoires (id, nomPrenom).');
                 return;
             }
             

@@ -718,14 +718,20 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-saut-${i}">
                     <div class="technique-box">
-                        <div class="technique-title">🎯 Objectifs L3 (2/4)</div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut1-${i}">
-                            <label>✅ Course d'élan régulière (6-8 foulées)</label>
+                        <div class="technique-title">⭐ Mon niveau technique — Saut</div>
+                        <div class="star-section-title">Course d'élan régulière</div>
+                        <div class="star-rating">
+                            <button class="star-btn" onclick="setStar(${i},'saut',1,1)" id="saut1-s1-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'saut',1,2)" id="saut1-s2-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'saut',1,3)" id="saut1-s3-${i}">⭐</button>
+                            <span class="star-label" id="saut1-lbl-${i}">Non évalué</span>
                         </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut2-${i}">
-                            <label>✅ Pied d'appel précis sur la ligne</label>
+                        <div class="star-section-title">Pied d'appel précis</div>
+                        <div class="star-rating">
+                            <button class="star-btn" onclick="setStar(${i},'saut',2,1)" id="saut2-s1-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'saut',2,2)" id="saut2-s2-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'saut',2,3)" id="saut2-s3-${i}">⭐</button>
+                            <span class="star-label" id="saut2-lbl-${i}">Non évalué</span>
                         </div>
                     </div>
                     <label>Distance sautée (m) :</label>
@@ -739,14 +745,20 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-lancer-${i}">
                     <div class="technique-box">
-                        <div class="technique-title">🎯 Objectifs L3 (2/4)</div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer1-${i}">
-                            <label>✅ Position de profil correcte</label>
+                        <div class="technique-title">⭐ Mon niveau technique — Lancer</div>
+                        <div class="star-section-title">Position de profil</div>
+                        <div class="star-rating">
+                            <button class="star-btn" onclick="setStar(${i},'lancer',1,1)" id="lancer1-s1-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'lancer',1,2)" id="lancer1-s2-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'lancer',1,3)" id="lancer1-s3-${i}">⭐</button>
+                            <span class="star-label" id="lancer1-lbl-${i}">Non évalué</span>
                         </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer2-${i}">
-                            <label>✅ Prise et placement de l'engin</label>
+                        <div class="star-section-title">Prise et placement de l'engin</div>
+                        <div class="star-rating">
+                            <button class="star-btn" onclick="setStar(${i},'lancer',2,1)" id="lancer2-s1-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'lancer',2,2)" id="lancer2-s2-${i}">⭐</button>
+                            <button class="star-btn" onclick="setStar(${i},'lancer',2,3)" id="lancer2-s3-${i}">⭐</button>
+                            <span class="star-label" id="lancer2-lbl-${i}">Non évalué</span>
                         </div>
                     </div>
                     <label>Distance lancée (m) :</label>

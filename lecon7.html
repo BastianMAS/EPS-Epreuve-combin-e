@@ -148,19 +148,19 @@
         .tour-header {
             font-weight: 700;
             color: var(--accent);
-            margin-bottom: 12px;
-            font-size: 1rem;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
         }
         
         .choix-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
-            margin: 12px 0;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin: 8px 0;
         }
         
         .choix-btn {
-            padding: 12px 8px;
+            padding: 8px 4px;
             background: rgba(255,255,255,0.1);
             border: 2px solid transparent;
             border-radius: 8px;
@@ -168,8 +168,26 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .choix-btn .vma-hint {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin-top: 3px;
+            line-height: 1.2;
+        }
+        
+        .choix-btn .temps-hint {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            margin-top: 1px;
         }
         
         .choix-btn:hover {
@@ -334,16 +352,11 @@ function createCard(i) {
                 <div class="section-body" id="body-tour1-${i}">
                     <div class="tour-container">
                         <div class="tour-header">Comment veux-tu aborder ce 1er 400m ?</div>
-                        <div class="choix-grid">
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'prudent')">
-                                🐌<br>Prudent<br><small>En sécurité</small>
-                            </div>
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'regulier')">
-                                ⚖️<br>Régulier<br><small>Comme L3/L4</small>
-                            </div>
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'ambitieux')">
-                                ⚡<br>Ambitieux<br><small>Je me lance</small>
-                            </div>
+                        <div class="choix-grid" id="choix-grid-tour1-${i}">
+                            <!-- Rempli dynamiquement par buildChoixBtns -->
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'prudent')">🐌 Prudent<span class="vma-hint">—</span></div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'regulier')">⚖️ Régulier<span class="vma-hint">—</span></div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour1', 'ambitieux')">⚡ Ambitieux<span class="vma-hint">—</span></div>
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
@@ -352,15 +365,15 @@ function createCard(i) {
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti1-facile-${i}">
+                                <input type="checkbox" id="ressenti1-facile-${i}" onchange="updateTour2Btns(${i})">
                                 <label>😊 C'était facile</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti1-bien-${i}">
+                                <input type="checkbox" id="ressenti1-bien-${i}" onchange="updateTour2Btns(${i})">
                                 <label>👍 C'était bien</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti1-dur-${i}">
+                                <input type="checkbox" id="ressenti1-dur-${i}" onchange="updateTour2Btns(${i})">
                                 <label>😮‍💨 C'était dur</label>
                             </div>
                         </div>
@@ -375,16 +388,10 @@ function createCard(i) {
                 <div class="section-body" id="body-tour2-${i}">
                     <div class="tour-container disabled" id="tour2-container-${i}">
                         <div class="tour-header">Après ton 1er tour, que veux-tu faire ?</div>
-                        <div class="choix-grid">
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'plus-lent')">
-                                🐌<br>Plus lent<br><small>Je me calme</small>
-                            </div>
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'meme')">
-                                ⚖️<br>Même rythme<br><small>Ça me va</small>
-                            </div>
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'plus-vite')">
-                                ⚡<br>Plus vite<br><small>J'accélère</small>
-                            </div>
+                        <div class="choix-grid" id="choix-grid-tour2-${i}">
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'plus-lent')">🐌 Plus lent<span class="vma-hint">—</span></div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'meme')">⚖️ Même rythme<span class="vma-hint">—</span></div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour2', 'plus-vite')">⚡ Plus vite<span class="vma-hint">—</span></div>
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
@@ -393,15 +400,15 @@ function createCard(i) {
                         <div class="ressenti-box">
                             <div style="font-weight: 700; margin-bottom: 8px;">Comment ça s'est passé ?</div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti2-facile-${i}">
+                                <input type="checkbox" id="ressenti2-facile-${i}" onchange="updateTour3Btns(${i})">
                                 <label>😊 Encore facile</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti2-bien-${i}">
+                                <input type="checkbox" id="ressenti2-bien-${i}" onchange="updateTour3Btns(${i})">
                                 <label>👍 Toujours bien</label>
                             </div>
                             <div class="checkbox-row">
-                                <input type="checkbox" id="ressenti2-fatigue-${i}">
+                                <input type="checkbox" id="ressenti2-fatigue-${i}" onchange="updateTour3Btns(${i})">
                                 <label>😮‍💨 Je commence à fatiguer</label>
                             </div>
                         </div>
@@ -416,16 +423,10 @@ function createCard(i) {
                 <div class="section-body" id="body-tour3-${i}">
                     <div class="tour-container disabled" id="tour3-container-${i}">
                         <div class="tour-header">Pour ce dernier tour, quel est TON projet ?</div>
-                        <div class="choix-grid">
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'tenir')">
-                                🛡️<br>Tenir<br><small>Finir proprement</small>
-                            </div>
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'maintenir')">
-                                ⚖️<br>Maintenir<br><small>Même allure</small>
-                            </div>
-                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'sprint')">
-                                🚀<br>Sprint<br><small>Tout donner</small>
-                            </div>
+                        <div class="choix-grid" id="choix-grid-tour3-${i}">
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'tenir')">🛡️ Tenir<span class="vma-hint">—</span></div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'maintenir')">⚖️ Maintenir<span class="vma-hint">—</span></div>
+                            <div class="choix-btn" onclick="selectChoix(${i}, 'tour3', 'sprint')">🚀 Sprint<span class="vma-hint">—</span></div>
                         </div>
                         <div class="temps-saisie">
                             <label style="min-width: 60px;">Temps :</label>
@@ -498,6 +499,246 @@ function createCard(i) {
     return card;
 }
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function calcTemps400(vma, pct) {
+    if(!vma || !pct) return '—';
+    const vitesse = parseFloat(vma) * pct / 100 / 3.6;
+    const sec = Math.round(400 / vitesse);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// Lit le % VMA réel depuis les données de séance
+function getPctVMAFromSeance(s, vma) {
+    if(!s || !vma) return null;
+    // Priorité 1 : niveau choisi en L3 (vma95/100/105/110)
+    if(s.lecon === 'L3' && s.niveau) {
+        const map = { vma95:95, vma100:100, vma105:105, vma110:110 };
+        if(map[s.niveau]) return map[s.niveau];
+    }
+    // Priorité 2 : calcul depuis moyenne200m
+    if(s.moyenne200m) {
+        const vitesse = 200 / parseFloat(s.moyenne200m);
+        return Math.round((vitesse / (parseFloat(vma) / 3.6)) * 100);
+    }
+    return null;
+}
+
+function getPctL4(sL3, sL4, vma) {
+    const pctL3 = getPctVMAFromSeance(sL3, vma);
+    if(!sL4) return pctL3;
+    // Si moyenne200m dispo → calcul direct
+    if(sL4.moyenne200m) return getPctVMAFromSeance(sL4, vma);
+    // Sinon delta depuis progression choisie
+    if(pctL3 !== null && sL4.progression) {
+        const delta = { maintien:0, progression:5, depassement:10 }[sL4.progression] ?? 0;
+        return pctL3 + delta;
+    }
+    return pctL3;
+}
+
+// ── Historique (section dépliable au-dessus des tours) ──────────────────────
+
+function generateHistorique(i, student) {
+    const container = document.getElementById(`historique-data-${i}`);
+    const vma = parseFloat(student.vma) || null;
+    const seances = student.seances || [];
+    const sL3 = seances.filter(s => s.lecon==='L3').at(-1) || null;
+    const sL4 = seances.filter(s => s.lecon==='L4').at(-1) || null;
+    const sL5 = seances.filter(s => s.lecon==='L5').at(-1) || null;
+    const sL6 = seances.filter(s => s.lecon==='L6').at(-1) || null;
+
+    const pctL3 = getPctVMAFromSeance(sL3, vma);
+    const pctL4 = getPctL4(sL3, sL4, vma);
+    const pctL5 = sL5?.performanceMoyenne ? Math.round(sL5.performanceMoyenne) : null;
+    const pyramideOk = sL6?.pyramideReussie ?? null;
+
+    // Calcul du % conseillé pour T1
+    let pctConseil = 100; // défaut
+    let baseLabel = 'Base 100% VMA';
+    let raisonnement = [];
+
+    if(pctL3 !== null) {
+        pctConseil = pctL3;
+        baseLabel = `L3 → ${pctL3}%`;
+    }
+    if(pctL4 !== null) {
+        if(pctL4 > pctConseil) {
+            raisonnement.push(`progression L3→L4 : +${pctL4 - pctL3}%`);
+        }
+        pctConseil = pctL4;
+        baseLabel = `L4 → ${pctL4}%`;
+    }
+    // L5 relais > 95% = endurance confirmée → +5%
+    if(pctL5 !== null && pctL5 >= 95) {
+        pctConseil = Math.min(pctConseil + 5, 130);
+        raisonnement.push(`relais L5 réussi à ${pctL5}% → +5%`);
+    }
+    // L6 pyramide validée → capable de haute intensité → +5% sup
+    if(pyramideOk === true) {
+        pctConseil = Math.min(pctConseil + 5, 130);
+        raisonnement.push(`pyramide L6 validée → +5%`);
+    }
+
+    // Stocker dans cardState pour que T2/T3 puissent y accéder
+    if(!cardState[i]) cardState[i] = {};
+    cardState[i].pctConseil = pctConseil;
+    cardState[i].vma = vma;
+
+    // Construire l'affichage
+    let html = '<div class="historique-box">';
+
+    // Ligne de progression visuelle
+    if(pctL3 !== null || pctL4 !== null) {
+        html += `<div style="font-size:0.72rem;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">📈 Ta progression</div>`;
+        html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px">`;
+        if(pctL3 !== null) html += `<span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:6px;padding:3px 8px;font-size:0.75rem;font-weight:800;color:#34d399">L3 · ${pctL3}%</span>`;
+        if(pctL4 !== null) {
+            const arrow = pctL4 > (pctL3||pctL4) ? '↑' : pctL4 < (pctL3||pctL4) ? '↓' : '→';
+            const arrowColor = arrow==='↑'?'#34d399':arrow==='↓'?'#f87171':'#94a3b8';
+            html += `<span style="color:${arrowColor};font-weight:900;font-size:0.9rem">${arrow}</span>`;
+            html += `<span style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.4);border-radius:6px;padding:3px 8px;font-size:0.75rem;font-weight:800;color:#60a5fa">L4 · ${pctL4}%</span>`;
+        }
+        if(pctL5 !== null) {
+            html += `<span style="color:#94a3b8;font-size:0.8rem">→</span>`;
+            const l5Color = pctL5>=95?'#a78bfa':'#f87171';
+            html += `<span style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:6px;padding:3px 8px;font-size:0.75rem;font-weight:800;color:${l5Color}">Relais · ${pctL5}%</span>`;
+        }
+        if(pyramideOk !== null) {
+            html += `<span style="font-size:0.75rem;${pyramideOk?'color:#34d399':'color:#f87171'}">${pyramideOk ? '⚡ Pyramide ✅' : '⚡ Pyramide ❌'}</span>`;
+        }
+        html += `</div>`;
+    }
+
+    // Conseil T1
+    const tConseil = vma ? calcTemps400(vma, pctConseil) : null;
+    const raisStr = raisonnement.length ? ` (${raisonnement.join(', ')})` : '';
+    html += `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:8px;padding:8px 10px">`;
+    html += `<div style="font-size:0.72rem;font-weight:800;color:#fbbf24;margin-bottom:3px">💡 Mon conseil pour ton 1er 400m${raisStr}</div>`;
+    html += `<div style="font-size:0.85rem;font-weight:900;color:white">Pars à <span style="color:#fbbf24">${pctConseil}% VMA</span>${tConseil ? ` → <span style="color:#fbbf24">⏱ ${tConseil}</span>` : ''}</div>`;
+    html += `</div>`;
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ── Boutons de choix dynamiques ──────────────────────────────────────────────
+
+function buildChoixBtns(i, student) {
+    const vma = parseFloat(student.vma) || null;
+    const pctRef = cardState[i]?.pctConseil || 100;
+
+    // Tour 1 : prudent = pctRef-10, conseillé = pctRef, ambitieux = pctRef+10
+    renderChoixGrid(i, 'tour1', [
+        { key:'prudent',   emoji:'🐌', label:'Prudent',    pct: pctRef - 10 },
+        { key:'regulier',  emoji:'⚖️', label:'Conseillé',  pct: pctRef, highlight: true },
+        { key:'ambitieux', emoji:'⚡', label:'Ambitieux',  pct: pctRef + 10 },
+    ], vma);
+
+    // Tour 2 : rempli après saisie T1 + ressenti (voir updateTour2Btns)
+    renderChoixGrid(i, 'tour2', [
+        { key:'plus-lent', emoji:'🐌', label:'Réduire',    pct: pctRef - 5 },
+        { key:'meme',      emoji:'⚖️', label:'Maintenir',  pct: pctRef, highlight: true },
+        { key:'plus-vite', emoji:'⚡', label:'Accélérer',  pct: pctRef + 5 },
+    ], vma);
+
+    // Tour 3 idem
+    renderChoixGrid(i, 'tour3', [
+        { key:'tenir',     emoji:'🛡️', label:'Tenir',     pct: pctRef - 5 },
+        { key:'maintenir', emoji:'⚖️', label:'Maintenir', pct: pctRef, highlight: true },
+        { key:'sprint',    emoji:'🚀', label:'Sprint',    pct: pctRef + 10 },
+    ], vma);
+}
+
+function renderChoixGrid(i, tour, configs, vma) {
+    const grid = document.getElementById(`choix-grid-${tour}-${i}`);
+    if(!grid) return;
+    grid.innerHTML = configs.map(c => {
+        const t = vma ? calcTemps400(vma, c.pct) : '';
+        const borderStyle = c.highlight ? 'border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.08)' : '';
+        return `<div class="choix-btn" id="btn-${tour}-${c.key}-${i}" onclick="selectChoix(${i}, '${tour}', '${c.key}')" style="${borderStyle}">
+            ${c.emoji} ${c.label}
+            <span class="vma-hint">${vma ? c.pct+'% VMA' : '—'}</span>
+            ${t ? `<span class="temps-hint">⏱ ${t}</span>` : ''}
+        </div>`;
+    }).join('');
+}
+
+// Mise à jour intelligente de T2 après ressenti T1
+function updateTour2Btns(i) {
+    const state = cardState[i];
+    if(!state?.student) return;
+    const vma = parseFloat(state.student.vma) || null;
+    const pctT1 = getChoixPct(i, 'tour1') || state.pctConseil || 100;
+
+    // Lire le ressenti T1
+    const facile = document.getElementById(`ressenti1-facile-${i}`)?.checked;
+    const bien   = document.getElementById(`ressenti1-bien-${i}`)?.checked;
+    const dur    = document.getElementById(`ressenti1-dur-${i}`)?.checked;
+
+    let pctT2ref = pctT1;
+    let conseil = '';
+    if(facile) { pctT2ref = pctT1 + 10; conseil = 'Facile → tu peux accélérer'; }
+    else if(bien) { pctT2ref = pctT1 + 5; conseil = 'Bien → légère hausse possible'; }
+    else if(dur)  { pctT2ref = pctT1 - 5; conseil = 'Dur → réduis un peu'; }
+    else          { pctT2ref = pctT1;      conseil = 'Choisis ton rythme'; }
+
+    // Mettre à jour le header du tour2
+    const header = document.querySelector(`#body-tour2-${i} .tour-header`);
+    if(header && conseil) header.innerHTML = `Après ton 1er tour (${pctT1}% VMA) — <span style="color:#fbbf24">${conseil}</span>`;
+
+    cardState[i].pctT2ref = pctT2ref;
+
+    renderChoixGrid(i, 'tour2', [
+        { key:'plus-lent', emoji:'🐌', label:'Réduire',   pct: pctT2ref - 5 },
+        { key:'meme',      emoji:'⚖️', label:'Maintenir', pct: pctT2ref, highlight: true },
+        { key:'plus-vite', emoji:'⚡', label:'Accélérer', pct: pctT2ref + 5 },
+    ], vma);
+}
+
+// Mise à jour intelligente de T3 après ressenti T2
+function updateTour3Btns(i) {
+    const state = cardState[i];
+    if(!state?.student) return;
+    const vma = parseFloat(state.student.vma) || null;
+    const pctT2 = getChoixPct(i, 'tour2') || state.pctT2ref || state.pctConseil || 100;
+
+    const facile = document.getElementById(`ressenti2-facile-${i}`)?.checked;
+    const bien   = document.getElementById(`ressenti2-bien-${i}`)?.checked;
+    const fatigue= document.getElementById(`ressenti2-fatigue-${i}`)?.checked;
+
+    let pctT3ref = pctT2;
+    let conseil = '';
+    if(facile) { pctT3ref = pctT2 + 10; conseil = 'Encore facile → sprint final !'; }
+    else if(bien) { pctT3ref = pctT2 + 5; conseil = 'Bien → maintiens ou sprint léger'; }
+    else if(fatigue) { pctT3ref = pctT2 - 5; conseil = 'Tu fatigues → tiens le rythme'; }
+    else { pctT3ref = pctT2; conseil = 'Choisis ton projet final'; }
+
+    const header = document.querySelector(`#body-tour3-${i} .tour-header`);
+    if(header && conseil) header.innerHTML = `Dernier 400m — <span style="color:#fbbf24">${conseil}</span>`;
+
+    renderChoixGrid(i, 'tour3', [
+        { key:'tenir',     emoji:'🛡️', label:'Tenir',     pct: pctT3ref - 5 },
+        { key:'maintenir', emoji:'⚖️', label:'Maintenir', pct: pctT3ref, highlight: true },
+        { key:'sprint',    emoji:'🚀', label:'Sprint',    pct: pctT3ref + 10 },
+    ], vma);
+}
+
+function getChoixPct(i, tour) {
+    const choix = cardState[i]?.choix?.[tour];
+    if(!choix) return null;
+    const btn = document.getElementById(`btn-${tour}-${choix}-${i}`);
+    if(!btn) return null;
+    // Lire le % depuis le texte du span vma-hint
+    const hint = btn.querySelector('.vma-hint');
+    if(!hint) return null;
+    const m = hint.textContent.match(/(\d+)%/);
+    return m ? parseInt(m[1]) : null;
+}
+
+
 function selectStudent(i, studentId) {
     const student = ELEVES.find(s => s.id === studentId);
     
@@ -513,6 +754,7 @@ function selectStudent(i, studentId) {
         </div>`;
         
         generateHistorique(i, student);
+        buildChoixBtns(i, student);
         
         // Désactiver tour2 et tour3 par défaut
         document.getElementById(`tour2-container-${i}`).classList.add('disabled');
@@ -524,76 +766,13 @@ function selectStudent(i, studentId) {
     }
 }
 
-function generateHistorique(i, student) {
-    const container = document.getElementById(`historique-data-${i}`);
-    let html = '<div class="historique-box">';
-    
-    // Analyser L3/L4 avec conversion 400m
-    const seanceL3 = student.seances?.find(s => s.lecon === 'L3');
-    const seanceL4 = student.seances?.find(s => s.lecon === 'L4');
-    
-    if(seanceL3 && seanceL3.moyenne200m && student.vma) {
-        const moyenne200 = parseFloat(seanceL3.moyenne200m);
-        const vma = parseFloat(student.vma);
-        
-        // Calcul % VMA sur 200m
-        const vitesse200 = 200 / moyenne200; // m/s
-        const vitesseVMA = vma / 3.6; // m/s
-        const pourcentageVMA = Math.round((vitesse200 / vitesseVMA) * 100);
-        
-        // Estimation 400m (dégradation ~8-12% selon profil)
-        const estimation400 = moyenne200 * 2.1; // Facteur empirique
-        const minutes = Math.floor(estimation400 / 60);
-        const secondes = Math.floor(estimation400 % 60);
-        const dixiemes = Math.round((estimation400 % 1) * 10);
-        const temps400Str = `${minutes}:${secondes.toString().padStart(2, '0')}.${dixiemes}`;
-        
-        html += `
-            <div><strong>📊 Tes 200m L3/L4 :</strong> ${moyenne200.toFixed(1)}" (${pourcentageVMA}% VMA)</div>
-            <div><strong>🎯 Estimation 400m :</strong> ${temps400Str} si tu cours au même %VMA</div>
-        `;
-        
-        // Propositions avec %VMA
-        html += `
-            <div style="margin-top: 8px; font-size: 0.85rem; color: var(--gold);">
-                <strong>💡 Choix possibles 1er 400m :</strong><br>
-                • <strong>Prudent</strong> : ${pourcentageVMA - 10}% VMA (plus facile)<br>
-                • <strong>Régulier</strong> : ${pourcentageVMA}% VMA (comme L3/L4)<br>  
-                • <strong>Ambitieux</strong> : ${pourcentageVMA + 10}% VMA (plus dur)
-            </div>
-        `;
-    } else if(seanceL3 && seanceL3.moyenne200m) {
-        html += `<div>📊 <strong>Tes 200m L3/L4 :</strong> ${parseFloat(seanceL3.moyenne200m).toFixed(1)}" (VMA non renseignée)</div>`;
-    }
-    
-    // Analyser L5
-    const seanceL5 = student.seances?.find(s => s.lecon === 'L5');
-    if(seanceL5 && seanceL5.distanceMoyenneIndividuelle) {
-        html += `<div>🏅 <strong>Relais L5 :</strong> ${seanceL5.distanceMoyenneIndividuelle}m par manche (travail en équipe)</div>`;
-    }
-    
-    // Analyser L6
-    const seanceL6 = student.seances?.find(s => s.lecon === 'L6');
-    if(seanceL6) {
-        const pyramideText = seanceL6.pyramideReussie ? 
-            'Pyramide réussie ✅ (tu gères les efforts intenses)' : 
-            `Pyramide échouée ❌ sur ${seanceL6.pyramideEchec || 'une distance'} (normal, c'est très intense)`;
-        html += `<div>⚡ <strong>Perfectionnement L6 :</strong> ${pyramideText}</div>`;
-    }
-    
-    html += '<div style="margin-top: 12px; font-style: italic; color: var(--warning);">';
-    html += '💡 <strong>À toi de choisir :</strong> Avec ces informations, comment veux-tu aborder tes 3×400m ?';
-    html += '</div>';
-    
-    html += '</div>';
-    container.innerHTML = html;
-}
-
 function selectChoix(i, tour, choix) {
-    // Retirer sélection précédente
-    document.querySelectorAll(`#body-${tour}-${i} .choix-btn`).forEach(btn => btn.classList.remove('selected'));
-    // Ajouter nouvelle sélection
-    event.target.classList.add('selected');
+    // Retirer sélection précédente dans la grille
+    const grid = document.getElementById(`choix-grid-${tour}-${i}`);
+    if(grid) grid.querySelectorAll('.choix-btn').forEach(btn => btn.classList.remove('selected'));
+    // Ajouter nouvelle sélection sur le bon bouton
+    const btn = document.getElementById(`btn-${tour}-${choix}-${i}`);
+    if(btn) btn.classList.add('selected');
     
     // Stocker le choix
     if(!cardState[i].choix) cardState[i].choix = {};
@@ -608,6 +787,7 @@ function checkTour2(i) {
         const validation = convertTempsAvecValidation(temps, input);
         if(validation.valide) {
             document.getElementById(`tour2-container-${i}`).classList.remove('disabled');
+            updateTour2Btns(i);
         }
     }
 }
@@ -620,6 +800,7 @@ function checkTour3(i) {
         const validation = convertTempsAvecValidation(temps, input);
         if(validation.valide) {
             document.getElementById(`tour3-container-${i}`).classList.remove('disabled');
+            updateTour3Btns(i);
         }
     }
 }

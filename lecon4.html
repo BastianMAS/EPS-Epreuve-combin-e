@@ -532,6 +532,18 @@
         .tour-input.invalid { border-color: var(--danger) !important; background: rgba(239,68,68,0.1) !important; animation: shake 0.3s ease; }
         .tour-input.valid-time { border-color: var(--success) !important; }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+        .save-wrapper { position: relative; display: inline-block; width: 100%; }
+        .save-badge { position:absolute;top:-8px;right:-8px;background:#ef4444;color:white;border-radius:50%;width:22px;height:22px;font-size:0.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;pointer-events:none;opacity:0;transition:opacity 0.2s; }
+        .save-badge.visible { opacity: 1; }
+        @keyframes savePulse { 0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.5)} 50%{box-shadow:0 0 0 10px rgba(139,92,246,0)} }
+        .save-all.dirty { animation: savePulse 1.5s infinite; }
+
+        .star-btn { font-size:1.3rem;cursor:pointer;opacity:0.3;transition:opacity 0.15s,transform 0.15s;background:none;border:none;padding:2px;line-height:1; }
+        .star-btn.active { opacity:1;transform:scale(1.1); }
+        .star-rating { display:flex;gap:4px;align-items:center;margin:4px 0; }
+        .star-label { font-size:0.7rem;color:#94a3b8;margin-left:4px;font-style:italic; }
+        .star-section-title { font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.55);margin:8px 0 2px; }
     </style>
 </head>
 <body>
@@ -544,15 +556,15 @@
 <div id="autosave-indicator">💾 Sauvegarde auto active</div>
 <div class="grid6" id="grid"></div>
 
-<button class="save-all" onclick="saveAll()">🔥 Enregistrer les performances</button>
+<div class="save-wrapper"><button class="save-all" id="save-btn" onclick="saveAll()">🔥 Enregistrer les performances</button><div class="save-badge" id="save-badge">0</div></div>
 
 <script>
 const PROGRESSIONS_L4 = [
-    { id: 'refaire', label: 'Refaire L3', desc: 'Rattrapage absence ou révision technique', delta: 'L3' },
-    { id: 'meme', label: 'Même niveau', desc: 'Apprentissage technique de base', delta: 0 },
-    { id: 'plus5', label: 'Progression +5%', desc: 'Technique de base + amélioration', delta: 5 },
-    { id: 'plus10', label: 'Progression +10%', desc: 'Technique de base + performance', delta: 10 },
-    { id: 'plus15', label: 'Challenge +15%', desc: 'Technique de base + défi', delta: 15 }
+    { id: 'refaire', label: '🔁 Refaire L3',     desc: 'Rattrapage — je revois les bases',           delta: 'L3' },
+    { id: 'meme',    label: '⚖️ Même niveau',    desc: '🟡 Je consolide — respiration soutenue',     delta: 0   },
+    { id: 'plus5',   label: '📈 +5% VMA',        desc: '🟠 Je progresse — difficile de parler',      delta: 5   },
+    { id: 'plus10',  label: '🔥 +10% VMA',       desc: '🔴 Je me challenge — effort intense',        delta: 10  },
+    { id: 'plus15',  label: '⚡ +15% VMA',       desc: '💀 Je me dépasse — effort maximal',          delta: 15  }
 ];
 
 function analysePerformanceL3(eleve) {
@@ -785,23 +797,15 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-saut-${i}">
                     <div class="technique-box">
-                        <div class="technique-title">🎯 Objectifs techniques (4/4)</div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut1-${i}">
-                            <label>✅ Course d'élan régulière (6-8 foulées)</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut2-${i}">
-                            <label>✅ Pied d'appel précis sur la ligne</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut3-${i}">
-                            <label>✅ Impulsion verticale</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="saut4-${i}">
-                            <label>✅ Réception équilibrée</label>
-                        </div>
+                        <div class="technique-title">⭐ Mon niveau technique — Saut</div>
+                        <div class="star-section-title">Course d'élan régulière</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'saut',1,1)" id="saut1-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',1,2)" id="saut1-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',1,3)" id="saut1-s3-${i}">⭐</button><span class="star-label" id="saut1-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Pied d'appel précis</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'saut',2,1)" id="saut2-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',2,2)" id="saut2-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',2,3)" id="saut2-s3-${i}">⭐</button><span class="star-label" id="saut2-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Impulsion verticale</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'saut',3,1)" id="saut3-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',3,2)" id="saut3-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',3,3)" id="saut3-s3-${i}">⭐</button><span class="star-label" id="saut3-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Réception équilibrée</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'saut',4,1)" id="saut4-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',4,2)" id="saut4-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'saut',4,3)" id="saut4-s3-${i}">⭐</button><span class="star-label" id="saut4-lbl-${i}">Non évalué</span></div>
                     </div>
                     <label>Distance sautée (m) :</label>
                     <input type="number" step="0.01" id="saut-distance-${i}" placeholder="3.00" style="width:100px" inputmode="decimal">
@@ -814,23 +818,15 @@ function buildCard(i) {
                 </div>
                 <div class="section-body" id="body-lancer-${i}">
                     <div class="technique-box">
-                        <div class="technique-title">🎯 Objectifs techniques (4/4)</div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer1-${i}">
-                            <label>✅ Position de profil correcte</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer2-${i}">
-                            <label>✅ Prise et placement de l'engin</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer3-${i}">
-                            <label>✅ Rotation du bassin</label>
-                        </div>
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="lancer4-${i}">
-                            <label>✅ Accompagnement du geste</label>
-                        </div>
+                        <div class="technique-title">⭐ Mon niveau technique — Lancer</div>
+                        <div class="star-section-title">Position de profil</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'lancer',1,1)" id="lancer1-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',1,2)" id="lancer1-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',1,3)" id="lancer1-s3-${i}">⭐</button><span class="star-label" id="lancer1-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Prise et placement de l'engin</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'lancer',2,1)" id="lancer2-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',2,2)" id="lancer2-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',2,3)" id="lancer2-s3-${i}">⭐</button><span class="star-label" id="lancer2-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Rotation du bassin</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'lancer',3,1)" id="lancer3-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',3,2)" id="lancer3-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',3,3)" id="lancer3-s3-${i}">⭐</button><span class="star-label" id="lancer3-lbl-${i}">Non évalué</span></div>
+                        <div class="star-section-title">Accompagnement du geste</div>
+                        <div class="star-rating"><button class="star-btn" onclick="setStar4(${i},'lancer',4,1)" id="lancer4-s1-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',4,2)" id="lancer4-s2-${i}">⭐</button><button class="star-btn" onclick="setStar4(${i},'lancer',4,3)" id="lancer4-s3-${i}">⭐</button><span class="star-label" id="lancer4-lbl-${i}">Non évalué</span></div>
                     </div>
                     <label>Distance lancée (m) :</label>
                     <input type="number" step="0.01" id="lancer-distance-${i}" placeholder="10.50" style="width:100px" inputmode="decimal">
@@ -943,6 +939,13 @@ function selectEleve(i, id) {
             `${s.age} ans · ${s.classe || ''} · VMA : ${s.vma ? s.vma + ' km/h' : 'non renseignée'}`;
         document.getElementById(`confirm-${i}`).style.display = 'block';
         document.getElementById(`novma-${i}`).style.display = s.vma ? 'none' : 'block';
+        setTimeout(() => {
+            const ex = s.seances?.find(se => se.lecon === 'L4') || {};
+            [1,2,3,4].forEach(c => {
+                if(ex[`sautTech${c}`])   renderStar4(i,'saut',c,   ex[`sautTech${c}`]);
+                if(ex[`lancerTech${c}`]) renderStar4(i,'lancer',c, ex[`lancerTech${c}`]);
+            });
+        }, 150);
     } else {
         document.getElementById(`info-${i}`).style.display = 'none';
         document.getElementById(`confirm-${i}`).style.display = 'none';
@@ -1046,6 +1049,14 @@ function selectProgression(i, progressionId) {
     document.getElementById(`sec-course-${i}`).style.display = 'block';
     document.getElementById(`sec-saut-${i}`).style.display = 'block';
     document.getElementById(`sec-lancer-${i}`).style.display = 'block';
+
+    // ── Ouverture auto section Course ──
+    const bCourse = document.getElementById(`body-course-${i}`);
+    const aCourse = document.getElementById(`arr-course-${i}`);
+    if(bCourse && !bCourse.classList.contains('open')) {
+        bCourse.classList.add('open');
+        if(aCourse) aCourse.classList.add('open');
+    }
 }
 
 function toggleSection(sec, i) {
@@ -1058,6 +1069,7 @@ function toggleSection(sec, i) {
 
 function updateTours(i) {
     [1,2,3,4,5,6].forEach(n => { const inp=document.getElementById(`t${n}-${i}`); if(inp) validateTimeInput(inp,LIMITES_200M.max,LIMITES_200M.min); });
+    markDirty4(i);
     const cardData = cardState[i];
     if(!cardData?.student) return;
     if(!cardData.progression) return;
@@ -1158,6 +1170,33 @@ function updateTours(i) {
     }
 }
 
+
+const _dirtyCards4 = new Set();
+function markDirty4(i) { _dirtyCards4.add(i); updateSaveBadge4(); }
+function clearDirty4() { _dirtyCards4.clear(); updateSaveBadge4(); }
+function updateSaveBadge4() {
+    const btn=document.getElementById('save-btn'), badge=document.getElementById('save-badge');
+    const n=_dirtyCards4.size;
+    if(btn) btn.classList.toggle('dirty', n>0);
+    if(badge) { badge.textContent=n; badge.classList.toggle('visible', n>0); }
+}
+
+const STAR_LABELS4 = ['', "J'ai essayé", 'Je commence à maîtriser', 'Je maîtrise bien'];
+const _starValues4 = {};
+function setStar4(i, discipline, critere, val) {
+    const key = `${i}_${discipline}_${critere}`;
+    _starValues4[key] = val;
+    for(let s=1;s<=3;s++) {
+        const btn=document.getElementById(`${discipline}${critere}-s${s}-${i}`);
+        if(btn) btn.classList.toggle('active', s<=val);
+    }
+    const lbl=document.getElementById(`${discipline}${critere}-lbl-${i}`);
+    if(lbl) lbl.textContent = STAR_LABELS4[val]||'';
+    markDirty4(i);
+}
+function getStarValue4(i, discipline, critere) { return _starValues4[`${i}_${discipline}_${critere}`]||0; }
+function renderStar4(i, discipline, critere, val) { if(val) setStar4(i,discipline,critere,val); }
+
 function saveAll(silent=false) {
     let count = 0;
     let erreurs = [];
@@ -1176,18 +1215,18 @@ function saveAll(silent=false) {
         const sautRaw = parseFloat(document.getElementById(`saut-distance-${i}`)?.value);
         const sautDistance = (!isNaN(sautRaw) && sautRaw>=0.8 && sautRaw<=5.5) ? sautRaw : null;
         if(!isNaN(sautRaw) && sautRaw!==0 && sautDistance===null) erreurs.push(`${d.student.nomPrenom}: saut aberrant (${sautRaw}m)`);
-        const sautTech1 = document.getElementById(`saut1-${i}`)?.checked || false;
-        const sautTech2 = document.getElementById(`saut2-${i}`)?.checked || false;
-        const sautTech3 = document.getElementById(`saut3-${i}`)?.checked || false;
-        const sautTech4 = document.getElementById(`saut4-${i}`)?.checked || false;
+        const sautTech1 = getStarValue4(i,'saut',1);
+        const sautTech2 = getStarValue4(i,'saut',2);
+        const sautTech3 = getStarValue4(i,'saut',3);
+        const sautTech4 = getStarValue4(i,'saut',4);
 
         const lancerRaw = parseFloat(document.getElementById(`lancer-distance-${i}`)?.value);
         const lancerDistance = (!isNaN(lancerRaw) && lancerRaw>=3.0 && lancerRaw<=25.0) ? lancerRaw : null;
         if(!isNaN(lancerRaw) && lancerRaw!==0 && lancerDistance===null) erreurs.push(`${d.student.nomPrenom}: lancer aberrant (${lancerRaw}m)`);
-        const lancerTech1 = document.getElementById(`lancer1-${i}`)?.checked || false;
-        const lancerTech2 = document.getElementById(`lancer2-${i}`)?.checked || false;
-        const lancerTech3 = document.getElementById(`lancer3-${i}`)?.checked || false;
-        const lancerTech4 = document.getElementById(`lancer4-${i}`)?.checked || false;
+        const lancerTech1 = getStarValue4(i,'lancer',1);
+        const lancerTech2 = getStarValue4(i,'lancer',2);
+        const lancerTech3 = getStarValue4(i,'lancer',3);
+        const lancerTech4 = getStarValue4(i,'lancer',4);
 
         const idx = allStudents.findIndex(s => s.id === d.student.id);
         if(idx === -1) return;

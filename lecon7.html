@@ -671,29 +671,51 @@ function updateTour2Btns(i) {
     const vma = parseFloat(state.student.vma) || null;
     const pctT1 = getChoixPct(i, 'tour1') || state.pctConseil || 100;
 
-    // Lire le ressenti T1
     const facile = document.getElementById(`ressenti1-facile-${i}`)?.checked;
     const bien   = document.getElementById(`ressenti1-bien-${i}`)?.checked;
     const dur    = document.getElementById(`ressenti1-dur-${i}`)?.checked;
 
-    let pctT2ref = pctT1;
-    let conseil = '';
-    if(facile) { pctT2ref = roundTo5(pctT1 + 10); conseil = 'Facile → tu peux accélérer'; }
-    else if(bien) { pctT2ref = roundTo5(pctT1 + 5);  conseil = 'Bien → légère hausse possible'; }
-    else if(dur)  { pctT2ref = roundTo5(pctT1 - 5);  conseil = 'Dur → réduis un peu'; }
-    else          { pctT2ref = roundTo5(pctT1);       conseil = 'Choisis ton rythme'; }
+    let pctConseilT2, conseil, configs;
 
-    // Mettre à jour le header du tour2
+    if(facile) {
+        pctConseilT2 = roundTo5(pctT1 + 10);
+        conseil = 'Facile → accélère !';
+        configs = [
+            { key:'plus-lent', emoji:'⚖️', label:'Maintenir',  pct: pctT1 },
+            { key:'meme',      emoji:'⚡', label:'Accélérer',  pct: roundTo5(pctT1 + 5) },
+            { key:'plus-vite', emoji:'🚀', label:'Sprinter',   pct: pctConseilT2, highlight: true },
+        ];
+    } else if(bien) {
+        pctConseilT2 = roundTo5(pctT1 + 5);
+        conseil = 'Bien → légère hausse possible';
+        configs = [
+            { key:'plus-lent', emoji:'🐌', label:'Réduire',    pct: roundTo5(pctT1 - 5) },
+            { key:'meme',      emoji:'⚡', label:'Accélérer',  pct: pctConseilT2, highlight: true },
+            { key:'plus-vite', emoji:'🚀', label:'Sprinter',   pct: roundTo5(pctT1 + 10) },
+        ];
+    } else if(dur) {
+        pctConseilT2 = roundTo5(pctT1 - 5);
+        conseil = 'Dur → réduis un peu';
+        configs = [
+            { key:'plus-lent', emoji:'🐌', label:'Réduire +',  pct: roundTo5(pctT1 - 10) },
+            { key:'meme',      emoji:'🐌', label:'Réduire',    pct: pctConseilT2, highlight: true },
+            { key:'plus-vite', emoji:'⚖️', label:'Maintenir',  pct: pctT1 },
+        ];
+    } else {
+        pctConseilT2 = roundTo5(pctT1);
+        conseil = 'Choisis ton rythme';
+        configs = [
+            { key:'plus-lent', emoji:'🐌', label:'Réduire',    pct: roundTo5(pctT1 - 5) },
+            { key:'meme',      emoji:'⚖️', label:'Maintenir',  pct: pctConseilT2, highlight: true },
+            { key:'plus-vite', emoji:'⚡', label:'Accélérer',  pct: roundTo5(pctT1 + 5) },
+        ];
+    }
+
     const header = document.querySelector(`#body-tour2-${i} .tour-header`);
-    if(header && conseil) header.innerHTML = `Après ton 1er tour (${pctT1}% VMA) — <span style="color:#fbbf24">${conseil}</span>`;
+    if(header) header.innerHTML = `Après ton 1er tour (${pctT1}% VMA) — <span style="color:#fbbf24">${conseil}</span>`;
 
-    cardState[i].pctT2ref = pctT2ref;
-
-    renderChoixGrid(i, 'tour2', [
-        { key:'plus-lent', emoji:'🐌', label:'Réduire',   pct: pctT2ref - 5 },
-        { key:'meme',      emoji:'⚖️', label:'Maintenir', pct: pctT2ref, highlight: true },
-        { key:'plus-vite', emoji:'⚡', label:'Accélérer', pct: pctT2ref + 5 },
-    ], vma, true);
+    cardState[i].pctT2ref = pctConseilT2;
+    renderChoixGrid(i, 'tour2', configs, vma, true);
 }
 
 // Mise à jour intelligente de T3 après ressenti T2
@@ -707,21 +729,46 @@ function updateTour3Btns(i) {
     const bien   = document.getElementById(`ressenti2-bien-${i}`)?.checked;
     const fatigue= document.getElementById(`ressenti2-fatigue-${i}`)?.checked;
 
-    let pctT3ref = pctT2;
-    let conseil = '';
-    if(facile) { pctT3ref = roundTo5(pctT2 + 10); conseil = 'Encore facile → sprint final !'; }
-    else if(bien) { pctT3ref = roundTo5(pctT2 + 5);  conseil = 'Bien → maintiens ou sprint léger'; }
-    else if(fatigue) { pctT3ref = roundTo5(pctT2 - 5); conseil = 'Tu fatigues → tiens le rythme'; }
-    else { pctT3ref = roundTo5(pctT2); conseil = 'Choisis ton projet final'; }
+    let pctConseilT3, conseil, configs;
+
+    if(facile) {
+        pctConseilT3 = roundTo5(pctT2 + 10);
+        conseil = 'Encore facile → sprint final !';
+        configs = [
+            { key:'tenir',     emoji:'⚖️', label:'Maintenir',  pct: pctT2 },
+            { key:'maintenir', emoji:'⚡', label:'Accélérer',  pct: roundTo5(pctT2 + 5) },
+            { key:'sprint',    emoji:'🚀', label:'Sprint max', pct: pctConseilT3, highlight: true },
+        ];
+    } else if(bien) {
+        pctConseilT3 = roundTo5(pctT2 + 5);
+        conseil = 'Bien → maintiens ou accélère légèrement';
+        configs = [
+            { key:'tenir',     emoji:'🐌', label:'Réduire',    pct: roundTo5(pctT2 - 5) },
+            { key:'maintenir', emoji:'⚖️', label:'Maintenir',  pct: pctT2 },
+            { key:'sprint',    emoji:'⚡', label:'Accélérer',  pct: pctConseilT3, highlight: true },
+        ];
+    } else if(fatigue) {
+        pctConseilT3 = pctT2;
+        conseil = 'Tu fatigues → tiens le rythme';
+        configs = [
+            { key:'tenir',     emoji:'🐌', label:'Réduire',    pct: roundTo5(pctT2 - 5) },
+            { key:'maintenir', emoji:'⚖️', label:'Tenir',      pct: pctConseilT3, highlight: true },
+            { key:'sprint',    emoji:'⚡', label:'Accélérer',  pct: roundTo5(pctT2 + 5) },
+        ];
+    } else {
+        pctConseilT3 = pctT2;
+        conseil = 'Choisis ton projet final';
+        configs = [
+            { key:'tenir',     emoji:'🐌', label:'Réduire',    pct: roundTo5(pctT2 - 5) },
+            { key:'maintenir', emoji:'⚖️', label:'Maintenir',  pct: pctConseilT3, highlight: true },
+            { key:'sprint',    emoji:'🚀', label:'Sprint',     pct: roundTo5(pctT2 + 10) },
+        ];
+    }
 
     const header = document.querySelector(`#body-tour3-${i} .tour-header`);
-    if(header && conseil) header.innerHTML = `Dernier 400m — <span style="color:#fbbf24">${conseil}</span>`;
+    if(header) header.innerHTML = `Dernier 400m — <span style="color:#fbbf24">${conseil}</span>`;
 
-    renderChoixGrid(i, 'tour3', [
-        { key:'tenir',     emoji:'🛡️', label:'Tenir',     pct: pctT3ref - 5 },
-        { key:'maintenir', emoji:'⚖️', label:'Maintenir', pct: pctT3ref, highlight: true },
-        { key:'sprint',    emoji:'🚀', label:'Sprint',    pct: pctT3ref + 10 },
-    ], vma, true);
+    renderChoixGrid(i, 'tour3', configs, vma, true);
 }
 
 function getChoixPct(i, tour) {

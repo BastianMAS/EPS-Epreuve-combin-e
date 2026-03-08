@@ -714,7 +714,14 @@ function exportPDF() {
                 <span style="float:right;background:#fff7ed;color:#f97316;border-radius:20px;padding:2px 8px;font-size:0.7rem;font-weight:800">${e.progression?.label||'N/D'}</span>
             </div>
             <div class="mini-grid">
-                <div class="mini-cell"><span>VMA</span>${e.vma||'?'} km/h</div>
+                <div class="mini-cell"><span>VMA</span>${e.vma||'?'} km/h${(() => {
+        const v = parseFloat(e.vma);
+        if(!v) return '';
+        const s400 = Math.round(400 / (v / 3.6));
+        const s200 = Math.round(200 / (v / 3.6));
+        const fmt = s => Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0');
+        return ` <span style="font-size:0.68rem;color:rgba(255,255,255,0.45);font-weight:400">→ 400m ⏱${fmt(s400)} | 200m ⏱${fmt(s200)}</span>`;
+    })()}</div>
                 <div class="mini-cell"><span>% VMA L4</span>${e.course?.niveauVMA?e.course.niveauVMA+'%':'—'}</div>
                 <div class="mini-cell"><span>Moy 200m L4</span>${fmtS(e.course?.moyenne)}</div>
                 <div class="mini-cell"><span>vs L3 ${evolIcon}</span>${fmtS(e.course?.moyenneL3)}</div>

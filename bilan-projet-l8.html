@@ -139,9 +139,39 @@
         .btn-pdf  { flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.85rem; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:white; }
         .save-status { text-align:center; font-size:0.75rem; color:var(--green); min-height:18px; margin-top:6px; }
         .no-data { text-align:center; color:rgba(255,255,255,0.4); padding:60px 20px; font-style:italic; }
+
+        /* ── Félicitations cycle terminé ── */
+        @keyframes confettiFall {
+            0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti-piece {
+            position: fixed; top: -20px; width: 10px; height: 14px;
+            border-radius: 2px; pointer-events: none; z-index: 9999;
+            animation: confettiFall linear forwards;
+        }
+        #felicitations-banner {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+            background: linear-gradient(135deg, #7c3aed, #0d9488);
+            padding: 14px 20px; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        #felicitations-banner.visible { display: block; }
+        .banner-title { font-size: 1.1rem; font-weight: 900; color: white; margin-bottom: 2px; }
+        .banner-sub   { font-size: 0.78rem; color: rgba(255,255,255,0.8); }
+        .banner-close { position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+                        background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body>
+    <!-- Bandeau félicitations fin de cycle -->
+    <div id="felicitations-banner">
+        <div class="banner-title">🎉 Félicitations — Cycle terminé !</div>
+        <div class="banner-sub">Tous les élèves ont validé leur projet L8 — super boulot à la classe !</div>
+        <button class="banner-close" onclick="document.getElementById('felicitations-banner').classList.remove('visible')">✕</button>
+    </div>
+
 
 <a href="index.html" class="btn-back">← Retour</a>
 
@@ -199,6 +229,7 @@ function renderEleves() {
     c.innerHTML = elevesData.map((e,i) => buildCard(e,i)).join('');
     // Restaurer projets sauvegardés
     elevesData.forEach((e,i) => { if(e.projetL8) restoreProjet(e,i); });
+    setTimeout(checkCycleComplete, 500);
 }
 
 function buildCard(eleve, idx) {
@@ -581,6 +612,8 @@ function sauvegarderProjet(idx) {
     const i=all.findIndex(s=>s.id===eleve.id);
     if(i===-1) return;
     all[i].projetL8={coches,projetHTML,date:new Date().toISOString()};
+    localStorage.setItem('eps_pro_students', JSON.stringify(all));
+    checkCycleComplete();
     localStorage.setItem('eps_pro_students',JSON.stringify(all));
     elevesData[i]=all[i];
     const st=document.getElementById(`save-status-${idx}`);
@@ -646,6 +679,37 @@ function exportFiche(idx) {
 </script>
 
 <script>
+
+// ── Félicitations fin de cycle ──
+function checkCycleComplete() {
+    if(!elevesData.length) return;
+    const presents = elevesData.filter(e => !e.absent);
+    if(!presents.length) return;
+    const tous = presents.every(e => e.projetL8?.coches?.length > 0);
+    if(tous) {
+        document.getElementById('felicitations-banner').classList.add('visible');
+        lancerConfetti();
+    }
+}
+
+function lancerConfetti() {
+    const colors = ['#7c3aed','#0d9488','#f59e0b','#ef4444','#3b82f6','#10b981','#f97316'];
+    for(let i = 0; i < 60; i++) {
+        setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'confetti-piece';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.background = colors[Math.floor(Math.random() * colors.length)];
+            el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+            el.style.animationDelay = '0s';
+            el.style.width = (8 + Math.random() * 8) + 'px';
+            el.style.height = (10 + Math.random() * 10) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }, i * 60);
+    }
+}
+
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js').catch(function(){}); }
 (function(){
     function upd(){

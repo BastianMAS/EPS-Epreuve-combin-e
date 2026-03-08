@@ -523,7 +523,14 @@ function renderEleves() {
             <div class="eleve-header">
                 <span>${eleve.sexe === 'F' ? '👧' : '🧑'}</span>
                 <span>${eleve.nomPrenom}</span>
-                <span style="margin-left: auto; font-size: 0.8rem;">VMA ${eleve.vma || 'N/A'} km/h</span>
+                <span style="margin-left: auto; font-size: 0.8rem;">VMA ${eleve.vma || 'N/A'} km/h${(() => {
+        const v = parseFloat(eleve.vma);
+        if(!v) return '';
+        const s400 = Math.round(400 / (v / 3.6));
+        const s200 = Math.round(200 / (v / 3.6));
+        const fmt = s => Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0');
+        return ` <span style="font-size:0.68rem;color:rgba(255,255,255,0.45);font-weight:400">→ 400m ⏱${fmt(s400)} | 200m ⏱${fmt(s200)}</span>`;
+    })()}</span>
             </div>`;
 
         eleve.sessions.forEach((sess, si) => {

@@ -857,6 +857,19 @@
             color: var(--warning);
             font-weight: 700;
         }
+
+        /* ── Graphique progression classe ── */
+        .graph-container { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:14px }
+        .graph-title { font-size:0.72rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px }
+        .graph-tabs { display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap }
+        .graph-tab { font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.15s }
+        .graph-tab.active { background:rgba(139,92,246,0.3);border-color:rgba(139,92,246,0.5);color:white }
+        .graph-canvas-wrap { position:relative;height:160px }
+        .graph-canvas-wrap canvas { width:100%!important;height:160px!important }
+        .graph-legend { display:flex;gap:12px;flex-wrap:wrap;margin-top:8px }
+        .graph-legend-item { display:flex;align-items:center;gap:4px;font-size:0.68rem;color:rgba(255,255,255,0.5) }
+        .graph-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0 }
+        .graph-empty { font-size:0.75rem;color:rgba(255,255,255,0.3);text-align:center;padding:30px 0 }
     </style>
     <script src="firebase-config.js"></script>
 </head>
@@ -1118,21 +1131,36 @@
                         <span id="lecons-arrow">▼</span>
                     </button>
                     <div id="lecons-menu" style="display: none; margin-top: 10px; padding-left: 20px;">
-                        <button onclick="window.open('./lecon3.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            🚀 L3 : Découverte & Technique
-                        </button>
-                        <button onclick="window.open('./lecon4.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            → L4 : Consolidation &amp; Progression
-                        </button>
-                        <button onclick="window.open('./lecon5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            → L5 : Relais Olympique <span style="font-size:0.72rem;opacity:0.7;font-weight:400">· Séance collective — motivation &amp; coopération</span>
-                        </button>
-                        <button onclick="window.open('./lecon6.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            → L6 : Perfectionnement Technique
-                        </button>
-                        <button onclick="window.open('./lecon7.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
-                            → L7 : Mise en Situation 3×400m
-                        </button>
+                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
+                            <button onclick="window.open('./lecon3.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
+                                🚀 L3 : Découverte & Technique
+                            </button>
+                            <button onclick="window.open('./bilan-l3.html', '_blank')" title="Bilan L3" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
+                            <button onclick="window.open('./lecon4.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
+                                → L4 : Consolidation & Progression
+                            </button>
+                            <button onclick="window.open('./bilan-l4.html', '_blank')" title="Bilan L4" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
+                            <button onclick="window.open('./lecon5.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
+                                → L5 : Relais Olympique <span style="font-size:0.72rem;opacity:0.7;font-weight:400">· Séance collective</span>
+                            </button>
+                            <button onclick="window.open('./bilan-l5.html', '_blank')" title="Bilan L5" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
+                            <button onclick="window.open('./lecon6.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
+                                → L6 : Perfectionnement Technique
+                            </button>
+                            <button onclick="window.open('./bilan-l6.html', '_blank')" title="Bilan L6" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
+                            <button onclick="window.open('./lecon7.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
+                                → L7 : Mise en Situation 3×400m
+                            </button>
+                            <button onclick="window.open('./bilan-l7.html', '_blank')" title="Bilan L7" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -1499,14 +1527,30 @@
         </button>
     </div>
 
-    <!-- NETTOYAGE DOUBLONS L5 -->
+    <!-- NETTOYAGE DOUBLONS -->
     <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:16px;margin-bottom:14px">
-        <div style="font-size:0.72rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧹 Nettoyage</div>
-        <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:10px">Supprime les séances L5 en doublon (même équipe, même date)</p>
-        <button onclick="cleanDoublonsL5()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:0.85rem;font-weight:800;cursor:pointer;width:100%">
-            🧹 Nettoyer les doublons L5
+        <div style="font-size:0.72rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧹 Nettoyage doublons</div>
+        <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:10px">Détecte et supprime les séances en doublon pour toutes les leçons</p>
+        <button onclick="previewDoublons()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:0.85rem;font-weight:800;cursor:pointer;width:100%">
+            🔍 Analyser les doublons
         </button>
+        <div id="doublon-preview" style="margin-top:10px;display:none"></div>
         <div id="doublon-result" style="margin-top:8px;font-size:0.78rem;color:#fbbf24"></div>
+    </div>
+
+
+    <!-- GRAPHIQUE PROGRESSION CLASSE -->
+    <div class="graph-container" id="graph-section">
+        <div class="graph-title">📈 Progression de la classe</div>
+        <div class="graph-tabs">
+            <div class="graph-tab active" onclick="switchGraphTab('vma',this)">% VMA course</div>
+            <div class="graph-tab" onclick="switchGraphTab('saut',this)">Saut (m)</div>
+            <div class="graph-tab" onclick="switchGraphTab('lancer',this)">Lancer (m)</div>
+        </div>
+        <div class="graph-canvas-wrap">
+            <canvas id="graph-canvas"></canvas>
+        </div>
+        <div class="graph-legend" id="graph-legend"></div>
     </div>
 
     <!-- LISTE ÉLÈVES -->
@@ -2319,31 +2363,100 @@ function importJSON(event) {
     event.target.value = '';
 }
 
-function cleanDoublonsL5() {
-    let totalSupprimés = 0;
-    storedStudents.forEach(eleve => {
+function previewDoublons() {
+    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    const lecons = ['L3','L4','L5','L6','L7'];
+    const doublons = [];
+
+    stored.forEach(eleve => {
         if(!eleve.seances) return;
-        const seancesL5 = eleve.seances.filter(s => s.lecon === 'L5');
-        const autres = eleve.seances.filter(s => s.lecon !== 'L5');
-        if(seancesL5.length <= 1) return;
-        // Dédoublonner par clé : equipe + date (arrondi à la minute)
-        const seen = new Set();
-        const dedup = seancesL5.filter(s => {
-            const dateMin = s.date ? s.date.substring(0, 16) : '';
-            const key = (s.equipe || '') + '|' + dateMin;
-            if(seen.has(key)) { totalSupprimés++; return false; }
-            seen.add(key);
-            return true;
+        lecons.forEach(lecon => {
+            const seances = eleve.seances.filter(s => s.lecon === lecon);
+            if(seances.length <= 1) return;
+            // Regrouper par date (arrondie à la minute)
+            const seen = new Map();
+            seances.forEach((s, idx) => {
+                const key = lecon === 'L5'
+                    ? (s.equipe||'') + '|' + (s.date||'').substring(0,16)
+                    : (s.date||'').substring(0,10);
+                if(!seen.has(key)) seen.set(key, []);
+                seen.get(key).push({ seance: s, origIdx: eleve.seances.indexOf(s) });
+            });
+            seen.forEach((group, key) => {
+                if(group.length > 1) {
+                    doublons.push({ eleve, lecon, key, group });
+                }
+            });
         });
-        eleve.seances = [...autres, ...dedup];
     });
-    localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
-    const msg = totalSupprimés > 0
-        ? `✅ ${totalSupprimés} doublon(s) L5 supprimé(s).`
-        : '✅ Aucun doublon détecté.';
-    document.getElementById('doublon-result').textContent = msg;
-    renderArchivesEleves();
+
+    const preview = document.getElementById('doublon-preview');
+    const result  = document.getElementById('doublon-result');
+    result.textContent = '';
+
+    if(!doublons.length) {
+        preview.style.display = 'none';
+        result.textContent = '✅ Aucun doublon détecté.';
+        return;
+    }
+
+    // Construire preview
+    let html = `<div style="font-size:0.75rem;font-weight:800;color:#fbbf24;margin-bottom:8px">${doublons.reduce((a,d)=>a+d.group.length-1,0)} doublon(s) détecté(s) :</div>`;
+    doublons.forEach((d, di) => {
+        const dateStr = d.key.split('|')[0] || d.key;
+        html += `<div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;padding:8px 10px;margin-bottom:6px">`;
+        html += `<div style="font-size:0.75rem;font-weight:700;color:white;margin-bottom:4px">${d.eleve.nomPrenom} — ${d.lecon} · ${d.group.length} séances</div>`;
+        d.group.forEach((item, gi) => {
+            const s = item.seance;
+            const dateLabel = s.date ? new Date(s.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'Date inconnue';
+            html += `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">`;
+            html += `<input type="checkbox" id="dd-${di}-${gi}" ${gi > 0 ? 'checked' : ''} style="accent-color:#ef4444">`;
+            html += `<label for="dd-${di}-${gi}" style="font-size:0.72rem;color:rgba(255,255,255,0.7);cursor:pointer">${dateLabel}${gi===0?' <span style="color:#34d399;font-size:0.65rem">← garder</span>':' <span style="color:#ef4444;font-size:0.65rem">← supprimer</span>'}</label>`;
+            html += `</div>`;
+        });
+        html += `</div>`;
+    });
+    html += `<button onclick="applyDoublonSuppression(${JSON.stringify(doublons.map((d,di)=>({eleveId:d.eleve.id,lecon:d.lecon,groupSize:d.group.length,di})))})" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:0.8rem;font-weight:800;cursor:pointer;width:100%;margin-top:6px">🗑️ Supprimer les cochés</button>`;
+
+    preview.innerHTML = html;
+    preview.style.display = 'block';
+    // Stocker doublons en mémoire pour suppression
+    window._doublonsData = doublons;
 }
+
+function applyDoublonSuppression(meta) {
+    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+    let totalSupprimés = 0;
+
+    (window._doublonsData || []).forEach((d, di) => {
+        const eleve = stored.find(e => e.id === d.eleve.id);
+        if(!eleve) return;
+        d.group.forEach((item, gi) => {
+            const checkbox = document.getElementById(`dd-${di}-${gi}`);
+            if(checkbox && checkbox.checked) {
+                const idx = eleve.seances.indexOf(item.seance);
+                // Trouver par correspondance date+lecon dans les données fraîches
+                const toRemove = eleve.seances.find(s =>
+                    s.lecon === d.lecon &&
+                    (s.date||'').substring(0,16) === (item.seance.date||'').substring(0,16)
+                );
+                if(toRemove) {
+                    eleve.seances.splice(eleve.seances.indexOf(toRemove), 1);
+                    totalSupprimés++;
+                }
+            }
+        });
+    });
+
+    localStorage.setItem('eps_pro_students', JSON.stringify(stored));
+    document.getElementById('doublon-preview').style.display = 'none';
+    document.getElementById('doublon-result').textContent =
+        totalSupprimés > 0 ? `✅ ${totalSupprimés} doublon(s) supprimé(s).` : '✅ Rien supprimé.';
+    window._doublonsData = null;
+    if(typeof renderArchivesEleves === 'function') renderArchivesEleves();
+}
+
+function cleanDoublonsL5() { previewDoublons(); }
 
 function deleteEleve(eleveId) {
     const eleve = storedStudents.find(e => e.id === eleveId);
@@ -2354,6 +2467,7 @@ function deleteEleve(eleveId) {
     updateStudentsStats();
     renderStudentsList();
     renderArchivesEleves();
+    renderGraphProgression();
 }
 
 function deleteSeanceArchive(eleveId, seanceIdx) {

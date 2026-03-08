@@ -366,11 +366,10 @@ function generateBilan() {
             if(!equipes[equipeNom]) {
                 equipes[equipeNom] = {
                     nom: equipeNom,
-                    membres: {},      // map id → données agrégées
+                    membres: {},
                     mancheKeys: new Set(),
-                    distanceTotaleEquipeParManche: [], // une entrée par manche unique
+                    distanceTotaleEquipeParManche: [],
                     objectifManche: seance.objectifManche || seance.objectifEquipe || 0,
-                    objectif: (seance.objectifManche || seance.objectifEquipe || 0), // sera multiplié après
                     performancesParManche: [],
                 };
             }
@@ -623,7 +622,7 @@ function renderEquipesDetails() {
                     </div>
                     <div class="detail-item">
                         <div class="detail-number">${equipe.objectif}m</div>
-                        <div>Objectif total (×${manchesNums.length || equipe.manches})</div>
+                        <div>Objectif total</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-number">${equipe.performanceMoyenne}%</div>
@@ -737,56 +736,88 @@ function exportXLSX() {
 
 function exportPDF() {
     if(!bilanData) return;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
-    const W = doc.internal.pageSize.getWidth();
+    const d = bilanData;
     const date = new Date().toLocaleDateString('fr-FR');
+    const medals = ['🥇','🥈','🥉'];
 
-    doc.setFillColor(0,133,195); doc.rect(0,0,W,22,'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont(undefined,'bold');
-    doc.text('EPS : Épreuve Combinée', 14, 10);
-    doc.setFontSize(11); doc.setFont(undefined,'normal');
-    doc.text('BILAN L5 — RELAIS OLYMPIQUE', 14, 17);
-    doc.text('Date : ' + date, W-14, 17, {align:'right'});
+    // Équipes triées par distance
+    const sorted = [...d.equipes].sort((a,b) => b.distanceTotale - a.distanceTotale);
 
-    doc.setTextColor(30,30,30);
-    const stats = [
-        ['Équipes', bilanData.stats.totalEquipes],
-        ['Élèves', bilanData.stats.totalEleves],
-        ['Distance totale', Math.round(bilanData.stats.distanceTotaleClasse/1000*10)/10+'km'],
-        ['Perf. moyenne', bilanData.stats.performanceMoyenneClasse+'%'],
-        ['Objectif atteint', bilanData.stats.equipesObjectifAtteint+' éq.'],
-    ];
-    const bw = (W-28)/stats.length;
-    stats.forEach(([lbl,val],i) => {
-        const x = 14 + i*bw;
-        doc.setFillColor(240,248,255); doc.roundedRect(x,26,bw-4,18,2,2,'F');
-        doc.setFontSize(14); doc.setFont(undefined,'bold'); doc.setTextColor(0,133,195);
-        doc.text(String(val), x+(bw-4)/2, 37, {align:'center'});
-        doc.setFontSize(7); doc.setFont(undefined,'normal'); doc.setTextColor(100,100,100);
-        doc.text(lbl, x+(bw-4)/2, 42, {align:'center'});
-    });
+    const equipeCards = sorted.map((eq, i) => {
+        const medal = medals[i] || (i+1)+'.';
+        const pctColor = eq.performanceMoyenne >= 100 ? '#10b981' : eq.performanceMoyenne >= 80 ? '#f59e0b' : '#ef4444';
+        const pctLabel = eq.performanceMoyenne >= 100 ? '✅ Objectif atteint !' : eq.performanceMoyenne >= 80 ? '⚠️ Proche de l\'objectif' : '❌ Objectif non atteint';
+        const barPct = Math.min(eq.performanceMoyenne, 100);
 
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Classement équipes', 14, 55);
-    const sorted = [...bilanData.equipes].sort((a,b) => b.distanceTotale-a.distanceTotale);
-    const headers = [['Rang','Équipe','Distance (m)','Objectif (m)','% atteint','Manches','Membres']];
-    const rows = sorted.map((eq,i) => {
-        const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
-        return [medal, eq.nom, eq.distanceTotale, eq.objectif, eq.performanceMoyenne+'%', eq.manches, eq.membres.length];
-    });
-    doc.autoTable({startY:59, head:headers, body:rows,
-        styles:{fontSize:9, cellPadding:2.5},
-        headStyles:{fillColor:[0,133,195], textColor:255, fontStyle:'bold'},
-        alternateRowStyles:{fillColor:[240,248,255]},
-        margin:{left:14, right:14}});
+        const membreRows = eq.membres.map(m => {
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:0.78rem">
+                <span>${m.sexe==='F'?'👧':'🧑'} ${m.nomPrenom||m.id}</span>
+                <span style="font-weight:800;color:#0891b2">${m.distanceIndividuelle||0}m</span>
+            </div>`;
+        }).join('');
 
-    const pages = doc.internal.getNumberOfPages();
-    for(let p=1; p<=pages; p++){
-        doc.setPage(p); doc.setFontSize(7); doc.setTextColor(160,160,160);
-        doc.text('EPS Épreuve Combinée · Bilan L5 · '+date+' · Page '+p+'/'+pages, W/2, doc.internal.pageSize.getHeight()-6, {align:'center'});
-    }
-    doc.save('bilan_L5_'+date.replace(/\//g,'-')+'.pdf');
+        return `<div class="card" style="border-top:4px solid #0891b2">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <span class="card-name" style="margin:0">${medal} Équipe ${eq.nom}</span>
+                <span style="font-size:0.72rem;color:#64748b">${eq.membres.length} coureurs · ${eq.manches} manche${eq.manches>1?'s':''}</span>
+            </div>
+            <div class="mini-grid">
+                <div class="mini-cell"><span>Distance totale</span><strong style="color:#0891b2">${eq.distanceTotale}m</strong></div>
+                <div class="mini-cell"><span>Objectif total</span>${eq.objectif}m</div>
+                <div class="mini-cell"><span>Objectif / manche</span>${eq.objectifManche}m</div>
+                <div class="mini-cell"><span>% atteint</span><strong style="color:${pctColor}">${eq.performanceMoyenne}%</strong></div>
+            </div>
+            <div style="background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;margin-bottom:8px">
+                <div style="width:${barPct}%;height:100%;background:linear-gradient(90deg,#0891b2,#06b6d4);border-radius:99px"></div>
+            </div>
+            ${membreRows}
+            <div class="result-pill" style="margin-top:8px;background:${pctColor}18;color:${pctColor};border:1px solid ${pctColor}40">${pctLabel}</div>
+        </div>`;
+    }).join('');
+
+    const win = window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan L5 — EPS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Nunito',Arial,sans-serif;background:#f0f9ff;padding:20px;color:#1e293b}
+        .hero{background:linear-gradient(135deg,#0891b2,#0284c7);color:white;padding:24px;border-radius:18px;margin-bottom:16px}
+        .hero h1{font-size:1.5rem;font-weight:900;margin-bottom:4px}
+        .hero p{opacity:0.85;font-size:0.88rem}
+        .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+        .kpi{background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .kpi-val{font-size:1.6rem;font-weight:900;line-height:1}
+        .kpi-lbl{font-size:0.65rem;color:#64748b;margin-top:4px}
+        .section-title{font-weight:800;color:#475569;font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+        .card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);break-inside:avoid}
+        .card-name{font-weight:800;font-size:0.9rem;margin-bottom:8px}
+        .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.78rem;margin-bottom:8px}
+        .mini-cell{background:#f8fafc;border-radius:8px;padding:6px}
+        .mini-cell span{color:#64748b;font-size:0.68rem;display:block}
+        .result-pill{text-align:center;border-radius:8px;padding:7px;font-weight:800;font-size:0.78rem}
+        .no-print{display:flex;gap:12px;justify-content:center;margin:24px 0}
+        @media print{.no-print{display:none}body{background:white;padding:10px}@page{margin:10mm}}
+    </style></head><body>
+    <div class="hero">
+        <h1>🏅 Bilan L5 — Relais Olympique</h1>
+        <p>EPS Épreuve Combinée · ${date} · ${d.stats.totalEquipes} équipe${d.stats.totalEquipes>1?'s':''} · ${d.stats.totalEleves} élèves</p>
+    </div>
+    <div class="kpis">
+        <div class="kpi"><div class="kpi-val" style="color:#0891b2">${d.stats.totalEquipes}</div><div class="kpi-lbl">Équipes</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#6366f1">${d.stats.totalEleves}</div><div class="kpi-lbl">Élèves</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#0891b2;font-size:1.3rem">${Math.round(d.stats.distanceTotaleClasse/1000*10)/10}km</div><div class="kpi-lbl">Distance totale classe</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.performanceMoyenneClasse}%</div><div class="kpi-lbl">Perf. moyenne</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.equipesObjectifAtteint}</div><div class="kpi-lbl">Équipes ≥ objectif</div></div>
+    </div>
+    <div class="section-title">🏆 Classement des équipes</div>
+    <div class="grid">${equipeCards}</div>
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:12px 28px;background:linear-gradient(135deg,#0891b2,#0284c7);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">🖨️ Imprimer / PDF</button>
+        <button onclick="window.close()" style="padding:12px 28px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
 }
 
 </script>

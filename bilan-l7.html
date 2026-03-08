@@ -643,38 +643,96 @@ function exportXLSX() {
 
 function exportPDF() {
     if(!bilanData || !bilanData.elevesAvecL7.length) return;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
-    const W = doc.internal.pageSize.getWidth();
+    const d = bilanData;
     const date = new Date().toLocaleDateString('fr-FR');
-    doc.setFillColor(59,130,246); doc.rect(0,0,W,22,'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont(undefined,'bold');
-    doc.text('EPS : Épreuve Combinée', 14, 10);
-    doc.setFontSize(11); doc.setFont(undefined,'normal');
-    doc.text('BILAN L7 — MISE EN SITUATION 3×400M', 14, 17);
-    doc.text('Date : ' + date, W-14, 17, {align:'right'});
-    doc.setTextColor(30,30,30);
-    const headers = [['Élève','VMA','Tour 1','% T1','Tour 2','% T2','Tour 3','% T3','% Moy','Confiant L8','Stratégie']];
-    const rows = bilanData.elevesAvecL7.map(e => [
-        e.nomPrenom, e.vma?e.vma+' km/h':'-',
-        e.seanceL7.temps1||'-', e.pctVMA1?e.pctVMA1+'%':'-',
-        e.seanceL7.temps2||'-', e.pctVMA2?e.pctVMA2+'%':'-',
-        e.seanceL7.temps3||'-', e.pctVMA3?e.pctVMA3+'%':'-',
-        e.pctVMAMoyen?e.pctVMAMoyen+'%':'-',
-        e.seanceL7.confiantL8?'✓':'-',
-        e.seanceL7.strategieTrouvee?'✓':'-'
-    ]);
-    doc.autoTable({startY:28, head:headers, body:rows,
-        styles:{fontSize:8,cellPadding:2},
-        headStyles:{fillColor:[59,130,246],textColor:255,fontStyle:'bold'},
-        alternateRowStyles:{fillColor:[239,246,255]},
-        margin:{left:14,right:14}});
-    const pages = doc.internal.getNumberOfPages();
-    for(let p=1;p<=pages;p++){
-        doc.setPage(p); doc.setFontSize(7); doc.setTextColor(160,160,160);
-        doc.text('EPS · Bilan L7 · '+date+' · Page '+p+'/'+pages, W/2, doc.internal.pageSize.getHeight()-6, {align:'center'});
-    }
-    doc.save('bilan_L7_'+date.replace(/\//g,'-')+'.pdf');
+    const fmtT = t => t || '—';
+
+    const cards = d.elevesAvecL7.map(e => {
+        const s = e.seanceL7;
+        if(!s) return '';
+        const pct = e.pctVMAMoyen;
+        const pctColor = pct>=100?'#10b981':pct>=85?'#f59e0b':'#ef4444';
+        const tourRows = [
+            ['Tour 1', s.temps1||'—', e.sessions?.[e.sessions.length-1]?.pctVMA1 || null],
+            ['Tour 2', s.temps2||'—', e.sessions?.[e.sessions.length-1]?.pctVMA2 || null],
+            ['Tour 3', s.temps3||'—', e.sessions?.[e.sessions.length-1]?.pctVMA3 || null],
+        ].map(([lbl, temps, p]) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.78rem;border-bottom:1px solid #f1f5f9">
+            <span style="color:#64748b">${lbl}</span>
+            <span style="font-weight:700">${temps}</span>
+            ${p?`<span style="background:#e0f2fe;color:#0891b2;border-radius:8px;padding:1px 7px;font-size:0.7rem;font-weight:800">${p}%</span>`:'<span style="color:#cbd5e1">—</span>'}
+        </div>`).join('');
+
+        return `<div class="card" style="border-top:4px solid #3b82f6">
+            <div class="card-name">${e.sexe==='F'?'👧':'🧑'} ${e.nomPrenom}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <div style="flex:1;background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden">
+                    <div style="width:${Math.min(pct||0,100)}%;height:100%;background:${pctColor};border-radius:99px"></div>
+                </div>
+                <span style="font-weight:900;color:${pctColor};font-size:1rem;min-width:46px">${pct?pct+'%':'—'}</span>
+            </div>
+            ${tourRows}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px">
+                <div style="background:${s.confiantL8?'#f0fdf4':'#f8fafc'};border-radius:8px;padding:6px;text-align:center;font-size:0.75rem">
+                    ${s.confiantL8?'✅':'⬜'} <strong>Confiant L8</strong>
+                </div>
+                <div style="background:${s.strategieTrouvee?'#eff6ff':'#f8fafc'};border-radius:8px;padding:6px;text-align:center;font-size:0.75rem">
+                    ${s.strategieTrouvee?'🧠':'⬜'} <strong>Stratégie</strong>
+                </div>
+            </div>
+            ${s.sautCourseElan||s.lancerCoordination?`<div style="margin-top:8px;font-size:0.72rem;color:#64748b">
+                🦘 Saut: élan ${s.sautCourseElan||0}/4 · préc ${s.sautPrecision||0}/4
+                &nbsp;|&nbsp; 🎯 Lancer: coord ${s.lancerCoordination||0}/4
+            </div>`:''}
+        </div>`;
+    }).join('');
+
+    const tauxConfiance = d.stats.totalEleves>0 ? Math.round(d.stats.confiantsL8/d.stats.totalEleves*100):0;
+    const tauxStrategie = d.stats.totalEleves>0 ? Math.round(d.stats.strategiesTrouvees/d.stats.totalEleves*100):0;
+
+    const win = window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan L7 — EPS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Nunito',Arial,sans-serif;background:#eff6ff;padding:20px;color:#1e293b}
+        .hero{background:linear-gradient(135deg,#3b82f6,#6366f1);color:white;padding:24px;border-radius:18px;margin-bottom:16px}
+        .hero h1{font-size:1.5rem;font-weight:900;margin-bottom:4px}
+        .hero p{opacity:0.85;font-size:0.88rem}
+        .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+        .kpi{background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .kpi-val{font-size:1.6rem;font-weight:900;line-height:1}
+        .kpi-lbl{font-size:0.65rem;color:#64748b;margin-top:4px}
+        .section-title{font-weight:800;color:#475569;font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+        .card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);break-inside:avoid}
+        .card-name{font-weight:800;font-size:0.9rem;margin-bottom:8px}
+        .no-print{display:flex;gap:12px;justify-content:center;margin:24px 0}
+        @media print{.no-print{display:none}body{background:white;padding:10px}@page{margin:10mm}}
+    </style></head><body>
+    <div class="hero">
+        <h1>🎯 Bilan L7 — Mise en situation 3×400m</h1>
+        <p>EPS Épreuve Combinée · ${date} · ${d.stats.totalEleves} élève${d.stats.totalEleves>1?'s':''}</p>
+    </div>
+    <div class="kpis">
+        <div class="kpi"><div class="kpi-val" style="color:#3b82f6">${d.stats.totalEleves}</div><div class="kpi-lbl">Élèves</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.vmaMovennne}%</div><div class="kpi-lbl">% VMA moyen classe</div></div>
+        <div class="kpi">
+            <div class="kpi-val" style="color:#10b981">${d.stats.confiantsL8}</div>
+            <div class="kpi-lbl">✅ Confiants pour L8 (${tauxConfiance}%)</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-val" style="color:#6366f1">${d.stats.strategiesTrouvees}</div>
+            <div class="kpi-lbl">🧠 Stratégie trouvée (${tauxStrategie}%)</div>
+        </div>
+    </div>
+    <div class="section-title">👥 Fiche par élève</div>
+    <div class="grid">${cards}</div>
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">🖨️ Imprimer / PDF</button>
+        <button onclick="window.close()" style="padding:12px 28px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
 }
 
 </script>

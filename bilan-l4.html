@@ -687,102 +687,98 @@ function exportXLSX(event) {
 
 
 function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const d = bilanData;
     const date = new Date().toLocaleDateString('fr-FR');
-    const W = doc.internal.pageSize.getWidth();
+    const fmtS = s => { if(!s) return '—'; const m=Math.floor(s/60); const sec=Math.round(s%60); return m+':'+String(sec).padStart(2,'0'); };
+    const PROG_COLORS = {refaire:'#fca5a5',meme:'#93c5fd',plus5:'#86efac',plus10:'#4ade80',plus15:'#22c55e'};
 
-    doc.setFillColor(255, 107, 53);
-    doc.rect(0, 0, W, 22, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(16); doc.setFont(undefined,'bold');
-    doc.text('EPS : Épreuve Combinée', 14, 10);
-    doc.setFontSize(11); doc.setFont(undefined,'normal');
-    doc.text('BILAN L4 — CONSOLIDATION & PROGRESSION', 14, 17);
-    doc.setFontSize(9);
-    doc.text('Date : ' + date, W - 14, 17, { align: 'right' });
+    const progBars = [['plus5','+5% VMA'],['plus10','+10% VMA'],['plus15','+15% VMA'],['meme','Même niveau'],['refaire','Refaire L3']].map(([id,lbl]) => {
+        const count = d.stats.repartitionProgressions[id] || 0;
+        const pct = d.stats.totalEleves>0 ? Math.round(count/d.stats.totalEleves*100):0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+            <span style="min-width:90px;font-size:0.75rem;font-weight:700">${lbl}</span>
+            <div style="flex:1;background:#e2e8f0;border-radius:99px;height:12px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${PROG_COLORS[id]};border-radius:99px"></div>
+            </div>
+            <span style="min-width:55px;font-size:0.75rem;color:#64748b">${count} élève${count>1?'s':''} (${pct}%)</span>
+        </div>`;
+    }).join('');
 
-    doc.setTextColor(30,30,30);
-    const stats = [
-        ['Élèves', d.stats.totalEleves],
-        ['Obj. course atteint', d.stats.moyenneObjectifAtteint + '%'],
-        ['Tech saut /4', d.stats.moyenneTechniqueSaut],
-        ['Tech lancer /4', d.stats.moyenneTechniqueLancer],
-        ['Amélioré vs L3', d.stats.evolutionVsL3?.ameliore || 0],
-    ];
-    const bw = (W - 28) / stats.length;
-    stats.forEach(([lbl, val], i) => {
-        const x = 14 + i * bw;
-        doc.setFillColor(245, 245, 250);
-        doc.roundedRect(x, 26, bw - 4, 18, 2, 2, 'F');
-        doc.setFontSize(15); doc.setFont(undefined,'bold');
-        doc.setTextColor(255, 107, 53);
-        doc.text(String(val), x + (bw-4)/2, 37, { align: 'center' });
-        doc.setFontSize(7); doc.setFont(undefined,'normal');
-        doc.setTextColor(100,100,100);
-        doc.text(lbl, x + (bw-4)/2, 42, { align: 'center' });
-    });
+    const cards = d.eleves.map(e => {
+        const evol = e.course?.evolutionVsL3;
+        const evolIcon = evol==='ameliore'?'📈':evol==='degrade'?'📉':'➡️';
+        const evalColor = e.course?.evaluation==='excellent'?'#10b981':e.course?.evaluation==='good'?'#f59e0b':'#ef4444';
+        const evalLabel = e.course?.evaluation==='excellent'?'✅ Objectif atteint':e.course?.evaluation==='good'?'⚠️ Proche de l\'objectif':'❌ Objectif non atteint';
+        return `<div class="card" style="border-top:4px solid #f97316">
+            <div class="card-name">${e.sexe==='F'?'👧':'🧑'} ${e.nom}
+                <span style="float:right;background:#fff7ed;color:#f97316;border-radius:20px;padding:2px 8px;font-size:0.7rem;font-weight:800">${e.progression?.label||'N/D'}</span>
+            </div>
+            <div class="mini-grid">
+                <div class="mini-cell"><span>VMA</span>${e.vma||'?'} km/h</div>
+                <div class="mini-cell"><span>% VMA L4</span>${e.course?.niveauVMA?e.course.niveauVMA+'%':'—'}</div>
+                <div class="mini-cell"><span>Moy 200m L4</span>${fmtS(e.course?.moyenne)}</div>
+                <div class="mini-cell"><span>vs L3 ${evolIcon}</span>${fmtS(e.course?.moyenneL3)}</div>
+            </div>
+            <div class="tech-row">
+                <div class="tech-cell" style="background:#f0fdf4;border-left:3px solid #10b981">
+                    <span style="font-size:0.68rem;color:#64748b">🦘 Tech saut</span><br><strong>${e.saut?.techniques||0}/4</strong>${e.saut?.distance?' · '+e.saut.distance+'m':''}
+                </div>
+                <div class="tech-cell" style="background:#fffbeb;border-left:3px solid #f59e0b">
+                    <span style="font-size:0.68rem;color:#64748b">🎯 Tech lancer</span><br><strong>${e.lancer?.techniques||0}/4</strong>${e.lancer?.distance?' · '+e.lancer.distance+'m':''}
+                </div>
+            </div>
+            <div class="result-pill" style="background:${evalColor}18;color:${evalColor};border:1px solid ${evalColor}40">${evalLabel}</div>
+        </div>`;
+    }).join('');
 
-    // Progressions
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Progressions choisies', 14, 56);
-    const progs = [
-        ['+5% VMA', d.stats.repartitionProgressions.plus5],
-        ['+10% VMA', d.stats.repartitionProgressions.plus10],
-        ['+15% VMA', d.stats.repartitionProgressions.plus15],
-        ['Même niveau', d.stats.repartitionProgressions.meme],
-        ['Refaire L3', d.stats.repartitionProgressions.refaire],
-    ];
-    const barW = (W - 28) / progs.length - 2;
-    const colors = [[134,239,172],[74,222,128],[34,197,94],[251,191,36],[239,68,68]];
-    progs.forEach(([lbl, count], i) => {
-        const x = 14 + i * (barW + 2);
-        const maxH = 20; const h = d.stats.totalEleves > 0 ? Math.max(1, (count / d.stats.totalEleves) * maxH) : 1;
-        doc.setFillColor(...colors[i]);
-        doc.rect(x, 80 - h, barW, h, 'F');
-        doc.setFontSize(7.5); doc.setTextColor(60,60,60); doc.setFont(undefined,'normal');
-        doc.text(lbl, x + barW/2, 83, { align: 'center' });
-        doc.setFont(undefined,'bold'); doc.setFontSize(8.5);
-        doc.text(String(count), x + barW/2, 78 - h, { align: 'center' });
-    });
-
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Détail par élève', 14, 96);
-
-    const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=Math.round(s%60); return m+':'+(sec+'').padStart(2,'0'); };
-    const headers = [['Élève', 'Progression', 'Motif', '% VMA', 'Moy 200m', 'Saut/4', 'Dist. saut', 'Lancer/4', 'Dist. lancer', 'Obj.']];
-    const rows = d.eleves.map(e => [
-        e.nom,
-        e.progression?.label || '-',
-        e.seanceL4?.motifRefaire || '',
-        e.course?.niveauVMA ? e.course.niveauVMA + '%' : '-',
-        fmtS(e.course?.moyenne),
-        (e.saut?.techniques || 0) + '/4',
-        e.saut?.distance ? e.saut.distance + 'm' : '-',
-        (e.lancer?.techniques || 0) + '/4',
-        e.lancer?.distance ? e.lancer.distance + 'm' : '-',
-        e.course?.evaluation === 'excellent' ? '✓' : '—',
-    ]);
-
-    doc.autoTable({
-        startY: 100,
-        head: headers,
-        body: rows,
-        styles: { fontSize: 7, cellPadding: 2 },
-        headStyles: { fillColor: [255, 107, 53], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [255, 250, 245] },
-        columnStyles: { 0: { cellWidth: 30 } },
-        margin: { left: 14, right: 14 },
-    });
-
-    const pages = doc.internal.getNumberOfPages();
-    for(let p = 1; p <= pages; p++) {
-        doc.setPage(p);
-        doc.setFontSize(7); doc.setTextColor(160,160,160); doc.setFont(undefined,'normal');
-        doc.text('EPS Épreuve Combinée · Bilan L4 · ' + date + ' · Page ' + p + '/' + pages, W/2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-    }
-    doc.save('bilan_L4_' + date.replace(/\//g,'-') + '.pdf');
+    const win = window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan L4 — EPS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Nunito',Arial,sans-serif;background:#fff7ed;padding:20px;color:#1e293b}
+        .hero{background:linear-gradient(135deg,#f97316,#ef4444);color:white;padding:24px;border-radius:18px;margin-bottom:16px}
+        .hero h1{font-size:1.5rem;font-weight:900;margin-bottom:4px}
+        .hero p{opacity:0.85;font-size:0.88rem}
+        .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+        .kpi{background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .kpi-val{font-size:1.6rem;font-weight:900;line-height:1}
+        .kpi-lbl{font-size:0.65rem;color:#64748b;margin-top:4px}
+        .section-title{font-weight:800;color:#475569;font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px}
+        .bar-wrap{background:white;border-radius:14px;padding:16px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+        .card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);break-inside:avoid}
+        .card-name{font-weight:800;font-size:0.9rem;margin-bottom:8px}
+        .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.78rem;margin-bottom:6px}
+        .mini-cell{background:#f8fafc;border-radius:8px;padding:6px}
+        .mini-cell span{color:#64748b;font-size:0.68rem;display:block}
+        .tech-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.78rem;margin-bottom:6px}
+        .tech-cell{border-radius:8px;padding:6px}
+        .result-pill{text-align:center;border-radius:8px;padding:6px;font-weight:800;font-size:0.78rem}
+        .no-print{display:flex;gap:12px;justify-content:center;margin:24px 0}
+        @media print{.no-print{display:none}body{background:white;padding:10px}@page{margin:10mm}}
+    </style></head><body>
+    <div class="hero">
+        <h1>🔥 Bilan L4 — Consolidation & Progression</h1>
+        <p>EPS Épreuve Combinée · ${date} · ${d.stats.totalEleves} élève${d.stats.totalEleves>1?'s':''}</p>
+    </div>
+    <div class="kpis">
+        <div class="kpi"><div class="kpi-val" style="color:#f97316">${d.stats.totalEleves}</div><div class="kpi-lbl">Élèves</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.moyenneObjectifAtteint}%</div><div class="kpi-lbl">Obj. course atteint</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#8b5cf6">${d.stats.moyenneTechniqueSaut}<span style="font-size:1rem">/4</span></div><div class="kpi-lbl">🦘 Tech saut</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#f59e0b">${d.stats.moyenneTechniqueLancer}<span style="font-size:1rem">/4</span></div><div class="kpi-lbl">🎯 Tech lancer</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.evolutionVsL3?.ameliore||0}</div><div class="kpi-lbl">📈 Améliorés vs L3</div></div>
+    </div>
+    <div class="section-title">📊 Progressions choisies</div>
+    <div class="bar-wrap">${progBars}</div>
+    <div class="section-title">👥 Fiche par élève</div>
+    <div class="grid">${cards}</div>
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:12px 28px;background:linear-gradient(135deg,#f97316,#ef4444);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">🖨️ Imprimer / PDF</button>
+        <button onclick="window.close()" style="padding:12px 28px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
 }
 
 </script>

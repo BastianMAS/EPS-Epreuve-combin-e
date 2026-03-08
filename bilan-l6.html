@@ -555,86 +555,101 @@ function exportXLSX() {
 }
 
 function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const d = bilanData;
     const date = new Date().toLocaleDateString('fr-FR');
-    const W = doc.internal.pageSize.getWidth();
+    const PYRA_LABELS = ['60% (1)','80% (1)','100%','80% (2)','60% (2)'];
+    const PYRA_KEYS = ['pyramide60_1','pyramide80_1','pyramide100','pyramide80_2','pyramide60_2'];
 
-    doc.setFillColor(16, 185, 129);
-    doc.rect(0, 0, W, 22, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(16); doc.setFont(undefined,'bold');
-    doc.text('EPS : Épreuve Combinée', 14, 10);
-    doc.setFontSize(11); doc.setFont(undefined,'normal');
-    doc.text('BILAN L6 — PERFECTIONNEMENT TECHNIQUE', 14, 17);
-    doc.text('Date : ' + date, W - 14, 17, { align: 'right' });
-
-    doc.setTextColor(30,30,30);
-    const stats = [
-        ['Élèves', d.totalEleves],
-        ['Pyramide complète', d.stats.pyramide.complete],
-        ['Tech saut /4', d.stats.moyenneTechSaut],
-        ['Tech lancer /4', d.stats.moyenneTechLancer],
-        ['Critère ⭐', d.stats.tauxCritereHarmonieux + '%'],
-    ];
-    const bw = (W - 28) / stats.length;
-    stats.forEach(([lbl, val], i) => {
-        const x = 14 + i * bw;
-        doc.setFillColor(240, 253, 244);
-        doc.roundedRect(x, 26, bw - 4, 18, 2, 2, 'F');
-        doc.setFontSize(15); doc.setFont(undefined,'bold');
-        doc.setTextColor(16, 185, 129);
-        doc.text(String(val), x + (bw-4)/2, 37, { align: 'center' });
-        doc.setFontSize(7); doc.setFont(undefined,'normal');
-        doc.setTextColor(100,100,100);
-        doc.text(lbl, x + (bw-4)/2, 42, { align: 'center' });
-    });
-
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Détail par élève', 14, 55);
-
-    const fmtPyra = e => {
+    const cards = d.elevesAvecL6.map(e => {
         const s = e.seanceL6;
-        const steps = ['pyramide60_1','pyramide80_1','pyramide100','pyramide80_2','pyramide60_2'];
-        return steps.filter(k => s[k]).length + '/5' + (e.pyramideComplete ? ' ✓' : '');
-    };
-    const headers = [['Élève', 'Âge', 'VMA', 'Pyramide', 'Tech saut/4', '⭐ saut', 'Dist. saut', 'Tech lancer/4', '⭐ lancer', 'Dist. lancer', 'Total/10']];
-    const rows = d.elevesAvecL6.map(e => {
-        const s = e.seanceL6;
-        const total = e.techSaut + e.techLancer + (s.sautTech5?1:0) + (s.lancerTech5?1:0);
-        return [
-            e.nomPrenom,
-            e.age,
-            e.vma ? e.vma + ' km/h' : '-',
-            fmtPyra(e),
-            e.techSaut + '/4',
-            s.sautTech5 ? '⭐' : '-',
-            s.sautDistance ? s.sautDistance + 'm' : '-',
-            e.techLancer + '/4',
-            s.lancerTech5 ? '⭐' : '-',
-            s.lancerDistance ? s.lancerDistance + 'm' : '-',
-            total + '/10',
-        ];
-    });
+        const total = e.techSaut + e.techLancer;
+        const totalMax = 10;
+        const pct = Math.round(total/totalMax*100);
+        const pctColor = pct>=80?'#10b981':pct>=60?'#f59e0b':'#ef4444';
+        const pyraSteps = PYRA_KEYS.map((k,i) => `<span style="padding:2px 6px;border-radius:6px;background:${s[k]?'#10b981':'#e2e8f0'};color:${s[k]?'white':'#94a3b8'};font-size:0.68rem;font-weight:700">${PYRA_LABELS[i]}</span>`).join('');
+        return `<div class="card" style="border-top:4px solid #10b981">
+            <div class="card-name">${e.sexe==='F'?'👧':'🧑'} ${e.nomPrenom}</div>
+            <div style="margin-bottom:8px">
+                <div style="font-size:0.68rem;color:#64748b;margin-bottom:4px;font-weight:700">🔺 Pyramide d'intensité</div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px">${pyraSteps}</div>
+                <div style="font-size:0.7rem;color:${e.pyramideComplete?'#10b981':'#94a3b8'};margin-top:4px;font-weight:700">${e.pyramideComplete?'✅ Pyramide complète':'⏳ Pyramide incomplète'}</div>
+            </div>
+            <div class="tech-row">
+                <div class="tech-cell" style="background:#f0fdf4;border-left:3px solid #10b981">
+                    <span style="font-size:0.68rem;color:#64748b">🦘 Tech saut</span><br>
+                    <strong>${e.techSaut}/4</strong>${s.sautTech5?' ⭐':''} ${s.sautDistance?'· '+s.sautDistance+'m':''}
+                </div>
+                <div class="tech-cell" style="background:#fffbeb;border-left:3px solid #f59e0b">
+                    <span style="font-size:0.68rem;color:#64748b">🎯 Tech lancer</span><br>
+                    <strong>${e.techLancer}/4</strong>${s.lancerTech5?' ⭐':''} ${s.lancerDistance?'· '+s.lancerDistance+'m':''}
+                </div>
+            </div>
+            <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+                <div style="flex:1;background:#e2e8f0;border-radius:99px;height:8px;overflow:hidden">
+                    <div style="width:${pct}%;height:100%;background:${pctColor};border-radius:99px"></div>
+                </div>
+                <span style="font-weight:800;color:${pctColor};font-size:0.85rem">${total}/${totalMax}</span>
+            </div>
+        </div>`;
+    }).join('');
 
-    doc.autoTable({
-        startY: 59,
-        head: headers,
-        body: rows,
-        styles: { fontSize: 7.5, cellPadding: 2 },
-        headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [240, 253, 244] },
-        margin: { left: 14, right: 14 },
-    });
+    // Stats pyramide
+    const pyraStats = PYRA_KEYS.map((k,i) => {
+        const count = d.stats.pyramide[k.replace('pyramide','').replace('_','').toLowerCase()] ?? (d.elevesAvecL6.filter(e => e.seanceL6[k]).length);
+        const pct = d.totalEleves>0 ? Math.round(count/d.totalEleves*100):0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="min-width:68px;font-size:0.75rem;font-weight:700">${PYRA_LABELS[i]}</span>
+            <div style="flex:1;background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:#10b981;border-radius:99px"></div>
+            </div>
+            <span style="min-width:55px;font-size:0.75rem;color:#64748b">${count} (${pct}%)</span>
+        </div>`;
+    }).join('');
 
-    const pages = doc.internal.getNumberOfPages();
-    for(let p = 1; p <= pages; p++) {
-        doc.setPage(p);
-        doc.setFontSize(7); doc.setTextColor(160,160,160); doc.setFont(undefined,'normal');
-        doc.text('EPS Épreuve Combinée · Bilan L6 · ' + date + ' · Page ' + p + '/' + pages, W/2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-    }
-    doc.save('bilan_L6_' + date.replace(/\//g,'-') + '.pdf');
+    const win = window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan L6 — EPS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Nunito',Arial,sans-serif;background:#f0fdf4;padding:20px;color:#1e293b}
+        .hero{background:linear-gradient(135deg,#10b981,#059669);color:white;padding:24px;border-radius:18px;margin-bottom:16px}
+        .hero h1{font-size:1.5rem;font-weight:900;margin-bottom:4px}
+        .hero p{opacity:0.85;font-size:0.88rem}
+        .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+        .kpi{background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .kpi-val{font-size:1.6rem;font-weight:900;line-height:1}
+        .kpi-lbl{font-size:0.65rem;color:#64748b;margin-top:4px}
+        .section-title{font-weight:800;color:#475569;font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px}
+        .bar-wrap{background:white;border-radius:14px;padding:16px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+        .card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);break-inside:avoid}
+        .card-name{font-weight:800;font-size:0.9rem;margin-bottom:8px}
+        .tech-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.78rem;margin-bottom:6px}
+        .tech-cell{border-radius:8px;padding:7px}
+        .no-print{display:flex;gap:12px;justify-content:center;margin:24px 0}
+        @media print{.no-print{display:none}body{background:white;padding:10px}@page{margin:10mm}}
+    </style></head><body>
+    <div class="hero">
+        <h1>💪 Bilan L6 — Perfectionnement Technique</h1>
+        <p>EPS Épreuve Combinée · ${date} · ${d.totalEleves} élève${d.totalEleves>1?'s':''}</p>
+    </div>
+    <div class="kpis">
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.totalEleves}</div><div class="kpi-lbl">Élèves</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.pyramide.complete}</div><div class="kpi-lbl">🔺 Pyramide complète</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#6366f1">${d.stats.moyenneTechSaut}<span style="font-size:1rem">/4</span></div><div class="kpi-lbl">🦘 Tech saut</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#f59e0b">${d.stats.moyenneTechLancer}<span style="font-size:1rem">/4</span></div><div class="kpi-lbl">🎯 Tech lancer</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.tauxCritereHarmonieux}%</div><div class="kpi-lbl">⭐ Critère harmonieux</div></div>
+    </div>
+    <div class="section-title">🔺 Complétion de la pyramide</div>
+    <div class="bar-wrap">${pyraStats}</div>
+    <div class="section-title">👥 Fiche par élève</div>
+    <div class="grid">${cards}</div>
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:12px 28px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">🖨️ Imprimer / PDF</button>
+        <button onclick="window.close()" style="padding:12px 28px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
 }
 
 </script>

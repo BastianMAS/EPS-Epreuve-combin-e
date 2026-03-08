@@ -508,106 +508,99 @@ function exportXLSX() {
 }
 
 function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const d = bilanData;
     const date = new Date().toLocaleDateString('fr-FR');
-    const W = doc.internal.pageSize.getWidth();
+    const fmtS = s => { if(!s) return '—'; const m=Math.floor(s/60); const sec=Math.round(s%60); return m+':'+String(sec).padStart(2,'0'); };
+    const NIVEAU_COLORS = {vma95:'#bfdbfe',vma100:'#bbf7d0',vma105:'#fde68a',vma110:'#fca5a5'};
 
-    // Header band
-    doc.setFillColor(139, 92, 246);
-    doc.rect(0, 0, W, 22, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(16); doc.setFont(undefined,'bold');
-    doc.text('EPS : Épreuve Combinée', 14, 10);
-    doc.setFontSize(11); doc.setFont(undefined,'normal');
-    doc.text('BILAN L3 — DÉCOUVERTE ATHLÉTIQUE', 14, 17);
-    doc.setFontSize(9);
-    doc.text(`Date : ${date}`, W - 14, 17, { align: 'right' });
+    // Barres niveaux
+    const niveauRows = [['vma95','95% VMA'],['vma100','100% VMA'],['vma105','105% VMA'],['vma110','110% VMA']].map(([id,lbl]) => {
+        const count = d.stats.niveauxRepartition[id] || 0;
+        const pct = d.totalEleves > 0 ? Math.round(count/d.totalEleves*100) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+            <span style="min-width:74px;font-size:0.75rem;font-weight:700">${lbl}</span>
+            <div style="flex:1;background:#e2e8f0;border-radius:99px;height:12px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${NIVEAU_COLORS[id]};border-radius:99px"></div>
+            </div>
+            <span style="min-width:55px;font-size:0.75rem;color:#64748b">${count} élève${count>1?'s':''} (${pct}%)</span>
+        </div>`;
+    }).join('');
 
-    // Stats boxes
-    doc.setTextColor(30,30,30);
-    const stats = [
-        ['Élèves évalués', d.totalEleves],
-        ['Objectif ≥100% atteint', d.stats.tauxObjectifAtteint + '%'],
-        ['Moy. technique saut', d.stats.moyenneTechSaut + '/2'],
-        ['Moy. technique lancer', d.stats.moyenneTechLancer + '/2'],
-    ];
-    const bw = (W - 28) / stats.length;
-    stats.forEach(([lbl, val], i) => {
-        const x = 14 + i * bw;
-        doc.setFillColor(245, 245, 250);
-        doc.roundedRect(x, 26, bw - 4, 18, 2, 2, 'F');
-        doc.setFontSize(16); doc.setFont(undefined,'bold');
-        doc.setTextColor(139, 92, 246);
-        doc.text(String(val), x + (bw-4)/2, 37, { align: 'center' });
-        doc.setFontSize(7.5); doc.setFont(undefined,'normal');
-        doc.setTextColor(100,100,100);
-        doc.text(lbl, x + (bw-4)/2, 42, { align: 'center' });
-    });
+    // Cartes élèves
+    const cards = d.elevesAvecL3.map(e => {
+        const s = e.seanceL3;
+        const nc = NIVEAU_COLORS[s.niveau] || '#e2e8f0';
+        const objColor = e.objAtteint ? '#10b981' : e.toursValides>=4 ? '#f59e0b' : '#ef4444';
+        const objLabel = e.objAtteint ? '✅ Objectif atteint' : e.toursValides>=4 ? '⚠️ Objectif non atteint' : '❌ Tours incomplets';
+        return `<div class="card" style="border-top:4px solid ${nc}">
+            <div class="card-name">${e.sexe==='F'?'👧':'🧑'} ${e.nomPrenom}
+                <span style="float:right;background:${nc};border-radius:20px;padding:2px 9px;font-size:0.7rem;font-weight:800;color:#1e293b">${e.niv?.label||'N/D'}</span>
+            </div>
+            <div class="mini-grid">
+                <div class="mini-cell"><span>VMA</span>${e.vma||'?'} km/h</div>
+                <div class="mini-cell"><span>% VMA réel</span>${e.pctVMAMoyen?e.pctVMAMoyen+'%':'—'}</div>
+                <div class="mini-cell"><span>Moy 200m</span>${fmtS(s.moyenne200m)}</div>
+                <div class="mini-cell"><span>Tours validés</span>${e.toursValides}/6</div>
+            </div>
+            <div class="tech-row">
+                <div class="tech-cell" style="background:#f0fdf4;border-left:3px solid #10b981">
+                    <span style="font-size:0.7rem;color:#64748b">🦘 Tech saut</span><br><strong>${e.techSaut}/2</strong>${s.sautDistance?' · '+s.sautDistance+'m':''}
+                </div>
+                <div class="tech-cell" style="background:#fffbeb;border-left:3px solid #f59e0b">
+                    <span style="font-size:0.7rem;color:#64748b">🎯 Tech lancer</span><br><strong>${e.techLancer}/2</strong>${s.lancerDistance?' · '+s.lancerDistance+'m':''}
+                </div>
+            </div>
+            <div class="result-pill" style="background:${objColor}18;color:${objColor};border:1px solid ${objColor}40">${objLabel}</div>
+        </div>`;
+    }).join('');
 
-    // Niveau distribution
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Répartition des niveaux', 14, 56);
-    const niveaux = [
-        ['95% VMA', d.stats.niveauxRepartition.vma95],
-        ['100% VMA', d.stats.niveauxRepartition.vma100],
-        ['105% VMA', d.stats.niveauxRepartition.vma105],
-        ['110% VMA', d.stats.niveauxRepartition.vma110],
-    ];
-    const barY = 60; const barH = 6; const barMaxW = 80;
-    const colors = [[147,197,253],[134,239,172],[253,186,116],[252,165,165]];
-    niveaux.forEach(([lbl, count], i) => {
-        const y = barY + i * 10;
-        const pct = d.totalEleves > 0 ? count / d.totalEleves : 0;
-        doc.setFillColor(230,230,240);
-        doc.rect(50, y, barMaxW, barH, 'F');
-        doc.setFillColor(...colors[i]);
-        doc.rect(50, y, barMaxW * pct, barH, 'F');
-        doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
-        doc.text(lbl, 14, y + 4.5);
-        doc.text(String(count) + ' élève' + (count > 1 ? 's' : ''), 50 + barMaxW + 3, y + 4.5);
-    });
-
-    // Table
-    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(30,30,30);
-    doc.text('Détail par élève', 14, 106);
-
-    const headers = [['Élève', 'Niveau', '% VMA', 'Moy 200m', 'Tours', 'Saut/2', 'Dist. saut', 'Lancer/2', 'Dist. lancer', 'Objectif']];
-    const fmtS = s => { if(!s) return '-'; const m=Math.floor(s/60); const sec=Math.round(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; };
-    const rows = d.elevesAvecL3.map(e => [
-        e.nomPrenom,
-        e.niv?.label || '-',
-        e.pctVMAMoyen ? e.pctVMAMoyen + '%' : '-',
-        fmtS(e.seanceL3.moyenne200m),
-        e.toursValides + '/6',
-        e.techSaut + '/2',
-        e.seanceL3.sautDistance ? e.seanceL3.sautDistance + 'm' : '-',
-        e.techLancer + '/2',
-        e.seanceL3.lancerDistance ? e.seanceL3.lancerDistance + 'm' : '-',
-        e.objAtteint ? '✓' : '✗',
-    ]);
-
-    doc.autoTable({
-        startY: 110,
-        head: headers,
-        body: rows,
-        styles: { fontSize: 7.5, cellPadding: 2 },
-        headStyles: { fillColor: [139, 92, 246], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [248, 248, 255] },
-        columnStyles: { 0: { cellWidth: 32 }, 9: { halign: 'center' } },
-        margin: { left: 14, right: 14 },
-    });
-
-    // Footer
-    const pages = doc.internal.getNumberOfPages();
-    for(let p = 1; p <= pages; p++) {
-        doc.setPage(p);
-        doc.setFontSize(7); doc.setTextColor(160,160,160); doc.setFont(undefined,'normal');
-        doc.text(`EPS Épreuve Combinée · Bilan L3 · ${date} · Page ${p}/${pages}`, W/2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-    }
-
-    doc.save(`bilan_L3_${date.replace(/\//g,'-')}.pdf`);
+    const win = window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan L3 — EPS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Nunito',Arial,sans-serif;background:#f5f3ff;padding:20px;color:#1e293b}
+        .hero{background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;padding:24px;border-radius:18px;margin-bottom:16px}
+        .hero h1{font-size:1.5rem;font-weight:900;margin-bottom:4px}
+        .hero p{opacity:0.85;font-size:0.88rem}
+        .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+        .kpi{background:white;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .kpi-val{font-size:1.8rem;font-weight:900;line-height:1}
+        .kpi-lbl{font-size:0.67rem;color:#64748b;margin-top:4px}
+        .section-title{font-weight:800;color:#475569;font-size:0.78rem;text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px}
+        .bar-wrap{background:white;border-radius:14px;padding:16px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+        .card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);break-inside:avoid}
+        .card-name{font-weight:800;font-size:0.9rem;margin-bottom:8px}
+        .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.78rem;margin-bottom:6px}
+        .mini-cell{background:#f8fafc;border-radius:8px;padding:6px}
+        .mini-cell span{color:#64748b;font-size:0.68rem;display:block}
+        .tech-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.78rem;margin-bottom:6px}
+        .tech-cell{border-radius:8px;padding:6px}
+        .result-pill{text-align:center;border-radius:8px;padding:6px;font-weight:800;font-size:0.78rem}
+        .no-print{display:flex;gap:12px;justify-content:center;margin:24px 0}
+        @media print{.no-print{display:none}body{background:white;padding:10px}@page{margin:10mm}}
+    </style></head><body>
+    <div class="hero">
+        <h1>🏃 Bilan L3 — Découverte Athlétique</h1>
+        <p>EPS Épreuve Combinée · ${date} · ${d.totalEleves} élève${d.totalEleves>1?'s':''}</p>
+    </div>
+    <div class="kpis">
+        <div class="kpi"><div class="kpi-val" style="color:#8b5cf6">${d.totalEleves}</div><div class="kpi-lbl">Élèves évalués</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#10b981">${d.stats.tauxObjectifAtteint}%</div><div class="kpi-lbl">Objectif ≥100% atteint</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#6366f1">${d.stats.moyenneTechSaut}<span style="font-size:1.1rem">/2</span></div><div class="kpi-lbl">🦘 Moy. tech saut</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#f59e0b">${d.stats.moyenneTechLancer}<span style="font-size:1.1rem">/2</span></div><div class="kpi-lbl">🎯 Moy. tech lancer</div></div>
+    </div>
+    <div class="section-title">📊 Répartition des niveaux VMA</div>
+    <div class="bar-wrap">${niveauRows}</div>
+    <div class="section-title">👥 Fiche par élève</div>
+    <div class="grid">${cards}</div>
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:12px 28px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">🖨️ Imprimer / PDF</button>
+        <button onclick="window.close()" style="padding:12px 28px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer">✕ Fermer</button>
+    </div>
+    </body></html>`);
+    win.document.close();
 }
 
 </script>

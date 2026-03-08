@@ -783,10 +783,12 @@ function updateTours(i) {
             valid++;
             temps.push(val);
             
-            // Pas de feedback dans le diagnostic - juste encourager
-            let feedback = `✅ Tour ${n} enregistré !`;
-            
-            // Afficher feedback simple
+            // Feedback avec validation de plage
+            const tInput = document.getElementById(`t${n}-${i}`);
+            validateTourInput(tInput);
+            const isValide = val >= LIMITES_400M_DIAG.min && val <= LIMITES_400M_DIAG.max;
+            let feedback = isValide ? `✅ Tour ${n} enregistré !` : `⚠️ Temps hors plage !`;
+
             let feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
             if(!feedbackEl) {
                 feedbackEl = document.createElement('div');
@@ -795,6 +797,10 @@ function updateTours(i) {
                 el.parentNode.appendChild(feedbackEl);
             }
             feedbackEl.textContent = feedback;
+            feedbackEl.style.background = isValide
+                ? 'linear-gradient(135deg, var(--success), var(--accent))'
+                : 'linear-gradient(135deg, var(--danger), #dc2626)';
+            feedbackEl.style.color = isValide ? 'black' : 'white';
             
         } else { 
             el.textContent = '';
@@ -852,7 +858,11 @@ function addSaut(i, type) {
     const input = document.getElementById(`saut-${type}-input-${i}`);
     const val = parseFloat(input.value);
     if(!val || val <= 0) { alert('⚠️ Entrez une distance valide'); return; }
-
+    // Bornes plausibles : 0.50m → 5.50m
+    if(val < 0.5 || val > 5.5) {
+        alert(`⚠️ Distance hors plage (${val}m)\nValeurs attendues : 0.50m à 5.50m`);
+        return;
+    }
     const key = type === 'sans' ? 'sautSans' : 'sautAvec';
     cardState[i][key] = cardState[i][key] || [];
     cardState[i][key].push(val);
@@ -891,7 +901,11 @@ function addLancer(i) {
     const input = document.getElementById(`lancer-input-${i}`);
     const val = parseFloat(input.value);
     if(!val || val <= 0) { alert('⚠️ Entrez une distance valide'); return; }
-
+    // Bornes plausibles : 2.0m → 25.0m
+    if(val < 2.0 || val > 25.0) {
+        alert(`⚠️ Distance hors plage (${val}m)\nValeurs attendues : 2.0m à 25.0m`);
+        return;
+    }
     cardState[i].lancerResults = cardState[i].lancerResults || [];
     cardState[i].lancerResults.push(val);
     input.value = '';
@@ -971,12 +985,43 @@ function saveAll() {
 // =============================================
 function parseTime(str) {
     if(!str) return null;
-    const parts = str.replace(',',':').split(':');
-    if(parts.length === 2) {
-        const m = parseInt(parts[0]), s = parseInt(parts[1]);
-        if(!isNaN(m) && !isNaN(s)) return m*60 + s;
+    const raw = str.trim().replace(',', ':');
+    // Format M:SS standard
+    const m1 = raw.match(/^(\d+):(\d{1,2})$/);
+    if(m1) {
+        const min = parseInt(m1[1]), sec = parseInt(m1[2]);
+        if(sec < 60) return min * 60 + sec;
+    }
+    // Format entier seul ex: 125 → 1:25, 210 → 2:10
+    const m2 = raw.match(/^(\d{3,4})$/);
+    if(m2) {
+        const n = parseInt(m2[0]);
+        if(n >= 100 && n <= 9959) {
+            const min = Math.floor(n / 100), sec = n % 100;
+            if(sec < 60) return min * 60 + sec;
+        }
     }
     return null;
+}
+
+// Validation visuelle temps 400m (bornes : 1:00 à 3:30)
+const LIMITES_400M_DIAG = { min: 60, max: 210 };
+function validateTourInput(input) {
+    if(!input) return;
+    const val = parseTime(input.value);
+    // Reset
+    input.style.borderColor = '';
+    input.style.background = '';
+    if(!input.value.trim()) return;
+    if(val === null || val < LIMITES_400M_DIAG.min || val > LIMITES_400M_DIAG.max) {
+        input.style.borderColor = '#ef4444';
+        input.style.background = 'rgba(239,68,68,0.15)';
+        input.title = 'Temps hors plage (1:00 → 3:30)';
+    } else {
+        input.style.borderColor = '#4ade80';
+        input.style.background = 'rgba(74,222,128,0.08)';
+        input.title = '';
+    }
 }
 
 function fmtSec(sec) {

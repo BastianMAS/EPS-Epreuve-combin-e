@@ -923,7 +923,17 @@ function selectEleve(i, id) {
             if(cardState[i].progression) {
                 selectProgression(i, cardState[i].progression);
             }
-        // ── Confirmation visuelle forte (toujours) ──
+        } else {
+            // Pas de VMA
+            analyse.style.display = 'none';
+            progression.style.display = 'none';
+            document.getElementById(`novma-${i}`).style.display = 'block';
+            document.getElementById(`sec-course-${i}`).style.display = 'block';
+            document.getElementById(`sec-saut-${i}`).style.display = 'block';
+            document.getElementById(`sec-lancer-${i}`).style.display = 'block';
+        }
+
+        // ── Confirmation visuelle forte (toujours, avec ou sans VMA) ──
         const avatarEl = document.getElementById(`confirm-avatar-${i}`);
         avatarEl.innerHTML = s.photo
             ? `<img src="${s.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">`
@@ -932,17 +942,7 @@ function selectEleve(i, id) {
         document.getElementById(`confirm-meta-${i}`).textContent =
             `${s.age} ans · ${s.classe || ''} · VMA : ${s.vma ? s.vma + ' km/h' : 'non renseignée'}`;
         document.getElementById(`confirm-${i}`).style.display = 'block';
-
-        if(s.vma) {
-            document.getElementById(`novma-${i}`).style.display = 'none';
-        } else {
-            analyse.style.display = 'none';
-            progression.style.display = 'none';
-            document.getElementById(`novma-${i}`).style.display = 'block';
-            document.getElementById(`sec-course-${i}`).style.display = 'block';
-            document.getElementById(`sec-saut-${i}`).style.display = 'block';
-            document.getElementById(`sec-lancer-${i}`).style.display = 'block';
-        }
+        document.getElementById(`novma-${i}`).style.display = s.vma ? 'none' : 'block';
     } else {
         document.getElementById(`info-${i}`).style.display = 'none';
         document.getElementById(`confirm-${i}`).style.display = 'none';

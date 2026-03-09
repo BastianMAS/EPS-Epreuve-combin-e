@@ -544,6 +544,15 @@
         .star-rating { display:flex;gap:4px;align-items:center;margin:4px 0; }
         .star-label { font-size:0.7rem;color:#94a3b8;margin-left:4px;font-style:italic; }
         .star-section-title { font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.55);margin:8px 0 2px; }
+
+        .ressenti-box { margin-top:10px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.08); }
+        .ressenti-label { font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em; }
+        .ressenti-btns { display:flex;gap:6px; }
+        .ressenti-btn { flex:1;padding:7px 4px;border:2px solid rgba(255,255,255,0.12);border-radius:8px;background:rgba(255,255,255,0.05);color:white;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center; }
+        .ressenti-btn.selected { border-color:var(--accent);background:rgba(99,102,241,0.25); }
+        .ressenti-btn.facile.selected { border-color:#10b981;background:rgba(16,185,129,0.2); }
+        .ressenti-btn.ok.selected { border-color:#8b5cf6;background:rgba(139,92,246,0.2); }
+        .ressenti-btn.dur.selected { border-color:#ef4444;background:rgba(239,68,68,0.2); }
     </style>
 </head>
 <body>
@@ -791,6 +800,15 @@ function buildCard(i) {
                 </div>
             </div>
 
+            <div class="ressenti-box" id="ressenti-box-${i}" style="display:none">
+                <div class="ressenti-label">💬 Ressenti global après les 6 tours</div>
+                <div class="ressenti-btns">
+                    <button class="ressenti-btn facile" id="res-facile-${i}" onclick="setRessenti4(${i},'facile')">🐌 Trop facile</button>
+                    <button class="ressenti-btn ok"     id="res-ok-${i}"     onclick="setRessenti4(${i},'ok')">✅ Bien calibré</button>
+                    <button class="ressenti-btn dur"    id="res-dur-${i}"    onclick="setRessenti4(${i},'dur')">🔥 Trop dur</button>
+                </div>
+            </div>
+
             <div class="section" id="sec-saut-${i}" style="display:none">
                 <div class="section-header saut-h" onclick="toggleSection('saut',${i})">
                     <span>🦘 SAUT - APPRENTISSAGE TECHNIQUE DE BASE</span><span class="arrow" id="arr-saut-${i}">▼</span>
@@ -945,6 +963,12 @@ function selectEleve(i, id) {
                 if(ex[`sautTech${c}`])   renderStar4(i,'saut',c,   ex[`sautTech${c}`]);
                 if(ex[`lancerTech${c}`]) renderStar4(i,'lancer',c, ex[`lancerTech${c}`]);
             });
+            // Recharger ressenti + afficher la box si séance existante
+            if(ex.ressenti) setRessenti4(i, ex.ressenti);
+            if(ex.moyenne200m) {
+                const rb = document.getElementById(`ressenti-box-${i}`);
+                if(rb) rb.style.display = 'block';
+            }
         }, 150);
     } else {
         document.getElementById(`info-${i}`).style.display = 'none';
@@ -1165,6 +1189,9 @@ function updateTours(i) {
 
         moyEl.textContent = moyFeedback;
         cardState[i].tours = temps;
+        // Afficher la ressenti-box quand les 6 tours sont remplis
+        const rb = document.getElementById(`ressenti-box-${i}`);
+        if(rb) rb.style.display = 'block';
     } else {
         moyEl.textContent = '';
     }
@@ -1196,6 +1223,19 @@ function setStar4(i, discipline, critere, val) {
 }
 function getStarValue4(i, discipline, critere) { return _starValues4[`${i}_${discipline}_${critere}`]||0; }
 function renderStar4(i, discipline, critere, val) { if(val) setStar4(i,discipline,critere,val); }
+
+
+// ── Ressenti L4 ──
+const _ressenti4 = {};
+function setRessenti4(i, val) {
+    _ressenti4[i] = val;
+    ['facile','ok','dur'].forEach(v => {
+        const btn = document.getElementById(`res-${v}-${i}`);
+        if(btn) btn.classList.toggle('selected', v === val);
+    });
+    markDirty4(i);
+}
+function getRessenti4(i) { return _ressenti4[i] || null; }
 
 function saveAll(silent=false) {
     let count = 0;
@@ -1279,6 +1319,7 @@ function saveAll(silent=false) {
             lancerTech2: lancerTech2,
             lancerTech3: lancerTech3,
             lancerTech4: lancerTech4,
+            ressenti: getRessenti4(i),
             date: new Date().toISOString()
         };
 

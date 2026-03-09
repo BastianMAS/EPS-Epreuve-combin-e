@@ -266,6 +266,12 @@
         @keyframes confirmPop { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
         .student-confirm .student-name-big { font-size:1.15rem;font-weight:900;color:white;margin-bottom:3px; }
         .student-confirm .student-meta { font-size:0.75rem;color:#94a3b8; }
+
+        .save-wrapper-diag { position:relative;display:inline-block;width:100%; }
+        .save-badge-diag { position:absolute;top:-8px;right:-8px;background:#ef4444;color:white;border-radius:50%;width:22px;height:22px;font-size:0.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;pointer-events:none;opacity:0;transition:opacity 0.2s; }
+        .save-badge-diag.visible { opacity:1; }
+        @keyframes savePulseDiag { 0%,100%{box-shadow:0 0 0 0 rgba(0,210,255,0.5)} 50%{box-shadow:0 0 0 10px rgba(0,210,255,0)} }
+        .save-all.dirty-diag { animation:savePulseDiag 1.5s infinite; }
     </style>
 
     <script src="firebase-config.js"></script>
@@ -280,7 +286,7 @@
 <div id="autosave-indicator">💾 Sauvegarde auto active</div>
 <div class="grid6" id="grid"></div>
 
-<button class="save-all" onclick="saveAll()">💾 ENREGISTRER LES 6 DIAGNOSTICS</button>
+<div class="save-wrapper-diag"><button class="save-all" id="save-btn-diag" onclick="saveAll()">💾 ENREGISTRER LES 6 DIAGNOSTICS</button><div class="save-badge-diag" id="save-badge-diag">0</div></div>
 
 <script>
 // =============================================
@@ -578,6 +584,13 @@ function selectEleve(i, id) {
         }
         // Recharger historique si VMA existante
         if(s.vmaHistorique && s.vmaHistorique.length > 0) updateHistorique(i);
+        // Ouverture auto section VMA
+        const bVma = document.getElementById(`body-vma-${i}`);
+        const aVma = document.getElementById(`arr-vma-${i}`);
+        if(bVma && !bVma.classList.contains('open')) {
+            bVma.classList.add('open');
+            if(aVma) aVma.classList.add('open');
+        }
     } else {
         info.style.display = 'none';
         const cf=document.getElementById(`confirm-${i}`); if(cf) cf.style.display='none';
@@ -926,6 +939,19 @@ function renderLancer(i) {
 // =============================================
 // ENREGISTREMENT GLOBAL
 // =============================================
+
+// ── Dirty tracking diagnostic ──
+const _dirtyCardsDiag = new Set();
+function markDirtyDiag(i) { _dirtyCardsDiag.add(i); updateSaveBadgeDiag(); }
+function clearDirtyDiag() { _dirtyCardsDiag.clear(); updateSaveBadgeDiag(); }
+function updateSaveBadgeDiag() {
+    const btn = document.getElementById('save-btn-diag');
+    const badge = document.getElementById('save-badge-diag');
+    const n = _dirtyCardsDiag.size;
+    if(btn) btn.classList.toggle('dirty-diag', n > 0);
+    if(badge) { badge.textContent = n; badge.classList.toggle('visible', n > 0); }
+}
+
 function saveAll() {
     let count = 0;
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
@@ -977,6 +1003,7 @@ function saveAll() {
     if(count === 0) { alert('⚠️ Aucun élève sélectionné'); return; }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
+    clearDirtyDiag();
     alert(`✅ ${count} diagnostic(s) enregistré(s) !`);
 }
 

@@ -853,10 +853,7 @@ function saveAll(silent = false) {
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
     if(typeof syncStudentsToFirebase === 'function') syncStudentsToFirebase(allStudents);
-    if(!silent) {
-        if(count === 0) { alert('⚠️ Aucun élève sélectionné !'); return; }
-        alert(`✅ L6 sauvegardée pour ${count} élève(s) !`);
-    }
+    if(!silent) { if(count===0){ alert('⚠️ Aucun élève sélectionné !'); return; } const n=count; clearDirty6(); setTimeout(()=>{ const b=document.createElement('div'); b.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:white;padding:12px 24px;border-radius:12px;font-weight:900;font-size:1rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4)'; b.textContent=`💪 Super session ! ${n} élève(s) enregistré(s) ✅`; document.body.appendChild(b); setTimeout(()=>b.remove(),2800); },100); }
 }
 
 console.log('⚡ L6 - Perfectionnement Technique chargé !');

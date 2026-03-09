@@ -1188,6 +1188,7 @@ function updateTours(i) {
         }
 
         moyEl.textContent = moyFeedback;
+        const tend4 = getTendance(temps); if(tend4) moyEl.textContent += ` ${tend4}`;
         cardState[i].tours = temps;
         // Afficher la ressenti-box quand les 6 tours sont remplis
         const rb = document.getElementById(`ressenti-box-${i}`);
@@ -1236,6 +1237,19 @@ function setRessenti4(i, val) {
     markDirty4(i);
 }
 function getRessenti4(i) { return _ressenti4[i] || null; }
+
+
+// ── Tendance inter-tours ──
+function getTendance(temps) {
+    const valid = temps.filter(t => t !== null && t > 0);
+    if(valid.length < 3) return '';
+    const first = valid.slice(0, Math.ceil(valid.length/2)).reduce((a,b)=>a+b)/Math.ceil(valid.length/2);
+    const last  = valid.slice(-Math.floor(valid.length/2)).reduce((a,b)=>a+b)/Math.floor(valid.length/2);
+    const delta = last - first;
+    if(delta < -1.5) return '📈 En progression'; // temps qui baisse = plus rapide = bien
+    if(delta > 1.5)  return '📉 Attention au relâchement';
+    return '↔️ Régulier';
+}
 
 function saveAll(silent=false) {
     let count = 0;
@@ -1332,7 +1346,7 @@ function saveAll(silent=false) {
     }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    if(!silent) alert(`🔧 Données L4 sauvegardées pour ${count} élève(s) !`);
+    if(!silent) { const n=count; clearDirty4(); setTimeout(()=>{ const b=document.createElement('div'); b.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:white;padding:12px 24px;border-radius:12px;font-weight:900;font-size:1rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4)'; b.textContent=`💪 Super session ! ${n} élève(s) enregistré(s) ✅`; document.body.appendChild(b); setTimeout(()=>b.remove(),2800); },100); }
 }
 
 function parseTime(str) {

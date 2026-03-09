@@ -1153,7 +1153,7 @@ function saveAll(silent=false) {
     }
     if(count === 0) { if(!silent) alert('⚠️ Aucun élève sélectionné !'); return; }
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    if(!silent) { alert(`🎯 L7 sauvegardée pour ${count} élève(s) !`); clearDirty7(); }
+    if(!silent) { const n=count; clearDirty7(); setTimeout(()=>{ const b=document.createElement('div'); b.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:white;padding:12px 24px;border-radius:12px;font-weight:900;font-size:1rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4)'; b.textContent=`💪 Super session ! ${n} élève(s) enregistré(s) ✅`; document.body.appendChild(b); setTimeout(()=>b.remove(),2800); },100); }
 }
 // Sauvegarde automatique uniquement à la fermeture/quitter la page
 window.addEventListener('beforeunload', function() { try { saveAll(true); } catch(e){} });

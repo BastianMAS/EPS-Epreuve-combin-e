@@ -646,6 +646,24 @@ function calcVMA(i) {
         cardState[i].vmaCalculee = vma;
         document.getElementById(`vma-val-${i}`).textContent = vma;
         document.getElementById(`vma-res-${i}`).style.display = 'block';
+        // Feedback contextuel pour l'élève
+        const s_vma = cardState[i]?.student;
+        const isFemale = s_vma?.sexe === 'F';
+        let vmaTxt = '', vmaColor = '';
+        if(isFemale) {
+            if(vma >= 11.5)      { vmaTxt = '🟢 Excellent niveau pour ton âge !'; vmaColor = '#10b981'; }
+            else if(vma >= 10.0) { vmaTxt = '🟡 Dans la bonne moyenne'; vmaColor = '#f59e0b'; }
+            else if(vma >= 8.5)  { vmaTxt = '🟠 Axe de progression'; vmaColor = '#f97316'; }
+            else                  { vmaTxt = '🔴 On va progresser ensemble !'; vmaColor = '#ef4444'; }
+        } else {
+            if(vma >= 13.0)      { vmaTxt = '🟢 Excellent niveau pour ton âge !'; vmaColor = '#10b981'; }
+            else if(vma >= 11.0) { vmaTxt = '🟡 Dans la bonne moyenne'; vmaColor = '#f59e0b'; }
+            else if(vma >= 9.5)  { vmaTxt = '🟠 Axe de progression'; vmaColor = '#f97316'; }
+            else                  { vmaTxt = '🔴 On va progresser ensemble !'; vmaColor = '#ef4444'; }
+        }
+        let fbEl = document.getElementById(`vma-feedback-${i}`);
+        if(!fbEl) { fbEl = document.createElement('div'); fbEl.id = `vma-feedback-${i}`; fbEl.style.cssText = 'font-size:0.78rem;font-weight:700;margin-top:4px;text-align:center'; document.getElementById(`vma-res-${i}`).appendChild(fbEl); }
+        fbEl.style.color = vmaColor; fbEl.textContent = vmaTxt;
     } else {
         document.getElementById(`vma-res-${i}`).style.display = 'none';
     }

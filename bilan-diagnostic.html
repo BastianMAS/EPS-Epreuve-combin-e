@@ -586,7 +586,15 @@ function exportStudentPDF(studentId) {
 
     <div class="card" style="margin-bottom:14px">
         <div class="card-title" style="color:#475569">📋 Détail de la Course</div>
-        <div class="row"><span>VMA mesurée</span><span class="row-val">${vma.toFixed(1)} km/h</span></div>
+        ${(()=>{
+            const isLL = (d.methode||d.testCourse||'').toLowerCase().includes('luc') || (s.vmaHistorique||[]).some(h=>h.type==='lucleger');
+            const vmaNavette = (s.vmaHistorique||[]).find(h=>h.type==='lucleger')?.vmaNavette;
+            if(isLL && vmaNavette) {
+                return `<div class="row"><span>VMA piste (×1.06)</span><span class="row-val" style="color:var(--accent);font-weight:700">${vma.toFixed(1)} km/h</span></div>
+                        <div class="row"><span style="color:#888;font-size:0.8rem">↳ VMA navette (Luc Léger)</span><span class="row-val" style="color:#888;font-size:0.8rem">${vmaNavette} km/h</span></div>`;
+            }
+            return `<div class="row"><span>VMA mesurée</span><span class="row-val">${vma.toFixed(1)} km/h</span></div>`;
+        })()}
         <div class="row"><span>Méthode</span><span class="row-val">${d.methode||d.testCourse||'—'}</span></div>
         <div class="row"><span>Moyenne 3×400m</span><span class="row-val">${moy?formatTime(moy):'—'}</span></div>
         <div class="row"><span>Saut sans élan</span><span class="row-val">${sautSans?sautSans.toFixed(2)+'m':'—'}</span></div>

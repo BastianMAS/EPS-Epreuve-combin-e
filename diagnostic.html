@@ -260,18 +260,6 @@
             margin-top: 8px;
         }
         .btn-back { padding: 8px 16px; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; margin-bottom: 12px; font-size: 0.85rem; }
-
-        #autosave-indicator { position:fixed;bottom:80px;right:16px;z-index:9999;background:rgba(30,40,55,0.92);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:6px 12px;font-size:0.72rem;color:#94a3b8;font-weight:600;pointer-events:none; }
-        .student-confirm { background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(0,217,255,0.15));border:2px solid var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:12px;display:none;animation:confirmPop 0.3s ease-out; }
-        @keyframes confirmPop { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
-        .student-confirm .student-name-big { font-size:1.15rem;font-weight:900;color:white;margin-bottom:3px; }
-        .student-confirm .student-meta { font-size:0.75rem;color:#94a3b8; }
-
-        .save-wrapper-diag { position:relative;display:inline-block;width:100%; }
-        .save-badge-diag { position:absolute;top:-8px;right:-8px;background:#ef4444;color:white;border-radius:50%;width:22px;height:22px;font-size:0.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;pointer-events:none;opacity:0;transition:opacity 0.2s; }
-        .save-badge-diag.visible { opacity:1; }
-        @keyframes savePulseDiag { 0%,100%{box-shadow:0 0 0 0 rgba(0,210,255,0.5)} 50%{box-shadow:0 0 0 10px rgba(0,210,255,0)} }
-        .save-all.dirty-diag { animation:savePulseDiag 1.5s infinite; }
     </style>
 
     <script src="firebase-config.js"></script>
@@ -282,11 +270,9 @@
 <p class="subtitle">📊 L1/L2 - ÉVALUATION DIAGNOSTIQUE</p>
 <button class="btn-back" onclick="window.location.href='index.html'">← Retour</button>
 
-
-<div id="autosave-indicator">💾 Sauvegarde auto active</div>
 <div class="grid6" id="grid"></div>
 
-<div class="save-wrapper-diag"><button class="save-all" id="save-btn-diag" onclick="saveAll()">💾 ENREGISTRER LES 6 DIAGNOSTICS</button><div class="save-badge-diag" id="save-badge-diag">0</div></div>
+<button class="save-all" onclick="saveAll()">💾 ENREGISTRER LES 6 DIAGNOSTICS</button>
 
 <script>
 // =============================================
@@ -332,15 +318,6 @@ function buildCard(i) {
                 ${opts}
             </select>
             <div class="student-info" id="info-${i}"></div>
-            <div class="student-confirm" id="confirm-${i}">
-                <div style="display:flex;align-items:center;gap:10px">
-                    <div id="confirm-avatar-${i}" style="flex-shrink:0"></div>
-                    <div>
-                        <div class="student-name-big" id="confirm-name-${i}"></div>
-                        <div class="student-meta" id="confirm-meta-${i}"></div>
-                    </div>
-                </div>
-            </div>
 
             <!-- SECTION VMA -->
             <div class="section" id="sec-vma-${i}">
@@ -398,10 +375,16 @@ function buildCard(i) {
 
                     <!-- Résultat VMA calculé -->
                     <div class="vma-display" id="vma-res-${i}">
-                        <div style="font-size:0.7rem;color:#aaa">🏃 Vitesse de course</div>
-                        <div class="vma-val" id="vma-val-${i}">--</div>
+                        <div style="font-size:0.7rem;color:#aaa">🏃 VMA navette (test)</div>
+                        <div class="vma-val" id="vma-val-navette-${i}">--</div>
                         <div style="font-size:0.7rem;color:#aaa">km/h</div>
-                        <button class="btn-save-vma" onclick="saveVMATest(${i})">💾 Enregistrer</button>
+                        <div id="vma-correction-${i}" style="display:none;margin-top:6px;padding:5px 8px;background:rgba(0,210,255,0.12);border-radius:6px;font-size:0.7rem;color:#aaa;text-align:center">
+                            🏟️ VMA piste estimée (×1.06)<br>
+                            <span id="vma-val-${i}" style="font-size:1.1rem;font-weight:900;color:#00d2ff">--</span>
+                            <span style="font-size:0.7rem;color:#aaa"> km/h</span>
+                            <div style="font-size:0.62rem;color:#888;margin-top:2px">Correction navette → piste · Berthoin & Léger</div>
+                        </div>
+                        <button class="btn-save-vma" onclick="saveVMATest(${i})">💾 Enregistrer VMA piste</button>
                     </div>
 
                 </div>
@@ -431,17 +414,17 @@ function buildCard(i) {
 
                     <div class="tour-row">
                         <span class="tour-label">T1</span>
-                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i});validateTourInput(this)" style="width:60px" inputmode="decimal">
+                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t1r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T2</span>
-                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i});validateTourInput(this)" style="width:60px" inputmode="decimal">
+                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t2r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T3</span>
-                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i});validateTourInput(this)" style="width:60px" inputmode="decimal">
+                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t3r-${i}"></span>
                     </div>
                     <div id="moy-course-${i}" style="font-size:0.75rem;margin-top:4px;color:var(--success);font-weight:700"></div>
@@ -574,26 +557,10 @@ function selectEleve(i, id) {
         info.style.display = 'block';
         const vmaInfo = s.vma ? ` | VMA: <strong style="color:var(--success)">${s.vma} km/h</strong>` : '';
         info.innerHTML = `<strong>${s.sexe==='F'?'👧':'🧑'} ${s.sexe==='F'?'Fille':'Garçon'}</strong> | ${s.age} ans${vmaInfo}`;
-        // ── Confirmation visuelle forte ──
-        const avD = document.getElementById(`confirm-avatar-${i}`);
-        if(avD) {
-            avD.innerHTML = s.photo ? `<img src="${s.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">` : `<span style="font-size:2rem">${s.sexe==='F'?'👧':'🧑'}</span>`;
-            document.getElementById(`confirm-name-${i}`).textContent = s.nomPrenom;
-            document.getElementById(`confirm-meta-${i}`).textContent = `${s.age} ans · ${s.classe || ''}`;
-            document.getElementById(`confirm-${i}`).style.display = 'block';
-        }
         // Recharger historique si VMA existante
         if(s.vmaHistorique && s.vmaHistorique.length > 0) updateHistorique(i);
-        // Ouverture auto section VMA
-        const bVma = document.getElementById(`body-vma-${i}`);
-        const aVma = document.getElementById(`arr-vma-${i}`);
-        if(bVma && !bVma.classList.contains('open')) {
-            bVma.classList.add('open');
-            if(aVma) aVma.classList.add('open');
-        }
     } else {
         info.style.display = 'none';
-        const cf=document.getElementById(`confirm-${i}`); if(cf) cf.style.display='none';
     }
 }
 
@@ -642,28 +609,24 @@ function calcVMA(i) {
     }
 
     if(vma && vma > 0) {
-        vma = Math.round(vma * 10) / 10;
-        cardState[i].vmaCalculee = vma;
-        document.getElementById(`vma-val-${i}`).textContent = vma;
+        const vmaNavette = Math.round(vma * 10) / 10;
+        // Luc Léger uniquement : correction navette → piste ×1.06, arrondie au 0.5
+        const vmaPiste = (type === 'lucleger')
+            ? Math.round(vma * 1.06 * 2) / 2
+            : Math.round(vma * 10) / 10;
+
+        cardState[i].vmaCalculeeNavette = vmaNavette;
+        cardState[i].vmaCalculee = vmaPiste;
+
+        // Affichage VMA navette (brute)
+        document.getElementById(`vma-val-navette-${i}`).textContent = vmaNavette;
+
+        // Affichage VMA piste corrigée (bloc visible uniquement pour Luc Léger)
+        const corrEl = document.getElementById(`vma-correction-${i}`);
+        document.getElementById(`vma-val-${i}`).textContent = vmaPiste;
+        corrEl.style.display = (type === 'lucleger') ? 'block' : 'none';
+
         document.getElementById(`vma-res-${i}`).style.display = 'block';
-        // Feedback contextuel pour l'élève
-        const s_vma = cardState[i]?.student;
-        const isFemale = s_vma?.sexe === 'F';
-        let vmaTxt = '', vmaColor = '';
-        if(isFemale) {
-            if(vma >= 11.5)      { vmaTxt = '🟢 Excellent niveau pour ton âge !'; vmaColor = '#10b981'; }
-            else if(vma >= 10.0) { vmaTxt = '🟡 Dans la bonne moyenne'; vmaColor = '#f59e0b'; }
-            else if(vma >= 8.5)  { vmaTxt = '🟠 Axe de progression'; vmaColor = '#f97316'; }
-            else                  { vmaTxt = '🔴 On va progresser ensemble !'; vmaColor = '#ef4444'; }
-        } else {
-            if(vma >= 13.0)      { vmaTxt = '🟢 Excellent niveau pour ton âge !'; vmaColor = '#10b981'; }
-            else if(vma >= 11.0) { vmaTxt = '🟡 Dans la bonne moyenne'; vmaColor = '#f59e0b'; }
-            else if(vma >= 9.5)  { vmaTxt = '🟠 Axe de progression'; vmaColor = '#f97316'; }
-            else                  { vmaTxt = '🔴 On va progresser ensemble !'; vmaColor = '#ef4444'; }
-        }
-        let fbEl = document.getElementById(`vma-feedback-${i}`);
-        if(!fbEl) { fbEl = document.createElement('div'); fbEl.id = `vma-feedback-${i}`; fbEl.style.cssText = 'font-size:0.78rem;font-weight:700;margin-top:4px;text-align:center'; document.getElementById(`vma-res-${i}`).appendChild(fbEl); }
-        fbEl.style.color = vmaColor; fbEl.textContent = vmaTxt;
     } else {
         document.getElementById(`vma-res-${i}`).style.display = 'none';
     }
@@ -676,11 +639,17 @@ function saveVMATest(i) {
 
     const labels = { demicooper:'1/2 Cooper', cooper:'Cooper', lucleger:'Luc Léger' };
     cardState[i].vmaHistorique = cardState[i].vmaHistorique || [];
-    cardState[i].vmaHistorique.push({ type, label: labels[type], vma, date: new Date().toLocaleDateString('fr-FR') });
+    const entry = { type, label: labels[type], vma, date: new Date().toLocaleDateString('fr-FR') };
+    // Pour Luc Léger : stocker aussi la VMA navette brute pour traçabilité
+    if(type === 'lucleger' && cardState[i].vmaCalculeeNavette) {
+        entry.vmaNavette = cardState[i].vmaCalculeeNavette;
+        entry.label = `Luc Léger (navette: ${cardState[i].vmaCalculeeNavette} → piste: ${vma})`;
+    }
+    cardState[i].vmaHistorique.push(entry);
 
-    // Moyenne
+    // Moyenne arrondie au 0.5
     const moy = cardState[i].vmaHistorique.reduce((s,t) => s+t.vma, 0) / cardState[i].vmaHistorique.length;
-    cardState[i].vma = Math.round(moy * 10) / 10;
+    cardState[i].vma = Math.round(moy * 2) / 2;
 
     // Reset input
     document.getElementById(`${type==='demicooper'?'dc':type==='cooper'?'co':'ll'}-${i}`).value = '';
@@ -814,12 +783,10 @@ function updateTours(i) {
             valid++;
             temps.push(val);
             
-            // Feedback avec validation de plage
-            const tInput = document.getElementById(`t${n}-${i}`);
-            validateTourInput(tInput);
-            const isValide = val >= LIMITES_400M_DIAG.min && val <= LIMITES_400M_DIAG.max;
-            let feedback = isValide ? `✅ Tour ${n} enregistré !` : `⚠️ Temps hors plage !`;
-
+            // Pas de feedback dans le diagnostic - juste encourager
+            let feedback = `✅ Tour ${n} enregistré !`;
+            
+            // Afficher feedback simple
             let feedbackEl = document.getElementById(`feedback-t${n}-${i}`);
             if(!feedbackEl) {
                 feedbackEl = document.createElement('div');
@@ -828,10 +795,6 @@ function updateTours(i) {
                 el.parentNode.appendChild(feedbackEl);
             }
             feedbackEl.textContent = feedback;
-            feedbackEl.style.background = isValide
-                ? 'linear-gradient(135deg, var(--success), var(--accent))'
-                : 'linear-gradient(135deg, var(--danger), #dc2626)';
-            feedbackEl.style.color = isValide ? 'black' : 'white';
             
         } else { 
             el.textContent = '';
@@ -889,11 +852,7 @@ function addSaut(i, type) {
     const input = document.getElementById(`saut-${type}-input-${i}`);
     const val = parseFloat(input.value);
     if(!val || val <= 0) { alert('⚠️ Entrez une distance valide'); return; }
-    // Bornes plausibles : 0.50m → 5.50m
-    if(val < 0.5 || val > 5.5) {
-        alert(`⚠️ Distance hors plage (${val}m)\nValeurs attendues : 0.50m à 5.50m`);
-        return;
-    }
+
     const key = type === 'sans' ? 'sautSans' : 'sautAvec';
     cardState[i][key] = cardState[i][key] || [];
     cardState[i][key].push(val);
@@ -932,11 +891,7 @@ function addLancer(i) {
     const input = document.getElementById(`lancer-input-${i}`);
     const val = parseFloat(input.value);
     if(!val || val <= 0) { alert('⚠️ Entrez une distance valide'); return; }
-    // Bornes plausibles : 2.0m → 25.0m
-    if(val < 2.0 || val > 25.0) {
-        alert(`⚠️ Distance hors plage (${val}m)\nValeurs attendues : 2.0m à 25.0m`);
-        return;
-    }
+
     cardState[i].lancerResults = cardState[i].lancerResults || [];
     cardState[i].lancerResults.push(val);
     input.value = '';
@@ -957,19 +912,6 @@ function renderLancer(i) {
 // =============================================
 // ENREGISTREMENT GLOBAL
 // =============================================
-
-// ── Dirty tracking diagnostic ──
-const _dirtyCardsDiag = new Set();
-function markDirtyDiag(i) { _dirtyCardsDiag.add(i); updateSaveBadgeDiag(); }
-function clearDirtyDiag() { _dirtyCardsDiag.clear(); updateSaveBadgeDiag(); }
-function updateSaveBadgeDiag() {
-    const btn = document.getElementById('save-btn-diag');
-    const badge = document.getElementById('save-badge-diag');
-    const n = _dirtyCardsDiag.size;
-    if(btn) btn.classList.toggle('dirty-diag', n > 0);
-    if(badge) { badge.textContent = n; badge.classList.toggle('visible', n > 0); }
-}
-
 function saveAll() {
     let count = 0;
     let allStudents = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
@@ -1021,7 +963,6 @@ function saveAll() {
     if(count === 0) { alert('⚠️ Aucun élève sélectionné'); return; }
 
     localStorage.setItem('eps_pro_students', JSON.stringify(allStudents));
-    clearDirtyDiag();
     alert(`✅ ${count} diagnostic(s) enregistré(s) !`);
 }
 
@@ -1030,43 +971,12 @@ function saveAll() {
 // =============================================
 function parseTime(str) {
     if(!str) return null;
-    const raw = str.trim().replace(',', ':');
-    // Format M:SS standard
-    const m1 = raw.match(/^(\d+):(\d{1,2})$/);
-    if(m1) {
-        const min = parseInt(m1[1]), sec = parseInt(m1[2]);
-        if(sec < 60) return min * 60 + sec;
-    }
-    // Format entier seul ex: 125 → 1:25, 210 → 2:10
-    const m2 = raw.match(/^(\d{3,4})$/);
-    if(m2) {
-        const n = parseInt(m2[0]);
-        if(n >= 100 && n <= 9959) {
-            const min = Math.floor(n / 100), sec = n % 100;
-            if(sec < 60) return min * 60 + sec;
-        }
+    const parts = str.replace(',',':').split(':');
+    if(parts.length === 2) {
+        const m = parseInt(parts[0]), s = parseInt(parts[1]);
+        if(!isNaN(m) && !isNaN(s)) return m*60 + s;
     }
     return null;
-}
-
-// Validation visuelle temps 400m (bornes : 1:00 à 3:30)
-const LIMITES_400M_DIAG = { min: 60, max: 210 };
-function validateTourInput(input) {
-    if(!input) return;
-    const val = parseTime(input.value);
-    // Reset
-    input.style.borderColor = '';
-    input.style.background = '';
-    if(!input.value.trim()) return;
-    if(val === null || val < LIMITES_400M_DIAG.min || val > LIMITES_400M_DIAG.max) {
-        input.style.borderColor = '#ef4444';
-        input.style.background = 'rgba(239,68,68,0.15)';
-        input.title = 'Temps hors plage (1:00 → 3:30)';
-    } else {
-        input.style.borderColor = '#4ade80';
-        input.style.background = 'rgba(74,222,128,0.08)';
-        input.title = '';
-    }
 }
 
 function fmtSec(sec) {

@@ -857,19 +857,6 @@
             color: var(--warning);
             font-weight: 700;
         }
-
-        /* ── Graphique progression classe ── */
-        .graph-container { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:14px }
-        .graph-title { font-size:0.72rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px }
-        .graph-tabs { display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap }
-        .graph-tab { font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.15s }
-        .graph-tab.active { background:rgba(139,92,246,0.3);border-color:rgba(139,92,246,0.5);color:white }
-        .graph-canvas-wrap { position:relative;height:160px }
-        .graph-canvas-wrap canvas { width:100%!important;height:160px!important }
-        .graph-legend { display:flex;gap:12px;flex-wrap:wrap;margin-top:8px }
-        .graph-legend-item { display:flex;align-items:center;gap:4px;font-size:0.68rem;color:rgba(255,255,255,0.5) }
-        .graph-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0 }
-        .graph-empty { font-size:0.75rem;color:rgba(255,255,255,0.3);text-align:center;padding:30px 0 }
     </style>
     <script src="firebase-config.js"></script>
 </head>
@@ -1120,9 +1107,14 @@
             <div style="margin-top: 30px;">
                 
                 <!-- Diagnostic L1 -->
-                <button onclick="window.open('./diagnostic.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 15px; background: var(--warning); color: black; font-size: 1.1rem;">
-                    📊 L1/L2 - Évaluation diagnostique
-                </button>
+                <div style="display:flex;gap:8px;margin-bottom:15px;align-items:stretch">
+                    <button onclick="window.open('./diagnostic.html', '_blank')" class="btn-action" style="flex:1;background:var(--warning);color:black;font-size:1.1rem;">
+                        📊 L1/L2 - Évaluation diagnostique
+                    </button>
+                    <button onclick="window.open('./bilan-diagnostic.html', '_blank')" title="Bilan diagnostique" style="background:rgba(231,76,60,0.85);color:white;border:none;border-radius:10px;padding:10px 13px;font-size:1.2rem;cursor:pointer;font-weight:900">
+                        📈
+                    </button>
+                </div>
                 
                 <!-- Menu Leçons L3-L6 -->
                 <div style="margin-bottom: 15px;">
@@ -1131,43 +1123,54 @@
                         <span id="lecons-arrow">▼</span>
                     </button>
                     <div id="lecons-menu" style="display: none; margin-top: 10px; padding-left: 20px;">
-                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
-                            <button onclick="window.open('./lecon3.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
-                                🚀 L3 : Découverte & Technique
-                            </button>
-                            <button onclick="window.open('./bilan-l3.html', '_blank')" title="Bilan L3" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
-                        </div>
-                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
-                            <button onclick="window.open('./lecon4.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
-                                → L4 : Consolidation & Progression
-                            </button>
-                            <button onclick="window.open('./bilan-l4.html', '_blank')" title="Bilan L4" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
-                        </div>
-                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
-                            <button onclick="window.open('./lecon5.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
-                                → L5 : Relais Olympique <span style="font-size:0.72rem;opacity:0.7;font-weight:400">· Séance collective</span>
-                            </button>
-                            <button onclick="window.open('./bilan-l5.html', '_blank')" title="Bilan L5" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
-                        </div>
-                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
-                            <button onclick="window.open('./lecon6.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
-                                → L6 : Perfectionnement Technique
-                            </button>
-                            <button onclick="window.open('./bilan-l6.html', '_blank')" title="Bilan L6" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
-                        </div>
-                        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:stretch">
-                            <button onclick="window.open('./lecon7.html', '_blank')" class="btn-action" style="flex:1;background:rgba(155,89,182,0.3);color:white;font-size:0.95rem;text-align:left;padding-left:16px">
-                                → L7 : Mise en Situation 3×400m
-                            </button>
-                            <button onclick="window.open('./bilan-l7.html', '_blank')" title="Bilan L7" style="background:rgba(231,76,60,0.4);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap">📊</button>
-                        </div>
+                        <button onclick="window.open('./lecon3.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            🚀 L3 : Découverte & Technique
+                        </button>
+                        <button onclick="window.open('./lecon4.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → L4 : Consolidation &amp; Progression
+                        </button>
+                        <button onclick="window.open('./lecon5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → L5 : Relais Olympique <span style="font-size:0.72rem;opacity:0.7;font-weight:400">· Séance collective — motivation &amp; coopération</span>
+                        </button>
+                        <button onclick="window.open('./lecon6.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → L6 : Perfectionnement Technique
+                        </button>
+                        <button onclick="window.open('./lecon7.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(155,89,182,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            → L7 : Mise en Situation 3×400m
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Bilan Projet L8 -->
-                <button onclick="window.open('./bilan-projet-l8.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 15px; background: #e74c3c; color: white; font-size: 1.1rem; font-weight: 900;">
-                    🎯 MON PROJET POUR L8
-                </button>
+                <!-- Menu Bilans -->
+                <div style="margin-bottom: 15px;">
+                    <button onclick="toggleMenu('bilans-menu')" class="btn-action" style="width: 100%; background: #e74c3c; color: white; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📊 BILANS LEÇONS</span>
+                        <span id="bilans-arrow">▼</span>
+                    </button>
+                    <div id="bilans-menu" style="display: none; margin-top: 10px; padding-left: 20px;">
+                        <button onclick="window.open('./bilan-diagnostic.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.5); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px; font-weight: 900;">
+                            → 📊 Bilan L1/L2 - Évaluation diagnostique
+                        </button>
+                        <button onclick="window.open('./bilan-l3.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            📊 Bilan L3 - Découverte & Technique
+                        </button>
+                        <button onclick="window.open('./bilan-l4.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            📊 Bilan L4 - Consolidation &amp; Progression
+                        </button>
+                        <button onclick="window.open('./bilan-l5.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            📊 Bilan L5 - Relais Olympique
+                        </button>
+                        <button onclick="window.open('./bilan-l6.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            📊 Bilan L6 - Perfectionnement Technique
+                        </button>
+                        <button onclick="window.open('./bilan-l7.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.3); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px;">
+                            📊 Bilan L7 - Mise en Situation
+                        </button>
+                        <button onclick="window.open('./bilan-projet-l8.html', '_blank')" class="btn-action" style="width: 100%; margin-bottom: 8px; background: rgba(231,76,60,0.7); color: white; font-size: 0.95rem; text-align: left; padding-left: 20px; font-weight: 900;">
+                            🎯 MON PROJET POUR L8 (aide à la décision)
+                        </button>
+                    </div>
+                </div>
                 
                 <!-- Statistiques globales -->
                 <button onclick="goToStats()" class="btn-action" style="width: 100%; margin-bottom: 15px; background: var(--success); color: black; font-size: 1.1rem;">
@@ -1496,35 +1499,16 @@
             </button>
         </div>
         <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(event)">
-        <button onclick="showRestorePanel()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#059669,#047857);color:white;border:none;border-radius:10px;padding:10px;font-size:0.82rem;font-weight:800;cursor:pointer">
-            🔄 Restaurer un snapshot auto<br><span style="font-weight:400;opacity:0.8;font-size:0.7rem">3 dernières sauvegardes disponibles</span>
-        </button>
     </div>
 
-    <!-- NETTOYAGE DOUBLONS -->
+    <!-- NETTOYAGE DOUBLONS L5 -->
     <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:16px;margin-bottom:14px">
-        <div style="font-size:0.72rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧹 Nettoyage doublons</div>
-        <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:10px">Détecte et supprime les séances en doublon pour toutes les leçons</p>
-        <button onclick="previewDoublons()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:0.85rem;font-weight:800;cursor:pointer;width:100%">
-            🔍 Analyser les doublons
+        <div style="font-size:0.72rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧹 Nettoyage</div>
+        <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:10px">Supprime les séances L5 en doublon (même équipe, même date)</p>
+        <button onclick="cleanDoublonsL5()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:0.85rem;font-weight:800;cursor:pointer;width:100%">
+            🧹 Nettoyer les doublons L5
         </button>
-        <div id="doublon-preview" style="margin-top:10px;display:none"></div>
         <div id="doublon-result" style="margin-top:8px;font-size:0.78rem;color:#fbbf24"></div>
-    </div>
-
-
-    <!-- GRAPHIQUE PROGRESSION CLASSE -->
-    <div class="graph-container" id="graph-section">
-        <div class="graph-title">📈 Progression de la classe</div>
-        <div class="graph-tabs">
-            <div class="graph-tab active" onclick="switchGraphTab('vma',this)">% VMA course</div>
-            <div class="graph-tab" onclick="switchGraphTab('saut',this)">Saut (m)</div>
-            <div class="graph-tab" onclick="switchGraphTab('lancer',this)">Lancer (m)</div>
-        </div>
-        <div class="graph-canvas-wrap">
-            <canvas id="graph-canvas"></canvas>
-        </div>
-        <div class="graph-legend" id="graph-legend"></div>
     </div>
 
     <!-- LISTE ÉLÈVES -->
@@ -1740,8 +1724,6 @@ function saveStudentsToStorage() {
     try {
         localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
         console.log('✅ Élèves sauvegardés dans localStorage');
-        // ── Snapshot automatique (3 derniers) ──
-        createAutoSnapshot();
         // Sync Firebase en arrière-plan si configuré
         if(typeof syncStudentsToFirebase === 'function') {
             syncStudentsToFirebase(storedStudents);
@@ -1751,56 +1733,6 @@ function saveStudentsToStorage() {
         console.error('❌ Erreur lors de la sauvegarde:', e);
         alert('⚠️ Erreur lors de la sauvegarde. Vérifiez l\'espace disponible.');
         return false;
-    }
-}
-
-// ── Gestion des snapshots automatiques ──────────────────────────────────────
-function createAutoSnapshot() {
-    try {
-        const snapshots = getSnapshots();
-        const newSnap = {
-            ts: Date.now(),
-            label: new Date().toLocaleString('fr-FR'),
-            count: storedStudents.length,
-            data: JSON.stringify(storedStudents)
-        };
-        snapshots.unshift(newSnap);
-        // Garder seulement les 3 derniers
-        const trimmed = snapshots.slice(0, 3);
-        localStorage.setItem('eps_auto_snapshots', JSON.stringify(trimmed));
-    } catch(e) { /* pas critique */ }
-}
-
-function getSnapshots() {
-    try {
-        return JSON.parse(localStorage.getItem('eps_auto_snapshots') || '[]');
-    } catch(e) { return []; }
-}
-
-function showRestorePanel() {
-    const snapshots = getSnapshots();
-    if(!snapshots.length) {
-        alert('Aucun snapshot disponible. Les snapshots sont créés automatiquement à chaque sauvegarde.');
-        return;
-    }
-    let msg = '🔄 RESTAURER UN SNAPSHOT\n\n';
-    snapshots.forEach((s, i) => {
-        msg += `${i+1}. ${s.label} — ${s.count} élève(s)\n`;
-    });
-    msg += '\nEntrez le numéro à restaurer (1, 2 ou 3) :';
-    const choice = prompt(msg);
-    const idx = parseInt(choice) - 1;
-    if(isNaN(idx) || idx < 0 || idx >= snapshots.length) return;
-    if(!confirm(`Restaurer le snapshot du ${snapshots[idx].label} (${snapshots[idx].count} élèves) ?\nCela remplacera vos données actuelles.`)) return;
-    try {
-        const restored = JSON.parse(snapshots[idx].data);
-        storedStudents = restored;
-        localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
-        renderStudentsList();
-        updateStudentsStats();
-        alert(`✅ Snapshot restauré ! ${restored.length} élève(s) rechargé(s).`);
-    } catch(e) {
-        alert('❌ Erreur lors de la restauration : ' + e.message);
     }
 }
 
@@ -2337,107 +2269,31 @@ function importJSON(event) {
     event.target.value = '';
 }
 
-function previewDoublons() {
-    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
-    const lecons = ['L3','L4','L5','L6','L7'];
-    const doublons = [];
-
-    stored.forEach(eleve => {
-        if(!eleve.seances) return;
-        lecons.forEach(lecon => {
-            const seances = eleve.seances.filter(s => s.lecon === lecon);
-            if(seances.length <= 1) return;
-            // Regrouper par date (arrondie à la minute)
-            const seen = new Map();
-            seances.forEach((s, idx) => {
-                const key = lecon === 'L5'
-                    ? (s.equipe||'') + '|' + (s.date||'').substring(0,16)
-                    : (s.date||'').substring(0,10);
-                if(!seen.has(key)) seen.set(key, []);
-                seen.get(key).push({ seance: s, origIdx: eleve.seances.indexOf(s) });
-            });
-            seen.forEach((group, key) => {
-                if(group.length > 1) {
-                    doublons.push({ eleve, lecon, key, group });
-                }
-            });
-        });
-    });
-
-    const preview = document.getElementById('doublon-preview');
-    const result  = document.getElementById('doublon-result');
-    result.textContent = '';
-
-    if(!doublons.length) {
-        preview.style.display = 'none';
-        result.textContent = '✅ Aucun doublon détecté.';
-        return;
-    }
-
-    // Construire preview
-    let html = `<div style="font-size:0.75rem;font-weight:800;color:#fbbf24;margin-bottom:8px">${doublons.reduce((a,d)=>a+d.group.length-1,0)} doublon(s) détecté(s) :</div>`;
-    doublons.forEach((d, di) => {
-        const dateStr = d.key.split('|')[0] || d.key;
-        html += `<div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;padding:8px 10px;margin-bottom:6px">`;
-        html += `<div style="font-size:0.75rem;font-weight:700;color:white;margin-bottom:4px">${d.eleve.nomPrenom} — ${d.lecon} · ${d.group.length} séances</div>`;
-        d.group.forEach((item, gi) => {
-            const s = item.seance;
-            const dateLabel = s.date ? new Date(s.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'Date inconnue';
-            html += `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">`;
-            html += `<input type="checkbox" id="dd-${di}-${gi}" ${gi > 0 ? 'checked' : ''} style="accent-color:#ef4444">`;
-            html += `<label for="dd-${di}-${gi}" style="font-size:0.72rem;color:rgba(255,255,255,0.7);cursor:pointer">${dateLabel}${gi===0?' <span style="color:#34d399;font-size:0.65rem">← garder</span>':' <span style="color:#ef4444;font-size:0.65rem">← supprimer</span>'}</label>`;
-            html += `</div>`;
-        });
-        html += `</div>`;
-    });
-    html += `<button onclick="applyDoublonSuppression(${JSON.stringify(doublons.map((d,di)=>({eleveId:d.eleve.id,lecon:d.lecon,groupSize:d.group.length,di})))})" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:0.8rem;font-weight:800;cursor:pointer;width:100%;margin-top:6px">🗑️ Supprimer les cochés</button>`;
-
-    preview.innerHTML = html;
-    preview.style.display = 'block';
-    // Stocker doublons en mémoire pour suppression
-    window._doublonsData = doublons;
-}
-
-function applyDoublonSuppression(meta) {
-    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
+function cleanDoublonsL5() {
     let totalSupprimés = 0;
-
-    // Collecter les indices à supprimer par élève (triés desc pour splicing safe)
-    const toDelete = {}; // { eleveId: Set<origIdx> }
-
-    (window._doublonsData || []).forEach((d, di) => {
-        d.group.forEach((item, gi) => {
-            const checkbox = document.getElementById(`dd-${di}-${gi}`);
-            if(!checkbox || !checkbox.checked) return;
-            if(!toDelete[d.eleve.id]) toDelete[d.eleve.id] = new Set();
-            toDelete[d.eleve.id].add(item.origIdx);
+    storedStudents.forEach(eleve => {
+        if(!eleve.seances) return;
+        const seancesL5 = eleve.seances.filter(s => s.lecon === 'L5');
+        const autres = eleve.seances.filter(s => s.lecon !== 'L5');
+        if(seancesL5.length <= 1) return;
+        // Dédoublonner par clé : equipe + date (arrondi à la minute)
+        const seen = new Set();
+        const dedup = seancesL5.filter(s => {
+            const dateMin = s.date ? s.date.substring(0, 16) : '';
+            const key = (s.equipe || '') + '|' + dateMin;
+            if(seen.has(key)) { totalSupprimés++; return false; }
+            seen.add(key);
+            return true;
         });
+        eleve.seances = [...autres, ...dedup];
     });
-
-    // Appliquer les suppressions sur les données fraîches du localStorage
-    stored.forEach(eleve => {
-        const indices = toDelete[eleve.id];
-        if(!indices || !indices.size) return;
-        // Trier décroissant pour ne pas décaler les index
-        const sorted = [...indices].sort((a, b) => b - a);
-        sorted.forEach(idx => {
-            if(idx >= 0 && idx < eleve.seances.length) {
-                eleve.seances.splice(idx, 1);
-                totalSupprimés++;
-            }
-        });
-    });
-
-    localStorage.setItem('eps_pro_students', JSON.stringify(stored));
-    document.getElementById('doublon-preview').style.display = 'none';
-    document.getElementById('doublon-result').textContent =
-        totalSupprimés > 0 ? `✅ ${totalSupprimés} doublon(s) supprimé(s).` : '✅ Rien supprimé.';
-    window._doublonsData = null;
-    if(typeof renderArchivesEleves === 'function') renderArchivesEleves();
-    if(typeof updateStudentsStats === 'function') updateStudentsStats();
+    localStorage.setItem('eps_pro_students', JSON.stringify(storedStudents));
+    const msg = totalSupprimés > 0
+        ? `✅ ${totalSupprimés} doublon(s) L5 supprimé(s).`
+        : '✅ Aucun doublon détecté.';
+    document.getElementById('doublon-result').textContent = msg;
+    renderArchivesEleves();
 }
-
-function cleanDoublonsL5() { previewDoublons(); }
 
 function deleteEleve(eleveId) {
     const eleve = storedStudents.find(e => e.id === eleveId);
@@ -2448,7 +2304,6 @@ function deleteEleve(eleveId) {
     updateStudentsStats();
     renderStudentsList();
     renderArchivesEleves();
-    renderGraphProgression();
 }
 
 function deleteSeanceArchive(eleveId, seanceIdx) {
@@ -5124,13 +4979,7 @@ function importStudents(event) {
             const importData = JSON.parse(e.target.result);
             
             if (!importData.students || !Array.isArray(importData.students)) {
-                alert('⚠️ Fichier invalide — structure non reconnue. Vérifiez que c\'est bien un export EPS PRO.');
-                return;
-            }
-            // Vérification basique de la structure des élèves
-            const sampleOk = importData.students.every(s => s.id && s.nomPrenom !== undefined);
-            if(!sampleOk) {
-                alert('⚠️ Fichier invalide — certains élèves manquent de champs obligatoires (id, nomPrenom).');
+                alert('⚠️ Fichier invalide.');
                 return;
             }
             
@@ -5456,91 +5305,6 @@ function showInstallInstructions() {
 
 <!-- Enregistrement du Service Worker pour mode hors ligne -->
 <script>
-
-// ══════ Graphique progression classe ══════
-let _graphTab = 'vma';
-function renderGraphProgression() {
-    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
-    if(!stored.length) return;
-    setTimeout(() => drawGraph(stored, _graphTab), 300);
-}
-function switchGraphTab(tab, el) {
-    _graphTab = tab;
-    document.querySelectorAll('.graph-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    const stored = JSON.parse(localStorage.getItem('eps_pro_students') || '[]');
-    drawGraph(stored, tab);
-}
-function drawGraph(students, tab) {
-    const canvas = document.getElementById('graph-canvas');
-    if(!canvas) return;
-    const wrap = canvas.parentElement;
-    const W = (wrap && wrap.offsetWidth > 0) ? wrap.offsetWidth : 340;
-    const H = 160;
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, W, H);
-    const PAD = {top:16,right:16,bottom:28,left:38};
-    const cW = W-PAD.left-PAD.right, cH = H-PAD.top-PAD.bottom;
-    const LECONS = ['L3','L4','L6','L7'];
-    const COLORS = ['#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16'];
-    const series = []; let ci = 0;
-    students.forEach(eleve => {
-        const vma = parseFloat(eleve.vma) || null;
-        const pts = LECONS.map(lecon => {
-            const s = (eleve.seances||[]).filter(x=>x.lecon===lecon).at(-1);
-            if(!s) return null;
-            if(tab==='vma') {
-                if(!vma) return null;
-                if(s.moyenne200m) return Math.round(200/parseFloat(s.moyenne200m)*3.6/vma*100);
-                if(lecon==='L7') {
-                    const ts=[s.v1?.secondes,s.v2?.secondes,s.v3?.secondes].filter(Boolean);
-                    if(ts.length) return Math.round(400/(ts.reduce((a,b)=>a+b)/ts.length)*3.6/vma*100);
-                }
-                return null;
-            }
-            if(tab==='saut') { const d=parseFloat(s.sautDistance); return isNaN(d)?null:d; }
-            if(tab==='lancer') { const d=parseFloat(s.lancerDistance); return isNaN(d)?null:d; }
-            return null;
-        });
-        if(pts.some(p=>p!==null)) { series.push({nom:(eleve.nomPrenom||'?').split(' ')[0],color:COLORS[ci%COLORS.length],points:pts}); ci++; }
-    });
-    if(!series.length) {
-        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='13px Arial'; ctx.textAlign='center';
-        ctx.fillText('Pas encore de données', W/2, H/2); return;
-    }
-    const allV = series.flatMap(s=>s.points).filter(v=>v!==null);
-    let minV=Math.floor(Math.min(...allV)*0.93), maxV=Math.ceil(Math.max(...allV)*1.05);
-    if(tab==='vma'){minV=Math.min(minV,80);maxV=Math.max(maxV,120);} if(minV===maxV){minV-=5;maxV+=5;}
-    for(let g=0;g<=4;g++) {
-        const y=PAD.top+cH*(1-g/4);
-        ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+cW,y); ctx.stroke();
-        ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.font='9px Arial'; ctx.textAlign='right';
-        ctx.fillText((minV+(maxV-minV)*g/4).toFixed(tab==='vma'?0:1)+(tab==='vma'?'%':'m'),PAD.left-4,y+3);
-    }
-    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='10px Arial'; ctx.textAlign='center';
-    LECONS.forEach((l,xi)=>ctx.fillText(l,PAD.left+(xi/(LECONS.length-1))*cW,H-PAD.bottom+14));
-    const xPos = xi => PAD.left+(xi/(LECONS.length-1))*cW;
-    const yPos = v => PAD.top+cH*(1-(v-minV)/(maxV-minV));
-    series.forEach(s => {
-        ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.setLineDash([]);
-        ctx.beginPath(); let st=false;
-        s.points.forEach((v,xi)=>{ if(v===null)return; const x=xPos(xi),y=yPos(v); st?(ctx.lineTo(x,y)):(ctx.moveTo(x,y),st=true); });
-        ctx.stroke();
-        s.points.forEach((v,xi)=>{ if(v===null)return; ctx.fillStyle=s.color; ctx.beginPath(); ctx.arc(xPos(xi),yPos(v),3.5,0,Math.PI*2); ctx.fill(); });
-    });
-    const moy = LECONS.map((_,xi)=>{ const vs=series.map(s=>s.points[xi]).filter(v=>v!==null); return vs.length?vs.reduce((a,b)=>a+b)/vs.length:null; });
-    if(moy.some(v=>v!==null)) {
-        ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=2.5; ctx.setLineDash([5,4]);
-        ctx.beginPath(); let st=false;
-        moy.forEach((v,xi)=>{ if(v===null)return; const x=xPos(xi),y=yPos(v); st?(ctx.lineTo(x,y)):(ctx.moveTo(x,y),st=true); });
-        ctx.stroke(); ctx.setLineDash([]);
-    }
-    const lg=document.getElementById('graph-legend');
-    if(lg) lg.innerHTML='<div class="graph-legend-item"><div class="graph-dot" style="background:rgba(255,255,255,0.55);outline:2px dashed rgba(255,255,255,0.4)"></div>Moy. classe</div>'+series.map(s=>`<div class="graph-legend-item"><div class="graph-dot" style="background:${s.color}"></div>${s.nom}</div>`).join('');
-}
-
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')

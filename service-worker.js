@@ -1,11 +1,11 @@
 /**
- * EPS : Épreuve Combinée — Service Worker v5
- * Cache-First : 100% offline après le 1er chargement avec WiFi
+ * EPS : Épreuve Combinée — Service Worker v7
+ * Network-First pour HTML : mise à jour automatique à chaque ouverture avec WiFi
+ * Cache-First pour JS/CSS/CDN : performances offline
  */
 
-const CACHE = 'eps-v6';
+const CACHE = 'eps-v7';
 
-// Tous les fichiers HTML de l'app
 const APP_FILES = [
     './',
     './index.html',
@@ -26,31 +26,25 @@ const APP_FILES = [
     './manifest.json',
 ];
 
-// Librairies CDN (exports PDF/XLSX) — mises en cache au 1er lancement avec WiFi
 const CDN_FILES = [
     'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
 ];
 
-// ── INSTALL ───────────────────────────────────────────────────
+// INSTALL
 self.addEventListener('install', event => {
     event.waitUntil((async () => {
         const cache = await caches.open(CACHE);
-        // Fichiers app : critiques
         await cache.addAll(APP_FILES);
-        // CDN : non bloquant (si pas de WiFi au 1er lancement, exports désactivés jusqu'à connexion)
         for (const url of CDN_FILES) {
-            try {
-                const res = await fetch(url);
-                if (res.ok) await cache.put(url, res);
-            } catch (_) {}
+            try { const res = await fetch(url); if (res.ok) await cache.put(url, res); } catch (_) {}
         }
     })());
     self.skipWaiting();
 });
 
-// ── ACTIVATE : purge anciens caches ──────────────────────────
+// ACTIVATE : purge anciens caches + prise de contrôle immédiate de tous les onglets
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys()
@@ -59,10 +53,9 @@ self.addEventListener('activate', event => {
     );
 });
 
-// ── FETCH : Cache-First ───────────────────────────────────────
+// FETCH
 self.addEventListener('fetch', event => {
     const url = event.request.url;
-    // Firebase et APIs réseau : laisse passer sans cache
     if (
         event.request.method !== 'GET' ||
         url.includes('firebaseapp.com') ||
@@ -71,21 +64,22 @@ self.addEventListener('fetch', event => {
         url.includes('gstatic.com')
     ) return;
 
-    event.respondWith((async () => {
-        // 1. Cache d'abord
-        const cached = await caches.match(event.request);
-        if (cached) return cached;
-        // 2. Réseau si pas en cache
-        try {
-            const res = await fetch(event.request);
-            if (res && res.ok) {
-                const cache = await caches.open(CACHE);
-                cache.put(event.request, res.clone());
-            }
-            return res;
-        } catch (_) {
-            // 3. Hors ligne + pas en cache
-            if (event.request.headers.get('accept')?.includes('text/html')) {
+    const isHTML = url.endsWith('.html') || url.endsWith('/') ||
+                   event.request.headers.get('accept')?.includes('text/html');
+
+    if (isHTML) {
+        // Network-First : récupère toujours la dernière version si WiFi dispo
+        event.respondWith((async () => {
+            try {
+                const res = await fetch(event.request);
+                if (res && res.ok) {
+                    const cache = await caches.open(CACHE);
+                    cache.put(event.request, res.clone());
+                }
+                return res;
+            } catch (_) {
+                const cached = await caches.match(event.request);
+                if (cached) return cached;
                 return new Response(
                     `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -93,18 +87,28 @@ self.addEventListener('fetch', event => {
 <style>body{background:#0f1419;color:#fff;font-family:system-ui;display:flex;
 flex-direction:column;align-items:center;justify-content:center;
 min-height:100vh;text-align:center;padding:20px}
-h1{color:#ff6b35;font-size:1.8rem;margin-bottom:12px}
-p{color:#aaa;margin-bottom:24px}
+h1{color:#ff6b35;font-size:1.8rem}p{color:#aaa;margin-bottom:24px}
 a{background:#ff6b35;color:#fff;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:800}
 </style></head><body>
 <h1>📡 Hors ligne</h1>
-<p>Cette page n'est pas en cache.<br>Retournez à l'accueil — tout le reste fonctionne.</p>
+<p>Reconnectez-vous pour charger la dernière version.</p>
 <a href="./index.html">← Accueil</a></body></html>`,
                     { headers: { 'Content-Type': 'text/html;charset=utf-8' } }
                 );
             }
-        }
-    })());
+        })());
+    } else {
+        // Cache-First pour JS/CSS/CDN
+        event.respondWith((async () => {
+            const cached = await caches.match(event.request);
+            if (cached) return cached;
+            try {
+                const res = await fetch(event.request);
+                if (res && res.ok) { const cache = await caches.open(CACHE); cache.put(event.request, res.clone()); }
+                return res;
+            } catch (_) {}
+        })());
+    }
 });
 
 self.addEventListener('message', event => {

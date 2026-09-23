@@ -944,7 +944,7 @@ function checkVMAAlert(i) {
     const vitesse = 1440 / moyS;  // km/h pour 400m : (0.4/moyS)*3600 = 1440/moyS
     const pctVMA = (vitesse / vma) * 100;
 
-    if(pctVMA <= 130) {
+    if(pctVMA <= 125) {
         document.getElementById(`vma-alert-badge-${i}`).style.display = 'none';
         document.getElementById(`vma-alert-box-${i}`).style.display = 'none';
         return;

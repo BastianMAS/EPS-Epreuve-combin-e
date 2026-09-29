@@ -543,7 +543,7 @@ function getPctVMAProgression(member) {
     const vma = parseFloat(member.vma) || 10;
 
     function pctFromNiveau(niveau) {
-        return {vma95:95, vma100:100, vma105:105, vma110:110}[niveau] || 100;
+        return {vma100:100, vma105:105, vma110:110, vma115:115, vma120:120}[niveau] || 105;
     }
     function objectifAtteint(seance) {
         if(!seance || !seance.niveau || !seance.moyenne200m) return false;

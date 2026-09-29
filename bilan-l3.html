@@ -222,7 +222,7 @@ let bilanData = {
     totalEleves: 0,
     elevesAvecL3: [],
     stats: {
-        niveauxRepartition: { vma95: 0, vma100: 0, vma105: 0, vma110: 0 },
+        niveauxRepartition: { vma100: 0, vma105: 0, vma110: 0, vma115: 0, vma120: 0 },
         moyenneTechSaut: 0,
         moyenneTechLancer: 0,
         tauxObjectifAtteint: 0,
@@ -230,10 +230,11 @@ let bilanData = {
 };
 
 const NIVEAUX = {
-    vma95:  { label: '95% VMA',  desc: 'Endurance active', classe: 'n95',  pourcent: 95,  color: '#93c5fd' },
-    vma100: { label: '100% VMA', desc: 'Découverte',       classe: 'n100', pourcent: 100, color: '#86efac' },
-    vma105: { label: '105% VMA', desc: 'Progression',      classe: 'n105', pourcent: 105, color: '#fdba74' },
-    vma110: { label: '110% VMA', desc: 'Challenge',         classe: 'n110', pourcent: 110, color: '#fca5a5' },
+    vma100: { label: '100% VMA', desc: 'Endurance soutenue', classe: 'n100', pourcent: 100, color: '#86efac' },
+    vma105: { label: '105% VMA', desc: 'Effort notable',     classe: 'n105', pourcent: 105, color: '#fdba74' },
+    vma110: { label: '110% VMA', desc: 'Effort poussé',      classe: 'n110', pourcent: 110, color: '#fca5a5' },
+    vma115: { label: '115% VMA', desc: 'Effort intense',     classe: 'n115', pourcent: 115, color: '#f87171' },
+    vma120: { label: '120% VMA', desc: 'Effort max',         classe: 'n120', pourcent: 120, color: '#ef4444' },
 };
 
 const SAUT_LABELS  = ['Course d\'élan régulière', 'Pied d\'appel précis'];
@@ -347,7 +348,7 @@ function renderNiveauDistrib() {
     const total = bilanData.totalEleves;
     if(total === 0) return;
     document.getElementById('niveau-distrib-section').style.display = 'block';
-    const colors = { vma95: '#93c5fd', vma100: '#86efac', vma105: '#fdba74', vma110: '#fca5a5' };
+    const colors = { vma100: '#86efac', vma105: '#fdba74', vma110: '#fca5a5', vma115: '#f87171', vma120: '#ef4444' };
     document.getElementById('niveau-distrib').innerHTML = Object.entries(NIVEAUX).map(([id, n]) => {
         const count = rep[id] || 0;
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
@@ -518,10 +519,10 @@ function exportPDF() {
     const d = bilanData;
     const date = new Date().toLocaleDateString('fr-FR');
     const fmtS = s => { if(!s) return '—'; const m=Math.floor(s/60); const sec=Math.round(s%60); return m+':'+String(sec).padStart(2,'0'); };
-    const NIVEAU_COLORS = {vma95:'#bfdbfe',vma100:'#bbf7d0',vma105:'#fde68a',vma110:'#fca5a5'};
+    const NIVEAU_COLORS = {vma100:'#bbf7d0',vma105:'#fde68a',vma110:'#fca5a5',vma115:'#fca5a5',vma120:'#ef4444'};
 
     // Barres niveaux
-    const niveauRows = [['vma95','95% VMA'],['vma100','100% VMA'],['vma105','105% VMA'],['vma110','110% VMA']].map(([id,lbl]) => {
+    const niveauRows = [['vma100','100% VMA'],['vma105','105% VMA'],['vma110','110% VMA'],['vma115','115% VMA'],['vma120','120% VMA']].map(([id,lbl]) => {
         const count = d.stats.niveauxRepartition[id] || 0;
         const pct = d.totalEleves > 0 ? Math.round(count/d.totalEleves*100) : 0;
         return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">

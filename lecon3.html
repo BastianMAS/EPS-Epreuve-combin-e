@@ -552,10 +552,11 @@
 
 <script>
 const NIVEAUX_VMA_L3 = [
-    { id: 'vma95',  label: '95% VMA',  desc: '🟢 Je peux parler — rythme régulier et maîtrisé',       pourcent: 95  },
-    { id: 'vma100', label: '100% VMA', desc: '🟡 Mon meilleur rythme régulier — respiration soutenue', pourcent: 100 },
-    { id: 'vma105', label: '105% VMA', desc: '🟠 Je suis poussé — difficile de parler',               pourcent: 105 },
-    { id: 'vma110', label: '110% VMA', desc: '🔴 Effort max — très difficile de tenir',               pourcent: 110 }
+    { id: 'vma100', label: '100% VMA', desc: '🟢 Rythme soutenu maîtrisé — respiration rythmée',      pourcent: 100 },
+    { id: 'vma105', label: '105% VMA', desc: '🟡 Effort notable — difficile de parler longtemps',      pourcent: 105 },
+    { id: 'vma110', label: '110% VMA', desc: '🟠 Je suis poussé — je tiens sur toute la séance',      pourcent: 110 },
+    { id: 'vma115', label: '115% VMA', desc: '🔴 Effort intense — je me dépasse sur chaque tour',     pourcent: 115 },
+    { id: 'vma120', label: '120% VMA', desc: '🔥 Effort max — VMA bien calibrée terrain requise',     pourcent: 120 }
 ];
 
 function getFeedbackCourse(tempsSecEleve, tempsCibleSec, tourNum) {

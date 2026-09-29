@@ -410,7 +410,7 @@ function tlL3(s, vma) {
     const moy  = s.moyenne200m ? fmtTime(s.moyenne200m) : null;
     const saut = s.sautDistance ? parseFloat(s.sautDistance).toFixed(2)+'m' : null;
     const lance= s.lancerDistance ? parseFloat(s.lancerDistance).toFixed(1)+'m' : null;
-    const niv  = {vma95:'95% VMA',vma100:'100% VMA',vma105:'105% VMA',vma110:'110% VMA'}[s.niveau]||s.niveau||'';
+    const niv  = {vma100:'100% VMA',vma105:'105% VMA',vma110:'110% VMA',vma115:'115% VMA',vma120:'120% VMA'}[s.niveau]||s.niveau||'';
     const techs= [s.sautTech1&&'Élan',s.sautTech2&&'Appel',s.lancerTech1&&'Armé',s.lancerTech2&&'Rotation'].filter(Boolean);
     return `<div class="seance-bloc">
         ${dot('dot-L3','L3',false)}
@@ -553,7 +553,7 @@ function generateProjet(idx) {
     } else if(course.includes('course1')||course.includes('course2')) {
         strat='🚀 STRATÉGIE AMBITIEUSE';intensite='Ton ressenti est bon — vise 110-115% VMA';
     } else if(course.includes('course3')||mental.includes('mental4')) {
-        strat='🛡️ STRATÉGIE SÉCURISÉE';intensite='Pars à 95-100% VMA, puis progressif';
+        strat='🛡️ STRATÉGIE SÉCURISÉE';intensite='Pars à 100-105% VMA, puis progressif';
     } else {
         strat='⚖️ STRATÉGIE ÉQUILIBRÉE';intensite='Rythme régulier : 100-105% VMA';
     }

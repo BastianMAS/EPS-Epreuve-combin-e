@@ -638,10 +638,11 @@ function analysePerformanceL3(eleve) {
 
 function getNiveauL3Data(niveauId) {
     const niveauxL3 = {
-        'vma95': { label: '95% VMA', pourcent: 95 },
         'vma100': { label: '100% VMA', pourcent: 100 },
         'vma105': { label: '105% VMA', pourcent: 105 },
-        'vma110': { label: '110% VMA', pourcent: 110 }
+        'vma110': { label: '110% VMA', pourcent: 110 },
+        'vma115': { label: '115% VMA', pourcent: 115 },
+        'vma120': { label: '120% VMA', pourcent: 120 }
     };
     return niveauxL3[niveauId] || null;
 }

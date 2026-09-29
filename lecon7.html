@@ -533,9 +533,9 @@ function calcTemps400(vma, pct) {
 // Lit le % VMA réel depuis les données de séance
 function getPctVMAFromSeance(s, vma) {
     if(!s || !vma) return null;
-    // Priorité 1 : niveau choisi en L3 (vma95/100/105/110)
+    // Priorité 1 : niveau choisi en L3 (vma100/105/110/115/120)
     if(s.lecon === 'L3' && s.niveau) {
-        const map = { vma95:95, vma100:100, vma105:105, vma110:110 };
+        const map = { vma100:100, vma105:105, vma110:110, vma115:115, vma120:120 };
         if(map[s.niveau]) return map[s.niveau];
     }
     // Priorité 2 : calcul depuis moyenne200m

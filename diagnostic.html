@@ -423,17 +423,17 @@ function buildCard(i) {
 
                     <div class="tour-row">
                         <span class="tour-label">T1</span>
-                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
+                        <input type="text" id="t1-${i}" placeholder="2:05" oninput="updateTours(${i});markDirtyDiag()" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t1r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T2</span>
-                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
+                        <input type="text" id="t2-${i}" placeholder="2:08" oninput="updateTours(${i});markDirtyDiag()" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t2r-${i}"></span>
                     </div>
                     <div class="tour-row">
                         <span class="tour-label">T3</span>
-                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i})" style="width:60px" inputmode="decimal">
+                        <input type="text" id="t3-${i}" placeholder="2:10" oninput="updateTours(${i});markDirtyDiag()" style="width:60px" inputmode="decimal">
                         <span class="tour-result" id="t3r-${i}"></span>
                     </div>
                     <div id="moy-course-${i}" style="font-size:0.75rem;margin-top:4px;color:var(--success);font-weight:700"></div>
@@ -569,6 +569,30 @@ function selectEleve(i, id) {
         info.innerHTML = `<strong>${s.sexe==='F'?'👧':'🧑'} ${s.sexe==='F'?'Fille':'Garçon'}</strong> | ${s.age} ans${vmaInfo}`;
         // Recharger historique si VMA existante
         if(s.vmaHistorique && s.vmaHistorique.length > 0) updateHistorique(i);
+
+        // ── Restaurer tours 400m existants ──────────────────────────
+        const toursExist = cardState[i].tours || [];
+        toursExist.forEach((t, idx) => {
+            if(!t) return;
+            const input = document.getElementById(`t${idx+1}-${i}`);
+            if(input) { input.value = fmtSec(t); }
+        });
+        if(toursExist.some(t => t)) updateTours(i);
+
+        // ── Restaurer lancer existant ────────────────────────────────
+        const lancerType = cardState[i].lancerType;
+        if(lancerType) {
+            // Sélectionner le bon type de lancer
+            const btnLancer = document.querySelector(`[onclick*="setLancerType(${i}, '${lancerType}')"]`);
+            if(btnLancer) btnLancer.click();
+            else { cardState[i].lancerType = lancerType; renderLancer(i); }
+        } else if(cardState[i].lancerResults && cardState[i].lancerResults.length) {
+            renderLancer(i);
+        }
+
+        // ── Restaurer saut existant ──────────────────────────────────
+        if(cardState[i].sautSans && cardState[i].sautSans.length) renderSaut(i, 'sans');
+        if(cardState[i].sautAvec && cardState[i].sautAvec.length) renderSaut(i, 'avec');
     } else {
         info.style.display = 'none';
     }
@@ -853,8 +877,10 @@ function updateTours(i) {
         checkVMAAlert(i);
     } else {
         moyEl.textContent = '';
-        document.getElementById(`vma-alert-badge-${i}`).style.display = 'none';
-        document.getElementById(`vma-alert-box-${i}`).style.display = 'none';
+        if(document.getElementById(`vma-alert-badge-${i}`)) {
+            document.getElementById(`vma-alert-badge-${i}`).style.display = 'none';
+            document.getElementById(`vma-alert-box-${i}`).style.display = 'none';
+        }
     }
 }
 
@@ -923,44 +949,33 @@ function renderLancer(i) {
 }
 
 // =============================================
-// ALERTE VMA SOUS-ESTIMÉE
+// ALERTE VMA SOUS-ESTIMÉE (seuil 125%)
 // =============================================
 function checkVMAAlert(i) {
     const d = cardState[i];
     if(!d) return;
-
     const vma = d.vma;
     const tours = d.tours || [];
     const valid = tours.filter(t => t && t > 0);
-
-    // Conditions : 3 tours valides + VMA connue + alerte pas ignorée
     if(valid.length < 3 || !vma || d.vmaAlertIgnored) {
         document.getElementById(`vma-alert-badge-${i}`).style.display = 'none';
         document.getElementById(`vma-alert-box-${i}`).style.display = 'none';
         return;
     }
-
     const moyS = (valid[0] + valid[1] + valid[2]) / 3;
-    const vitesse = 1440 / moyS;  // km/h pour 400m : (0.4/moyS)*3600 = 1440/moyS
+    const vitesse = 1440 / moyS;
     const pctVMA = (vitesse / vma) * 100;
-
     if(pctVMA <= 125) {
         document.getElementById(`vma-alert-badge-${i}`).style.display = 'none';
         document.getElementById(`vma-alert-box-${i}`).style.display = 'none';
         return;
     }
-
-    // VMA corrigée = vitesse / 1.18, arrondie au 0.5
     const vmaCorr = Math.round((vitesse / 1.18) * 2) / 2;
-
     document.getElementById(`vma-alert-badge-${i}`).style.display = 'block';
     document.getElementById(`vma-alert-box-${i}`).style.display = 'block';
     document.getElementById(`vma-alert-box-${i}`).innerHTML = `
         <div>⚠️ <strong>VMA probablement sous-estimée</strong></div>
-        <div style="margin-top:5px;color:#ccc">
-            VMA actuelle : <strong style="color:#ff6b35">${vma} km/h</strong> &nbsp;|&nbsp;
-            %VMA sur 400m : <strong style="color:#ff6b35">${pctVMA.toFixed(0)}%</strong>
-        </div>
+        <div style="margin-top:5px;color:#ccc">VMA actuelle : <strong style="color:#ff6b35">${vma} km/h</strong> &nbsp;|&nbsp; %VMA sur 400m : <strong style="color:#ff6b35">${pctVMA.toFixed(0)}%</strong></div>
         <div style="margin-top:3px;color:#ccc">VMA corrigée proposée : <strong style="color:#00d2ff">${vmaCorr} km/h</strong> <span style="font-size:0.65rem;color:#888">(vitesse moy. ÷ 1.18)</span></div>
         <div>
             <button class="vma-alert-btn apply" onclick="applyVMACorrection(${i}, ${vmaCorr})">✅ Appliquer ${vmaCorr} km/h</button>
@@ -975,15 +990,12 @@ function applyVMACorrection(i, vmaCorr) {
     d.vmaHistorique = d.vmaHistorique || [];
     d.vmaHistorique.push({
         type: 'correction400m',
-        label: `Correction terrain 400m (ancienne VMA : ${ancienneVMA} → corrigée : ${vmaCorr})`,
-        vma: vmaCorr,
-        vmaNavette: ancienneVMA,
+        label: `Correction terrain 400m (${ancienneVMA} → ${vmaCorr})`,
+        vma: vmaCorr, vmaNavette: ancienneVMA,
         date: new Date().toLocaleDateString('fr-FR')
     });
     d.vma = vmaCorr;
     d.vmaAlertIgnored = true;
-
-    // Mettre à jour l'affichage
     const info = document.getElementById(`info-${i}`);
     if(info) {
         const s = d.student;
@@ -992,18 +1004,7 @@ function applyVMACorrection(i, vmaCorr) {
     document.getElementById(`vma-alert-badge-${i}`).style.display = 'none';
     document.getElementById(`vma-alert-box-${i}`).style.display = 'none';
     updateHistorique(i);
-
-    // Toast confirmation
-    let toast = document.getElementById('_toast_diag');
-    if(!toast) {
-        toast = document.createElement('div');
-        toast.id = '_toast_diag';
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#00d2ff;color:#000;padding:10px 16px;border-radius:10px;font-size:0.82rem;font-weight:800;z-index:9999;opacity:0;transition:opacity 0.3s';
-        document.body.appendChild(toast);
-    }
-    toast.textContent = `✅ VMA mise à jour : ${vmaCorr} km/h`;
-    toast.style.opacity = '1';
-    setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    markDirtyDiag();
 }
 
 function ignoreVMAAlert(i) {
@@ -1041,7 +1042,6 @@ function saveAll() {
         // Mettre à jour VMA et historique
         if(d.vma) allStudents[idx].vma = d.vma;
         if(d.vmaHistorique && d.vmaHistorique.length > 0) allStudents[idx].vmaHistorique = d.vmaHistorique;
-        if(d.vmaAlertIgnored) allStudents[idx].vmaAlertIgnored = true;
 
         // Sauvegarder diagnostic complet
         allStudents[idx].diagnostique = {
@@ -1088,13 +1088,37 @@ function fmtSec(sec) {
     const s = Math.round(sec%60);
     return `${m}:${s.toString().padStart(2,'0')}`;
 }
-// ── Sauvegarde silencieuse à la fermeture uniquement ──
-window.addEventListener('beforeunload', function() {
-    if (typeof saveAll === 'function') {
-        var _a = window.alert; window.alert = function(){};
-        saveAll();
-        window.alert = _a;
+// ── Sauvegarde robuste ────────────────────────────────────────────────
+let _diagDirty = false;
+function markDirtyDiag() { _diagDirty = true; }
+function clearDirtyDiag() { _diagDirty = false; }
+
+function autosaveDiag() {
+    if(!_diagDirty) return;
+    const _a = window.alert; window.alert = function(){};
+    try { saveAll(); } catch(e) {}
+    window.alert = _a;
+    clearDirtyDiag();
+    let toast = document.getElementById('_toast_diag');
+    if(!toast) {
+        toast = document.createElement('div');
+        toast.id = '_toast_diag';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16a34a;color:white;padding:8px 14px;border-radius:10px;font-size:0.78rem;font-weight:700;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none';
+        document.body.appendChild(toast);
     }
+    toast.textContent = '💾 Sauvegarde auto…';
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+}
+
+setInterval(autosaveDiag, 20000);
+
+document.addEventListener('visibilitychange', () => {
+    if(document.hidden && _diagDirty) autosaveDiag();
+});
+
+window.addEventListener('beforeunload', function() {
+    if(_diagDirty) autosaveDiag();
 });
 
 </script>
